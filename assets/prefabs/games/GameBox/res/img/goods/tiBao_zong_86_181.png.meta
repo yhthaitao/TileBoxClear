@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "d059b51b-e873-40c7-a69d-76478ae5ddc9",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 86,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "tiBao_zong_86_181": {
+      "ver": "1.0.4",
+      "uuid": "3fa1e1c3-eaf1-4ba3-a569-85c4ea578c38",
+      "rawTextureUuid": "d059b51b-e873-40c7-a69d-76478ae5ddc9",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 1,
+      "offsetY": -17,
+      "trimX": 2,
+      "trimY": 47,
+      "width": 84,
+      "height": 121,
+      "rawWidth": 86,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

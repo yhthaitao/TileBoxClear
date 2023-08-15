@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "0232b32a-6ae4-4d74-96e6-aa56c8252dff",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 134,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "fangbao_lv_134_181": {
+      "ver": "1.0.4",
+      "uuid": "b925bafe-aad7-4c16-a558-ffc5e8091119",
+      "rawTextureUuid": "0232b32a-6ae4-4d74-96e6-aa56c8252dff",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0.5,
+      "offsetY": -1.5,
+      "trimX": 4,
+      "trimY": 18,
+      "width": 127,
+      "height": 148,
+      "rawWidth": 134,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

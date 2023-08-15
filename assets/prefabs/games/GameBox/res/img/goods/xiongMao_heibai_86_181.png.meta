@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "0453a992-05ab-4188-919c-e42e37839113",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 86,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "xiongMao_heibai_86_181": {
+      "ver": "1.0.4",
+      "uuid": "b345da41-443c-46cf-bb71-b34acedeec1d",
+      "rawTextureUuid": "0453a992-05ab-4188-919c-e42e37839113",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0.5,
+      "offsetY": -3,
+      "trimX": 5,
+      "trimY": 19,
+      "width": 77,
+      "height": 149,
+      "rawWidth": 86,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

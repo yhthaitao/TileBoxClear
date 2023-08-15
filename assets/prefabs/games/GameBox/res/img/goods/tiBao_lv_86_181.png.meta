@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "12ee2488-f591-4e93-8626-3dc56b318323",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 86,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "tiBao_lv_86_181": {
+      "ver": "1.0.4",
+      "uuid": "25ee602d-3581-4299-acba-325f89b07d84",
+      "rawTextureUuid": "12ee2488-f591-4e93-8626-3dc56b318323",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 1,
+      "offsetY": -17,
+      "trimX": 2,
+      "trimY": 47,
+      "width": 84,
+      "height": 121,
+      "rawWidth": 86,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

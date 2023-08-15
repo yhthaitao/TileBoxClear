@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "8336ab66-b6b1-4cab-93ed-a5941175bab1",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 86,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "mao_hui_86_181": {
+      "ver": "1.0.4",
+      "uuid": "4ffde068-043f-451e-b5f4-1d40ac49b2d7",
+      "rawTextureUuid": "8336ab66-b6b1-4cab-93ed-a5941175bab1",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -2,
+      "trimX": 6,
+      "trimY": 18,
+      "width": 74,
+      "height": 149,
+      "rawWidth": 86,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
