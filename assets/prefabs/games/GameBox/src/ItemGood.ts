@@ -34,6 +34,13 @@ export default class ItemGood extends cc.Component {
         });
     };
 
+    refreshParams(pos: cc.Vec3){
+        this.params.x = pos.x;
+        this.params.y = pos.y;
+        this.node.x = this.params.x;
+        this.node.y = this.params.y;
+    }
+
     /** 点击事件 */
     eventBtn() {
         if (this.state > 0) {
