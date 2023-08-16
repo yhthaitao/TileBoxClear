@@ -155,11 +155,14 @@ export default class GameBox extends cc.Component {
     bottomScale: number = 0.5;
     bottomPosArr: cc.Vec3[] = [];// 底部位置数组
 
+    rectBg: cc.Rect = cc.rect();
+    arrBoxY: { y: number, h: number }[] = [];
+
     baseTime = 1;// 基础时间 用于计算移动时间
     baseDis = 1000;// 基础距离 用于计算移动时间
     poolBox: cc.NodePool = null;
     poolGood: cc.NodePool = null;
-    interval: number = 1/60;
+    interval: number = 1 / 60;
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -167,7 +170,7 @@ export default class GameBox extends cc.Component {
     };
     /** 移动速度 物品 */
     speedGood = {
-        speedCur: 0, speedDis: 2, speedInit: 0, speedMax: 20, isMove: false,
+        speedCur: 0, speedDis: 5, speedInit: 0, speedMax: 20, isMove: false,
     };
 
     protected onLoad(): void {
@@ -255,6 +258,17 @@ export default class GameBox extends cc.Component {
         arrValue.sort((a, b) => { return Number(a) - Number(b) });
         for (let index = 0; index < arrValue.length; index++) {
             this.dataBox.push(arrBox[arrValue[index]]);
+        }
+
+        // 箱子碰撞数据
+        let collider = this.boxBottom.getComponent(cc.BoxCollider);
+        let rectX = this.boxBottom.x + collider.offset.x - collider.size.width * 0.5;
+        let rectY = this.boxBottom.y - collider.offset.y - collider.size.height * 0.5;
+        this.rectBg = cc.rect(rectX, rectY, collider.size.width, collider.size.height);
+        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+            let boxArr = this.dataBox[i];
+            let boxOne = boxArr[0];
+            this.arrBoxY.push({ y: boxOne.y, h: boxOne.h });
         }
 
         // 物品计数
@@ -354,6 +368,7 @@ export default class GameBox extends cc.Component {
         this.cycleGood();
     }
 
+    /** 箱子逻辑 */
     cycleBox() {
         // 移动判断
         if (!this.speedBox.isMove) {
@@ -373,17 +388,15 @@ export default class GameBox extends cc.Component {
 
         // 碰撞检测
         let funcCollider = (A: BoxParams, arrB: BoxParams[]) => {
-            let isIntersect = false;
             for (let index = 0, length = arrB.length; index < length; index++) {
                 let B = arrB[index];
                 let rectA = getRect(A);
                 let rectB = getRect(B);
                 if (rectA.intersects(rectB)) {
-                    isIntersect = true;
-                    break;
+                    return B;
                 }
             }
-            return isIntersect;
+            return null;
         };
 
         // 移动box
@@ -400,18 +413,12 @@ export default class GameBox extends cc.Component {
             this.dataBox[i - 1].sort((a: BoxParams, b: BoxParams) => {
                 return a.x - b.x;
             });
-        };
-
-        // 重新移动
-        let boxParamsRestart = ()=>{
-            for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
-                let boxArr = this.dataBox[i];
-                for (let j = 0, lenB = boxArr.length; j < lenB; j++) {
-                    let boxOne = boxArr[j];
-                    boxOne.isMove = true;
-                }
+            let names = [];
+            for (let index = 0; index < this.dataBox[i - 1].length; index++) {
+                const element = this.dataBox[i - 1][index];
+                names.push(element.nameNode);
             }
-        }
+        };
 
         let isContinueMove = false;
         let isRemove = false;
@@ -427,18 +434,13 @@ export default class GameBox extends cc.Component {
                 }
                 let nodeBox = this.nodeMain.getChildByName(boxOne.nameNode);
                 let scriptBox = nodeBox.getComponent(ItemBox);
-                let isIntersect = false;
                 let yA = boxOne.y - this.speedBox.speedCur;
                 if (i == 0) {
                     let rectA = getRect(boxOne);
-                    let collider = this.boxBottom.getComponent(cc.BoxCollider);
-                    let rectX = this.boxBottom.x + collider.offset.x - collider.size.width * 0.5;
-                    let rectY = this.boxBottom.y - collider.offset.y - collider.size.height * 0.5;
-                    let rectB = cc.rect(rectX, rectY, collider.size.width, collider.size.height);
-                    isIntersect = rectA.intersects(rectB);
+                    let isIntersect = rectA.intersects(this.rectBg);
                     if (isIntersect) {
                         boxOne.isMove = false;
-                        boxOne.y = rectB.y + rectB.height;
+                        boxOne.y = this.rectBg.y + this.rectBg.height;
                         scriptBox.refreshParams(boxOne.y);
                     }
                     else {
@@ -448,9 +450,8 @@ export default class GameBox extends cc.Component {
                     }
                 }
                 else {
-                    let boxB = this.dataBox[i - 1][0];
-                    isIntersect = funcCollider(boxOne, this.dataBox[i - 1]);
-                    if (isIntersect) {
+                    let boxB = funcCollider(boxOne, this.dataBox[i - 1]);
+                    if (boxB) {
                         boxOne.isMove = false;
                         boxOne.y = boxB.y + boxB.h;
                         scriptBox.refreshParams(boxOne.y);
@@ -459,9 +460,11 @@ export default class GameBox extends cc.Component {
                         isContinueMove = true;
                         boxOne.y = yA;
                         scriptBox.refreshParams(boxOne.y);
-                        if (boxOne.y <= boxB.y + boxB.h * 0.5) {
+                        let boxGoal = this.arrBoxY[i - 1];
+                        if (boxOne.y <= boxGoal.y + boxGoal.h * 0.5) {
                             boxParamsRemove(i, j);
                             isRemove = true;
+                            Common.log('0 isRemove: ', isRemove);
                             break;
                         }
                     }
@@ -469,9 +472,8 @@ export default class GameBox extends cc.Component {
             }
             // 重新移动
             if (isRemove) {
-                boxParamsRestart();
                 isRemove = false;
-                isContinueMove = true;
+                Common.log('1 isRemove: ', isRemove);
                 break;
             }
         }
@@ -482,6 +484,7 @@ export default class GameBox extends cc.Component {
         }
     }
 
+    /** 物品逻辑 */
     cycleGood() {
         // 移动判断
         if (!this.speedGood.isMove) {
@@ -494,7 +497,7 @@ export default class GameBox extends cc.Component {
             this.speedGood.speedCur += this.speedGood.speedDis;
         }
 
-        let goodParamsRemove = (arrParams: GoodParams[], arrIndex: number)=> {
+        let goodParamsRemove = (arrParams: GoodParams[], arrIndex: number) => {
             for (let index = 0, length = arrParams.length; index < length; index++) {
                 let params = arrParams[index];
                 let good = this.bottomMain.getChildByName(params.nameNode);
@@ -504,7 +507,7 @@ export default class GameBox extends cc.Component {
         }
 
         // 重新移动
-        let goodParamsRestart = ()=>{
+        let goodParamsRestart = () => {
             for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
                 let arrParams = this.bottomParamArr[i];
                 for (let j = 0, lenB = arrParams.length; j < lenB; j++) {
@@ -537,9 +540,9 @@ export default class GameBox extends cc.Component {
                 params.y -= speedY;
                 let nodeGood = this.bottomMain.getChildByName(params.nameNode);
                 if (nodeGood.scale > 0.5) {
-                    nodeGood.scale -= 0.02;
+                    nodeGood.scale -= 0.04;
                 }
-                else{
+                else {
                     nodeGood.scale = 0.5;
                 }
                 if (Math.pow(disX, 2) + Math.pow(disY, 2) <= Math.pow(this.speedGood.speedCur, 2)) {
@@ -551,7 +554,7 @@ export default class GameBox extends cc.Component {
                     nodeGood.scale = 0.5;
                     continue;
                 }
-                else{
+                else {
                     nodeGood.getComponent(ItemGood).refreshParams(cc.v3(params.x, params.y));
                 }
             }
@@ -606,11 +609,12 @@ export default class GameBox extends cc.Component {
      * @returns 
      */
     eventTouch(good: cc.Node) {
+        let scriptGood = good.getComponent(ItemGood);
         // 游戏不能继续
         if (this.getGoodParamsNum() >= this.bottomMax) {
+            scriptGood.state = 0;
             return;
         }
-        let scriptGood = good.getComponent(ItemGood);
         // 删除数据
         let box = good.parent.parent;
         let scriptBox = box.getComponent(ItemBox);
