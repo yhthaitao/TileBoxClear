@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "89705fed-6148-40e9-b3fd-f9c0573066ab",
+  "uuid": "a3d6d631-c319-4b15-a689-3cc373c95dec",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -11,17 +11,17 @@
   "height": 181,
   "platformSettings": {},
   "subMetas": {
-    "jingZi_lan_86_181": {
+    "jingzi_lan_86_181": {
       "ver": "1.0.4",
-      "uuid": "00a60e5f-8f1e-476c-a631-83a260d3c8c0",
-      "rawTextureUuid": "89705fed-6148-40e9-b3fd-f9c0573066ab",
+      "uuid": "7c9bcdde-305a-43b3-a6f5-7a7602e4ceca",
+      "rawTextureUuid": "a3d6d631-c319-4b15-a689-3cc373c95dec",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
       "offsetX": -0.5,
-      "offsetY": -15,
+      "offsetY": -16,
       "trimX": 0,
-      "trimY": 43,
+      "trimY": 44,
       "width": 85,
       "height": 125,
       "rawWidth": 86,

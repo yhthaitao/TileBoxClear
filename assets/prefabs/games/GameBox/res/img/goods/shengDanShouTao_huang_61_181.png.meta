@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "3834870b-286f-496c-84e1-3fd4712a9ccc",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 61,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "shengDanShouTao_huang_61_181": {
+      "ver": "1.0.4",
+      "uuid": "1a47bafa-7d73-4cff-b3cf-74c61d5f76bd",
+      "rawTextureUuid": "3834870b-286f-496c-84e1-3fd4712a9ccc",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -24,
+      "trimX": 0,
+      "trimY": 61,
+      "width": 61,
+      "height": 107,
+      "rawWidth": 61,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

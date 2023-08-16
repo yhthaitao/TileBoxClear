@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "cc6c1e4b-9f81-428f-8f1b-44a62bce9769",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 116,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "gaoGenXie_huang_116_181": {
+      "ver": "1.0.4",
+      "uuid": "822bd63b-55c9-4005-b976-7dc69a3f4099",
+      "rawTextureUuid": "cc6c1e4b-9f81-428f-8f1b-44a62bce9769",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0.5,
+      "offsetY": -39.5,
+      "trimX": 1,
+      "trimY": 89,
+      "width": 115,
+      "height": 82,
+      "rawWidth": 116,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

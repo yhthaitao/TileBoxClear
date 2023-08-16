@@ -13,7 +13,7 @@
   "subMetas": {
     "mai_lan_61_181": {
       "ver": "1.0.4",
-      "uuid": "62969a78-3f7d-45df-832a-28f34d59df17",
+      "uuid": "2fdd4330-ca13-4a83-b1f9-a808a6811f10",
       "rawTextureUuid": "c79bc9cb-3e3e-4856-9630-2175e67c460c",
       "trimType": "auto",
       "trimThreshold": 1,
@@ -21,9 +21,9 @@
       "offsetX": 0,
       "offsetY": -30.5,
       "trimX": 3,
-      "trimY": 74,
+      "trimY": 73,
       "width": 55,
-      "height": 94,
+      "height": 96,
       "rawWidth": 61,
       "rawHeight": 181,
       "borderTop": 0,

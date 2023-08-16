@@ -13,7 +13,7 @@
   "subMetas": {
     "tiBao_zong_86_181": {
       "ver": "1.0.4",
-      "uuid": "3fa1e1c3-eaf1-4ba3-a569-85c4ea578c38",
+      "uuid": "f71c7114-9a2c-4669-80e7-d5f87dfbee1c",
       "rawTextureUuid": "d059b51b-e873-40c7-a69d-76478ae5ddc9",
       "trimType": "auto",
       "trimThreshold": 1,
@@ -21,9 +21,9 @@
       "offsetX": 1,
       "offsetY": -17,
       "trimX": 2,
-      "trimY": 47,
+      "trimY": 46,
       "width": 84,
-      "height": 121,
+      "height": 123,
       "rawWidth": 86,
       "rawHeight": 181,
       "borderTop": 0,

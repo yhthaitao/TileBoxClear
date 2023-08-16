@@ -13,7 +13,7 @@
   "subMetas": {
     "tiBao_lan_86_181": {
       "ver": "1.0.4",
-      "uuid": "63b07e73-7c06-4a2b-9b10-1b5a20d73694",
+      "uuid": "56b7a343-7c45-461c-ac84-d2cbcf7ce544",
       "rawTextureUuid": "5df6ed8f-12e5-488f-950c-533ebc55f9b7",
       "trimType": "auto",
       "trimThreshold": 1,
@@ -21,9 +21,9 @@
       "offsetX": 1,
       "offsetY": -17,
       "trimX": 2,
-      "trimY": 47,
+      "trimY": 46,
       "width": 84,
-      "height": 121,
+      "height": 123,
       "rawWidth": 86,
       "rawHeight": 181,
       "borderTop": 0,

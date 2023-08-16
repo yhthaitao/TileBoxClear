@@ -109,6 +109,78 @@ const DataBox = {
             "isGolden": 0
         },
         {
+            "id": 1013,
+            "name": "mai_bai_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1014,
+            "name": "mai_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1015,
+            "name": "huaBan_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1016,
+            "name": "shengDanLazhu_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1017,
+            "name": "niuNai_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1018,
+            "name": "shengDanShu_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1019,
+            "name": "shouDian_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1020,
+            "name": "shengDanShouTao_huang_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
             "id": 2001,
             "name": "gou_huang_86_181",
             "series": 1,
@@ -271,6 +343,78 @@ const DataBox = {
             "isGolden": 0
         },
         {
+            "id": 2019,
+            "name": "huoJian_hong_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2020,
+            "name": "diQiuYi_hong_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2021,
+            "name": "tiBao_hong_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2022,
+            "name": "piJia_huang_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2023,
+            "name": "deng_huang_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2024,
+            "name": "deng_hong_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2025,
+            "name": "xueRen_huang_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2026,
+            "name": "xueRen_juse_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
             "id": 3001,
             "name": "shouTiBao_huang_116_181",
             "series": 1,
@@ -372,6 +516,33 @@ const DataBox = {
         {
             "id": 3012,
             "name": "qianBao_hua_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3013,
+            "name": "fanBuXie_hong_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3014,
+            "name": "niuPiBao_huang_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3015,
+            "name": "gaoGenXie_huang_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -504,6 +675,51 @@ const DataBox = {
             "t": 4,
             "isGolden": 0
         },
+        {
+            "id": 4015,
+            "name": "duJiaoShou_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4016,
+            "name": "yang_jin_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4017,
+            "name": "maoZi_fen_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4018,
+            "name": "yang_jin1_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4019,
+            "name": "yang_jin2_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        }
     ],
 };
 export default DataBox;

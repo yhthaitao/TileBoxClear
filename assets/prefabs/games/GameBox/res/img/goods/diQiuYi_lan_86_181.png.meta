@@ -13,7 +13,7 @@
   "subMetas": {
     "diQiuYi_lan_86_181": {
       "ver": "1.0.4",
-      "uuid": "18b105d3-d45c-46b8-8536-a9671bb1b02a",
+      "uuid": "dbdba531-e00d-4ec4-a787-6acd8e224ac8",
       "rawTextureUuid": "357244b9-b04e-45e0-8617-84326bd42abb",
       "trimType": "auto",
       "trimThreshold": 1,
@@ -21,9 +21,9 @@
       "offsetX": 0,
       "offsetY": -14.5,
       "trimX": 0,
-      "trimY": 42,
+      "trimY": 41,
       "width": 86,
-      "height": 126,
+      "height": 128,
       "rawWidth": 86,
       "rawHeight": 181,
       "borderTop": 0,
