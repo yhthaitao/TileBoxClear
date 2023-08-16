@@ -1,5 +1,6 @@
 import Common from "../../../../src/config/Common";
 import { BoxParams } from "./GameBox";
+import ItemGood from "./ItemGood";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -26,6 +27,19 @@ export default class ItemBox extends cc.Component {
         let collider = this.node.getComponent(cc.BoxCollider);
         Common.refreshCollider(collider, 0, this.params.h * 0.5, this.params.w - 1, this.params.h - 2);
     };
+
+    sortGood(){
+        this.nodeMain.children.sort((a: cc.Node, b: cc.Node)=>{
+            return a.getComponent(ItemGood).params.index - b.getComponent(ItemGood).params.index;
+        });
+        this.refreshGoods();
+    };
+
+    refreshGoods(){
+        this.nodeMain.children.forEach((good: cc.Node, index: number)=>{
+            good.active = index == 0;
+        });
+    }
 
     refreshParams(y: number){
         this.params.y = y;
