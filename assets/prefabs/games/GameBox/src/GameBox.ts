@@ -676,7 +676,6 @@ export default class GameBox extends cc.Component {
         // 转移节点
         let pStart = Common.getLocalPos(good.parent, good.position, this.bottomMain);
         good.parent = this.bottomMain;
-        scriptGood.param.keyBox = -1;
         scriptGood.refreshParams(pStart);
         if (scriptBox.param.isFrame) {
             scriptBox.refreshGoods();
@@ -952,18 +951,18 @@ export default class GameBox extends cc.Component {
                 composeArr(boxOne);
             }
         }
-        // 组合物品数组 检测区
-        this.bottomMain.children.forEach((good: cc.Node) => {
-            let goodParam: GoodParam = good.getComponent(ItemGood).param;
-            let char = String(goodParam.keyGood);
-            let index = Number(char.substring(0, 1)) - 1;
-            if (arrGoodParam[index]) {
-                arrGoodParam[index].push(goodParam);
-            }
-            else {
-                arrGoodParam[index] = [goodParam];
-            }
-        });
+        // // 组合物品数组 检测区
+        // this.bottomMain.children.forEach((good: cc.Node) => {
+        //     let goodParam: GoodParam = good.getComponent(ItemGood).param;
+        //     let char = String(goodParam.keyGood);
+        //     let index = Number(char.substring(0, 1)) - 1;
+        //     if (arrGoodParam[index]) {
+        //         arrGoodParam[index].push(goodParam);
+        //     }
+        //     else {
+        //         arrGoodParam[index] = [goodParam];
+        //     }
+        // });
 
 
         /*****************************************************赋值物品数组 并 重新排序*************************************************************/
@@ -989,14 +988,8 @@ export default class GameBox extends cc.Component {
                 goodParamA.w = goodParamB.w;
                 goodParamA.h = goodParamB.h;
                 goodParamA.keyGood = goodParamB.keyGood;
-                let good: cc.Node = null;
-                if (goodParamA.keyBox < 0) {
-                    good = this.bottomMain.getChildByName(goodParamA.name);
-                }
-                else {
-                    let box = this.nodeMain.getChildByName(goodParamA.nameBox);
-                    good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParamA.name);
-                }
+                let box = this.nodeMain.getChildByName(goodParamA.nameBox);
+                let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParamA.name);
                 if (good) {
                     good.getComponent(ItemGood).refreshRes(goodParamA);
                 }
@@ -1010,56 +1003,56 @@ export default class GameBox extends cc.Component {
 
 
         /**********************************************重新排序底部物品 并 移动*************************************************/
-        let layerIndex = 0;
-        let arrInsert: GoodParam[] = [];
-        let reInsert = (goodParam: GoodParam)=>{
-            let isAdd = false;
-            for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
-                let arrParams = this.bottomParamArr[index];
-                let lenB = arrParams.length;
-                if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == goodParam.keyGood) {
-                    isAdd = true;
-                    arrParams.push(goodParam);
-                    break;
-                }
-            }
-            if (!isAdd) {
-                layerIndex++;
-                this.bottomParamArr.splice(layerIndex, 0, [goodParam]);
-            }
-        };
-        // 获取需要重新排列的数组
-        if (this.bottomParamArr.length > 0) {
-            let arrGoodParam = this.bottomParamArr[0];
-            let arrOne = arrGoodParam.splice(1, arrGoodParam.length - 1);
-            for (let index = 0, length = arrOne.length; index < length; index++) {
-                arrInsert.push(arrOne[index]);
-            }
-            let arrElse = this.bottomParamArr.splice(1, this.bottomParamArr.length - 1);
-            for (let i = 0, lenA = arrElse.length; i < lenA; i++) {
-                let arrGoodParam = arrElse[i];
-                for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
-                    arrInsert.push(arrGoodParam[j]);
-                }
-            }
-        }
-        // 数组插入到对应位置
-        for (let index = 0, length = arrInsert.length; index < length; index++) {
-            let goodParam = arrInsert[index];
-            reInsert(goodParam);
-        }
+        // let layerIndex = 0;
+        // let arrInsert: GoodParam[] = [];
+        // let reInsert = (goodParam: GoodParam)=>{
+        //     let isAdd = false;
+        //     for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
+        //         let arrParams = this.bottomParamArr[index];
+        //         let lenB = arrParams.length;
+        //         if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == goodParam.keyGood) {
+        //             isAdd = true;
+        //             arrParams.push(goodParam);
+        //             break;
+        //         }
+        //     }
+        //     if (!isAdd) {
+        //         layerIndex++;
+        //         this.bottomParamArr.splice(layerIndex, 0, [goodParam]);
+        //     }
+        // };
+        // // 获取需要重新排列的数组
+        // if (this.bottomParamArr.length > 0) {
+        //     let arrGoodParam = this.bottomParamArr[0];
+        //     let arrOne = arrGoodParam.splice(1, arrGoodParam.length - 1);
+        //     for (let index = 0, length = arrOne.length; index < length; index++) {
+        //         arrInsert.push(arrOne[index]);
+        //     }
+        //     let arrElse = this.bottomParamArr.splice(1, this.bottomParamArr.length - 1);
+        //     for (let i = 0, lenA = arrElse.length; i < lenA; i++) {
+        //         let arrGoodParam = arrElse[i];
+        //         for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
+        //             arrInsert.push(arrGoodParam[j]);
+        //         }
+        //     }
+        // }
+        // // 数组插入到对应位置
+        // for (let index = 0, length = arrInsert.length; index < length; index++) {
+        //     let goodParam = arrInsert[index];
+        //     reInsert(goodParam);
+        // }
 
 
         /**********************************************设置移动-物品*************************************************/
-        for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
-            let arrGoodParam = this.bottomParamArr[i];
-            for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
-                let goodParam = arrGoodParam[j];
-                goodParam.isMove = true;
-            }
-        }
-        this.speedGood.isMove = true;
-        this.speedGood.speedCur = this.speedGood.speedInit;
+        // for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
+        //     let arrGoodParam = this.bottomParamArr[i];
+        //     for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
+        //         let goodParam = arrGoodParam[j];
+        //         goodParam.isMove = true;
+        //     }
+        // }
+        // this.speedGood.isMove = true;
+        // this.speedGood.speedCur = this.speedGood.speedInit;
 
 
 
