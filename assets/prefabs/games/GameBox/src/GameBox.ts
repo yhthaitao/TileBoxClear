@@ -44,6 +44,7 @@ export default class GameBox extends cc.Component {
 
     @property(cc.Node) maskTop: cc.Node = null;// 顶部屏蔽
     @property(cc.Node) maskBottom: cc.Node = null;// 底部屏蔽
+    @property([cc.Label]) arrTimeLayer: cc.Label[] = [];// 时间
     @property(cc.Node) boxBottom: cc.Node = null;// 底部箱子
     @property(cc.Node) nodeMain: cc.Node = null;// 箱子父节点
     @property(cc.Node) uiTop: cc.Node = null;// 顶部节点
@@ -52,12 +53,6 @@ export default class GameBox extends cc.Component {
     @property(cc.Node) nodeProp: cc.Node = null;// 道具父节点
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
-
-    goodsCount: number = 0;
-    goodsTotal: number = 0;
-    dataGame: any = {};
-    dataBox: BoxParam[][] = [];
-    fanhuidata: BoxParam[][] = [];
 
     // dataLevel = {
     //     map: [
@@ -196,42 +191,36 @@ export default class GameBox extends cc.Component {
         ]
     };
 
-    /**
-     * 游戏用数据
-     * @param stepCount 步数统计
-     * @param passTime 通关用时
-     * @param isFinish 游戏是否结束
-     * @returns 
-     */
-    dataObj = {
-        stepCount: 0,
-        passTime: 0,
-        isFinish: false,
-    };
-
     resPath = {
         levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/SortLevel' },
     }
 
-    cfgGoods: any = {};
-    midPosYObj: any = {};// 中部箱子y位置
-    bottomParamArr: GoodParam[][] = [];
-    bottomMax: number = 7;
-    bottomDis: number = 90;
-    bottomDisY: number = -40;
-    bottomScale: number = 0.5;
-    bottomPosArr: cc.Vec3[] = [];// 底部位置数组
-    bottomTime = { cur: 0, init: 0, total: 0.1 };
+    /** 游戏用数据 */
+    dataObj = { stepCount: 0, passTime: 0, isFinish: false, };
 
-    rectBg: cc.Rect = cc.rect();
-    arrBoxY: { y: number, h: number }[] = [];
+    goodsCfg: any = {};// 物品配置
+    goodsCount: number = 0;// 物品计数
+    goodsTotal: number = 0;// 物品总数
+    dataGame: any = {};// 箱子数据（按游戏数据整理）
+    dataBox: BoxParam[][] = [];// 箱子数据（按层级排列）
+    isLock: boolean = false;// 游戏是否锁定
+    timeGame = { cur: 0, init: 0, count: 0, total: 120 };// 游戏时间
+    timeProp = {iceCount: 0, iceTotal: 12, addTotal: 10};// 道具时间
+    fanhuidata: BoxParam[][] = [];
+    
+    bottomParamArr: GoodParam[][] = [];// 物品数据（检测区）
+    bottomMax: number = 7;// 物品最大数量（检测区）
+    bottomDis: number = 90;// 物品间距（检测区）
+    bottomDisY: number = -40;// 物品y轴偏移量（检测区）
+    bottomScale: number = 0.5;// 物品缩放比率（检测区）
+    bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
+    bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
-    baseTime = 1;// 基础时间 用于计算移动时间
-    baseDis = 2000;// 基础距离 用于计算移动时间
-    poolBox: cc.NodePool = null;
-    poolGood: cc.NodePool = null;
-    interval: number = 1 / 60;
-    isLock: boolean = false;
+    rectBg: cc.Rect = cc.rect();// 箱子底部碰撞数据
+    arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
+
+    poolBox: cc.NodePool = null;// 箱子缓存
+    poolGood: cc.NodePool = null;// 物品缓存
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -239,7 +228,7 @@ export default class GameBox extends cc.Component {
     };
     /** 移动速度 物品 */
     speedGood = {
-        speedCur: 0, speedDis: 5, speedInit: 0, speedMax: 20, isMove: false,
+        speedCur: 0, speedDis: 5, speedInit: 0, speedMax: 50, isMove: false,
     };
 
     protected onLoad(): void {
@@ -268,6 +257,7 @@ export default class GameBox extends cc.Component {
         this.clear();
         this.initData();
         this.initUI();
+        this.setTime();// 设置之间
         this.loadLevel();
         this.initLevel();
         this.isLock = false;
@@ -275,12 +265,11 @@ export default class GameBox extends cc.Component {
 
     initData() {
         DataBox.goodsConf.forEach((obj) => {
-            this.cfgGoods[obj.id] = obj;
+            this.goodsCfg[obj.id] = obj;
         });
         this.dataGame = {};
         let boxs = this.dataLevel.map;
         let dataBoxBottom = this.getDataBoxBottom();
-
         let disY = Math.floor(Number(cc.winSize.height * 0.5 - (Number(dataBoxBottom.h) * 5 + this.uiTop.height)));
         let dataBoxBottomY = Math.floor(Number(dataBoxBottom.y));
         for (let index = 0, length = boxs.length; index < length; index++) {
@@ -299,9 +288,9 @@ export default class GameBox extends cc.Component {
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
             let keyGood = Number(obj.n);
-            let nameRes = this.cfgGoods[keyGood].name;
-            let w = this.cfgGoods[keyGood].w;
-            let h = this.cfgGoods[keyGood].h;
+            let nameRes = this.goodsCfg[keyGood].name;
+            let w = this.goodsCfg[keyGood].w;
+            let h = this.goodsCfg[keyGood].h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.dataGame[keyBox];
             let x = obj.x - this.dataLevel.map[keyBox].x;
@@ -312,6 +301,9 @@ export default class GameBox extends cc.Component {
             };
             dataBox.goods[index] = goodParam;
         }
+
+        // 组织数据 dataBox
+        this.dataBox = [];
         let arrBox = {};
         for (const key in this.dataGame) {
             if (Object.prototype.hasOwnProperty.call(this.dataGame, key)) {
@@ -324,7 +316,6 @@ export default class GameBox extends cc.Component {
                 }
             }
         }
-        // 组织数据 dataBox
         let arrValue = Object.keys(arrBox);
         arrValue.sort((a, b) => { return Number(a) - Number(b) });
         for (let index = 0; index < arrValue.length; index++) {
@@ -332,27 +323,33 @@ export default class GameBox extends cc.Component {
         }
 
         // 箱子层级 y
+        this.arrBoxY = [];
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
             let boxArr = this.dataBox[i];
             let boxOne = boxArr[0];
             this.arrBoxY.push({ y: boxOne.y, h: boxOne.h });
         }
 
-        // 物品计数
-        this.goodsCount = 0;
-        this.goodsTotal = goods.length;
-
         // 底部物品位置
+        this.bottomParamArr = [];
+        this.bottomPosArr = [];
         for (let index = 0; index < this.bottomMax; index++) {
             let x = index * this.bottomDis - Math.floor(this.bottomMax * 0.5) * this.bottomDis;
             this.bottomPosArr[index] = cc.v3(x, this.bottomDisY, 0);
         }
+
+        // 物品计数
+        this.goodsCount = 0;
+        this.goodsTotal = goods.length;
+
+        // 倒计时开始
+        this.timeGame.cur = this.timeGame.init;
+        this.timeGame.count = this.timeGame.total;
     }
 
     initUI() {
         let w = cc.winSize.width;
         let h = cc.winSize.height;
-        console.log('w: ', w, '; h: ', h);
         this.uiTop.y = h * 0.5 - this.uiTop.height * 0.5;
         this.nodeProp.y = -h * 0.5 + this.nodeProp.height * 0.5;
         this.uiBottom.y = this.nodeProp.y + this.uiBottom.height + 20;
@@ -438,9 +435,52 @@ export default class GameBox extends cc.Component {
         });
     }
 
+    setTime() {
+        let m = Math.floor(this.timeGame.count / 60);
+        let s = Math.floor(this.timeGame.count % 60);
+        let strM = m < 10 ? '0' + m : String(m);
+        let strS = s < 10 ? '0' + s : String(s);
+        this.arrTimeLayer[0].getComponent(cc.Label).string = strM;
+        this.arrTimeLayer[1].getComponent(cc.Label).string = strS;
+    }
+
     protected update(dt: number): void {
+        this.cycleTime(dt);
         this.cycleBox(dt);
         this.cycleGood(dt);
+    }
+
+    /** 时间逻辑 */
+    cycleTime(dt: number) {
+        if (this.isLock) {
+            return;
+        }
+        
+        this.timeGame.cur += dt;
+        if (this.timeGame.cur < 1) {
+            return;
+        }
+        this.timeGame.cur = this.timeGame.init;
+
+        // 冻结 倒计时
+        if (this.timeProp.iceCount > 0) {
+            this.timeProp.iceCount--;
+            // 冻结 结束
+            if (this.timeProp.iceCount <= 0) {
+                this.playAniIceFinish();
+            }
+            return;
+        }
+
+        // 游戏 倒计时
+        if (this.timeGame.count > 0) {
+            this.timeGame.count--;
+            this.setTime();
+            if (this.timeGame.count <= 0) {
+                this.isLock = true;
+                Common.log('游戏结束：倒计时结束');
+            }
+        }
     }
 
     /** 箱子逻辑 */
@@ -579,7 +619,7 @@ export default class GameBox extends cc.Component {
                 if (!goodParam.isMove) {
                     continue;
                 }
-                
+
                 let bottomMainY = cc.winSize.height * 0.5 - this.uiBottom.y - this.bottomPosArr[0].y;
                 if (goodParam.y > bottomMainY + 120) {
                     goodParam.y -= 100;
@@ -631,10 +671,9 @@ export default class GameBox extends cc.Component {
         // 是否继续移动
         if (!isContinueMove) {
             this.speedGood.isMove = false;
-            if (this.bottomParamArr.length > this.bottomMax - 1) {
-                // 游戏结束
+            if (this.getGoodParamsNum() > this.bottomMax - 1) {
                 this.isLock = true;
-                console.log('游戏结束 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
+                Common.log('游戏结束 检测去无空位 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
             }
         }
     }
@@ -678,7 +717,7 @@ export default class GameBox extends cc.Component {
     eventTouch(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         // 游戏不能继续
-        if (this.isLock || this.getGoodParamsNum() >= this.bottomMax) {
+        if (this.isLock || this.getGoodParamsNum() > this.bottomMax - 1) {
             scriptGood.state = 0;
             return;
         }
@@ -826,7 +865,7 @@ export default class GameBox extends cc.Component {
         this.goodsCount += arrParam.length;
         if (this.goodsCount >= this.goodsTotal) {
             this.isLock = true;
-            console.log('游戏结束 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
+            Common.log('游戏结束 物品消完 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
         }
     }
 
@@ -843,6 +882,7 @@ export default class GameBox extends cc.Component {
 
     /** 回收 */
     clear() {
+        // 回收物品
         for (let i = this.nodeMain.childrenCount - 1; i >= 0; i--) {
             let box = this.nodeMain.children[i];
             let boxMain = box.getComponent(ItemBox).nodeMain;
@@ -855,6 +895,12 @@ export default class GameBox extends cc.Component {
             }
             DataManager.poolPut(box, this.poolBox);
         }
+        for (let index = this.bottomMain.childrenCount - 1; index >= 0; index--) {
+            let good = this.bottomMain.children[index];
+            DataManager.poolPut(good, this.poolGood);
+        }
+        this.timeProp.iceCount = 0;
+        this.playAniIceFinish();
     }
 
     /** 按钮事件 返回 */
@@ -945,8 +991,8 @@ export default class GameBox extends cc.Component {
 
     /** 按钮事件 刷新 */
     eventBtnRefresh() {
-        // 锁定 物品移动过程中，不触发道具
-        console.log('eventBtnRefresh isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        // 锁定 或 物品移动过程中，不触发道具
+        Common.log('eventBtnRefresh isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1089,8 +1135,8 @@ export default class GameBox extends cc.Component {
 
     /** 按钮事件 提示 */
     eventBtnTip() {
-        // 锁定 物品移动过程中，不触发道具
-        console.log('eventBtnTip isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        // 锁定 或 物品移动过程中，不触发道具
+        Common.log('eventBtnTip isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1121,7 +1167,7 @@ export default class GameBox extends cc.Component {
             }
             if (keyGood == 0) {
                 this.isLock = false;
-                console.log('eventBtnTip 箱子里没有物品')
+                Common.log('eventBtnTip 箱子里没有物品')
                 return;
             }
         }
@@ -1161,6 +1207,32 @@ export default class GameBox extends cc.Component {
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
 
+    /** 按钮事件 时间冻结 */
+    eventBtnTimeIce(){
+        // 锁定 或 物品移动过程中，不触发道具
+        Common.log('eventBtnTip isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        kit.Audio.playEffect(CConst.sound_path_click);
+        this.timeProp.iceCount += this.timeProp.iceTotal;
+        this.playAniIceStart();
+    }
+
+    /** 按钮事件 时间增加 */
+    eventBtnTimeAdd(){
+        // 锁定 或 物品移动过程中，不触发道具
+        Common.log('eventBtnTip isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        kit.Audio.playEffect(CConst.sound_path_click);
+
+        this.timeGame.count += this.timeProp.addTotal;
+        this.setTime();
+    }
+
+    /** 动作：游戏显示 */
     playAniShow(isShow, callback) {
         let opaStart = isShow ? 0 : 255;
         let opaFinish = isShow ? 255 : 0;
@@ -1171,46 +1243,21 @@ export default class GameBox extends cc.Component {
             this.maskBottom.active = false;
             callback && callback();
         }).start();
+
+        this.bottomMain.opacity = opaStart;
+        cc.tween(this.bottomMain).to(0.383, { opacity: opaFinish }, cc.easeSineInOut()).start();
     }
 
-    /**
-     * 刷新游戏内容
-     * @param isAdd 是否添加 
-     * @param tubeNum 瓶子数量
-     * @param blocksObj 动物种类数组 空数组时，不添加动物
-     */
-    refreshGame() {
-        //开始排列
-        // for (let i = 0; i < tubeNum; i++) {
-        //     let nodeTube: cc.Node = null;
-        //     if (isAddTube) {
-        //         nodeTube = this.addTube(i);
-        //     }
-        //     else {
-        //         nodeTube = this.nodeMain.children[i];
-        //     }
-        //     let blocksNum = blocksObj.length;
-        //     if (blocksNum > 0) {
-        //         //添加球
-        //         for (let j = 0; j < this.dataObj.blockTotal; j++) {
-        //             let id = i * this.dataObj.blockTotal + j;
-        //             let blockObj = blocksObj[id];
-        //             if (blockObj.number > 0) {
-        //                 this.addBlock(nodeTube, blockObj);
-        //             }
-        //         }
-        //     }
-        // }
-        // this.refreshTubePos(tubeNum);
+    /** 动作 冻结开始 */
+    playAniIceStart(){
+        this.arrTimeLayer[0].node.color = cc.Color.BLUE;
+        this.arrTimeLayer[1].node.color = cc.Color.BLUE;
     }
 
-    /** 刷新 位置 */
-    refreshTubePos() {
-        if (this.nodeMain.childrenCount > 0) {
-            let box = this.nodeMain.children[0];
-            let boxH = box.getComponent(ItemBox).itemIcon.height;
-            this.nodeMain.y = cc.winSize.height * 0.5 - boxH * 5 - this.uiTop.height - box.y;
-        }
+    /** 动作 冻结结束 */
+    playAniIceFinish(){
+        this.arrTimeLayer[0].node.color = cc.Color.WHITE;
+        this.arrTimeLayer[1].node.color = cc.Color.WHITE;
     }
 
     /** 添加 箱子 */
@@ -1276,7 +1323,6 @@ export default class GameBox extends cc.Component {
 
         let level = DataManager.data.boxData.level
 
-        this.dataObj.isFinish = true;
         // 打点 过关
         NativeCall.logEventOne(GameDot.dot_levelPass);
         let dot = GameDot['dot_pass_level_' + level];
@@ -1298,7 +1344,7 @@ export default class GameBox extends cc.Component {
             // 打点 插屏广告请求（过关）
             NativeCall.logEventThree(GameDot.dot_adReq, "inter_nextlevel", "Interstital");
             let funcA = () => {
-                // 打点 插屏播放完成（游戏结束）
+                // 打点 插屏播放完成
                 NativeCall.logEventTwo(GameDot.dot_ads_advert_succe_win, String(level));
                 funcNext();
 

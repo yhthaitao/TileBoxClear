@@ -14,13 +14,15 @@ export default class ItemGood extends cc.Component {
     resPath = { bundle: 'prefabs', path: './games/GameBox/res/img/goods/' };
 
     init(param: GoodParam) {
+        this.state = 0;
         this.param = Common.clone(param);
-
+        this.node.scale = 1;
         this.node.opacity = 0;
         this.node.position = cc.v3(this.param.x, this.param.y);
         this.node.name = this.param.name;
         this.node.getChildByName('label').getComponent(cc.Label).string = String(this.param.keyGood);
-
+        this.node.active = true;
+        
         let path = this.resPath.path + this.param.nameRes;
         kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
             if (err) {
