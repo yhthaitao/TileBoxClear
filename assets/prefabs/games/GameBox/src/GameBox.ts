@@ -221,12 +221,13 @@ export default class GameBox extends cc.Component {
     bottomDisY: number = -40;
     bottomScale: number = 0.5;
     bottomPosArr: cc.Vec3[] = [];// 底部位置数组
+    bottomTime = { cur: 0, init: 0, total: 0.1 };
 
     rectBg: cc.Rect = cc.rect();
     arrBoxY: { y: number, h: number }[] = [];
 
     baseTime = 1;// 基础时间 用于计算移动时间
-    baseDis = 1000;// 基础距离 用于计算移动时间
+    baseDis = 2000;// 基础距离 用于计算移动时间
     poolBox: cc.NodePool = null;
     poolGood: cc.NodePool = null;
     interval: number = 1 / 60;
@@ -269,7 +270,7 @@ export default class GameBox extends cc.Component {
         this.initUI();
         this.loadLevel();
         this.initLevel();
-        this.playAniNotMove();// 游戏重新开始之后，ui不再跳
+        this.isLock = false;
     }
 
     initData() {
@@ -351,6 +352,7 @@ export default class GameBox extends cc.Component {
     initUI() {
         let w = cc.winSize.width;
         let h = cc.winSize.height;
+        console.log('w: ', w, '; h: ', h);
         this.uiTop.y = h * 0.5 - this.uiTop.height * 0.5;
         this.nodeProp.y = -h * 0.5 + this.nodeProp.height * 0.5;
         this.uiBottom.y = this.nodeProp.y + this.uiBottom.height + 20;
@@ -437,12 +439,12 @@ export default class GameBox extends cc.Component {
     }
 
     protected update(dt: number): void {
-        this.cycleBox();
-        this.cycleGood();
+        this.cycleBox(dt);
+        this.cycleGood(dt);
     }
 
     /** 箱子逻辑 */
-    cycleBox() {
+    cycleBox(dt: number) {
         // 移动判断
         if (!this.speedBox.isMove) {
             return;
@@ -555,7 +557,7 @@ export default class GameBox extends cc.Component {
     }
 
     /** 物品逻辑 */
-    cycleGood() {
+    cycleGood(dt: number) {
         // 移动判断
         if (!this.speedGood.isMove) {
             return;
@@ -570,50 +572,60 @@ export default class GameBox extends cc.Component {
         let isContinueMove = false;
         let index = -1;
         for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
-            let arrParams = this.bottomParamArr[i];
-            for (let j = 0, lenB = arrParams.length; j < lenB; j++) {
+            let arrGoodParam = this.bottomParamArr[i];
+            for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
                 index += 1;
-                let params = arrParams[j];
-                if (!params.isMove) {
+                let goodParam = arrGoodParam[j];
+                if (!goodParam.isMove) {
                     continue;
+                }
+                
+                let bottomMainY = cc.winSize.height * 0.5 - this.uiBottom.y - this.bottomPosArr[0].y;
+                if (goodParam.y > bottomMainY + 120) {
+                    goodParam.y -= 100;
                 }
                 let pX = this.bottomPosArr[index].x;
                 let pY = this.bottomPosArr[index].y;
-                let disX = params.x - pX;
-                let disY = params.y - pY;
+                let disX = goodParam.x - pX;
+                let disY = goodParam.y - pY;
                 let disAB = Math.sqrt(Math.pow(disX, 2) + Math.pow(disY, 2));
 
                 isContinueMove = true;
-                let speedX = this.speedGood.speedCur * disX / disAB;
-                let speedY = this.speedGood.speedCur * disY / disAB;
-                params.x -= speedX;
-                params.y -= speedY;
-                let nodeGood = this.bottomMain.getChildByName(params.name);
+                let speed = this.speedGood.speedCur;
+                let speedX = speed * disX / disAB;
+                let speedY = speed * disY / disAB;
+                goodParam.x -= speedX;
+                goodParam.y -= speedY;
+                let nodeGood = this.bottomMain.getChildByName(goodParam.name);
                 if (nodeGood.scale > 0.5) {
                     nodeGood.scale -= 0.04;
                 }
                 else {
                     nodeGood.scale = 0.5;
                 }
-                if (Math.pow(disX, 2) + Math.pow(disY, 2) <= Math.pow(this.speedGood.speedCur, 2)) {
-                    params.isMove = false;
-                    params.x = pX;
-                    params.y = pY;
-                    let good = this.bottomMain.getChildByName(params.name);
-                    good.getComponent(ItemGood).refreshParams(cc.v3(params.x, params.y));
+                if (Math.pow(disX, 2) + Math.pow(disY, 2) <= Math.pow(speed, 2)) {
+                    goodParam.isMove = false;
+                    goodParam.x = pX;
+                    goodParam.y = pY;
+                    let good = this.bottomMain.getChildByName(goodParam.name);
+                    good.getComponent(ItemGood).refreshParams(cc.v3(goodParam.x, goodParam.y));
                     nodeGood.scale = 0.5;
                     continue;
                 }
                 else {
-                    nodeGood.getComponent(ItemGood).refreshParams(cc.v3(params.x, params.y));
+                    nodeGood.getComponent(ItemGood).refreshParams(cc.v3(goodParam.x, goodParam.y));
                 }
             }
             // 检测物品是否可以消除
-            if (this.goodParamsCheck(arrParams)) {
-                this.goodParamsRemove(arrParams, i);
-                this.goodParamsRestart();
+            if (this.goodParamsCheck(arrGoodParam)) {
                 isContinueMove = true;
-                break;
+                this.bottomTime.cur += dt;
+                if (this.bottomTime.cur >= this.bottomTime.total) {
+                    this.bottomTime.cur = this.bottomTime.init;
+                    this.goodParamsRemove(arrGoodParam, i);
+                    this.goodParamsRestart();
+                    break;
+                }
             }
         }
         // 是否继续移动
@@ -621,6 +633,7 @@ export default class GameBox extends cc.Component {
             this.speedGood.isMove = false;
             if (this.bottomParamArr.length > this.bottomMax - 1) {
                 // 游戏结束
+                this.isLock = true;
                 console.log('游戏结束 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
             }
         }
@@ -678,6 +691,29 @@ export default class GameBox extends cc.Component {
         good.parent = this.bottomMain;
         scriptGood.refreshParams(pStart);
         if (scriptBox.param.isFrame) {
+            good.active = true;
+            scriptBox.refreshGoods();
+        }
+        // 检测箱子
+        this.checkBox(box);
+
+        // 构建底部ui参数
+        this.goodParamsInsert(scriptGood.param);
+    }
+
+    eventTouchAfter(goodParam: GoodParam) {
+        let box = this.nodeMain.getChildByName(goodParam.nameBox);
+        let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParam.name);
+        let scriptGood = good.getComponent(ItemGood);
+        // 删除数据
+        let scriptBox = box.getComponent(ItemBox);
+        delete scriptBox.param.goods[scriptGood.param.index];
+        // 转移节点
+        let pStart = Common.getLocalPos(good.parent, good.position, this.bottomMain);
+        good.parent = this.bottomMain;
+        scriptGood.refreshParams(pStart);
+        if (scriptBox.param.isFrame) {
+            good.active = true;
             scriptBox.refreshGoods();
         }
         // 检测箱子
@@ -784,16 +820,12 @@ export default class GameBox extends cc.Component {
             let param = arrParam[index];
             names.push(param.name);
             let good = this.bottomMain.getChildByName(param.name);
-            if (!good) {
-                console.log('缺少物品: ', param.name);
-            }
             DataManager.poolPut(good, this.poolGood);
         }
-        console.log('names: ', JSON.stringify(names));
         this.bottomParamArr.splice(arrIndex, 1);
         this.goodsCount += arrParam.length;
         if (this.goodsCount >= this.goodsTotal) {
-            // 游戏结束
+            this.isLock = true;
             console.log('游戏结束 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
         }
     }
@@ -823,11 +855,6 @@ export default class GameBox extends cc.Component {
             }
             DataManager.poolPut(box, this.poolBox);
         }
-    }
-
-    /** 播放动画（没有可移动的位置时）*/
-    playAniNotMove() {
-
     }
 
     /** 按钮事件 返回 */
@@ -919,7 +946,7 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 刷新 */
     eventBtnRefresh() {
         // 锁定 物品移动过程中，不触发道具
-        console.log('isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        console.log('eventBtnRefresh isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1057,6 +1084,80 @@ export default class GameBox extends cc.Component {
 
 
         /** 延时解锁 */
+        this.scheduleOnce(() => { this.isLock = false; }, 0.75);
+    }
+
+    /** 按钮事件 提示 */
+    eventBtnTip() {
+        // 锁定 物品移动过程中，不触发道具
+        console.log('eventBtnTip isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        this.isLock = true;
+        kit.Audio.playEffect(CConst.sound_path_click);
+
+        let needNum = 3;
+        let keyGood = 0;
+        if (this.bottomParamArr.length > 0) {
+            let arrGoodParam = this.bottomParamArr[0];
+            needNum -= arrGoodParam.length;
+            keyGood = arrGoodParam[0].keyGood;
+        }
+        else {
+            for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+                let arrBoxParam = this.dataBox[i];
+                for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                    let boxParam = arrBoxParam[j];
+                    let arrKey = Object.keys(boxParam.goods);
+                    if (arrKey.length > 0) {
+                        keyGood = boxParam.goods[arrKey[0]].keyGood;
+                        break;
+                    }
+                }
+                if (keyGood != 0) {
+                    break;
+                }
+            }
+            if (keyGood == 0) {
+                this.isLock = false;
+                console.log('eventBtnTip 箱子里没有物品')
+                return;
+            }
+        }
+        let isEnough: boolean = false;
+        let arrChose: GoodParam[] = [];
+        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+            let arrBoxParam = this.dataBox[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                for (const key in boxParam.goods) {
+                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                        let goodParam: GoodParam = boxParam.goods[key];
+                        if (goodParam.keyGood == keyGood) {
+                            arrChose.push(goodParam);
+                            if (arrChose.length > needNum - 1) {
+                                isEnough = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (isEnough) {
+                    break;
+                }
+            }
+            if (isEnough) {
+                break;
+            }
+        }
+
+        let delay = 0;
+        for (let index = 0, length = arrChose.length; index < length; index++) {
+            delay += 0.1;
+            let goodParam = arrChose[index];
+            this.scheduleOnce(this.eventTouchAfter.bind(this, goodParam), delay);
+        }
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
 
