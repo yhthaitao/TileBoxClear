@@ -708,7 +708,7 @@ export default class GameSort extends cc.Component {
             funcReplay();
         };
         let funcB = () => {
-            kit.Event.emit(CConst.event_tip_noVideo);
+            kit.Event.emit(CConst.event_notice, 'noVideo');
         };
         let isReady = DataManager.playAdvert(funcA, funcA);
         if (!isReady) {
@@ -750,7 +750,7 @@ export default class GameSort extends cc.Component {
                     this.updateBtnReturn();
                 };
                 let funcB = (err: any) => {
-                    kit.Event.emit(CConst.event_tip_noVideo);
+                    kit.Event.emit(CConst.event_notice, 'noVideo');
                 };
                 // 打点 视频广告请求（加返回道具）
                 NativeCall.logEventThree(GameDot.dot_adReq, "addPropReturn", "rewardVideo");
@@ -794,7 +794,7 @@ export default class GameSort extends cc.Component {
             }
 
             let funcB = () => {
-                kit.Event.emit(CConst.event_tip_noVideo);
+                kit.Event.emit(CConst.event_notice, 'noVideo');
             };
             // 打点 视频广告请求（加瓶子道具）
             NativeCall.logEventThree(GameDot.dot_adReq, "addPropTube", "rewardVideo");

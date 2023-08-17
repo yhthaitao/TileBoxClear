@@ -188,12 +188,12 @@ class NativeCall {
     /** 无视频 */
     public NoVideo() {
         Common.log(' javaToCocos cocos method: NoVideo() 无视频 ');
-        kit.Event.emit(CConst.event_tip_noVideo);
+        kit.Event.emit(CConst.event_notice, 'noVideo');
     }
 
     public NoNetwork() {
         Common.log(' javaToCocos cocos method: NoNetwork() 无网络 ');
-        kit.Event.emit(CConst.event_tip_noNetwork);
+        kit.Event.emit(CConst.event_notice, 'NoNetwork');
     }
 
     /** 打点 回传计数 */

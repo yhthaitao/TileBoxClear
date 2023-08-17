@@ -159,7 +159,7 @@ export default class MainScene extends cc.Component {
         kit.Event.on(CConst.event_enter_gameSort, this.eventBack_enterGameSort, this);
         kit.Event.on(CConst.event_enter_newPlayer, this.eventBack_enterNewPlayer, this);
         kit.Event.on(CConst.event_enter_gameWin, this.eventBack_enterGameWin, this);
-        kit.Event.on(CConst.event_tip_noVideo, this.eventBack_noVideoTip, this);
+        kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
     }
 
     /** 事件回调：loading完成 */
@@ -243,9 +243,10 @@ export default class MainScene extends cc.Component {
         nodeGameWin.parent = this.node;
     };
 
-    /** 事件回调：无视频提示 */
-    eventBack_noVideoTip(): void {
+    /** 事件回调：提示 */
+    eventBack_notice(msg: string): void {
         this.noVideoTip.opacity = 255;
+        this.noVideoTip.getComponent(cc.Label).string = msg;
         let anim = this.noVideoTip.getComponent(cc.Animation);
         anim.stop();
         anim.once(cc.Animation.EventType.FINISHED, ()=> {

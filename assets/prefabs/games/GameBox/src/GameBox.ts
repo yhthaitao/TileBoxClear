@@ -671,7 +671,7 @@ export default class GameBox extends cc.Component {
         // 是否继续移动
         if (!isContinueMove) {
             this.speedGood.isMove = false;
-            if (this.getGoodParamsNum() > this.bottomMax - 1) {
+            if (this.getBottomGoodNum() > this.bottomMax - 1) {
                 this.isLock = true;
                 Common.log('游戏结束 检测去无空位 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
             }
@@ -717,7 +717,7 @@ export default class GameBox extends cc.Component {
     eventTouch(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         // 游戏不能继续
-        if (this.isLock || this.getGoodParamsNum() > this.bottomMax - 1) {
+        if (this.isLock || this.getBottomGoodNum() > this.bottomMax - 1) {
             scriptGood.state = 0;
             return;
         }
@@ -802,7 +802,7 @@ export default class GameBox extends cc.Component {
     }
 
     /** 物品参数-数量 */
-    getGoodParamsNum() {
+    getBottomGoodNum() {
         let paramsNum = 0;
         this.bottomParamArr.forEach((param: GoodParam[]) => {
             paramsNum += param.length;
@@ -972,7 +972,7 @@ export default class GameBox extends cc.Component {
         //             this.updateBtnReturn();
         //         };
         //         let funcB = (err: any) => {
-        //             kit.Event.emit(CConst.event_tip_noVideo);
+        //             kit.Event.emit(CConst.event_notice, 'noVideo');
         //         };
         //         // 打点 视频广告请求（加返回道具）
         //         NativeCall.logEventThree(GameDot.dot_adReq, "addPropReturn", "rewardVideo");
@@ -1149,6 +1149,11 @@ export default class GameBox extends cc.Component {
             let arrGoodParam = this.bottomParamArr[0];
             needNum -= arrGoodParam.length;
             keyGood = arrGoodParam[0].keyGood;
+            if (needNum > this.bottomMax - this.getBottomGoodNum()) {
+                this.isLock = false;
+                kit.Event.emit(CConst.event_notice, 'noSpace');
+                return;
+            }
         }
         else {
             for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
@@ -1230,6 +1235,16 @@ export default class GameBox extends cc.Component {
 
         this.timeGame.count += this.timeProp.addTotal;
         this.setTime();
+    }
+
+    /** 按钮事件 使用磁铁 1 */
+    eventBtnMagnetOne(){
+
+    }
+
+    /** 按钮事件 使用磁铁 2 */
+    eventBtnMagnetTwo(){
+
     }
 
     /** 动作：游戏显示 */

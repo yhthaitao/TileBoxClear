@@ -41,10 +41,8 @@ const CConst = {
     event_enter_gameWin: 'event_enter_gameWin',
     /** 进入 下一关游戏 */
     event_enter_nextLevel: 'event_enter_nextLevel',
-    /** 提示：没有视频 */
-    event_tip_noVideo: 'event_tip_noVideo',
-    /** 提示：没有网络 */
-    event_tip_noNetwork: 'event_tip_noNetwork',
+    /** 提示 */
+    event_notice: 'event_notices',
     /** 提示：碰撞 */
     event_collider_start: 'event_collider_start',
     /*************************************** end **************************************************/
