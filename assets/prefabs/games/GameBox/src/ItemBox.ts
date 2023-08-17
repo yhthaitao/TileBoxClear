@@ -1,5 +1,5 @@
 import Common from "../../../../src/config/Common";
-import { BoxParams } from "./GameBox";
+import { BoxParam } from "./GameBox";
 import ItemGood from "./ItemGood";
 
 const { ccclass, property } = cc._decorator;
@@ -12,25 +12,25 @@ export default class ItemBox extends cc.Component {
     objSpeed = {
         speedCur: 0, speedDis: 1, speedInit: 0, speedMax: 20, isMove: false,
     };
-    params: BoxParams = null;
+    param: BoxParam = null;
     rect: cc.Rect = cc.rect();
-    init(params: BoxParams) {
-        this.params = params;
-        this.node.x = this.params.x;
-        this.node.y = this.params.y;
-        this.node.name = this.params.nameNode;
+    init(param: BoxParam) {
+        this.param = param;
+        this.node.x = this.param.x;
+        this.node.y = this.param.y;
+        this.node.name = this.param.name;
         let layer = this.node.getChildByName('layer');
-        layer.getComponent(cc.Label).string = String(this.params.index);
-        this.itemIcon.width = this.params.w;
-        this.itemIcon.height = this.params.h;
-        this.rect = cc.rect(this.params.x - this.params.w * 0.5, this.params.y, this.params.w, this.params.h);
+        layer.getComponent(cc.Label).string = String(this.param.index);
+        this.itemIcon.width = this.param.w;
+        this.itemIcon.height = this.param.h;
+        this.rect = cc.rect(this.param.x - this.param.w * 0.5, this.param.y, this.param.w, this.param.h);
         let collider = this.node.getComponent(cc.BoxCollider);
-        Common.refreshCollider(collider, 0, this.params.h * 0.5, this.params.w - 1, this.params.h - 2);
+        Common.refreshCollider(collider, 0, this.param.h * 0.5, this.param.w - 1, this.param.h - 2);
     };
 
     sortGood(){
         this.nodeMain.children.sort((a: cc.Node, b: cc.Node)=>{
-            return a.getComponent(ItemGood).params.index - b.getComponent(ItemGood).params.index;
+            return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
         });
         this.refreshGoods();
     };
@@ -42,8 +42,8 @@ export default class ItemBox extends cc.Component {
     }
 
     refreshParams(y: number){
-        this.params.y = y;
-        this.node.y = this.params.y;
+        this.param.y = y;
+        this.node.y = this.param.y;
     }
 
     moveStart() {
@@ -65,12 +65,12 @@ export default class ItemBox extends cc.Component {
     }
 
     playAniEnd() {
-        let y = this.node.y - this.params.yBottom;
+        let y = this.node.y - this.param.yBottom;
         if (y < 0) {
-            this.node.y = this.params.yBottom
+            this.node.y = this.param.yBottom
         }
         else{
-            let disY = this.params.h - y % this.params.h;
+            let disY = this.param.h - y % this.param.h;
             this.node.y += disY;
         }
     }

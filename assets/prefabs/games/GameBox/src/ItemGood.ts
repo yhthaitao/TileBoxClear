@@ -1,6 +1,6 @@
 import Common from "../../../../src/config/Common";
 import { kit } from "../../../../src/kit/kit";
-import GameBox, { GoodParams } from "./GameBox";
+import GameBox, { GoodParam } from "./GameBox";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -10,35 +10,56 @@ export default class ItemGood extends cc.Component {
 
     state: number = 0;
     isChose: boolean = false;
-    params: GoodParams = null;
+    param: GoodParam = null;
     resPath = { bundle: 'prefabs', path: './games/GameBox/res/img/goods/' };
 
-    init(params: GoodParams) {
-        this.params = Common.clone(params);
-        
-        this.node.opacity = 0;
-        this.node.position = cc.v3(this.params.x, this.params.y);
-        this.node.name = this.params.nameNode;
-        this.node.getChildByName('label').getComponent(cc.Label).string = this.node.name;
+    init(param: GoodParam) {
+        this.param = Common.clone(param);
 
-        let path = this.resPath.path + this.params.nameRes;
-        kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame)=>{
+        this.node.opacity = 0;
+        this.node.position = cc.v3(this.param.x, this.param.y);
+        this.node.name = this.param.name;
+        this.node.getChildByName('label').getComponent(cc.Label).string = String(this.param.keyGood);
+
+        let path = this.resPath.path + this.param.nameRes;
+        kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
             if (err) {
                 Common.log(' 资源加载异常 good_path: ', path);
                 return;
             }
             this.itemIcon.getComponent(cc.Sprite).spriteFrame = assets;
-            this.itemIcon.width = this.params.w;
-            this.itemIcon.height = this.params.h;
+            this.itemIcon.width = this.param.w;
+            this.itemIcon.height = this.param.h;
             this.node.opacity = 255;
         });
     };
 
-    refreshParams(pos: cc.Vec3){
-        this.params.x = pos.x;
-        this.params.y = pos.y;
-        this.node.x = this.params.x;
-        this.node.y = this.params.y;
+    refreshRes(param: GoodParam) {
+        let timeOpa = 0.3;
+        this.param.w = param.w;
+        this.param.h = param.h;
+        this.param.nameRes = param.nameRes;
+        this.param.keyGood = param.keyGood;
+        this.node.getChildByName('label').getComponent(cc.Label).string = String(this.param.keyGood);
+        cc.tween(this.node).to(timeOpa, { opacity: 0 }).call(async () => {
+            let path = this.resPath.path + this.param.nameRes;
+            await kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
+                if (err) {
+                    Common.log(' 资源加载异常 good_path: ', path);
+                    return;
+                }
+                this.itemIcon.getComponent(cc.Sprite).spriteFrame = assets;
+                this.itemIcon.width = this.param.w;
+                this.itemIcon.height = this.param.h;
+            });
+        }).to(timeOpa, {opacity: 255}).start();
+    }
+
+    refreshParams(pos: cc.Vec3) {
+        this.param.x = pos.x;
+        this.param.y = pos.y;
+        this.node.x = this.param.x;
+        this.node.y = this.param.y;
     }
 
     /** 点击事件 */

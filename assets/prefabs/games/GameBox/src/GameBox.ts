@@ -10,9 +10,9 @@ import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
 
 /** box参数 */
-export interface BoxParams {
+export interface BoxParam {
     index: number;
-    nameNode: string;
+    name: string;
     x: number;
     y: number;
     w: number;
@@ -24,16 +24,17 @@ export interface BoxParams {
 }
 
 /** good参数 */
-export interface GoodParams {
+export interface GoodParam {
     index: number;
+    name: string;
     nameRes: string;
-    nameNode: string;
+    nameBox: string;
     x: number;
     y: number;
     w: number;
     h: number;
-    keyBox: number;
     keyGood: number;
+    keyBox: number;
     isMove: boolean;
 }
 
@@ -48,7 +49,6 @@ export default class GameBox extends cc.Component {
     @property(cc.Node) uiTop: cc.Node = null;// 顶部节点
     @property(cc.Node) uiBottom: cc.Node = null;// 底部节点
     @property(cc.Node) bottomMain: cc.Node = null;// 底部物品父节点
-    @property(cc.Node) flyMain: cc.Node = null;// 箱子飞行节点
     @property(cc.Node) nodeProp: cc.Node = null;// 道具父节点
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
@@ -56,8 +56,8 @@ export default class GameBox extends cc.Component {
     goodsCount: number = 0;
     goodsTotal: number = 0;
     dataGame: any = {};
-    dataBox: BoxParams[][] = [];
-    fanhuidata: BoxParams[][] = [];
+    dataBox: BoxParam[][] = [];
+    fanhuidata: BoxParam[][] = [];
 
     // dataLevel = {
     //     map: [
@@ -215,7 +215,7 @@ export default class GameBox extends cc.Component {
 
     cfgGoods: any = {};
     midPosYObj: any = {};// 中部箱子y位置
-    bottomParamArr: GoodParams[][] = [];
+    bottomParamArr: GoodParam[][] = [];
     bottomMax: number = 7;
     bottomDis: number = 90;
     bottomDisY: number = -40;
@@ -230,6 +230,7 @@ export default class GameBox extends cc.Component {
     poolBox: cc.NodePool = null;
     poolGood: cc.NodePool = null;
     interval: number = 1 / 60;
+    isLock: boolean = false;
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -287,26 +288,28 @@ export default class GameBox extends cc.Component {
             let y = Math.floor(Number(obj.y + disY - dataBoxBottomY));
             let w = Math.floor(Number(obj.w));
             let h = Math.floor(Number(obj.h));
-            let boxParams: BoxParams = {
-                index: index, nameNode: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, yBottom: disY, isMove: false, isFrame: h < 100,
+            let boxParam: BoxParam = {
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h,
+                goods: {}, yBottom: disY, isMove: false, isFrame: h < 100,
             };
-            this.dataGame[index] = boxParams;
+            this.dataGame[index] = boxParam;
         }
         let goods = this.dataLevel.item;
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
             let keyGood = Number(obj.n);
-            let name = this.cfgGoods[keyGood].name;
+            let nameRes = this.cfgGoods[keyGood].name;
             let w = this.cfgGoods[keyGood].w;
             let h = this.cfgGoods[keyGood].h;
             let keyBox = Number(obj.p);
-            let dataBox = this.dataGame[keyBox];
+            let dataBox: BoxParam = this.dataGame[keyBox];
             let x = obj.x - this.dataLevel.map[keyBox].x;
             let y = obj.y - this.dataLevel.map[keyBox].y;
-            let goodParams: GoodParams = {
-                index: index, keyBox: keyBox, keyGood: keyGood, nameRes: name, nameNode: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false,
+            let goodParam: GoodParam = {
+                index: index, keyBox: keyBox, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index,
+                nameBox: dataBox.name, x: x, y: y, w: w, h: h, isMove: false,
             };
-            dataBox.goods[index] = goodParams;
+            dataBox.goods[index] = goodParam;
         }
         let arrBox = {};
         for (const key in this.dataGame) {
@@ -396,16 +399,16 @@ export default class GameBox extends cc.Component {
             if (!Object.prototype.hasOwnProperty.call(this.dataGame, keyBox)) {
                 continue;
             }
-            let boxData: BoxParams = this.dataGame[keyBox];
-            let box = this.addBox(boxData);
-            for (const keyGood in boxData.goods) {
-                if (!Object.prototype.hasOwnProperty.call(boxData.goods, keyGood)) {
+            let boxParam: BoxParam = this.dataGame[keyBox];
+            let box = this.addBox(boxParam);
+            for (const keyGood in boxParam.goods) {
+                if (!Object.prototype.hasOwnProperty.call(boxParam.goods, keyGood)) {
                     continue;
                 }
-                let goodData: GoodParams = boxData.goods[keyGood];
-                this.addGood(box, Common.clone(goodData));
+                let goodParam: GoodParam = boxParam.goods[keyGood];
+                this.addGood(box, Common.clone(goodParam));
             }
-            if (boxData.isFrame) {
+            if (boxParam.isFrame) {
                 box.getComponent(ItemBox).sortGood();
             }
         }
@@ -452,12 +455,12 @@ export default class GameBox extends cc.Component {
         }
 
         /** 获取矩形 */
-        let getRect = (boxParams: BoxParams) => {
-            return cc.rect(boxParams.x - boxParams.w * 0.5 + 1, boxParams.y, boxParams.w - 2, boxParams.h);
+        let getRect = (boxParam: BoxParam) => {
+            return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
         };
 
         // 碰撞检测
-        let funcCollider = (rectA: cc.Rect, arrB: BoxParams[]) => {
+        let funcCollider = (rectA: cc.Rect, arrB: BoxParam[]) => {
             for (let index = 0, length = arrB.length; index < length; index++) {
                 let B = arrB[index];
                 if (rectA.intersects(getRect(B))) {
@@ -478,14 +481,9 @@ export default class GameBox extends cc.Component {
                 this.dataBox.splice(i, 1);
             }
             this.dataBox[i - 1].push(boxOne);
-            this.dataBox[i - 1].sort((a: BoxParams, b: BoxParams) => {
+            this.dataBox[i - 1].sort((a: BoxParam, b: BoxParam) => {
                 return a.x - b.x;
             });
-            let names = [];
-            for (let index = 0; index < this.dataBox[i - 1].length; index++) {
-                const element = this.dataBox[i - 1][index];
-                names.push(element.nameNode);
-            }
         };
 
         let isContinueMove = false;
@@ -503,7 +501,7 @@ export default class GameBox extends cc.Component {
                 if (!boxOne.isMove) {
                     continue;
                 }
-                let box = this.nodeMain.getChildByName(boxOne.nameNode);
+                let box = this.nodeMain.getChildByName(boxOne.name);
                 let scriptBox = box.getComponent(ItemBox);
                 let yA = boxOne.y - this.speedBox.speedCur;
                 if (i == 0) {
@@ -590,7 +588,7 @@ export default class GameBox extends cc.Component {
                 let speedY = this.speedGood.speedCur * disY / disAB;
                 params.x -= speedX;
                 params.y -= speedY;
-                let nodeGood = this.bottomMain.getChildByName(params.nameNode);
+                let nodeGood = this.bottomMain.getChildByName(params.name);
                 if (nodeGood.scale > 0.5) {
                     nodeGood.scale -= 0.04;
                 }
@@ -601,7 +599,7 @@ export default class GameBox extends cc.Component {
                     params.isMove = false;
                     params.x = pX;
                     params.y = pY;
-                    let good = this.bottomMain.getChildByName(params.nameNode);
+                    let good = this.bottomMain.getChildByName(params.name);
                     good.getComponent(ItemGood).refreshParams(cc.v3(params.x, params.y));
                     nodeGood.scale = 0.5;
                     continue;
@@ -627,8 +625,6 @@ export default class GameBox extends cc.Component {
             }
         }
     }
-
-
 
     /** 获取最下方箱子数据 */
     getDataBoxBottom(): any {
@@ -669,26 +665,27 @@ export default class GameBox extends cc.Component {
     eventTouch(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         // 游戏不能继续
-        if (this.getGoodParamsNum() >= this.bottomMax) {
+        if (this.isLock || this.getGoodParamsNum() >= this.bottomMax) {
             scriptGood.state = 0;
             return;
         }
         // 删除数据
         let box = good.parent.parent;
         let scriptBox = box.getComponent(ItemBox);
-        delete scriptBox.params.goods[scriptGood.params.index];
+        delete scriptBox.param.goods[scriptGood.param.index];
         // 转移节点
         let pStart = Common.getLocalPos(good.parent, good.position, this.bottomMain);
         good.parent = this.bottomMain;
+        scriptGood.param.keyBox = -1;
         scriptGood.refreshParams(pStart);
-        if (scriptBox.params.isFrame) {
+        if (scriptBox.param.isFrame) {
             scriptBox.refreshGoods();
         }
         // 检测箱子
         this.checkBox(box);
 
         // 构建底部ui参数
-        this.goodParamsInsert(scriptGood.params);
+        this.goodParamsInsert(scriptGood.param);
     }
 
     /** 检测箱子掉落 */
@@ -697,7 +694,7 @@ export default class GameBox extends cc.Component {
         if (scriptBox.nodeMain.childrenCount > 0) {
             return;
         }
-        if (scriptBox.params.isFrame) {
+        if (scriptBox.param.isFrame) {
             return;
         }
         // 删除数据
@@ -708,7 +705,7 @@ export default class GameBox extends cc.Component {
             for (let j = 0, lenBox = boxLayer.length; j < lenBox; j++) {
                 let boxOne = boxLayer[j];
                 boxOne.isMove = !boxOne.isFrame;
-                if (boxOne.nameNode == scriptBox.params.nameNode) {
+                if (boxOne.name == scriptBox.param.name) {
                     indexI = i;
                     if (lenBox > 1) {
                         indexJ = j;
@@ -724,7 +721,8 @@ export default class GameBox extends cc.Component {
             this.dataBox[indexI].splice(indexJ, 1);
         }
         DataManager.poolPut(box, this.poolBox);
-        // 开始移动
+
+        // 开始移动 箱子
         this.speedBox.isMove = true;
         this.speedBox.speedCur = this.speedBox.speedInit;
     }
@@ -732,14 +730,14 @@ export default class GameBox extends cc.Component {
     /** 物品参数-数量 */
     getGoodParamsNum() {
         let paramsNum = 0;
-        this.bottomParamArr.forEach((params: GoodParams[]) => {
-            paramsNum += params.length;
+        this.bottomParamArr.forEach((param: GoodParam[]) => {
+            paramsNum += param.length;
         });
         return paramsNum;
     }
 
     /** 物品参数-插入 */
-    goodParamsInsert(param: GoodParams) {
+    goodParamsInsert(param: GoodParam) {
         param.isMove = true;
         let isAdd = false;
         for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
@@ -757,19 +755,20 @@ export default class GameBox extends cc.Component {
         if (!isAdd) {
             this.bottomParamArr.push([param]);
         }
-        // 开始移动
+
+        // 开始移动 物品
         this.speedGood.isMove = true;
         this.speedGood.speedCur = this.speedGood.speedInit;
     }
 
     /** 物品参数-检测 */
-    goodParamsCheck(arrParams: GoodParams[]) {
-        let length = arrParams.length;
+    goodParamsCheck(arrParam: GoodParam[]) {
+        let length = arrParam.length;
         let isEnough = length > 2;
         if (isEnough) {
-            let paramY = arrParams[0].y;
+            let paramY = arrParam[0].y;
             for (let index = 1; index < length; index++) {
-                let params = arrParams[index];
+                let params = arrParam[index];
                 if (paramY != params.y) {
                     isEnough = false;
                     break;
@@ -780,20 +779,23 @@ export default class GameBox extends cc.Component {
     }
 
     // 移除物品
-    goodParamsRemove(arrParams: GoodParams[], arrIndex: number) {
-        for (let index = 0, length = arrParams.length; index < length; index++) {
-            let params = arrParams[index];
-            let good = this.bottomMain.getChildByName(params.nameNode);
+    goodParamsRemove(arrParam: GoodParam[], arrIndex: number) {
+        let names = [];
+        for (let index = 0, length = arrParam.length; index < length; index++) {
+            let param = arrParam[index];
+            names.push(param.name);
+            let good = this.bottomMain.getChildByName(param.name);
+            if (!good) {
+                console.log('缺少物品: ', param.name);
+            }
             DataManager.poolPut(good, this.poolGood);
         }
+        console.log('names: ', JSON.stringify(names));
         this.bottomParamArr.splice(arrIndex, 1);
-        this.goodsCount += arrParams.length;
+        this.goodsCount += arrParam.length;
         if (this.goodsCount >= this.goodsTotal) {
             // 游戏结束
             console.log('游戏结束 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
-        }
-        else{
-            console.log('  进度 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
         }
     }
 
@@ -915,50 +917,154 @@ export default class GameBox extends cc.Component {
         // }
     }
 
-    /** 按钮事件 添加瓶子 */
-    eventBtnAddTube() {
-        // kit.Audio.playEffect(CConst.sound_path_click);
-        // let tubeNum = this.nodeMain.childrenCount;
-        // let tubeMax = this.isLevelSpecial ? tubeNum + 1 : 18;
-        // if (tubeNum < tubeMax) {
-        //     let funcA = () => {
-        //         this.addTube(tubeNum);
-        //         this.playAniNotMove();
-        //         this.saveData();
+    /** 按钮事件 刷新 */
+    eventBtnRefresh() {
+        // 锁定 物品移动过程中，不触发道具
+        console.log('isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        this.isLock = true;
+        kit.Audio.playEffect(CConst.sound_path_click);
 
-        //         tubeNum = this.nodeMain.childrenCount;
-        //         this.refreshTubePos(tubeNum);
-        //         if (tubeNum >= tubeMax) {
-        //             this.btnAddTube.active = false;
-        //         }
-        //     };
-        //     let count = DataManager.data.propAddTupe;
-        //     // 添加瓶子
-        //     if (count > 0) {
-        //         DataManager.data.propAddTupe--;
-        //         this.updateBtnAddTube();
-        //         funcA();
-        //         return;
-        //     }
+        /*****************************************************组合物品数组*************************************************************/
+        let arrGoodParam: GoodParam[][] = [];
+        let composeArr = (boxParam: BoxParam) => {
+            for (const key in boxParam.goods) {
+                if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                    let goodParam: GoodParam = boxParam.goods[key];
+                    let char = String(goodParam.keyGood);
+                    let index = Number(char.substring(0, 1)) - 1;
+                    if (arrGoodParam[index]) {
+                        arrGoodParam[index].push(goodParam);
+                    }
+                    else {
+                        arrGoodParam[index] = [goodParam];
+                    }
+                }
+            }
+        };
+        // 组合物品数组 操作区
+        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+            let boxArr = this.dataBox[i];
+            for (let j = 0, lenB = boxArr.length; j < lenB; j++) {
+                let boxOne = boxArr[j];
+                composeArr(boxOne);
+            }
+        }
+        // 组合物品数组 检测区
+        this.bottomMain.children.forEach((good: cc.Node) => {
+            let goodParam: GoodParam = good.getComponent(ItemGood).param;
+            let char = String(goodParam.keyGood);
+            let index = Number(char.substring(0, 1)) - 1;
+            if (arrGoodParam[index]) {
+                arrGoodParam[index].push(goodParam);
+            }
+            else {
+                arrGoodParam[index] = [goodParam];
+            }
+        });
 
-        //     let funcB = () => {
-        //         kit.Event.emit(CConst.event_tip_noVideo);
-        //     };
-        //     // 打点 视频广告请求（加瓶子道具）
-        //     NativeCall.logEventThree(GameDot.dot_adReq, "addPropTube", "rewardVideo");
-        //     let isReady = DataManager.playVideo(funcA, funcB);
-        //     if (!isReady) {
-        //         // 打点 插屏广告请求（加瓶子道具）
-        //         NativeCall.logEventThree(GameDot.dot_adReq, "addPropTube", "Interstital");
-        //         isReady = DataManager.playAdvert(funcA, funcB);
-        //     }
-        //     if (!isReady) {
-        //         funcB();
-        //     }
-        // }
-        // else {
-        //     Common.log('瓶子数量已达上限');
-        // }
+
+        /*****************************************************赋值物品数组 并 重新排序*************************************************************/
+        let arrCopy: GoodParam[][] = Common.clone(arrGoodParam);
+        for (let index = 0, length = arrCopy.length; index < length; index++) {
+            let arrParam = arrCopy[index];
+            let i = arrParam.length;
+            while (i) {
+                let j = Math.floor(Math.random() * i--);
+                let temp = arrParam[i];
+                arrParam[i] = arrParam[j];
+                arrParam[j] = temp;
+            }
+        }
+
+
+        /**********************************************重新排序后的物品数组 赋值给 物品数组, 并执行更新*************************************************/
+        let voluationArr = (arrParamA: GoodParam[], arrParamB: GoodParam[]) => {
+            for (let index = 0, length = arrParamA.length; index < length; index++) {
+                let goodParamA = arrParamA[index];
+                let goodParamB = arrParamB[index];
+                goodParamA.nameRes = goodParamB.nameRes;
+                goodParamA.w = goodParamB.w;
+                goodParamA.h = goodParamB.h;
+                goodParamA.keyGood = goodParamB.keyGood;
+                let good: cc.Node = null;
+                if (goodParamA.keyBox < 0) {
+                    good = this.bottomMain.getChildByName(goodParamA.name);
+                }
+                else {
+                    let box = this.nodeMain.getChildByName(goodParamA.nameBox);
+                    good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParamA.name);
+                }
+                if (good) {
+                    good.getComponent(ItemGood).refreshRes(goodParamA);
+                }
+            }
+        };
+        for (let index = 0, length = arrGoodParam.length; index < length; index++) {
+            let arrParamA = arrGoodParam[index];
+            let arrParamB = arrCopy[index];
+            voluationArr(arrParamA, arrParamB);
+        }
+
+
+        /**********************************************重新排序底部物品 并 移动*************************************************/
+        let layerIndex = 0;
+        let arrInsert: GoodParam[] = [];
+        let reInsert = (goodParam: GoodParam)=>{
+            let isAdd = false;
+            for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
+                let arrParams = this.bottomParamArr[index];
+                let lenB = arrParams.length;
+                if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == goodParam.keyGood) {
+                    isAdd = true;
+                    arrParams.push(goodParam);
+                    break;
+                }
+            }
+            if (!isAdd) {
+                layerIndex++;
+                this.bottomParamArr.splice(layerIndex, 0, [goodParam]);
+            }
+        };
+        // 获取需要重新排列的数组
+        if (this.bottomParamArr.length > 0) {
+            let arrGoodParam = this.bottomParamArr[0];
+            let arrOne = arrGoodParam.splice(1, arrGoodParam.length - 1);
+            for (let index = 0, length = arrOne.length; index < length; index++) {
+                arrInsert.push(arrOne[index]);
+            }
+            let arrElse = this.bottomParamArr.splice(1, this.bottomParamArr.length - 1);
+            for (let i = 0, lenA = arrElse.length; i < lenA; i++) {
+                let arrGoodParam = arrElse[i];
+                for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
+                    arrInsert.push(arrGoodParam[j]);
+                }
+            }
+        }
+        // 数组插入到对应位置
+        for (let index = 0, length = arrInsert.length; index < length; index++) {
+            let goodParam = arrInsert[index];
+            reInsert(goodParam);
+        }
+
+
+        /**********************************************设置移动-物品*************************************************/
+        for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
+            let arrGoodParam = this.bottomParamArr[i];
+            for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
+                let goodParam = arrGoodParam[j];
+                goodParam.isMove = true;
+            }
+        }
+        this.speedGood.isMove = true;
+        this.speedGood.speedCur = this.speedGood.speedInit;
+
+
+
+        /** 延时解锁 */
+        this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
 
     playAniShow(isShow, callback) {
@@ -1014,10 +1120,10 @@ export default class GameBox extends cc.Component {
     }
 
     /** 添加 箱子 */
-    addBox(params: BoxParams): cc.Node {
+    addBox(param: BoxParam): cc.Node {
         let node = this.getBox();
         node.parent = this.nodeMain;
-        node.getComponent(ItemBox).init(params);
+        node.getComponent(ItemBox).init(param);
         return node;
     };
 
@@ -1027,10 +1133,10 @@ export default class GameBox extends cc.Component {
     }
 
     /** 添加 物品 */
-    addGood(box: cc.Node, params: GoodParams): cc.Node {
+    addGood(box: cc.Node, param: GoodParam): cc.Node {
         let node = this.getGood();
         node.parent = box.getComponent(ItemBox).nodeMain;
-        node.getComponent(ItemGood).init(params);
+        node.getComponent(ItemGood).init(param);
         return node;
     };
 
