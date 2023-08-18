@@ -11,7 +11,7 @@
   "height": 69,
   "platformSettings": {},
   "subMetas": {
-    "uiLevelBack": {
+    "uiTopLevelBack": {
       "ver": "1.0.4",
       "uuid": "4cbe7aaf-1834-4fce-be2f-b90beced0412",
       "rawTextureUuid": "260faa8f-f916-44ce-ac3f-7f7593eec40c",
@@ -26,10 +26,10 @@
       "height": 69,
       "rawWidth": 269,
       "rawHeight": 69,
-      "borderTop": 25,
-      "borderBottom": 35,
-      "borderLeft": 100,
-      "borderRight": 100,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 40,
+      "borderRight": 40,
       "subMetas": {}
     }
   }
