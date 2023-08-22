@@ -81,6 +81,16 @@ export default class ItemGood extends cc.Component {
         }
     };
 
+    resetParams(param: GoodParam){
+        this.state = 0;
+        this.param.name = param.name;
+        this.param.x = param.box.x;
+        this.param.y = param.box.y;
+        this.node.x = this.param.x;
+        this.node.y = this.param.y;
+        this.node.name = this.param.name;
+    }
+
     getScriptMain(): GameBox {
         let game = cc.find('Canvas/GameBox');
         if (game) {
