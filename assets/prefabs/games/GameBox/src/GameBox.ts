@@ -782,7 +782,6 @@ export default class GameBox extends cc.Component {
             const element = box.getComponent(ItemBox).nodeMain.children[index];
             names.push(element.name);
         }
-        console.log('goodParam: ', goodParam, '; names: ', names);
         let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParam.name);
         let scriptGood = good.getComponent(ItemGood);
         // 删除数据
@@ -791,6 +790,13 @@ export default class GameBox extends cc.Component {
         // 转移节点
         let pStart = Common.getLocalPos(good.parent, good.position, this.uiBottomMain);
         good.parent = this.uiBottomMain;
+
+        names = [];
+        for (let index = 0; index < box.getComponent(ItemBox).nodeMain.children.length; index++) {
+            const element = box.getComponent(ItemBox).nodeMain.children[index];
+            names.push(element.name);
+        }
+
         scriptGood.refreshParams(pStart);
         if (scriptBox.param.isFrame) {
             good.active = true;
@@ -1036,15 +1042,24 @@ export default class GameBox extends cc.Component {
                 scriptBox.param.goods[goodParam.index] = goodParam;
                 good.parent = scriptBox.nodeMain;
                 good.getComponent(ItemGood).resetParams(goodParam);
+                this.refreshBoxParam(scriptBox.param);
                 this.isLock = false;
             }).start();
         }
+        // 物品原来的箱子存在
         else {
-            /** 获取矩形 */
+            /**
+             * 1.找到需要复原的箱子
+             * 2.现有箱子+需要复原的箱子，组成一个包含箱子名字的数组
+             * 3.对比游戏开始时所有箱子，排除掉已经消除的箱子
+             * 4.剩余箱子物品复原 并 重新排列位置，
+             * 5.根据数据移动现有箱子，底部物品返回到箱子中
+             */
+            // 获取矩形
             let getRect = (boxParam: BoxParam) => {
                 return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
             };
-            /** 获取箱子列数 */
+            // 获取箱子列数
             let getBoxLayer = (boxParamCur: BoxParam, layerCur: number) => {
                 let layer = 0;
                 let rectA = getRect(boxParamCur);
@@ -1069,8 +1084,8 @@ export default class GameBox extends cc.Component {
                 return layer;
             };
 
+            // 拿到原箱子
             let boxParamCur: BoxParam = this.dataGame[goodParam.box.key];
-            boxParamCur.goods = {};
             // 组合剩余箱子
             let names = [boxParamCur.name];
             for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
@@ -1094,23 +1109,40 @@ export default class GameBox extends cc.Component {
             }
 
             // 添加箱子 刚出现时高度为0
+            boxParamCur.goods = {};
             let box = this.addBox(boxParamCur);
-            // 重置箱子位置
-            this.dataBox = Common.clone(dataBox);
+            let objBox = {};
             for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
                 let arrBoxParam = this.dataBox[i];
                 for (let j = 0; j < arrBoxParam.length; j++) {
                     let boxParam = arrBoxParam[j];
+                    objBox[boxParam.index] = Common.clone(boxParam);
+                }
+            }
+            // 重置箱子位置
+            this.dataBox = Common.clone(dataBox);// 赋值箱子
+            for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+                let arrBoxParam = this.dataBox[i];
+                for (let j = 0; j < arrBoxParam.length; j++) {
+                    let boxParam = arrBoxParam[j];
+                    // 物品还原
+                    if (boxParam.name == boxParamCur.name) {
+                        boxParam.goods = {};
+                    }
+                    else {
+                        boxParam.goods = objBox[boxParam.index] ? objBox[boxParam.index].goods : {};
+                    }
+                    // 框不移动
                     if (boxParam.isFrame) {
                         continue;
                     }
+                    // 箱子层级
                     let layer = getBoxLayer(boxParam, i);
                     boxParam.y = this.arrBoxY[layer].y;
                     let box = this.nodeMain.getChildByName(boxParam.name);
                     let timeY = Common.getMoveTime(box.position, cc.v3(box.x, boxParam.y), this.baseTime, this.baseDis);
                     cc.tween(box).to(timeY, { y: boxParam.y }).call(() => {
-                        let scriptBox = box.getComponent(ItemBox);
-                        scriptBox.refreshParams(boxParam.y);
+                        box.getComponent(ItemBox).refreshParams(boxParam.y);
                     }).start();
                     if (layer == i) {
                         continue;
@@ -1144,6 +1176,7 @@ export default class GameBox extends cc.Component {
                     scriptBox.param.goods[goodParam.index] = goodParam;
                     good.parent = scriptBox.nodeMain;
                     good.getComponent(ItemGood).resetParams(goodParam);
+                    this.refreshBoxParam(scriptBox.param);
                     this.isLock = false;
                 }).start();
             }).start();
@@ -1321,9 +1354,14 @@ export default class GameBox extends cc.Component {
                 let arrBoxParam = this.dataBox[i];
                 for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
                     let boxParam = arrBoxParam[j];
-                    let arrKey = Object.keys(boxParam.goods);
-                    if (arrKey.length > 0) {
-                        keyGood = boxParam.goods[arrKey[0]].keyGood;
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            keyGood = goodParam.keyGood;
+                            break;
+                        }
+                    }
+                    if (keyGood != 0) {
                         break;
                     }
                 }
@@ -1337,6 +1375,7 @@ export default class GameBox extends cc.Component {
                 return;
             }
         }
+
         let isEnough: boolean = false;
         let arrChose: GoodParam[] = [];
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
@@ -1347,6 +1386,7 @@ export default class GameBox extends cc.Component {
                     if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
                         let goodParam: GoodParam = boxParam.goods[key];
                         if (goodParam.keyGood == keyGood) {
+                            delete boxParam.goods[key];
                             arrChose.push(goodParam);
                             if (arrChose.length > needNum - 1) {
                                 isEnough = true;
@@ -1467,19 +1507,14 @@ export default class GameBox extends cc.Component {
         return node;
     };
 
-    removeDataBox(box: cc.Node){
-        let boxScript = box.getComponent(ItemBox);
+    refreshBoxParam(param: BoxParam) {
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
             for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
                 let boxParam = this.dataBox[i][j];
-                if (boxParam.index == boxScript.param.index) {
-                    this.dataBox[i].splice(j, 1);
-                    break;
+                if (boxParam.index == param.index) {
+                    this.dataBox[i][j] = param;
+                    return;
                 }
-            }
-            if (this.dataBox[i].length <= 0) {
-                this.dataBox.splice(i, 1);
-                break;
             }
         }
     };
