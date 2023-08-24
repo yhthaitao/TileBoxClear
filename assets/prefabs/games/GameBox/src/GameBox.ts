@@ -17,8 +17,6 @@ export interface BoxParam {
     y: number;
     w: number;
     h: number;
-    layerI: number;
-    layerJ: number;
     goods: any;
     yBottom: number;
     isMove: boolean;
@@ -59,140 +57,50 @@ export default class GameBox extends cc.Component {
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
 
-    // dataLevel = {
-    //     map: [
-    //         { "x": -150, "y": 90.5, "w": "231", "h": "181" },
-    //         { "x": -150, "y": 271.5, "w": "231", "h": "181" },
-    //         { "x": -150, "y": 452.5, "w": "231", "h": "181" },
-    //         { "x": -150, "y": 633.5, "w": "231", "h": "181" },
-    //         { "x": -150, "y": 814.5, "w": "231", "h": "181" },
-    //         { "x": -150, "y": 995.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 90.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 271.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 452.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 633.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 814.5, "w": "231", "h": "181" },
-    //         { "x": 150, "y": 995.5, "w": "231", "h": "181" }
-    //     ],
-    //     item: [
-    //         { "x": -150, "y": 271.5, "w": 1, "p": 1, "n": "1001" },
-    //         { "x": -150, "y": 633.5, "w": 1, "p": 3, "n": "1001" },
-    //         { "x": -150, "y": 995.5, "w": 1, "p": 5, "n": "1001" },
-    //         { "x": 150, "y": 271.5, "w": 1, "p": 7, "n": "1001" },
-    //         { "x": 150, "y": 633.5, "w": 1, "p": 9, "n": "1001" },
-    //         { "x": 150, "y": 995.5, "w": 1, "p": 11, "n": "1001" },
-    //         { "x": -150, "y": 90.5, "w": 4, "p": 0, "n": "4006" },
-    //         { "x": -150, "y": 452.5, "w": 4, "p": 2, "n": "4006" },
-    //         { "x": -150, "y": 814.5, "w": 4, "p": 4, "n": "4006" },
-    //         { "x": 150, "y": 90.5, "w": 4, "p": 6, "n": "4006" },
-    //         { "x": 150, "y": 452.5, "w": 4, "p": 8, "n": "4006" },
-    //         { "x": 150, "y": 814.5, "w": 4, "p": 10, "n": "4006" }
-    //     ]
-    // };
-
-    // dataLevel = {
-    //     "map": [
-    //         { "x": -231, "y": 814.5, "w": "154", "h": "181" }, { "x": -155, "y": 1538.5, "w": "231", "h": "181" }, { "x": -115, "y": 1719.5, "w": "231", "h": "181" },
-    //         { "x": -154, "y": 2081.5, "w": "308", "h": "181" }, { "x": -231, "y": 2262.5, "w": "154", "h": "181" }, { "x": -231, "y": 2443.5, "w": "154", "h": "181" },
-    //         { "x": -154, "y": 2624.5, "w": "308", "h": "181" }, { "x": -231, "y": 2805.5, "w": "154", "h": "181" }, { "x": -231, "y": 2986.5, "w": "154", "h": "181" },
-    //         { "x": -154, "y": 3167.5, "w": "308", "h": "181" }, { "x": 0, "y": 90.5, "w": 231, "h": 181 }, { "x": 0, "y": 271.5, "w": 231, "h": 181 }, { "x": 0, "y": 452.5, "w": 231, "h": 181 },
-    //         { "x": 0, "y": 633.5, "w": "616", "h": "181" }, { "x": 0, "y": 814.5, "w": "231", "h": "181" }, { "x": 0, "y": 995.5, "w": "308", "h": "181" }, { "x": 0, "y": 1176.5, "w": "420", "h": "181" },
-    //         { "x": 0, "y": 1357.5, "w": "539", "h": "181" }, { "x": 0, "y": 1900.5, "w": "308", "h": "181" }, { "x": 0, "y": 2262.5, "w": "308", "h": "181" }, { "x": 0, "y": 2443.5, "w": "308", "h": "181" },
-    //         { "x": 0, "y": 2805.5, "w": "308", "h": "181" }, { "x": 0, "y": 2986.5, "w": "308", "h": "181" }, { "x": 231, "y": 814.5, "w": "154", "h": "181" }, { "x": 155, "y": 1538.5, "w": "231", "h": "181" },
-    //         { "x": 115, "y": 1719.5, "w": "231", "h": "181" }, { "x": 154, "y": 2081.5, "w": "308", "h": "181" }, { "x": 231, "y": 2262.5, "w": "154", "h": "181" }, { "x": 231, "y": 2443.5, "w": "154", "h": "181" },
-    //         { "x": 154, "y": 2624.5, "w": "308", "h": "181" }, { "x": 231, "y": 2805.5, "w": "154", "h": "181" }, { "x": 231, "y": 2986.5, "w": "154", "h": "181" }, { "x": 154, "y": 3167.5, "w": "308", "h": "181" }
-    //     ],
-    //     "item": [
-    //         { "x": 100, "y": 633.5, "w": 1, "p": 13, "n": "1001", "g": 0 }, { "x": -200, "y": 814.5, "w": 1, "p": 0, "n": "1001", "g": 0 }, { "x": -265, "y": 814.5, "w": 1, "p": 0, "n": "1001", "g": 0 },
-    //         { "x": 200, "y": 814.5, "w": 1, "p": 23, "n": "1001", "g": 0 }, { "x": 0, "y": 814.5, "w": 3, "p": 14, "n": "3001", "g": 0 }, { "x": 0, "y": 1176.5, "w": 3, "p": 16, "n": "3001", "g": 0 },
-    //         { "x": -155, "y": 1719.5, "w": 3, "p": 2, "n": "3001", "g": 0 }, { "x": -100, "y": 1900.5, "w": 1, "p": 18, "n": "1001", "g": 0 }, { "x": -100, "y": 2262.5, "w": 1, "p": 19, "n": "1001", "g": 0 },
-    //         { "x": 0, "y": 2805.5, "w": 3, "p": 21, "n": "3001", "g": 0 }, { "x": 0, "y": 2986.5, "w": 3, "p": 22, "n": "3001", "g": 0 }, { "x": 70, "y": 3167.5, "w": 3, "p": 32, "n": "3001", "g": 0 },
-    //         { "x": 0, "y": 633.5, "w": 3, "p": 13, "n": "3011", "g": 0 }, { "x": -230, "y": 2081.5, "w": 3, "p": 3, "n": "3011", "g": 0 }, { "x": 184, "y": 3167.5, "w": 3, "p": 32, "n": "3011", "g": 0 },
-    //         { "x": -100, "y": 633.5, "w": 1, "p": 13, "n": "1003", "g": 0 }, { "x": 35, "y": 271.5, "w": 1, "p": 11, "n": "1003", "g": 0 }, { "x": -220, "y": 1357.5, "w": 1, "p": 17, "n": "1003", "g": 0 },
-    //         { "x": -89, "y": 1538.5, "w": 1, "p": 1, "n": "1003", "g": 0 }, { "x": -100, "y": 2805.5, "w": 1, "p": 21, "n": "1003", "g": 0 }, { "x": -100, "y": 2986.5, "w": 1, "p": 22, "n": "1003", "g": 0 },
-    //         { "x": 35, "y": 452.5, "w": 1, "p": 12, "n": "1007", "g": 0 }, { "x": -50, "y": 452.5, "w": 1, "p": 12, "n": "1007", "g": 0 }, { "x": -50, "y": 271.5, "w": 1, "p": 11, "n": "1007", "g": 0 },
-    //         { "x": 265, "y": 814.5, "w": 1, "p": 23, "n": "1007", "g": 0 }, { "x": -100, "y": 1176.5, "w": 1, "p": 16, "n": "1007", "g": 0 }, { "x": 100, "y": 1900.5, "w": 1, "p": 18, "n": "1007", "g": 0 },
-    //         { "x": 100, "y": 2262.5, "w": 1, "p": 19, "n": "1007", "g": 0 }, { "x": 100, "y": 2986.5, "w": 1, "p": 22, "n": "1007", "g": 0 }, { "x": 265, "y": 3167.5, "w": 1, "p": 32, "n": "1007", "g": 0 },
-    //         { "x": -220, "y": 633.5, "w": 3, "p": 13, "n": "3012", "g": 0 }, { "x": 220, "y": 633.5, "w": 3, "p": 13, "n": "3012", "g": 0 }, { "x": 80, "y": 995.5, "w": 3, "p": 15, "n": "3012", "g": 0 },
-    //         { "x": 180, "y": 1357.5, "w": 3, "p": 17, "n": "3012", "g": 0 }, { "x": -231, "y": 2262.5, "w": 3, "p": 4, "n": "3012", "g": 0 }, { "x": 231, "y": 2262.5, "w": 3, "p": 27, "n": "3012", "g": 0 },
-    //         { "x": 231, "y": 2443.5, "w": 3, "p": 28, "n": "3012", "g": 0 }, { "x": 231, "y": 2624.5, "w": 3, "p": 29, "n": "3012", "g": 0 }, { "x": 80, "y": 2624.5, "w": 3, "p": 29, "n": "3012", "g": 0 },
-    //         { "x": 0, "y": 90.5, "w": 3, "p": 10, "n": "3008", "g": 0 }, { "x": -50, "y": 1357.5, "w": 3, "p": 17, "n": "3008", "g": 0 }, { "x": -189, "y": 1538.5, "w": 3, "p": 1, "n": "3008", "g": 0 },
-    //         { "x": 230, "y": 2081.5, "w": 3, "p": 26, "n": "3008", "g": 0 }, { "x": 0, "y": 2262.5, "w": 3, "p": 19, "n": "3008", "g": 0 }, { "x": -50, "y": 2443.5, "w": 3, "p": 20, "n": "3008", "g": 0 },
-    //         { "x": -70, "y": 995.5, "w": 4, "p": 15, "n": "4014", "g": 0 }, { "x": 130, "y": 1176.5, "w": 4, "p": 16, "n": "4014", "g": 0 }, { "x": 231, "y": 2986.5, "w": 4, "p": 31, "n": "4014", "g": 0 },
-    //         { "x": -231, "y": 2986.5, "w": 4, "p": 8, "n": "4014", "g": 0 }, { "x": -221, "y": 3167.5, "w": 4, "p": 9, "n": "4014", "g": 0 }, { "x": -86, "y": 3167.5, "w": 4, "p": 9, "n": "4014", "g": 0 },
-    //         { "x": -90, "y": 2081.5, "w": 4, "p": 3, "n": "4006", "g": 0 }, { "x": 90, "y": 2081.5, "w": 4, "p": 26, "n": "4006", "g": 0 }, { "x": -231, "y": 2443.5, "w": 4, "p": 5, "n": "4006", "g": 0 },
-    //         { "x": -90, "y": 2624.5, "w": 4, "p": 6, "n": "4006", "g": 0 }, { "x": -231, "y": 2805.5, "w": 4, "p": 7, "n": "4006", "g": 0 }, { "x": 231, "y": 2805.5, "w": 4, "p": 30, "n": "4006", "g": 0 },
-    //         { "x": -160, "y": 1176.5, "w": 1, "p": 16, "n": "1002", "g": 0 }, { "x": -150, "y": 1357.5, "w": 1, "p": 17, "n": "1002", "g": 0 }, { "x": 104, "y": 1538.5, "w": 1, "p": 24, "n": "1002", "g": 0 },
-    //         { "x": -60, "y": 1719.5, "w": 1, "p": 2, "n": "1002", "g": 0 }, { "x": 60, "y": 1719.5, "w": 1, "p": 25, "n": "1002", "g": 0 }, { "x": 100, "y": 2805.5, "w": 1, "p": 21, "n": "1002", "g": 0 },
-    //         { "x": 60, "y": 1357.5, "w": 2, "p": 17, "n": "2002", "g": 0 }, { "x": 209, "y": 1538.5, "w": 2, "p": 24, "n": "2002", "g": 0 }, { "x": 150, "y": 1719.5, "w": 2, "p": 25, "n": "2002", "g": 0 },
-    //         { "x": 0, "y": 1900.5, "w": 2, "p": 18, "n": "2002", "g": 0 }, { "x": 80, "y": 2443.5, "w": 2, "p": 20, "n": "2002", "g": 0 }, { "x": -230, "y": 2624.5, "w": 2, "p": 6, "n": "2002", "g": 0 }
-    //     ]
-    // };
-
     dataLevel = {
         "map": [
-            { "x": -148, "y": 452.5, "w": "320", "h": "181" }, { "x": -228, "y": 633.5, "w": "160", "h": "181" },
-            { "x": -148, "y": 814.5, "w": "320", "h": "181" }, { "x": -228, "y": 995.5, "w": "160", "h": "181" },
-            { "x": -148, "y": 1176.5, "w": "320", "h": "181" }, { "x": -148, "y": 1357.5, "w": "320", "h": "181" },
-            { "x": -228, "y": 1538.5, "w": "160", "h": "181" }, { "x": -148, "y": 1719.5, "w": "320", "h": "181" },
-            { "x": -148, "y": 1900.5, "w": "320", "h": "181" }, { "x": -228, "y": 2081.5, "w": "160", "h": "181" },
-            { "x": -148, "y": 2262.5, "w": "320", "h": "181" }, { "x": -148, "y": 2443.5, "w": "320", "h": "181" },
-            { "x": -228, "y": 2624.5, "w": "160", "h": "181" }, { "x": -148, "y": 2805.5, "w": "320", "h": "181" },
-            { "x": -148, "y": 2986.5, "w": "320", "h": "181" }, { "x": -228, "y": 3167.5, "w": "160", "h": "181" },
-            { "x": -148, "y": 3348.5, "w": "320", "h": "181" }, { "x": -148, "y": 3529.5, "w": "320", "h": "181" },
-            { "x": -228, "y": 3710.5, "w": "160", "h": "181" }, { "x": 0, "y": 90.5, "w": "616", "h": "181" },
-            { "x": 0, "y": 271.5, "w": "616", "h": "181" }, { "x": -68, "y": 633.5, "w": "160", "h": "181" },
-            { "x": -68, "y": 995.5, "w": "160", "h": "181" }, { "x": -68, "y": 1538.5, "w": "160", "h": "181" },
-            { "x": -68, "y": 2081.5, "w": "160", "h": "181" }, { "x": -68, "y": 2624.5, "w": "160", "h": "181" },
-            { "x": -68, "y": 3167.5, "w": "160", "h": "181" }, { "x": -68, "y": 3710.5, "w": "160", "h": "181" },
-            { "x": 280, "y": 633.5, "w": "154", "h": "20" }, { "x": 110, "y": 633.5, "w": "154", "h": "20" },
-            { "x": 193, "y": 814.5, "w": "154", "h": "20" }, { "x": 193, "y": 452.5, "w": "154", "h": "20" },
+            { "x": -105.5, "y": 90.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 271.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 452.5, "w": "462", "h": "181" },
+            { "x": -105.5, "y": 633.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 814.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 995.5, "w": "308", "h": "181" },
+            { "x": -105.5, "y": 1176.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 1357.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 1538.5, "w": "462", "h": "181" },
+            { "x": -105.5, "y": 1719.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 1900.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 2081.5, "w": "308", "h": "181" },
+            { "x": -105.5, "y": 2262.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 2443.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 2624.5, "w": "462", "h": "181" },
+            { "x": -105.5, "y": 2805.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 2986.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 3167.5, "w": "308", "h": "181" },
+            { "x": -105.5, "y": 3348.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 3529.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 3710.5, "w": "462", "h": "181" },
+            { "x": -105.5, "y": 3891.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 4072.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 4253.5, "w": "308", "h": "181" },
+            { "x": -105.5, "y": 4434.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 4615.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 4796.5, "w": "231", "h": "181" },
+            { "x": -105.5, "y": 4977.5, "w": "231", "h": "181" }, { "x": 230, "y": 660, "w": "160", "h": "20" }, { "x": 230, "y": 460, "w": "160", "h": "20" },
+            { "x": 230, "y": 260, "w": "160", "h": "20" }, { "x": 230, "y": 60, "w": "160", "h": "20" }
         ],
         "item": [
-            { "x": -245, "y": 90.5, "w": 2, "p": 19, "n": "2003", "g": 0 }, { "x": -168, "y": 90.5, "w": 1, "p": 19, "n": "1012", "g": 0 },
-            { "x": -77, "y": 90.5, "w": 3, "p": 19, "n": "3001", "g": 0 }, { "x": 26.5, "y": 90.5, "w": 2, "p": 19, "n": "2016", "g": 0 },
-            { "x": 116, "y": 90.5, "w": 2, "p": 19, "n": "2017", "g": 0 }, { "x": 230, "y": 90.5, "w": 4, "p": 19, "n": "4013", "g": 0 },
-            { "x": -230, "y": 271.5, "w": 2, "p": 20, "n": "2016", "g": 0 }, { "x": -134, "y": 271.5, "w": 2, "p": 20, "n": "2017", "g": 0 },
-            { "x": -23, "y": 271.5, "w": 3, "p": 20, "n": "3012", "g": 0 }, { "x": 75.5, "y": 271.5, "w": 1, "p": 20, "n": "1012", "g": 0 },
-            { "x": 146.5, "y": 271.5, "w": 1, "p": 20, "n": "1002", "g": 0 }, { "x": 230, "y": 271.5, "w": 2, "p": 20, "n": "2004", "g": 0 },
-            { "x": -238, "y": 452.5, "w": 3, "p": 0, "n": "3001", "g": 0 }, { "x": -148, "y": 452.5, "w": 1, "p": 0, "n": "1012", "g": 0 },
-            { "x": -58, "y": 452.5, "w": 3, "p": 0, "n": "3012", "g": 0 }, { "x": -228, "y": 633.5, "w": 3, "p": 1, "n": "3006", "g": 0 },
-            { "x": -68, "y": 633.5, "w": 3, "p": 21, "n": "3006", "g": 0 }, { "x": -244, "y": 814.5, "w": 2, "p": 2, "n": "2018", "g": 0 },
-            { "x": -148, "y": 814.5, "w": 2, "p": 2, "n": "2016", "g": 0 }, { "x": -52, "y": 814.5, "w": 2, "p": 2, "n": "2018", "g": 0 },
-            { "x": -228, "y": 995.5, "w": 3, "p": 3, "n": "3006", "g": 0 }, { "x": -68, "y": 995.5, "w": 3, "p": 22, "n": "3006", "g": 0 },
-            { "x": -219, "y": 1176.5, "w": 3, "p": 4, "n": "3001", "g": 0 }, { "x": -120.5, "y": 1176.5, "w": 1, "p": 4, "n": "1002", "g": 0 },
-            { "x": -49.5, "y": 1176.5, "w": 1, "p": 4, "n": "1012", "g": 0 }, { "x": -244, "y": 1357.5, "w": 2, "p": 5, "n": "2003", "g": 0 },
-            { "x": -148, "y": 1357.5, "w": 2, "p": 5, "n": "2017", "g": 0 }, { "x": -52, "y": 1357.5, "w": 2, "p": 5, "n": "2016", "g": 0 },
-            { "x": -228, "y": 1538.5, "w": 4, "p": 6, "n": "4013", "g": 0 }, { "x": -68, "y": 1538.5, "w": 3, "p": 23, "n": "3006", "g": 0 },
-            { "x": -238, "y": 1719.5, "w": 3, "p": 7, "n": "3001", "g": 0 }, { "x": -148, "y": 1719.5, "w": 1, "p": 7, "n": "1012", "g": 0 },
-            { "x": -58, "y": 1719.5, "w": 3, "p": 7, "n": "3012", "g": 0 }, { "x": -244, "y": 1900.5, "w": 2, "p": 8, "n": "2003", "g": 0 },
-            { "x": -148, "y": 1900.5, "w": 2, "p": 8, "n": "2018", "g": 0 }, { "x": -52, "y": 1900.5, "w": 2, "p": 8, "n": "2017", "g": 0 },
-            { "x": -228, "y": 2081.5, "w": 4, "p": 9, "n": "4013", "g": 0 }, { "x": -68, "y": 2081.5, "w": 3, "p": 24, "n": "3006", "g": 0 },
-            { "x": -244, "y": 2262.5, "w": 2, "p": 10, "n": "2003" }, { "x": -148, "y": 2262.5, "w": 2, "p": 10, "n": "2018" },
-            { "x": -52, "y": 2262.5, "w": 2, "p": 10, "n": "2008", "g": 0 }, { "x": -246.5, "y": 2443.5, "w": 1, "p": 11, "n": "1011", "g": 0 },
-            { "x": -148, "y": 2443.5, "w": 3, "p": 11, "n": "3001", "g": 0 }, { "x": -49.5, "y": 2443.5, "w": 1, "p": 11, "n": "1012", "g": 0 },
-            { "x": -228, "y": 2624.5, "w": 3, "p": 12, "n": "3006", "g": 0 }, { "x": -68, "y": 2624.5, "w": 4, "p": 25, "n": "4013", "g": 0 },
-            { "x": -246.5, "y": 2805.5, "w": 1, "p": 13, "n": "1012", "g": 0 }, { "x": -175.5, "y": 2805.5, "w": 1, "p": 13, "n": "1011", "g": 0 },
-            { "x": -77, "y": 2805.5, "w": 3, "p": 13, "n": "3012", "g": 0 }, { "x": -244, "y": 2986.5, "w": 2, "p": 14, "n": "2004", "g": 0 },
-            { "x": -148, "y": 2986.5, "w": 2, "p": 14, "n": "2016", "g": 0 }, { "x": -52, "y": 2986.5, "w": 2, "p": 14, "n": "2018", "g": 0 },
-            { "x": -228, "y": 3167.5, "w": 4, "p": 15, "n": "4013", "g": 0 }, { "x": -68, "y": 3167.5, "w": 4, "p": 26, "n": "4013", "g": 0 },
-            { "x": -254.5, "y": 3348.5, "w": 1, "p": 16, "n": "1011", "g": 0 }, { "x": -183.5, "y": 3348.5, "w": 1, "p": 16, "n": "1002", "g": 0 },
-            { "x": -112.5, "y": 3348.5, "w": 1, "p": 16, "n": "1011", "g": 0 }, { "x": -41.5, "y": 3348.5, "w": 1, "p": 16, "n": "1012", "g": 0 },
-            { "x": -219, "y": 3529.5, "w": 3, "p": 17, "n": "3011", "g": 0 }, { "x": -120.5, "y": 3529.5, "w": 1, "p": 17, "n": "1002", "g": 0 },
-            { "x": -49.5, "y": 3529.5, "w": 1, "p": 17, "n": "1002", "g": 0 }, { "x": -228, "y": 3710.5, "w": 2, "p": 18, "n": "2004", "g": 0 },
-            { "x": -68, "y": 3710.5, "w": 3, "p": 27, "n": "3001", "g": 0 }, { "x": 193, "y": 452.5, "w": 1, "p": 31, "n": "1012", "g": 0 },
-            { "x": 193, "y": 452.5, "w": 3, "p": 31, "n": "3001", "g": 0 }, { "x": 193, "y": 452.5, "w": 3, "p": 31, "n": "3006", "g": 0 },
-            { "x": 193, "y": 452.5, "w": 2, "p": 31, "n": "2018", "g": 0 }, { "x": 193, "y": 452.5, "w": 2, "p": 31, "n": "2003", "g": 0 },
-            { "x": 193, "y": 452.5, "w": 1, "p": 31, "n": "1011", "g": 0 }, { "x": 110, "y": 633.5, "w": 2, "p": 29, "n": "2008", "g": 0 },
-            { "x": 110, "y": 633.5, "w": 1, "p": 29, "n": "1002", "g": 0 }, { "x": 110, "y": 633.5, "w": 2, "p": 29, "n": "2016", "g": 0 },
-            { "x": 110, "y": 633.5, "w": 3, "p": 29, "n": "3001", "g": 0 }, { "x": 110, "y": 633.5, "w": 2, "p": 29, "n": "2008", "g": 0 },
-            { "x": 110, "y": 633.5, "w": 2, "p": 29, "n": "2008", "g": 0 }, { "x": 280, "y": 633.5, "w": 1, "p": 28, "n": "1011", "g": 0 },
-            { "x": 280, "y": 633.5, "w": 2, "p": 28, "n": "2008", "g": 0 }, { "x": 280, "y": 633.5, "w": 2, "p": 28, "n": "2008", "g": 0 },
-            { "x": 280, "y": 633.5, "w": 3, "p": 28, "n": "3012", "g": 0 }, { "x": 280, "y": 633.5, "w": 3, "p": 28, "n": "3001", "g": 0 },
-            { "x": 280, "y": 633.5, "w": 2, "p": 28, "n": "2017", "g": 0 }, { "x": 193, "y": 814.5, "w": 2, "p": 30, "n": "2003", "g": 0 },
-            { "x": 193, "y": 814.5, "w": 3, "p": 30, "n": "3012", "g": 0 }, { "x": 193, "y": 814.5, "w": 3, "p": 30, "n": "3011", "g": 0 },
-            { "x": 193, "y": 814.5, "w": 2, "p": 30, "n": "2017", "g": 0 }, { "x": 193, "y": 814.5, "w": 3, "p": 30, "n": "3006", "g": 0 },
-            { "x": 193, "y": 814.5, "w": 3, "p": 30, "n": "3011", "g": 0 }
+            { "x": 40, "y": 90.5, "w": 3, "p": 0, "n": "3002", "g": 0 }, { "x": -250, "y": 90.5, "w": 3, "p": 0, "n": "3008", "g": 0 }, { "x": -50, "y": 271.5, "w": 4, "p": 1, "n": "4012", "g": 0 },
+            { "x": -105.5, "y": 90.5, "w": 3, "p": 0, "n": "3002", "g": 0 }, { "x": -170, "y": 271.5, "w": 2, "p": 1, "n": "2008", "g": 0 }, { "x": 40, "y": 452.5, "w": 4, "p": 2, "n": "4001", "g": 0 },
+            { "x": -250, "y": 452.5, "w": 3, "p": 2, "n": "3006", "g": 0 }, { "x": -105.5, "y": 452.5, "w": 4, "p": 2, "n": "4012", "g": 0 }, { "x": -40, "y": 633.5, "w": 4, "p": 3, "n": "4001", "g": 0 },
+            { "x": -190, "y": 633.5, "w": 3, "p": 3, "n": "3002", "g": 0 }, { "x": 40, "y": 814.5, "w": 4, "p": 4, "n": "4001", "g": 0 }, { "x": -250, "y": 814.5, "w": 4, "p": 4, "n": "4012", "g": 0 },
+            { "x": -105.5, "y": 814.5, "w": 2, "p": 4, "n": "2016", "g": 0 }, { "x": -40, "y": 995.5, "w": 3, "p": 5, "n": "3002", "g": 0 }, { "x": -170, "y": 995.5, "w": 3, "p": 5, "n": "3008", "g": 0 },
+            { "x": -200, "y": 1357.5, "w": 2, "p": 7, "n": "2008", "g": 0 }, { "x": -10, "y": 1357.5, "w": 2, "p": 7, "n": "2018", "g": 0 }, { "x": -105.5, "y": 1357.5, "w": 2, "p": 7, "n": "2009", "g": 0 },
+            { "x": 40, "y": 1538.5, "w": 2, "p": 8, "n": "2016", "g": 0 }, { "x": -250, "y": 1538.5, "w": 3, "p": 8, "n": "3001", "g": 0 }, { "x": -95, "y": 1538.5, "w": 3, "p": 8, "n": "3006", "g": 0 },
+            { "x": -200, "y": 1719.5, "w": 2, "p": 9, "n": "2009", "g": 0 }, { "x": -10, "y": 1719.5, "w": 2, "p": 9, "n": "2018", "g": 0 }, { "x": -105.5, "y": 1719.5, "w": 2, "p": 9, "n": "2008", "g": 0 },
+            { "x": -250, "y": 1900.5, "w": 3, "p": 10, "n": "3002", "g": 0 }, { "x": -105.5, "y": 1900.5, "w": 2, "p": 10, "n": "2009", "g": 0 }, { "x": -40, "y": 2081.5, "w": 3, "p": 11, "n": "3008", "g": 0 },
+            { "x": -170, "y": 2081.5, "w": 3, "p": 11, "n": "3001", "g": 0 }, { "x": 40, "y": 2262.5, "w": 2, "p": 12, "n": "2008", "g": 0 }, { "x": -250, "y": 2262.5, "w": 3, "p": 12, "n": "3008", "g": 0 },
+            { "x": -95, "y": 2262.5, "w": 3, "p": 12, "n": "3006", "g": 0 }, { "x": -40, "y": 2443.5, "w": 4, "p": 13, "n": "4013", "g": 0 }, { "x": -170, "y": 2443.5, "w": 2, "p": 13, "n": "2018", "g": 0 },
+            { "x": 40, "y": 2624.5, "w": 2, "p": 14, "n": "2009", "g": 0 }, { "x": -250, "y": 2624.5, "w": 4, "p": 14, "n": "4001", "g": 0 }, { "x": -105.5, "y": 2624.5, "w": 3, "p": 14, "n": "3006", "g": 0 },
+            { "x": -40, "y": 2805.5, "w": 3, "p": 15, "n": "3001", "g": 0 }, { "x": -170, "y": 2805.5, "w": 3, "p": 15, "n": "3001", "g": 0 }, { "x": 40, "y": 2986.5, "w": 2, "p": 16, "n": "2016", "g": 0 },
+            { "x": -250, "y": 2986.5, "w": 4, "p": 16, "n": "4012", "g": 0 }, { "x": -105.5, "y": 2986.5, "w": 3, "p": 16, "n": "3001", "g": 0 }, { "x": -200, "y": 3167.5, "w": 2, "p": 17, "n": "2009", "g": 0 },
+            { "x": -10, "y": 3167.5, "w": 2, "p": 17, "n": "2018", "g": 0 }, { "x": -105.5, "y": 3167.5, "w": 2, "p": 17, "n": "2008", "g": 0 }, { "x": 40, "y": 3348.5, "w": 3, "p": 18, "n": "3008", "g": 0 },
+            { "x": -105.5, "y": 3348.5, "w": 3, "p": 18, "n": "3002", "g": 0 }, { "x": -35, "y": 3529.5, "w": 4, "p": 19, "n": "4013", "g": 0 }, { "x": -175, "y": 3529.5, "w": 4, "p": 19, "n": "4013", "g": 0 },
+            { "x": 40, "y": 3710.5, "w": 3, "p": 20, "n": "3011", "g": 0 }, { "x": -250, "y": 3710.5, "w": 3, "p": 20, "n": "3001", "g": 0 }, { "x": -105.5, "y": 3710.5, "w": 3, "p": 20, "n": "3011", "g": 0 },
+            { "x": -35, "y": 3891.5, "w": 4, "p": 21, "n": "4012", "g": 0 }, { "x": -175, "y": 3891.5, "w": 4, "p": 21, "n": "4012", "g": 0 }, { "x": 40, "y": 4072.5, "w": 3, "p": 22, "n": "3011", "g": 0 },
+            { "x": -250, "y": 4072.5, "w": 3, "p": 22, "n": "3008", "g": 0 }, { "x": -105.5, "y": 4072.5, "w": 3, "p": 22, "n": "3001", "g": 0 }, { "x": -200, "y": 4253.5, "w": 2, "p": 23, "n": "2009", "g": 0 },
+            { "x": -10, "y": 4253.5, "w": 2, "p": 23, "n": "2009", "g": 0 }, { "x": -105.5, "y": 4253.5, "w": 2, "p": 23, "n": "2018", "g": 0 }, { "x": 40, "y": 4434.5, "w": 3, "p": 24, "n": "3008", "g": 0 },
+            { "x": -250, "y": 4434.5, "w": 3, "p": 24, "n": "3001", "g": 0 }, { "x": 230, "y": 60, "w": 4, "p": 31, "n": "4013", "g": 0 }, { "x": 230, "y": 60, "w": 2, "p": 31, "n": "2009", "g": 0 },
+            { "x": 230, "y": 60, "w": 2, "p": 31, "n": "2008", "g": 0 }, { "x": 230, "y": 60, "w": 3, "p": 31, "n": "3006", "g": 0 }, { "x": 230, "y": 60, "w": 4, "p": 31, "n": "4001", "g": 0 },
+            { "x": 230, "y": 260, "w": 4, "p": 30, "n": "4013", "g": 0 }, { "x": 230, "y": 260, "w": 3, "p": 30, "n": "3011", "g": 0 }, { "x": 230, "y": 260, "w": 4, "p": 30, "n": "4001", "g": 0 },
+            { "x": 230, "y": 260, "w": 3, "p": 30, "n": "3011", "g": 0 }, { "x": 230, "y": 260, "w": 2, "p": 30, "n": "2009", "g": 0 }, { "x": 230, "y": 460, "w": 2, "p": 29, "n": "2018", "g": 0 },
+            { "x": 230, "y": 460, "w": 3, "p": 29, "n": "3008", "g": 0 }, { "x": 230, "y": 460, "w": 4, "p": 29, "n": "4013", "g": 0 }, { "x": 230, "y": 460, "w": 2, "p": 29, "n": "2016", "g": 0 },
+            { "x": 230, "y": 460, "w": 3, "p": 29, "n": "3008", "g": 0 }, { "x": 230, "y": 660, "w": 2, "p": 28, "n": "2016", "g": 0 }, { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3011", "g": 0 },
+            { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3006", "g": 0 }, { "x": 230, "y": 660, "w": 2, "p": 28, "n": "2016", "g": 0 }, { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3001", "g": 0 },
+            { "x": 40, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 }, { "x": -250, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 }, { "x": -105.5, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 },
+            { "x": 40, "y": 1900.5, "w": 4, "p": 10, "n": "4010", "g": 0 }, { "x": -250, "y": 3348.5, "w": 4, "p": 18, "n": "4010", "g": 0 }, { "x": -105.5, "y": 4434.5, "w": 4, "p": 24, "n": "4010", "g": 0 }
         ]
     };
 
@@ -210,7 +118,7 @@ export default class GameBox extends cc.Component {
     dataBox: BoxParam[][] = [];// 箱子数据（按层级排列）
     dataBoxCopy: BoxParam[][] = [];// 箱子数据（用于 返回上一步 确认箱子位置）
     isLock: boolean = false;// 游戏是否锁定
-    timeGame = { cur: 0, init: 0, count: 0, total: 120 };// 游戏时间
+    timeGame = { cur: 0, init: 0, count: 0, total: 1200 };// 游戏时间
     timeProp = { iceCount: 0, iceTotal: 12, addTotal: 10 };// 道具时间
 
     bottomParamArr: GoodParam[][] = [];// 物品数据（检测区）
@@ -221,7 +129,7 @@ export default class GameBox extends cc.Component {
     bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
     bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
-    rectBg: cc.Rect = cc.rect();// 箱子底部碰撞数据
+    displayH: number = 0;// 显示的高度
     arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
 
     baseTime: number = 1;
@@ -278,18 +186,22 @@ export default class GameBox extends cc.Component {
         });
         this.dataGame = {};
         let boxs = this.dataLevel.map;
-        let dataBoxBottom = this.getDataBoxBottom();
-        let disY = Math.floor(Number(cc.winSize.height * 0.5 - (Number(dataBoxBottom.h) * 5 + this.uiTop.height)));
+        let dataBoxBottom = this.getBottomBoxData();
+        this.displayH = Number(dataBoxBottom.h) * (this.dataLevel['layer'] || 5.2);
+
+        let disY = Math.floor(Number(cc.winSize.height * 0.5 - (this.displayH + this.uiTop.height)));
         let dataBoxBottomY = Math.floor(Number(dataBoxBottom.y));
         for (let index = 0, length = boxs.length; index < length; index++) {
             const obj = boxs[index];
             let x = Math.floor(Number(obj.x));
             let y = Math.floor(Number(obj.y + disY - dataBoxBottomY));
+            if (index < 2) {
+
+            }
             let w = Math.floor(Number(obj.w));
             let h = Math.floor(Number(obj.h));
             let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, layerI: 0, layerJ: 0,
-                goods: {}, yBottom: disY, isMove: false, isFrame: h < 100,
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, yBottom: disY, isMove: false, isFrame: this.getBoxIsFrame(h),
             };
             this.dataGame[index] = boxParam;
         }
@@ -314,25 +226,42 @@ export default class GameBox extends cc.Component {
         // 组织数据 dataBox
         this.dataBox = [];
         let arrBox = {};
+        let arrBoxFrame: BoxParam[] = [];
         for (const key in this.dataGame) {
             if (Object.prototype.hasOwnProperty.call(this.dataGame, key)) {
-                let box: BoxParam = Common.clone(this.dataGame[key]);
-                if (arrBox[box.y]) {
-                    box.layerJ = arrBox[box.y].length;
-                    arrBox[box.y].push(box);
+                let boxParam: BoxParam = Common.clone(this.dataGame[key]);
+                if (boxParam.isFrame) {
+                    arrBoxFrame.push(boxParam);
                 }
                 else {
-                    box.layerJ = 0;
-                    arrBox[box.y] = [box];
+                    if (arrBox[boxParam.y]) {
+                        arrBox[boxParam.y].push(boxParam);
+                    }
+                    else {
+                        arrBox[boxParam.y] = [boxParam];
+                    }
                 }
             }
         }
+        arrBoxFrame.sort((a: BoxParam, b: BoxParam) => { return a.y - b.y; })
+
         let arrValue = Object.keys(arrBox);
         arrValue.sort((a, b) => { return Number(a) - Number(b) });
         for (let index = 0; index < arrValue.length; index++) {
-            let arrBoxParam: BoxParam[] = arrBox[arrValue[index]];
-            arrBoxParam.forEach((boxParam: BoxParam) => { boxParam.layerI = index; });
-            this.dataBox.push(arrBoxParam);
+            this.dataBox.push(arrBox[arrValue[index]]);
+        }
+        this.dataBox[0] = this.dataBox[0].concat(arrBoxFrame);
+        // 删除空箱子
+        for (let i = this.dataBox.length - 1; i >= 0; i--) {
+            let arrBoxParam = this.dataBox[i];
+            for (let j = arrBoxParam.length - 1; j >= 0; j--) {
+                if (Object.keys(arrBoxParam[j].goods).length <= 0) {
+                    arrBoxParam.splice(j, 1);
+                }
+            }
+            if (arrBoxParam.length <= 0) {
+                this.dataBox.splice(i, 1);
+            }
         }
         this.dataBoxCopy = Common.clone(this.dataBox);// 用于确认消失箱子的位置
 
@@ -362,23 +291,13 @@ export default class GameBox extends cc.Component {
     }
 
     initUI() {
-        let w = cc.winSize.width;
-        let h = cc.winSize.height;
-        this.uiTop.y = h * 0.5 - this.uiTop.height * 0.5;
-        this.nodeProp.y = -h * 0.5 + this.nodeProp.height * 0.5;
+        this.uiTop.y = cc.winSize.height * 0.5 - this.uiTop.height * 0.5;
+        this.nodeProp.y = -cc.winSize.height * 0.5 + this.nodeProp.height * 0.5;
         this.uiBottom.y = this.nodeProp.y + this.uiBottom.height + 20;
 
         // 底部碰撞框
-        let dataBoxBottom = this.getDataBoxBottom();
-        let disY = cc.winSize.height * 0.5 - (Number(dataBoxBottom.h) * 5 + this.uiTop.height);
+        let disY = cc.winSize.height * 0.5 - (this.displayH + this.uiTop.height);
         this.boxBottom.y = disY;
-        let collider = this.boxBottom.getComponent(cc.BoxCollider);
-        Common.refreshCollider(collider, 0, -10, w, 20);
-
-        // 箱子碰撞数据
-        let rectX = this.boxBottom.x + collider.offset.x - collider.size.width * 0.5;
-        let rectY = this.boxBottom.y - collider.offset.y - collider.size.height * 0.5;
-        this.rectBg = cc.rect(rectX, rectY, collider.size.width, collider.size.height);
 
         this.setUITime();// 设置时间
         this.setUIProcess();// 设置进度
@@ -420,14 +339,13 @@ export default class GameBox extends cc.Component {
                         continue;
                     }
                     let goodParam: GoodParam = boxParam.goods[keyGood];
-                    this.addGood(box, Common.clone(goodParam));
+                    this.addGood(box, goodParam);
                 }
                 if (boxParam.isFrame) {
                     box.getComponent(ItemBox).sortGood();
                 }
             }
         }
-
         NativeCall.logEventOne(GameDot.dot_loadok_to_all);
         this.playAniShow(true, () => {
             // 新手引导
@@ -537,96 +455,90 @@ export default class GameBox extends cc.Component {
 
         // 碰撞检测
         let funcCollider = (rectA: cc.Rect, arrB: BoxParam[]) => {
+            let isCollider = false;
             for (let index = 0, length = arrB.length; index < length; index++) {
-                let B = arrB[index];
-                if (rectA.intersects(getRect(B))) {
-                    return B;
+                let boxParamB = arrB[index];
+                if (boxParamB.isFrame) {
+                    continue;
+                }
+                if (boxParamB.isMove) {
+                    continue;
+                }
+                let rectB = getRect(boxParamB);
+                if (rectA.intersects(rectB)) {
+                    console.log('rectA: ', JSON.stringify(rectA), '; rectB: ', JSON.stringify(rectB));
+                    isCollider = true;
+                    break;
                 }
             }
-            return null;
-        };
-
-        // 移动box
-        let boxParamsRemove = (i: number, j: number) => {
-            let boxLayer = this.dataBox[i];
-            let boxOne = boxLayer[j];
-            if (boxLayer.length > 1) {
-                this.dataBox[i].splice(j, 1);
-            }
-            else {
-                this.dataBox.splice(i, 1);
-            }
-            this.dataBox[i - 1].push(boxOne);
-            this.dataBox[i - 1].sort((a: BoxParam, b: BoxParam) => {
-                return a.x - b.x;
-            });
+            return isCollider;
         };
 
         let isContinueMove = false;
-        let isRemove = false;
         // 箱子 多层
-        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+        for (let i = 0; i < this.dataBox.length; i++) {
             // 箱子 单层
-            let boxArr = this.dataBox[i];
-            for (let j = 0, lenB = boxArr.length; j < lenB; j++) {
+            let arrBoxParam = this.dataBox[i];
+            for (let j = 0; j < arrBoxParam.length; j++) {
                 // 箱子 单个
-                let boxOne = boxArr[j];
-                if (boxOne.isFrame) {
+                let boxParam = arrBoxParam[j];
+                if (boxParam.isFrame) {
                     continue;
                 }
-                if (!boxOne.isMove) {
+                if (!boxParam.isMove) {
                     continue;
                 }
-                let box = this.nodeMain.getChildByName(boxOne.name);
+                let box = this.nodeMain.getChildByName(boxParam.name);
                 let scriptBox = box.getComponent(ItemBox);
-                let yA = boxOne.y - this.speedBox.speedCur;
+                let yA = boxParam.y - this.speedBox.speedCur;
                 if (i == 0) {
-                    let rectA = getRect(boxOne);
-                    rectA.y -= this.speedBox.speedCur * 0.5;
-                    let isInter = rectA.intersects(this.rectBg);
-                    if (isInter) {
-                        boxOne.isMove = false;
-                        boxOne.y = this.arrBoxY[0].y;
-                        scriptBox.refreshParams(boxOne.y);
+                    if (yA < this.arrBoxY[0].y) {
+                        boxParam.isMove = false;
+                        boxParam.y = this.arrBoxY[0].y;
+                        scriptBox.refreshParams(boxParam.y);
+                        console.log('cycle 箱子停止 boxName: ', boxParam.name, '; 层级: ', i, '; y: ', boxParam.y);
                     }
                     else {
                         isContinueMove = true;
-                        boxOne.y = yA;
-                        scriptBox.refreshParams(boxOne.y);
+                        boxParam.y = yA;
+                        scriptBox.refreshParams(boxParam.y);
                     }
                 }
                 else {
-                    let rectA = getRect(boxOne);
-                    rectA.y -= this.speedBox.speedCur * 0.5;
-                    let boxB = funcCollider(rectA, this.dataBox[i - 1]);
-                    if (boxB) {
-                        boxOne.isMove = false;
-                        boxOne.y = this.arrBoxY[i].y;
-                        scriptBox.refreshParams(boxOne.y);
+                    let rectA = getRect(boxParam);
+                    rectA.y = yA;
+                    let isCollider = funcCollider(rectA, this.dataBox[i - 1]);
+                    if (isCollider) {
+                        boxParam.isMove = false;
+                        boxParam.y = this.arrBoxY[i].y;
+                        scriptBox.refreshParams(boxParam.y);
+                        console.log('cycle 箱子停止 boxName: ', boxParam.name, '; 层级: ', i, '; y: ', boxParam.y);
                     }
                     else {
                         isContinueMove = true;
-                        boxOne.y = yA;
-                        scriptBox.refreshParams(boxOne.y);
-                        let boxGoal = this.arrBoxY[i - 1];
-                        if (boxOne.y <= boxGoal.y + boxGoal.h * 0.5) {
-                            boxParamsRemove(i, j);
-                            isRemove = true;
-                            break;
+                        boxParam.y = yA;
+                        scriptBox.refreshParams(boxParam.y);
+                        let boxGoal = this.arrBoxY[i - 1];// 下层的位置
+                        // 进入下层范围，数据转移到下层
+                        if (boxParam.y < boxGoal.y + boxGoal.h * 0.5) {
+                            arrBoxParam.splice(j, 1);
+                            this.dataBox[i - 1].push(boxParam);
+                            console.log('cycle 箱子进入下一层 boxName: ', boxParam.name, '; 层级: ', i - 1, '; y: ', boxParam.y);
+                            j--;
                         }
                     }
                 }
             }
-            // 重新移动
-            if (isRemove) {
-                isRemove = false;
-                break;
+            // 删除空箱子
+            if (arrBoxParam.length < 1) {
+                this.dataBox.splice(i, 1);
+                i--;
             }
         }
 
         // 是否继续移动
         if (!isContinueMove) {
-            this.speedBox.isMove = false;
+            this.setMoveBox(false);
         }
     }
 
@@ -704,7 +616,7 @@ export default class GameBox extends cc.Component {
         }
         // 是否继续移动
         if (!isContinueMove) {
-            this.speedGood.isMove = false;
+            this.setMoveGood(false);
             if (this.getBottomGoodNum() > this.bottomMax - 1) {
                 this.isLock = true;
                 this.dataObj.isFinish = true;
@@ -713,11 +625,47 @@ export default class GameBox extends cc.Component {
         }
     }
 
+    /** 开始移动 箱子 */
+    setMoveBox(isMove) {
+        if (isMove) {
+            for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
+                    let boxParam = this.dataBox[i][j];
+                    boxParam.isMove = true;
+                }
+            }
+            this.speedBox.speedCur = this.speedBox.speedInit;
+            this.speedBox.isMove = isMove;
+        }
+        else {
+            this.speedBox.isMove = isMove;
+        }
+    };
+
+    /** 开始移动 物品 */
+    setMoveGood(isMove) {
+        if (isMove) {
+            for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.bottomParamArr[i].length; j < lenB; j++) {
+                    this.bottomParamArr[i][j].isMove = true;
+                }
+            }
+            this.speedGood.speedCur = this.speedGood.speedInit;
+            this.speedGood.isMove = isMove;
+        }
+        else {
+            this.speedGood.isMove = isMove;
+        }
+    };
+
     /** 获取最下方箱子数据 */
-    getDataBoxBottom(): any {
+    getBottomBoxData(): any {
         let dataBoxBottom = null;
         for (let index = 0, length = this.dataLevel.map.length; index < length; index++) {
             let dataBox = this.dataLevel.map[index];
+            if (this.getBoxIsFrame(Math.floor(Number(dataBox.h)))) {
+                continue;
+            }
             if (dataBoxBottom) {
                 if (dataBox.y < dataBoxBottom.y) {
                     dataBoxBottom = dataBox;
@@ -728,6 +676,10 @@ export default class GameBox extends cc.Component {
             }
         }
         return dataBoxBottom;
+    };
+
+    getBoxIsFrame(h: number) {
+        return h < 100;
     };
 
     /**
@@ -756,96 +708,85 @@ export default class GameBox extends cc.Component {
             scriptGood.state = 0;
             return;
         }
-        // 删除数据
-        let box = good.parent.parent;
-        let scriptBox = box.getComponent(ItemBox);
-        delete scriptBox.param.goods[scriptGood.param.index];
-        // 转移节点
-        let pStart = Common.getLocalPos(good.parent, good.position, this.uiBottomMain);
-        good.parent = this.uiBottomMain;
-        scriptGood.refreshParams(pStart);
-        if (scriptBox.param.isFrame) {
-            good.active = true;
-            scriptBox.refreshGoods();
-        }
-        // 检测箱子
-        this.checkBox(box);
-
-        // 构建底部ui参数
-        this.goodParamsInsert(scriptGood.param);
+        this.consoleLog('点击 1');
+        this.eventTouchAfter([scriptGood.param]);
     }
 
-    eventTouchAfter(goodParam: GoodParam) {
+    eventTouchAfter(arrGoodParam: GoodParam[]) {
+        let removeBoxNum = 0;
+        for (let index = 0, length = arrGoodParam.length; index < length; index++) {
+            if (this.refreshOperationArea(arrGoodParam[index])) {
+                removeBoxNum++;
+            }
+        }
+        this.setMoveGood(true);
+        if (removeBoxNum > 0) {
+            // 开始移动 箱子
+            this.setMoveBox(true);
+        }
+    }
+
+    /** 刷新操作区 */
+    refreshOperationArea(goodParam: GoodParam) {
+        // 刷新数据
+        let isRemoveBox = false;
+        let isDelete = false;
         let box = this.nodeMain.getChildByName(goodParam.box.name);
-        let names = [];
-        for (let index = 0; index < box.getComponent(ItemBox).nodeMain.children.length; index++) {
-            const element = box.getComponent(ItemBox).nodeMain.children[index];
-            names.push(element.name);
-        }
-        let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParam.name);
-        let scriptGood = good.getComponent(ItemGood);
-        // 删除数据
         let scriptBox = box.getComponent(ItemBox);
-        delete scriptBox.param.goods[scriptGood.param.index];
-        // 转移节点
+        let good = scriptBox.nodeMain.getChildByName(goodParam.name);
+        let scriptGood = good.getComponent(ItemGood);
         let pStart = Common.getLocalPos(good.parent, good.position, this.uiBottomMain);
         good.parent = this.uiBottomMain;
-
-        names = [];
-        for (let index = 0; index < box.getComponent(ItemBox).nodeMain.children.length; index++) {
-            const element = box.getComponent(ItemBox).nodeMain.children[index];
-            names.push(element.name);
-        }
-
+        good.active = true;
         scriptGood.refreshParams(pStart);
-        if (scriptBox.param.isFrame) {
-            good.active = true;
-            scriptBox.refreshGoods();
-        }
-        // 检测箱子
-        this.checkBox(box);
-
-        // 构建底部ui参数
         this.goodParamsInsert(scriptGood.param);
-    }
 
-    /** 检测箱子掉落 */
-    checkBox(box: cc.Node): void {
-        let scriptBox = box.getComponent(ItemBox);
-        if (scriptBox.nodeMain.childrenCount > 0) {
-            return;
-        }
-        if (scriptBox.param.isFrame) {
-            return;
-        }
-        // 删除数据
-        let indexI = -1;
-        let indexJ = -1;
-        for (let i = 0, lenLayer = this.dataBox.length; i < lenLayer; i++) {
-            let boxLayer = this.dataBox[i];
-            for (let j = 0, lenBox = boxLayer.length; j < lenBox; j++) {
-                let boxOne = boxLayer[j];
-                boxOne.isMove = !boxOne.isFrame;
-                if (boxOne.name == scriptBox.param.name) {
-                    indexI = i;
-                    if (lenBox > 1) {
-                        indexJ = j;
+        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+            let arrBoxParam = this.dataBox[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                for (const key in boxParam.goods) {
+                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                        // 删除物品参数
+                        let goodParamOne: GoodParam = boxParam.goods[key];
+                        if (goodParamOne.name == goodParam.name) {
+                            isDelete = true;
+                            delete boxParam.goods[key];
+                            scriptBox.param = boxParam;
+                            if (scriptBox.param.isFrame) {
+                                scriptBox.refreshGoods();
+                            }
+                            break;
+                        }
+                    }
+                }
+                // 特殊箱子
+                if (boxParam.isFrame) {
+                    if (isDelete) {
+                        break;
+                    }
+                }
+                // 普通箱子 箱子内无物品 删除箱子
+                else {
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.poolBox);
+                        isRemoveBox = true;
+                    }
+                    if (isDelete) {
+                        break;
                     }
                 }
             }
+            // 当前层无箱子 删除层数据
+            if (arrBoxParam.length < 1) {
+                this.dataBox.splice(i, 1);
+            }
+            if (isDelete) {
+                break;
+            }
         }
-
-        if (indexJ < 0) {
-            this.dataBox.splice(indexI, 1);
-        }
-        else {
-            this.dataBox[indexI].splice(indexJ, 1);
-        }
-        DataManager.poolPut(box, this.poolBox);
-
-        // 开始移动 箱子
-        this.speedBox.isMove = true;
-        this.speedBox.speedCur = this.speedBox.speedInit;
+        return isRemoveBox;
     }
 
     /** 物品参数-数量 */
@@ -858,39 +799,31 @@ export default class GameBox extends cc.Component {
     }
 
     /** 物品参数-插入 */
-    goodParamsInsert(param: GoodParam) {
-        param.isMove = true;
+    goodParamsInsert(goodParam: GoodParam) {
+        goodParam.isMove = true;
         let isAdd = false;
         for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
             let arrParams = this.bottomParamArr[index];
-            for (let index = 0, lenB = arrParams.length; index < lenB; index++) {
-                arrParams[index].isMove = true;
-            }
             let lenB = arrParams.length;
-            if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == param.keyGood) {
+            if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == goodParam.keyGood) {
                 isAdd = true;
-                arrParams.push(param);
+                arrParams.push(goodParam);
                 continue;
             }
         }
         if (!isAdd) {
-            this.bottomParamArr.push([param]);
+            this.bottomParamArr.push([goodParam]);
         }
-
-        // 开始移动 物品
-        this.speedGood.isMove = true;
-        this.speedGood.speedCur = this.speedGood.speedInit;
     }
 
-    /** 物品参数-检测 */
-    goodParamsCheck(arrParam: GoodParam[]) {
-        let length = arrParam.length;
+    /** 物品参数-检测y值 */
+    goodParamsCheck(arrGoodParam: GoodParam[]) {
+        let length = arrGoodParam.length;
         let isEnough = length > 2;
         if (isEnough) {
-            let paramY = arrParam[0].y;
+            let goodParam = arrGoodParam[0].y;
             for (let index = 1; index < length; index++) {
-                let params = arrParam[index];
-                if (paramY != params.y) {
+                if (goodParam != arrGoodParam[index].y) {
                     isEnough = false;
                     break;
                 }
@@ -1008,22 +941,20 @@ export default class GameBox extends cc.Component {
         }
         kit.Audio.playEffect(CConst.sound_path_click);
 
-        let lenA = this.bottomParamArr.length;
+        let numGoodArr = this.bottomParamArr.length;
         // 没有物品
-        if (lenA <= 0) {
+        if (numGoodArr <= 0) {
             kit.Event.emit(CConst.event_notice, "Can't be used now");
             return;
         }
+        this.consoleLog('返回上一步 1');
         this.isLock = true;
 
-        let arrParamA = this.bottomParamArr[lenA - 1];
-        let lenB = arrParamA.length;
-        let goodParam = arrParamA[lenB - 1];
-        if (lenB > 1) {
-            arrParamA.splice(lenB - 1, 1);
-        }
-        else {
-            this.bottomParamArr.splice(lenA - 1, 1);
+        // 删除检测区物品数据 并 获取物品参数
+        let arrGood = this.bottomParamArr[numGoodArr - 1];
+        let goodParam = arrGood.splice(arrGood.length - 1, 1)[0];
+        if (arrGood.length < 1) {
+            this.bottomParamArr.splice(numGoodArr - 1, 1);
         }
 
         let good = this.uiBottomMain.getChildByName(goodParam.name);
@@ -1034,16 +965,17 @@ export default class GameBox extends cc.Component {
             let goodP1 = good.position;
             let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
             let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
-            cc.tween(good).call(() => {
-                // 物品开始移动
-                this.speedGood.isMove = true;
-                this.speedGood.speedCur = this.speedGood.speedInit;
-            }).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
-                scriptBox.param.goods[goodParam.index] = goodParam;
+            cc.tween(good).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
                 good.parent = scriptBox.nodeMain;
+                scriptBox.param.goods[goodParam.index] = goodParam;
+                if (scriptBox.param.isFrame) {
+                    scriptBox.sortGood();
+                }
                 good.getComponent(ItemGood).resetParams(goodParam);
                 this.refreshBoxParam(scriptBox.param);
+
                 this.isLock = false;
+                this.consoleLog('返回上一步 2');
             }).start();
         }
         // 物品原来的箱子存在
@@ -1055,6 +987,7 @@ export default class GameBox extends cc.Component {
              * 4.剩余箱子物品复原 并 重新排列位置，
              * 5.根据数据移动现有箱子，底部物品返回到箱子中
              */
+
             // 获取矩形
             let getRect = (boxParam: BoxParam) => {
                 return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
@@ -1063,12 +996,13 @@ export default class GameBox extends cc.Component {
             let getBoxLayer = (boxParamCur: BoxParam, layerCur: number) => {
                 let layer = 0;
                 let rectA = getRect(boxParamCur);
-                rectA.y -= boxParamCur.h * 0.5;
                 for (let i = layerCur - 1; i >= 0; i--) {
-                    let arrBoxParam = dataBox[i];
                     let isInter = false;
-                    for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
-                        let rectB = getRect(arrBoxParam[j]);
+                    let arrLayer = this.dataBox[i];
+                    for (let j = 0; j < arrLayer.length; j++) {
+                        let boxParam = arrLayer[j];
+                        let rectB = getRect(boxParam);
+                        rectA.y = rectB.y + boxParamCur.h * 0.5;
                         isInter = cc.Intersection.rectRect(rectA, rectB);
                         if (isInter) {
                             break;
@@ -1076,9 +1010,7 @@ export default class GameBox extends cc.Component {
                     }
                     if (isInter) {
                         layer = i + 1;
-                    }
-                    else {
-                        rectA.y -= boxParamCur.h;
+                        break;
                     }
                 }
                 return layer;
@@ -1110,23 +1042,23 @@ export default class GameBox extends cc.Component {
 
             // 添加箱子 刚出现时高度为0
             boxParamCur.goods = {};
-            let box = this.addBox(boxParamCur);
+            this.addBox(boxParamCur);
             let objBox = {};
             for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
-                let arrBoxParam = this.dataBox[i];
-                for (let j = 0; j < arrBoxParam.length; j++) {
-                    let boxParam = arrBoxParam[j];
+                for (let j = 0; j < this.dataBox[i].length; j++) {
+                    let boxParam = this.dataBox[i][j];
                     objBox[boxParam.index] = Common.clone(boxParam);
                 }
             }
             // 重置箱子位置
             this.dataBox = Common.clone(dataBox);// 赋值箱子
-            for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
-                let arrBoxParam = this.dataBox[i];
-                for (let j = 0; j < arrBoxParam.length; j++) {
-                    let boxParam = arrBoxParam[j];
+            for (let i = 0; i < this.dataBox.length; i++) {
+                let arrLayer = this.dataBox[i];
+                for (let j = 0; j < arrLayer.length; j++) {
+                    let boxParam = arrLayer[j];
+                    let isBox = boxParam.name == boxParamCur.name;
                     // 物品还原
-                    if (boxParam.name == boxParamCur.name) {
+                    if (isBox) {
                         boxParam.goods = {};
                     }
                     else {
@@ -1140,46 +1072,53 @@ export default class GameBox extends cc.Component {
                     let layer = getBoxLayer(boxParam, i);
                     boxParam.y = this.arrBoxY[layer].y;
                     let box = this.nodeMain.getChildByName(boxParam.name);
-                    let timeY = Common.getMoveTime(box.position, cc.v3(box.x, boxParam.y), this.baseTime, this.baseDis);
-                    cc.tween(box).to(timeY, { y: boxParam.y }).call(() => {
-                        box.getComponent(ItemBox).refreshParams(boxParam.y);
-                    }).start();
+                    let boxP1 = box.position;
+                    let boxP2 = cc.v3(box.x, boxParam.y);
+                    let timeY = Common.getMoveTime(cc.v3(0, 0), cc.v3(0, boxParamCur.h), this.baseTime, this.baseDis);
+                    if (isBox) {
+                        box.position = boxP2;
+                        // 箱子高度变化+物品移动
+                        let boxH = boxParamCur.h;
+                        let scriptBox = box.getComponent(ItemBox);
+                        scriptBox.param.y = boxParam.y;
+                        scriptBox.itemIcon.height = 0;
+                        cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
+                            let goodP1 = good.position;
+                            let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
+                            let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
+                            // 物品移动
+                            cc.tween(good).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
+                                scriptBox.param.goods[goodParam.index] = goodParam;
+                                good.parent = scriptBox.nodeMain;
+                                good.getComponent(ItemGood).resetParams(goodParam);
+                                this.refreshBoxParam(scriptBox.param);
+
+                                this.isLock = false;
+                                this.consoleLog('返回上一步 2');
+                            }).start();
+                        }).start();
+                    }
+                    else {
+                        box.position = boxP1;
+                        cc.tween(box).to(timeY, { position: boxP2 }).call(() => {
+                            box.getComponent(ItemBox).refreshParams(boxParam.y);
+                        }).start();
+                    }
                     if (layer == i) {
                         continue;
                     }
                     // 转移箱子数据
-                    arrBoxParam.splice(j, 1);
+                    arrLayer.splice(j, 1);
                     this.dataBox[layer].push(boxParam);
                     j--;
-                    if (arrBoxParam.length <= 0) {
-                        this.dataBox.splice(j, 1);
-                        i--;
-                    }
                 }
             }
-
-            // 箱子高度变化+物品移动
-            let boxH = boxParamCur.h;
-            let timeH = Common.getMoveTime(box.position, cc.v3(box.x, box.y + boxH), this.baseTime, this.baseDis);
-            box.height = 0;
-            cc.tween(box).to(timeH, { height: boxH }).call(() => {
-                let scriptBox = box.getComponent(ItemBox);
-                let goodP1 = good.position;
-                let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
-                let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
-                // 物品移动
-                cc.tween(good).call(() => {
-                    // 物品开始移动
-                    this.speedGood.isMove = true;
-                    this.speedGood.speedCur = this.speedGood.speedInit;
-                }).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
-                    scriptBox.param.goods[goodParam.index] = goodParam;
-                    good.parent = scriptBox.nodeMain;
-                    good.getComponent(ItemGood).resetParams(goodParam);
-                    this.refreshBoxParam(scriptBox.param);
-                    this.isLock = false;
-                }).start();
-            }).start();
+            for (let i = this.dataBox.length - 1; i >= 0; i--) {
+                let arrLayer = this.dataBox[i];
+                if (arrLayer.length <= 0) {
+                    this.dataBox.splice(i, 1);
+                }
+            }
         }
     }
 
@@ -1192,7 +1131,7 @@ export default class GameBox extends cc.Component {
         }
         this.isLock = true;
         kit.Audio.playEffect(CConst.sound_path_click);
-
+        this.consoleLog('刷新 1');
         /*****************************************************组合物品数组*************************************************************/
         let arrGoodParam: GoodParam[][] = [];
         let composeArr = (boxParam: BoxParam) => {
@@ -1212,36 +1151,23 @@ export default class GameBox extends cc.Component {
         };
         // 组合物品数组 操作区
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
-            let boxArr = this.dataBox[i];
-            for (let j = 0, lenB = boxArr.length; j < lenB; j++) {
-                let boxOne = boxArr[j];
-                composeArr(boxOne);
+            for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
+                composeArr(this.dataBox[i][j]);
             }
         }
-        // // 组合物品数组 检测区
-        // this.bottomMain.children.forEach((good: cc.Node) => {
-        //     let goodParam: GoodParam = good.getComponent(ItemGood).param;
-        //     let char = String(goodParam.keyGood);
-        //     let index = Number(char.substring(0, 1)) - 1;
-        //     if (arrGoodParam[index]) {
-        //         arrGoodParam[index].push(goodParam);
-        //     }
-        //     else {
-        //         arrGoodParam[index] = [goodParam];
-        //     }
-        // });
-
 
         /*****************************************************赋值物品数组 并 重新排序*************************************************************/
         let arrCopy: GoodParam[][] = Common.clone(arrGoodParam);
         for (let index = 0, length = arrCopy.length; index < length; index++) {
             let arrParam = arrCopy[index];
-            let i = arrParam.length;
-            while (i) {
-                let j = Math.floor(Math.random() * i--);
-                let temp = arrParam[i];
-                arrParam[i] = arrParam[j];
-                arrParam[j] = temp;
+            if (arrParam) {
+                let i = arrParam.length;
+                while (i) {
+                    let j = Math.floor(Math.random() * i--);
+                    let temp = arrParam[i];
+                    arrParam[i] = arrParam[j];
+                    arrParam[j] = temp;
+                }
             }
         }
 
@@ -1265,63 +1191,12 @@ export default class GameBox extends cc.Component {
         for (let index = 0, length = arrGoodParam.length; index < length; index++) {
             let arrParamA = arrGoodParam[index];
             let arrParamB = arrCopy[index];
-            voluationArr(arrParamA, arrParamB);
+            if (arrParamA && arrParamB) {
+                voluationArr(arrParamA, arrParamB);
+            }
         }
 
-
-        /**********************************************重新排序底部物品 并 移动*************************************************/
-        // let layerIndex = 0;
-        // let arrInsert: GoodParam[] = [];
-        // let reInsert = (goodParam: GoodParam)=>{
-        //     let isAdd = false;
-        //     for (let index = 0, lenA = this.bottomParamArr.length; index < lenA; index++) {
-        //         let arrParams = this.bottomParamArr[index];
-        //         let lenB = arrParams.length;
-        //         if (lenB > 0 && lenB < 3 && arrParams[0].keyGood == goodParam.keyGood) {
-        //             isAdd = true;
-        //             arrParams.push(goodParam);
-        //             break;
-        //         }
-        //     }
-        //     if (!isAdd) {
-        //         layerIndex++;
-        //         this.bottomParamArr.splice(layerIndex, 0, [goodParam]);
-        //     }
-        // };
-        // // 获取需要重新排列的数组
-        // if (this.bottomParamArr.length > 0) {
-        //     let arrGoodParam = this.bottomParamArr[0];
-        //     let arrOne = arrGoodParam.splice(1, arrGoodParam.length - 1);
-        //     for (let index = 0, length = arrOne.length; index < length; index++) {
-        //         arrInsert.push(arrOne[index]);
-        //     }
-        //     let arrElse = this.bottomParamArr.splice(1, this.bottomParamArr.length - 1);
-        //     for (let i = 0, lenA = arrElse.length; i < lenA; i++) {
-        //         let arrGoodParam = arrElse[i];
-        //         for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
-        //             arrInsert.push(arrGoodParam[j]);
-        //         }
-        //     }
-        // }
-        // // 数组插入到对应位置
-        // for (let index = 0, length = arrInsert.length; index < length; index++) {
-        //     let goodParam = arrInsert[index];
-        //     reInsert(goodParam);
-        // }
-
-
-        /**********************************************设置移动-物品*************************************************/
-        // for (let i = 0, lenA = this.bottomParamArr.length; i < lenA; i++) {
-        //     let arrGoodParam = this.bottomParamArr[i];
-        //     for (let j = 0, lenB = arrGoodParam.length; j < lenB; j++) {
-        //         let goodParam = arrGoodParam[j];
-        //         goodParam.isMove = true;
-        //     }
-        // }
-        // this.speedGood.isMove = true;
-        // this.speedGood.speedCur = this.speedGood.speedInit;
-
-
+        this.consoleLog('刷新 2');
 
         /** 延时解锁 */
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
@@ -1334,9 +1209,8 @@ export default class GameBox extends cc.Component {
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
-        this.isLock = true;
         kit.Audio.playEffect(CConst.sound_path_click);
-
+        this.consoleLog('提示 1');
         let needNum = 3;
         let keyGood = 0;
         if (this.bottomParamArr.length > 0) {
@@ -1344,7 +1218,6 @@ export default class GameBox extends cc.Component {
             needNum -= arrGoodParam.length;
             keyGood = arrGoodParam[0].keyGood;
             if (needNum > this.bottomMax - this.getBottomGoodNum()) {
-                this.isLock = false;
                 kit.Event.emit(CConst.event_notice, "Can't be used now");
                 return;
             }
@@ -1382,16 +1255,17 @@ export default class GameBox extends cc.Component {
             let arrBoxParam = this.dataBox[i];
             for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
                 let boxParam = arrBoxParam[j];
-                for (const key in boxParam.goods) {
-                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
-                        let goodParam: GoodParam = boxParam.goods[key];
-                        if (goodParam.keyGood == keyGood) {
-                            delete boxParam.goods[key];
-                            arrChose.push(goodParam);
-                            if (arrChose.length > needNum - 1) {
-                                isEnough = true;
-                                break;
-                            }
+                let goodKeys = Object.keys(boxParam.goods);
+                goodKeys.sort((a: string, b: string) => { return boxParam.goods[a].index - boxParam.goods[b].index; });
+                for (let k = 0, lenC = goodKeys.length; k < lenC; k++) {
+                    let value = goodKeys[k];
+                    let goodParam: GoodParam = boxParam.goods[value];
+                    if (goodParam.keyGood == keyGood) {
+                        console.log('needNum: ', needNum, '; boxName: ', boxParam.name, '; goodName: ', goodParam.name);
+                        arrChose.push(goodParam);
+                        if (arrChose.length > needNum - 1) {
+                            isEnough = true;
+                            break;
                         }
                     }
                 }
@@ -1404,13 +1278,8 @@ export default class GameBox extends cc.Component {
             }
         }
 
-        let delay = 0;
-        for (let index = 0, length = arrChose.length; index < length; index++) {
-            delay += 0.1;
-            let goodParam = arrChose[index];
-            this.scheduleOnce(this.eventTouchAfter.bind(this, goodParam), delay);
-        }
-        this.scheduleOnce(() => { this.isLock = false; }, 0.75);
+        this.eventTouchAfter(arrChose);
+        this.consoleLog('提示 2');
     }
 
     /** 按钮事件 时间冻结 */
@@ -1511,7 +1380,7 @@ export default class GameBox extends cc.Component {
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
             for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
                 let boxParam = this.dataBox[i][j];
-                if (boxParam.index == param.index) {
+                if (boxParam.name == param.name) {
                     this.dataBox[i][j] = param;
                     return;
                 }
@@ -1538,6 +1407,25 @@ export default class GameBox extends cc.Component {
             return CConst.newPlayer_guide_sort_3;
         }
         return null;
+    }
+
+    consoleLog(sign: string) {
+        let name = { a: sign + ' 当前游戏数据：' };
+        for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
+            for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
+                let boxParam = this.dataBox[i][j];
+                let key = '' + i + '-' + j + ': ';
+                let value = boxParam.name + ', y = ' + boxParam.y + ', ';
+                for (let key in boxParam.goods) {
+                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                        let goodParam: GoodParam = boxParam.goods[key];
+                        value += goodParam.name + ', ';
+                    }
+                }
+                name[key] = value;
+            }
+        }
+        console.log(JSON.stringify(name, null, 4));
     }
 
     /**

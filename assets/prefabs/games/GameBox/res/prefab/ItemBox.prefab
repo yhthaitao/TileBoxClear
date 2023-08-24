@@ -306,7 +306,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -100,
+        -50,
         100,
         0,
         0,

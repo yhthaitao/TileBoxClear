@@ -13,7 +13,6 @@ export default class ItemBox extends cc.Component {
         speedCur: 0, speedDis: 1, speedInit: 0, speedMax: 20, isMove: false,
     };
     param: BoxParam = null;
-    rect: cc.Rect = cc.rect();
     init(param: BoxParam) {
         this.param = param;
         this.node.x = this.param.x;
@@ -23,9 +22,6 @@ export default class ItemBox extends cc.Component {
         layer.getComponent(cc.Label).string = String(this.param.index);
         this.itemIcon.width = this.param.w;
         this.itemIcon.height = this.param.h;
-        this.rect = cc.rect(this.param.x - this.param.w * 0.5, this.param.y, this.param.w, this.param.h);
-        let collider = this.node.getComponent(cc.BoxCollider);
-        Common.refreshCollider(collider, 0, this.param.h * 0.5, this.param.w - 1, this.param.h - 2);
     };
 
     sortGood(){
