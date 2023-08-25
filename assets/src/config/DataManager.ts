@@ -3,6 +3,12 @@ import Common from "./Common";
 import GameDot from "./GameDot";
 import NativeCall from "./NativeCall";
 
+/** 设计分辨率 */
+export const Design = {
+    width: 720,
+    height: 1560,
+}
+
 /** 游戏状态 */
 export const GameState = {
     stateLoading: 1,
