@@ -1,4 +1,3 @@
-import Common from "../../../../src/config/Common";
 import { BoxParam } from "./GameBox";
 import ItemGood from "./ItemGood";
 
@@ -7,6 +6,7 @@ const { ccclass, property } = cc._decorator;
 export default class ItemBox extends cc.Component {
 
     @property(cc.Node) itemIcon: cc.Node = null;
+    @property([cc.Node]) arrKuang: cc.Node[] = [];
     @property(cc.Node) nodeMain: cc.Node = null;
 
     objSpeed = {
@@ -20,8 +20,18 @@ export default class ItemBox extends cc.Component {
         this.node.name = this.param.name;
         let layer = this.node.getChildByName('layer');
         layer.getComponent(cc.Label).string = String(this.param.index);
-        this.itemIcon.width = this.param.w;
-        this.itemIcon.height = this.param.h;
+        // 特殊箱子
+        if (this.param.isFrame) {
+            this.itemIcon.active = false;
+            this.arrKuang.forEach((item)=>{ item.active = true; });
+        }
+        // 普通箱子
+        else{
+            this.itemIcon.active = true;
+            this.itemIcon.width = this.param.w;
+            this.itemIcon.height = this.param.h;
+            this.arrKuang.forEach((item)=>{ item.active = false; });
+        }
     };
 
     sortGood(){
@@ -40,34 +50,5 @@ export default class ItemBox extends cc.Component {
     refreshParams(y: number){
         this.param.y = y;
         this.node.y = this.param.y;
-    }
-
-    moveStart() {
-        this.objSpeed.speedCur = this.objSpeed.speedInit;
-        this.objSpeed.isMove = true;
-    }
-
-    moveStop() {
-        this.objSpeed.speedCur = this.objSpeed.speedInit;
-        this.objSpeed.isMove = false;
-    }
-
-    moveEnd() {
-        if (!this.objSpeed.isMove) {
-            return;
-        }
-        this.moveStop();
-        this.playAniEnd();
-    }
-
-    playAniEnd() {
-        let y = this.node.y - this.param.yBottom;
-        if (y < 0) {
-            this.node.y = this.param.yBottom
-        }
-        else{
-            let disY = this.param.h - y % this.param.h;
-            this.node.y += disY;
-        }
     }
 }

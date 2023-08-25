@@ -5,9 +5,9 @@ import GameDot from "../../../../src/config/GameDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import DataBox from "./DataBox";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
+import DataBox from "./DataBox";
 
 /** box参数 */
 export interface BoxParam {
@@ -18,7 +18,6 @@ export interface BoxParam {
     w: number;
     h: number;
     goods: any;
-    yBottom: number;
     isMove: boolean;
     isFrame: boolean;
 }
@@ -44,7 +43,6 @@ export default class GameBox extends cc.Component {
     @property(cc.Node) maskTop: cc.Node = null;// 顶部屏蔽
     @property(cc.Node) maskBottom: cc.Node = null;// 底部屏蔽
     @property([cc.Label]) arrTimeLayer: cc.Label[] = [];// 时间
-    @property(cc.Node) boxBottom: cc.Node = null;// 底部箱子
     @property(cc.Node) nodeMain: cc.Node = null;// 箱子父节点
     @property(cc.Node) uiTop: cc.Node = null;// 顶部节点
     @property(cc.Node) uiTopLevel: cc.Node = null;// 等级ui
@@ -53,63 +51,17 @@ export default class GameBox extends cc.Component {
     @property(cc.Node) uiTopProcess: cc.Node = null;// 进度ui
     @property(cc.Node) uiBottom: cc.Node = null;// 底部节点
     @property(cc.Node) uiBottomMain: cc.Node = null;// 底部物品父节点
-    @property(cc.Node) nodeProp: cc.Node = null;// 道具父节点
+    @property(cc.Node) uiProp: cc.Node = null;// 道具父节点
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
 
-    dataLevel = {
-        "map": [
-            { "x": -105.5, "y": 90.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 271.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 452.5, "w": "462", "h": "181" },
-            { "x": -105.5, "y": 633.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 814.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 995.5, "w": "308", "h": "181" },
-            { "x": -105.5, "y": 1176.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 1357.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 1538.5, "w": "462", "h": "181" },
-            { "x": -105.5, "y": 1719.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 1900.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 2081.5, "w": "308", "h": "181" },
-            { "x": -105.5, "y": 2262.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 2443.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 2624.5, "w": "462", "h": "181" },
-            { "x": -105.5, "y": 2805.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 2986.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 3167.5, "w": "308", "h": "181" },
-            { "x": -105.5, "y": 3348.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 3529.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 3710.5, "w": "462", "h": "181" },
-            { "x": -105.5, "y": 3891.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 4072.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 4253.5, "w": "308", "h": "181" },
-            { "x": -105.5, "y": 4434.5, "w": "462", "h": "181" }, { "x": -105.5, "y": 4615.5, "w": "308", "h": "181" }, { "x": -105.5, "y": 4796.5, "w": "231", "h": "181" },
-            { "x": -105.5, "y": 4977.5, "w": "231", "h": "181" }, { "x": 230, "y": 660, "w": "160", "h": "20" }, { "x": 230, "y": 460, "w": "160", "h": "20" },
-            { "x": 230, "y": 260, "w": "160", "h": "20" }, { "x": 230, "y": 60, "w": "160", "h": "20" }
-        ],
-        "item": [
-            { "x": 40, "y": 90.5, "w": 3, "p": 0, "n": "3002", "g": 0 }, { "x": -250, "y": 90.5, "w": 3, "p": 0, "n": "3008", "g": 0 }, { "x": -50, "y": 271.5, "w": 4, "p": 1, "n": "4012", "g": 0 },
-            { "x": -105.5, "y": 90.5, "w": 3, "p": 0, "n": "3002", "g": 0 }, { "x": -170, "y": 271.5, "w": 2, "p": 1, "n": "2008", "g": 0 }, { "x": 40, "y": 452.5, "w": 4, "p": 2, "n": "4001", "g": 0 },
-            { "x": -250, "y": 452.5, "w": 3, "p": 2, "n": "3006", "g": 0 }, { "x": -105.5, "y": 452.5, "w": 4, "p": 2, "n": "4012", "g": 0 }, { "x": -40, "y": 633.5, "w": 4, "p": 3, "n": "4001", "g": 0 },
-            { "x": -190, "y": 633.5, "w": 3, "p": 3, "n": "3002", "g": 0 }, { "x": 40, "y": 814.5, "w": 4, "p": 4, "n": "4001", "g": 0 }, { "x": -250, "y": 814.5, "w": 4, "p": 4, "n": "4012", "g": 0 },
-            { "x": -105.5, "y": 814.5, "w": 2, "p": 4, "n": "2016", "g": 0 }, { "x": -40, "y": 995.5, "w": 3, "p": 5, "n": "3002", "g": 0 }, { "x": -170, "y": 995.5, "w": 3, "p": 5, "n": "3008", "g": 0 },
-            { "x": -200, "y": 1357.5, "w": 2, "p": 7, "n": "2008", "g": 0 }, { "x": -10, "y": 1357.5, "w": 2, "p": 7, "n": "2018", "g": 0 }, { "x": -105.5, "y": 1357.5, "w": 2, "p": 7, "n": "2009", "g": 0 },
-            { "x": 40, "y": 1538.5, "w": 2, "p": 8, "n": "2016", "g": 0 }, { "x": -250, "y": 1538.5, "w": 3, "p": 8, "n": "3001", "g": 0 }, { "x": -95, "y": 1538.5, "w": 3, "p": 8, "n": "3006", "g": 0 },
-            { "x": -200, "y": 1719.5, "w": 2, "p": 9, "n": "2009", "g": 0 }, { "x": -10, "y": 1719.5, "w": 2, "p": 9, "n": "2018", "g": 0 }, { "x": -105.5, "y": 1719.5, "w": 2, "p": 9, "n": "2008", "g": 0 },
-            { "x": -250, "y": 1900.5, "w": 3, "p": 10, "n": "3002", "g": 0 }, { "x": -105.5, "y": 1900.5, "w": 2, "p": 10, "n": "2009", "g": 0 }, { "x": -40, "y": 2081.5, "w": 3, "p": 11, "n": "3008", "g": 0 },
-            { "x": -170, "y": 2081.5, "w": 3, "p": 11, "n": "3001", "g": 0 }, { "x": 40, "y": 2262.5, "w": 2, "p": 12, "n": "2008", "g": 0 }, { "x": -250, "y": 2262.5, "w": 3, "p": 12, "n": "3008", "g": 0 },
-            { "x": -95, "y": 2262.5, "w": 3, "p": 12, "n": "3006", "g": 0 }, { "x": -40, "y": 2443.5, "w": 4, "p": 13, "n": "4013", "g": 0 }, { "x": -170, "y": 2443.5, "w": 2, "p": 13, "n": "2018", "g": 0 },
-            { "x": 40, "y": 2624.5, "w": 2, "p": 14, "n": "2009", "g": 0 }, { "x": -250, "y": 2624.5, "w": 4, "p": 14, "n": "4001", "g": 0 }, { "x": -105.5, "y": 2624.5, "w": 3, "p": 14, "n": "3006", "g": 0 },
-            { "x": -40, "y": 2805.5, "w": 3, "p": 15, "n": "3001", "g": 0 }, { "x": -170, "y": 2805.5, "w": 3, "p": 15, "n": "3001", "g": 0 }, { "x": 40, "y": 2986.5, "w": 2, "p": 16, "n": "2016", "g": 0 },
-            { "x": -250, "y": 2986.5, "w": 4, "p": 16, "n": "4012", "g": 0 }, { "x": -105.5, "y": 2986.5, "w": 3, "p": 16, "n": "3001", "g": 0 }, { "x": -200, "y": 3167.5, "w": 2, "p": 17, "n": "2009", "g": 0 },
-            { "x": -10, "y": 3167.5, "w": 2, "p": 17, "n": "2018", "g": 0 }, { "x": -105.5, "y": 3167.5, "w": 2, "p": 17, "n": "2008", "g": 0 }, { "x": 40, "y": 3348.5, "w": 3, "p": 18, "n": "3008", "g": 0 },
-            { "x": -105.5, "y": 3348.5, "w": 3, "p": 18, "n": "3002", "g": 0 }, { "x": -35, "y": 3529.5, "w": 4, "p": 19, "n": "4013", "g": 0 }, { "x": -175, "y": 3529.5, "w": 4, "p": 19, "n": "4013", "g": 0 },
-            { "x": 40, "y": 3710.5, "w": 3, "p": 20, "n": "3011", "g": 0 }, { "x": -250, "y": 3710.5, "w": 3, "p": 20, "n": "3001", "g": 0 }, { "x": -105.5, "y": 3710.5, "w": 3, "p": 20, "n": "3011", "g": 0 },
-            { "x": -35, "y": 3891.5, "w": 4, "p": 21, "n": "4012", "g": 0 }, { "x": -175, "y": 3891.5, "w": 4, "p": 21, "n": "4012", "g": 0 }, { "x": 40, "y": 4072.5, "w": 3, "p": 22, "n": "3011", "g": 0 },
-            { "x": -250, "y": 4072.5, "w": 3, "p": 22, "n": "3008", "g": 0 }, { "x": -105.5, "y": 4072.5, "w": 3, "p": 22, "n": "3001", "g": 0 }, { "x": -200, "y": 4253.5, "w": 2, "p": 23, "n": "2009", "g": 0 },
-            { "x": -10, "y": 4253.5, "w": 2, "p": 23, "n": "2009", "g": 0 }, { "x": -105.5, "y": 4253.5, "w": 2, "p": 23, "n": "2018", "g": 0 }, { "x": 40, "y": 4434.5, "w": 3, "p": 24, "n": "3008", "g": 0 },
-            { "x": -250, "y": 4434.5, "w": 3, "p": 24, "n": "3001", "g": 0 }, { "x": 230, "y": 60, "w": 4, "p": 31, "n": "4013", "g": 0 }, { "x": 230, "y": 60, "w": 2, "p": 31, "n": "2009", "g": 0 },
-            { "x": 230, "y": 60, "w": 2, "p": 31, "n": "2008", "g": 0 }, { "x": 230, "y": 60, "w": 3, "p": 31, "n": "3006", "g": 0 }, { "x": 230, "y": 60, "w": 4, "p": 31, "n": "4001", "g": 0 },
-            { "x": 230, "y": 260, "w": 4, "p": 30, "n": "4013", "g": 0 }, { "x": 230, "y": 260, "w": 3, "p": 30, "n": "3011", "g": 0 }, { "x": 230, "y": 260, "w": 4, "p": 30, "n": "4001", "g": 0 },
-            { "x": 230, "y": 260, "w": 3, "p": 30, "n": "3011", "g": 0 }, { "x": 230, "y": 260, "w": 2, "p": 30, "n": "2009", "g": 0 }, { "x": 230, "y": 460, "w": 2, "p": 29, "n": "2018", "g": 0 },
-            { "x": 230, "y": 460, "w": 3, "p": 29, "n": "3008", "g": 0 }, { "x": 230, "y": 460, "w": 4, "p": 29, "n": "4013", "g": 0 }, { "x": 230, "y": 460, "w": 2, "p": 29, "n": "2016", "g": 0 },
-            { "x": 230, "y": 460, "w": 3, "p": 29, "n": "3008", "g": 0 }, { "x": 230, "y": 660, "w": 2, "p": 28, "n": "2016", "g": 0 }, { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3011", "g": 0 },
-            { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3006", "g": 0 }, { "x": 230, "y": 660, "w": 2, "p": 28, "n": "2016", "g": 0 }, { "x": 230, "y": 660, "w": 3, "p": 28, "n": "3001", "g": 0 },
-            { "x": 40, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 }, { "x": -250, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 }, { "x": -105.5, "y": 1176.5, "w": 4, "p": 6, "n": "4010", "g": 0 },
-            { "x": 40, "y": 1900.5, "w": 4, "p": 10, "n": "4010", "g": 0 }, { "x": -250, "y": 3348.5, "w": 4, "p": 18, "n": "4010", "g": 0 }, { "x": -105.5, "y": 4434.5, "w": 4, "p": 24, "n": "4010", "g": 0 }
-        ]
-    };
-
+    dataLevel = {"map":[{"x":-115,"y":90.5,"w":"231","h":"181"},{"x":-190,"y":271.5,"w":"231","h":"181"},{"x":-115,"y":452.5,"w":"231","h":"181"},{"x":-190,"y":633.5,"w":"231","h":"181"},{"x":-115,"y":814.5,"w":"231","h":"181"},{"x":-190,"y":995.5,"w":"231","h":"181"},{"x":-115,"y":1176.5,"w":"231","h":"181"},{"x":-190,"y":1357.5,"w":"231","h":"181"},{"x":-115,"y":1538.5,"w":"231","h":"181"},{"x":-190,"y":1719.5,"w":"231","h":"181"},{"x":-115,"y":1900.5,"w":"231","h":"181"},{"x":-190,"y":2081.5,"w":"231","h":"181"},{"x":-115,"y":2262.5,"w":"231","h":"181"},{"x":115,"y":90.5,"w":"231","h":"181"},{"x":190,"y":271.5,"w":"231","h":"181"},{"x":115,"y":452.5,"w":"231","h":"181"},{"x":190,"y":633.5,"w":"231","h":"181"},{"x":115,"y":814.5,"w":"231","h":"181"},{"x":190,"y":995.5,"w":"231","h":"181"},{"x":115,"y":1176.5,"w":"231","h":"181"},{"x":190,"y":1357.5,"w":"231","h":"181"},{"x":115,"y":1538.5,"w":"231","h":"181"},{"x":190,"y":1719.5,"w":"231","h":"181"},{"x":115,"y":1900.5,"w":"231","h":"181"},{"x":190,"y":2081.5,"w":"231","h":"181"},{"x":115,"y":2262.5,"w":"231","h":"181"}],"item":[{"x":-176,"y":90.5,"w":1,"p":0,"n":"1002"},{"x":-115,"y":90.5,"w":1,"p":0,"n":"1001"},{"x":-54,"y":90.5,"w":1,"p":0,"n":"1003"},{"x":-260,"y":271.5,"w":1,"p":1,"n":"1003"},{"x":-160,"y":271.5,"w":4,"p":1,"n":"4011"},{"x":-160,"y":452.5,"w":2,"p":2,"n":"2018"},{"x":-60,"y":452.5,"w":2,"p":2,"n":"2018"},{"x":-260,"y":633.5,"w":1,"p":3,"n":"1002"},{"x":-160,"y":633.5,"w":4,"p":3,"n":"4013"},{"x":-176,"y":814.5,"w":1,"p":4,"n":"1002"},{"x":-115,"y":814.5,"w":1,"p":4,"n":"1003"},{"x":-54,"y":814.5,"w":1,"p":4,"n":"1002"},{"x":-245,"y":995.5,"w":2,"p":5,"n":"2018"},{"x":-150,"y":995.5,"w":2,"p":5,"n":"2001"},{"x":-145,"y":1176.5,"w":4,"p":6,"n":"4013"},{"x":-45,"y":1176.5,"w":1,"p":6,"n":"1002"},{"x":-245,"y":1357.5,"w":2,"p":7,"n":"2018"},{"x":-150,"y":1357.5,"w":2,"p":7,"n":"2001"},{"x":-176,"y":1538.5,"w":1,"p":8,"n":"1001"},{"x":-115,"y":1538.5,"w":1,"p":8,"n":"1001"},{"x":-54,"y":1538.5,"w":1,"p":8,"n":"1003"},{"x":-222,"y":1719.5,"w":4,"p":9,"n":"4011"},{"x":-118,"y":1719.5,"w":1,"p":9,"n":"1001"},{"x":-165,"y":1900.5,"w":2,"p":10,"n":"2018"},{"x":-65,"y":1900.5,"w":2,"p":10,"n":"2011"},{"x":-222,"y":2081.5,"w":4,"p":11,"n":"4013"},{"x":-118,"y":2081.5,"w":1,"p":11,"n":"1003"},{"x":-176,"y":2262.5,"w":1,"p":12,"n":"1003"},{"x":-115,"y":2262.5,"w":1,"p":12,"n":"1002"},{"x":-54,"y":2262.5,"w":1,"p":12,"n":"1001"},{"x":54,"y":90.5,"w":1,"p":13,"n":"1002"},{"x":115,"y":90.5,"w":1,"p":13,"n":"1002"},{"x":176,"y":90.5,"w":1,"p":13,"n":"1001"},{"x":160,"y":271.5,"w":4,"p":14,"n":"4011"},{"x":260,"y":271.5,"w":1,"p":14,"n":"1002"},{"x":60,"y":452.5,"w":2,"p":15,"n":"2001"},{"x":160,"y":452.5,"w":2,"p":15,"n":"2001"},{"x":160,"y":633.5,"w":4,"p":16,"n":"4013"},{"x":260,"y":633.5,"w":1,"p":16,"n":"1001"},{"x":54,"y":814.5,"w":1,"p":17,"n":"1001"},{"x":115,"y":814.5,"w":1,"p":17,"n":"1003"},{"x":176,"y":814.5,"w":1,"p":17,"n":"1002"},{"x":150,"y":995.5,"w":2,"p":18,"n":"2018"},{"x":245,"y":995.5,"w":2,"p":18,"n":"2018"},{"x":55,"y":1176.5,"w":1,"p":19,"n":"1001"},{"x":150,"y":1176.5,"w":4,"p":19,"n":"4013"},{"x":150,"y":1357.5,"w":2,"p":20,"n":"2018"},{"x":54,"y":1538.5,"w":1,"p":21,"n":"1001"},{"x":115,"y":1538.5,"w":1,"p":21,"n":"1001"},{"x":176,"y":1538.5,"w":1,"p":21,"n":"1001"},{"x":150,"y":1719.5,"w":2,"p":22,"n":"2011"},{"x":245,"y":1719.5,"w":2,"p":22,"n":"2001"},{"x":54,"y":1900.5,"w":1,"p":23,"n":"1002"},{"x":115,"y":1900.5,"w":1,"p":23,"n":"1003"},{"x":176,"y":1900.5,"w":1,"p":23,"n":"1002"},{"x":118,"y":2081.5,"w":1,"p":24,"n":"1003"},{"x":222,"y":2081.5,"w":4,"p":24,"n":"4013"},{"x":60,"y":2262.5,"w":2,"p":25,"n":"2011"},{"x":160,"y":2262.5,"w":2,"p":25,"n":"2001"},{"x":245,"y":1357.5,"w":2,"p":20,"n":"2018"}]};
     resPath = {
         levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/SortLevel' },
     }
 
     /** 游戏用数据 */
-    dataObj = { stepCount: 0, passTime: 0, isFinish: false, };
+    dataObj = { stepCount: 0, passTime: 0, isFinish: false };
 
     goodsCfg: any = {};// 物品配置
     goodsCount: number = 0;// 物品计数
@@ -129,7 +81,11 @@ export default class GameBox extends cc.Component {
     bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
     bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
+    defaultL: number = 5.5;
+    defaultS: number = 1.0;
     displayH: number = 0;// 显示的高度
+    scaleByW: number = 1;// 依据宽度的缩放比例
+    scaleByM: number = 0.5;
     arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
 
     baseTime: number = 1;
@@ -187,21 +143,17 @@ export default class GameBox extends cc.Component {
         this.dataGame = {};
         let boxs = this.dataLevel.map;
         let dataBoxBottom = this.getBottomBoxData();
-        this.displayH = Number(dataBoxBottom.h) * (this.dataLevel['layer'] || 5.2);
-
-        let disY = Math.floor(Number(cc.winSize.height * 0.5 - (this.displayH + this.uiTop.height)));
-        let dataBoxBottomY = Math.floor(Number(dataBoxBottom.y));
+        this.displayH = Number(dataBoxBottom.h) * (this.dataLevel['layer'] || this.defaultL);
+        this.scaleByW = this.getScaleByWidth();
+        console.log('layer: ', this.dataLevel['layer'] || 5.5, '; scaleByW: ', this.scaleByW);
         for (let index = 0, length = boxs.length; index < length; index++) {
             const obj = boxs[index];
             let x = Math.floor(Number(obj.x));
-            let y = Math.floor(Number(obj.y + disY - dataBoxBottomY));
-            if (index < 2) {
-
-            }
+            let y = Math.floor(Number(obj.y - dataBoxBottom.y - this.displayH));
             let w = Math.floor(Number(obj.w));
             let h = Math.floor(Number(obj.h));
             let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, yBottom: disY, isMove: false, isFrame: this.getBoxIsFrame(h),
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
             };
             this.dataGame[index] = boxParam;
         }
@@ -292,12 +244,10 @@ export default class GameBox extends cc.Component {
 
     initUI() {
         this.uiTop.y = cc.winSize.height * 0.5 - this.uiTop.height * 0.5;
-        this.nodeProp.y = -cc.winSize.height * 0.5 + this.nodeProp.height * 0.5;
-        this.uiBottom.y = this.nodeProp.y + this.uiBottom.height + 20;
-
-        // 底部碰撞框
-        let disY = cc.winSize.height * 0.5 - (this.displayH + this.uiTop.height);
-        this.boxBottom.y = disY;
+        this.nodeMain.y = cc.winSize.height * 0.5 - this.uiTop.height;
+        this.nodeMain.scale = this.scaleByW;
+        this.uiProp.y = -cc.winSize.height * 0.5 + this.uiProp.height * 0.5;
+        this.uiBottom.y = this.uiProp.y + this.uiBottom.height + 20;
 
         this.setUITime();// 设置时间
         this.setUIProcess();// 设置进度
@@ -466,7 +416,6 @@ export default class GameBox extends cc.Component {
                 }
                 let rectB = getRect(boxParamB);
                 if (rectA.intersects(rectB)) {
-                    console.log('rectA: ', JSON.stringify(rectA), '; rectB: ', JSON.stringify(rectB));
                     isCollider = true;
                     break;
                 }
@@ -496,7 +445,6 @@ export default class GameBox extends cc.Component {
                         boxParam.isMove = false;
                         boxParam.y = this.arrBoxY[0].y;
                         scriptBox.refreshParams(boxParam.y);
-                        console.log('cycle 箱子停止 boxName: ', boxParam.name, '; 层级: ', i, '; y: ', boxParam.y);
                     }
                     else {
                         isContinueMove = true;
@@ -512,7 +460,6 @@ export default class GameBox extends cc.Component {
                         boxParam.isMove = false;
                         boxParam.y = this.arrBoxY[i].y;
                         scriptBox.refreshParams(boxParam.y);
-                        console.log('cycle 箱子停止 boxName: ', boxParam.name, '; 层级: ', i, '; y: ', boxParam.y);
                     }
                     else {
                         isContinueMove = true;
@@ -523,7 +470,6 @@ export default class GameBox extends cc.Component {
                         if (boxParam.y < boxGoal.y + boxGoal.h * 0.5) {
                             arrBoxParam.splice(j, 1);
                             this.dataBox[i - 1].push(boxParam);
-                            console.log('cycle 箱子进入下一层 boxName: ', boxParam.name, '; 层级: ', i - 1, '; y: ', boxParam.y);
                             j--;
                         }
                     }
@@ -583,11 +529,11 @@ export default class GameBox extends cc.Component {
                 goodParam.x -= speedX;
                 goodParam.y -= speedY;
                 let nodeGood = this.uiBottomMain.getChildByName(goodParam.name);
-                if (nodeGood.scale > 0.5) {
+                if (nodeGood.scale > this.scaleByM) {
                     nodeGood.scale -= 0.04;
                 }
                 else {
-                    nodeGood.scale = 0.5;
+                    nodeGood.scale = this.scaleByM;
                 }
                 if (Math.pow(disX, 2) + Math.pow(disY, 2) <= Math.pow(speed, 2)) {
                     goodParam.isMove = false;
@@ -678,6 +624,31 @@ export default class GameBox extends cc.Component {
         return dataBoxBottom;
     };
 
+    /** 获取操作区的缩放（根据左右留边） */
+    getScaleByWidth(): number {
+        let obj: any = this.dataLevel['objW'];
+        if (!obj) {
+            return this.defaultS;
+        }
+        let leftX = 0;
+        let rightX = 0;
+        for (let index = 0, length = this.dataLevel.map.length; index < length; index++) {
+            let dataBox = this.dataLevel.map[index];
+            let x = Number(dataBox.x);
+            let w = Number(dataBox.w);
+            if (leftX > x - w * 0.5) {
+                leftX = x - w * 0.5;
+            }
+            if (rightX < x + w * 0.5) {
+                rightX = x + w * 0.5;
+            }
+        }
+        let width = obj.left + obj.right;
+        let widthReal = rightX - leftX;
+        let widthDesign = cc.winSize.width - width;
+        return widthDesign / widthReal;
+    };
+
     getBoxIsFrame(h: number) {
         return h < 100;
     };
@@ -708,7 +679,6 @@ export default class GameBox extends cc.Component {
             scriptGood.state = 0;
             return;
         }
-        this.consoleLog('点击 1');
         this.eventTouchAfter([scriptGood.param]);
     }
 
@@ -737,6 +707,7 @@ export default class GameBox extends cc.Component {
         let scriptGood = good.getComponent(ItemGood);
         let pStart = Common.getLocalPos(good.parent, good.position, this.uiBottomMain);
         good.parent = this.uiBottomMain;
+        good.scale = this.scaleByW;
         good.active = true;
         scriptGood.refreshParams(pStart);
         this.goodParamsInsert(scriptGood.param);
@@ -947,7 +918,6 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, "Can't be used now");
             return;
         }
-        this.consoleLog('返回上一步 1');
         this.isLock = true;
 
         // 删除检测区物品数据 并 获取物品参数
@@ -965,8 +935,9 @@ export default class GameBox extends cc.Component {
             let goodP1 = good.position;
             let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
             let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
-            cc.tween(good).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
+            cc.tween(good).to(timeP12, { position: goodP2, scale: this.scaleByW }).call(() => {
                 good.parent = scriptBox.nodeMain;
+                good.scale = 1.0;
                 scriptBox.param.goods[goodParam.index] = goodParam;
                 if (scriptBox.param.isFrame) {
                     scriptBox.sortGood();
@@ -975,7 +946,6 @@ export default class GameBox extends cc.Component {
                 this.refreshBoxParam(scriptBox.param);
 
                 this.isLock = false;
-                this.consoleLog('返回上一步 2');
             }).start();
         }
         // 物品原来的箱子存在
@@ -1087,14 +1057,14 @@ export default class GameBox extends cc.Component {
                             let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
                             let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
                             // 物品移动
-                            cc.tween(good).to(timeP12, { position: goodP2, scale: 1 }).call(() => {
+                            cc.tween(good).to(timeP12, { position: goodP2, scale: this.scaleByW }).call(() => {
                                 scriptBox.param.goods[goodParam.index] = goodParam;
                                 good.parent = scriptBox.nodeMain;
+                                good.scale = 1.0;
                                 good.getComponent(ItemGood).resetParams(goodParam);
                                 this.refreshBoxParam(scriptBox.param);
 
                                 this.isLock = false;
-                                this.consoleLog('返回上一步 2');
                             }).start();
                         }).start();
                     }
@@ -1131,7 +1101,6 @@ export default class GameBox extends cc.Component {
         }
         this.isLock = true;
         kit.Audio.playEffect(CConst.sound_path_click);
-        this.consoleLog('刷新 1');
         /*****************************************************组合物品数组*************************************************************/
         let arrGoodParam: GoodParam[][] = [];
         let composeArr = (boxParam: BoxParam) => {
@@ -1196,8 +1165,6 @@ export default class GameBox extends cc.Component {
             }
         }
 
-        this.consoleLog('刷新 2');
-
         /** 延时解锁 */
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
@@ -1210,14 +1177,19 @@ export default class GameBox extends cc.Component {
             return;
         }
         kit.Audio.playEffect(CConst.sound_path_click);
-        this.consoleLog('提示 1');
         let needNum = 3;
         let keyGood = 0;
         if (this.bottomParamArr.length > 0) {
-            let arrGoodParam = this.bottomParamArr[0];
-            needNum -= arrGoodParam.length;
-            keyGood = arrGoodParam[0].keyGood;
-            if (needNum > this.bottomMax - this.getBottomGoodNum()) {
+            for (let index = 0; index < this.bottomParamArr.length; index++) {
+                let arrGoodParam = this.bottomParamArr[index];
+                needNum = 3 - arrGoodParam.length;
+                if (needNum <= this.bottomMax - this.getBottomGoodNum()) {
+                    keyGood = arrGoodParam[0].keyGood;
+                    break;
+                }
+            }
+            // 物品标识为0，提示失败；
+            if (keyGood == 0) {
                 kit.Event.emit(CConst.event_notice, "Can't be used now");
                 return;
             }
@@ -1261,7 +1233,6 @@ export default class GameBox extends cc.Component {
                     let value = goodKeys[k];
                     let goodParam: GoodParam = boxParam.goods[value];
                     if (goodParam.keyGood == keyGood) {
-                        console.log('needNum: ', needNum, '; boxName: ', boxParam.name, '; goodName: ', goodParam.name);
                         arrChose.push(goodParam);
                         if (arrChose.length > needNum - 1) {
                             isEnough = true;
@@ -1279,7 +1250,6 @@ export default class GameBox extends cc.Component {
         }
 
         this.eventTouchAfter(arrChose);
-        this.consoleLog('提示 2');
     }
 
     /** 按钮事件 时间冻结 */
@@ -1409,7 +1379,7 @@ export default class GameBox extends cc.Component {
         return null;
     }
 
-    consoleLog(sign: string) {
+    gameLog(sign: string) {
         let name = { a: sign + ' 当前游戏数据：' };
         for (let i = 0, lenA = this.dataBox.length; i < lenA; i++) {
             for (let j = 0, lenB = this.dataBox[i].length; j < lenB; j++) {
@@ -1425,7 +1395,7 @@ export default class GameBox extends cc.Component {
                 name[key] = value;
             }
         }
-        console.log(JSON.stringify(name, null, 4));
+        Common.log(JSON.stringify(name, null, 4));
     }
 
     /**
@@ -1481,27 +1451,9 @@ export default class GameBox extends cc.Component {
         }
     }
 
-    /**
-     * 碰撞回调
-     * @param other 
-     * @param self 
-     */
-    collision(other: cc.BoxCollider, self: cc.BoxCollider) {
-        let scriptSelf = self.node.getComponent(ItemBox);
-        if (scriptSelf) {
-            scriptSelf.moveEnd();
-        }
-
-        let scriptOther = other.node.getComponent(ItemBox);
-        if (scriptOther) {
-            scriptOther.moveEnd();
-        }
-    }
-
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_enter_nextLevel, this.enterLevel, this);
-        kit.Event.on(CConst.event_collider_start, this.collision, this);
     }
 
     /** 监听-取消 */
