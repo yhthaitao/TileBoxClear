@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "d8650230-0260-4e5d-97eb-38cf5e5d3f44",
+  "uuid": "df678487-a399-41c8-b5c0-c491850b524f",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -11,10 +11,10 @@
   "height": 1600,
   "platformSettings": {},
   "subMetas": {
-    "bg": {
+    "游戏界面预览": {
       "ver": "1.0.4",
-      "uuid": "19d24b5b-9429-4aec-b2e4-594dcd9d48ca",
-      "rawTextureUuid": "d8650230-0260-4e5d-97eb-38cf5e5d3f44",
+      "uuid": "7e9a2d27-a12b-41f1-b3da-57e895394d18",
+      "rawTextureUuid": "df678487-a399-41c8-b5c0-c491850b524f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
