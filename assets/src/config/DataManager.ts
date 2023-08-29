@@ -1,6 +1,6 @@
 import CConst from "./CConst";
 import Common from "./Common";
-import GameDot from "./GameDot";
+import ConfigDot from "./ConfigDot";
 import NativeCall from "./NativeCall";
 
 /** 设计分辨率 */
@@ -104,25 +104,28 @@ class DataManager {
         installtime: new Date().valueOf(),
         revenue: '0',// 收入
         propAddTupe: 2,// 初始有两个加瓶子的道具
-        rePlayNum: 1,// 可以重玩的次数，限30关之前；
+        rePlayNum: 1,// 可以重玩的次数，限30关之前
         // 关卡数据 基础
-        sortData: {
+        boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
             newTip: {
                 cur: 0,
                 max: 3,
             },
-            curLevelData: [],// 存放关卡数据
-        },
-        // 关卡数据 特殊
-        specialData: {
-            level: 1,// 特殊关卡
-            isFirst: true,
-            curLevelData: [],// 存放关卡数据
-        },
-        // 箱子游戏
-        boxData: {
-            level: 1,// 关卡
+            levelPass: [],// 已通过的关卡
+            // 解锁的物品
+            goodUnlock: {
+                1: [1001, 1002, 1003, 1008],
+                2: [2001, 2002, 2003, 2007, 2018, 2017],
+                3: [3001, 3008, 3011, 3012],
+                4: [4001, 4011, 4012, 4013, 4014, 4017],
+            },
+            goodGold: {
+                1001: 1, 1002: 1, 1003: 1, 1004: 1, 1005: 1, 1006: 1, 1013: 1, 1014: 1, 1007: 1, 1011: 1, 1015: 1, 1010: 1,
+                2001: 1, 2002: 1, 2003: 1, 2016: 1, 2017: 1, 2018: 1, 2022: 1, 2013: 1, 2014: 1, 2015: 1, 2021: 1, 2010: 1, 2023: 1, 2024: 1,
+                3008: 1, 3009: 1, 3010: 1, 3013: 1, 3011: 1, 3014: 1, 3003: 1, 3015: 1, 3016: 1, 3001: 1, 3002: 1,
+                4001: 1, 4011: 1, 4012: 1, 4013: 1, 4014: 1,
+            },// 金色碎片
         },
     };
 
@@ -130,7 +133,13 @@ class DataManager {
     public async initData(nodeAni: cc.Node) {
         let _data = JSON.parse(cc.sys.localStorage.getItem('gameData'));
         if (_data) {
-            this.data = Common.clone(_data);
+            // this.data = Common.clone(_data);
+            let data = Common.clone(_data);
+            for (const key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    this.data[key] = data[key];
+                }
+            }
         }
         else {
             cc.sys.localStorage.setItem('gameData', JSON.stringify(_data));
@@ -205,11 +214,11 @@ class DataManager {
     }
 
     /** 检测是否有banner */
-    public checkBanner(){
+    public checkBanner() {
         if (this.data.adsRemove) {
             return false;
         }
-        return this.data.sortData.level > this.adStartLevel;
+        return this.data.boxData.level > this.adStartLevel;
     }
 
     /**
@@ -236,7 +245,7 @@ class DataManager {
         if (levelNow > 20) {
             return timeLast >= 30;
         }
-        else{
+        else {
             Common.log(' 检测 关卡 levelLast: ', levelLast, '; levelNow: ', levelNow, '; levelRecord: ', levelRecord);
             return timeLast >= 90 || levelLast >= 3;
         }
@@ -286,12 +295,12 @@ class DataManager {
     /** 更新广告计数 */
     public updateAdCount() {
         this.data.adCount++;
-        let dot = GameDot['dot_ad_revenue_track_flag_' + this.data.adCount];
+        let dot = ConfigDot['dot_ad_revenue_track_flag_' + this.data.adCount];
         dot && NativeCall.logEventOne(dot);
         // 过完35关、看广告次数达到50次打点，只记一次；
-        if (this.data.checkAdCpe && this.data.sortData.level > 35 && this.data.adCount >= 50) {
+        if (this.data.checkAdCpe && this.data.boxData.level > 35 && this.data.adCount >= 50) {
             this.data.checkAdCpe = false;
-            NativeCall.logEventOne(GameDot.dot_applovin_cpe);
+            NativeCall.logEventOne(ConfigDot.dot_applovin_cpe);
         }
         this.setData(false);
     };

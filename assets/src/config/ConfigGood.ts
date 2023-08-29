@@ -1,4 +1,4 @@
-const DataBox = {
+const ConfigGood = {
     goodsConf: [
         {
             "id": 1001,
@@ -731,4 +731,4 @@ const DataBox = {
         }
     ],
 };
-export default DataBox;
+export default ConfigGood;

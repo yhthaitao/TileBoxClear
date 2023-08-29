@@ -1,7 +1,7 @@
 import { kit } from "./../src/kit/kit";
 import Common from "../src/config/Common";
 import CConst from "../src/config/CConst";
-import GameDot from "../src/config/GameDot";
+import ConfigDot from "../src/config/ConfigDot";
 import NativeCall from "../src/config/NativeCall";
 import DataManager, { GameState, LangChars } from "../src/config/DataManager";
 import Loading from "../res/prefab/Loading/src/Loading";
@@ -114,7 +114,7 @@ export default class MainScene extends cc.Component {
         await kit.Resources.loadRes(ResPath.preNewPlayer.bundle, ResPath.preNewPlayer.path, cc.Prefab);
         await kit.Resources.loadRes(ResPath.preGameBox.bundle, ResPath.preGameBox.path, cc.Prefab);
 
-        NativeCall.logEventOne(GameDot.dot_resource_load_success);
+        NativeCall.logEventOne(ConfigDot.dot_resource_load_success);
         this.isCompleteLoadData = true;
 
         this.enterMenuLayer();
@@ -140,8 +140,8 @@ export default class MainScene extends cc.Component {
             });
         }
         let script = this.nodeLoading.getComponent(Loading);
-        let dataSort = DataManager.data.sortData;
-        let isNewPlayer = dataSort.newTip.cur < dataSort.newTip.max;
+        let boxData = DataManager.data.boxData;
+        let isNewPlayer = boxData.newTip.cur < boxData.newTip.max;
         if (isNewPlayer) {
             Common.log('新手 进入游戏');
             script.playAniLeave(this.eventBack_enterGameSort.bind(this));

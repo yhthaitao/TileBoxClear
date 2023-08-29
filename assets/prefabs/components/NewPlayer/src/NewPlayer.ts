@@ -1,5 +1,5 @@
 import CConst from "../../../../src/config/CConst";
-import GameDot from "../../../../src/config/GameDot";
+import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import DataManager, { LangChars } from "../../../../src/config/DataManager";
 
@@ -21,7 +21,7 @@ export default class NewPlayer extends cc.Component {
         let chars = '';
         switch (type) {
             case CConst.newPlayer_guide_sort_1:
-                NativeCall.logEventOne(GameDot.dot_guide_adventure_01);
+                NativeCall.logEventOne(ConfigDot.dot_guide_adventure_01);
                 chars = await DataManager.getString(LangChars.sort1);
                 label.getComponent(cc.Label).string = chars;
                 this.scheduleOnce(() => {
@@ -29,14 +29,14 @@ export default class NewPlayer extends cc.Component {
                 }, .383)
                 break;
             case CConst.newPlayer_guide_sort_2:
-                NativeCall.logEventOne(GameDot.dot_guide_adventure_02);
+                NativeCall.logEventOne(ConfigDot.dot_guide_adventure_02);
                 NativeCall.logEventTwo('sortFirstPlay', String(2));
                 chars = await DataManager.getString(LangChars.sort2);
                 label.getComponent(cc.Label).string = chars;
                 this.hand.x = -290;
                 break;
             case CConst.newPlayer_guide_sort_3:
-                NativeCall.logEventOne(GameDot.dot_guide_adventure_03);
+                NativeCall.logEventOne(ConfigDot.dot_guide_adventure_03);
                 NativeCall.logEventTwo('sortFirstPlay', String(3));
                 chars = await DataManager.getString(LangChars.sort3);
                 label.getComponent(cc.Label).string = chars;

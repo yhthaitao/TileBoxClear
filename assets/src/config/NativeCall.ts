@@ -2,7 +2,7 @@ import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
 import DataManager, { PropType } from "./DataManager";
-import GameDot from "./GameDot";
+import ConfigDot from "./ConfigDot";
 
 /** 原生交互 */
 class NativeCall {
@@ -95,8 +95,8 @@ class NativeCall {
         let methodName = "showMopubRewardVideo";
         let methodSignature = "()V";
         jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature);
-        this.logEventOne(GameDot.dot_ads_request_video);
-        this.logEventOne(GameDot.dot_ads_request_all);
+        this.logEventOne(ConfigDot.dot_ads_request_video);
+        this.logEventOne(ConfigDot.dot_ads_request_all);
     }
 
     public videoStart() {
@@ -152,8 +152,8 @@ class NativeCall {
         let methodName = "showInterstitial";
         let methodSignature = "()V";
         jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature);
-        this.logEventOne(GameDot.dot_ads_request_advert);
-        this.logEventOne(GameDot.dot_ads_request_all);
+        this.logEventOne(ConfigDot.dot_ads_request_advert);
+        this.logEventOne(ConfigDot.dot_ads_request_all);
     }
 
     /** 广告 播放完成 */
@@ -168,12 +168,12 @@ class NativeCall {
     public adsTimeTrue() {
         Common.log(' javaToCocos cocos method: adsTimeTrue() ');
         // 打点 插屏广告请求（游戏从后台返回）
-        this.logEventThree(GameDot.dot_adReq, "inter_backGame", "Interstital");
+        this.logEventThree(ConfigDot.dot_adReq, "inter_backGame", "Interstital");
         let isReady = this.advertCheck();
         if (isReady) {
             let funcA = () => {
                 // 打点 插屏播放成功（游戏从后台返回）
-                this.logEventTwo(GameDot.dot_ads_advert_succe_back, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.sortData.level));
             };
             let funcB = (err: any)=>{};
             DataManager.playAdvert(funcA, funcB);
@@ -293,10 +293,10 @@ class NativeCall {
         Common.log(' javaToCocos cocos method: buyItem() params: ', prop);
         switch (prop) {
             case PropType.propBack:
-                this.logEventTwo(GameDot.dot_buy_back_click, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_buy_back_click, String(DataManager.data.sortData.level));
                 break;
             case PropType.propTube:
-                this.logEventTwo(GameDot.dot_buy_bottle_click, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_buy_bottle_click, String(DataManager.data.sortData.level));
                 break;
             default:
                 break;
@@ -311,10 +311,10 @@ class NativeCall {
         Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', prop);
         switch (prop) {
             case PropType.propBack:
-                this.logEventTwo(GameDot.dot_buy_back_succe, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.sortData.level));
                 break;
             case PropType.propTube:
-                this.logEventTwo(GameDot.dot_buy_bottle_succe, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_buy_bottle_succe, String(DataManager.data.sortData.level));
                 break;
             default:
                 break;
