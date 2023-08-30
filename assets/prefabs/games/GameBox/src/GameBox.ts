@@ -9,6 +9,17 @@ import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
 import ConfigGood from "../../../../src/config/ConfigGood";
 
+/** 关卡参数 */
+export interface LevelParam {
+    difficulty?: number,// 难度
+    isGolden?: boolean,// 是否有金币
+    levelTime?: number,// 关卡时间
+    layer?: number,// 关卡显示层级
+    objW?: { left: number, right: number },// 左右宽度
+    map: any[],// 箱子数据
+    item: any[],// 物品数据
+}
+
 /** box参数 */
 export interface BoxParam {
     index: number;
@@ -56,80 +67,69 @@ export default class GameBox extends cc.Component {
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
 
-    a = {
-        "isGolden": true,
-        "levelTime": 300, 
-        "layer": 5.3, 
-        "objW": { "left": 10, "right": 10 },
-        "map": [{"x": 0}], 
-        "item": [{"x": 0}], 
-    };
-
-    dataLevel = {
-        "levelTime":300,"layer":5.3,"objW":{"left":10,"right":10},
+    levelParam: LevelParam = {
+        "difficulty": 1,
+        "isGolden":true,
         "map":[
-            {"x":-173,"y":90.5,"w":"346","h":"181"},{"x":-231,"y":271.5,"w":231,"h":181},{"x":-145,"y":452.5,"w":"290","h":"181"},
-            {"x":-97.5,"y":995.5,"w":"195","h":"181"},{"x":-97.5,"y":1357.5,"w":"195","h":"181"},{"x":-97.5,"y":1719.5,"w":"195","h":"181"},
-            {"x":-97.5,"y":2081.5,"w":"195","h":"181"},{"x":-97.5,"y":2443.5,"w":"195","h":"181"},{"x":-97.5,"y":2805.5,"w":"195","h":"181"},
-            {"x":-97.5,"y":3167.5,"w":"195","h":"181"},{"x":-97.5,"y":3529.5,"w":"195","h":"181"},{"x":0,"y":271.5,"w":231,"h":181},
-            {"x":0,"y":633.5,"w":"390","h":"181"},{"x":0,"y":814.5,"w":"390","h":"181"},{"x":0,"y":1176.5,"w":"390","h":"181"},
-            {"x":0,"y":1538.5,"w":"390","h":"181"},{"x":0,"y":1900.5,"w":"390","h":"181"},{"x":0,"y":2262.5,"w":"390","h":"181"},
-            {"x":0,"y":2624.5,"w":"390","h":"181"},{"x":0,"y":2986.5,"w":"390","h":"181"},{"x":0,"y":3348.5,"w":"390","h":"181"},
-            {"x":0,"y":3710.5,"w":"390","h":"181"},{"x":173,"y":90.5,"w":"346","h":"181"},{"x":231,"y":271.5,"w":231,"h":181},
-            {"x":145,"y":452.5,"w":"290","h":"181"},{"x":97.5,"y":995.5,"w":"195","h":"181"},{"x":97.5,"y":1357.5,"w":"195","h":"181"},
-            {"x":97.5,"y":1719.5,"w":"195","h":"181"},{"x":97.5,"y":2081.5,"w":"195","h":"181"},{"x":97.5,"y":2443.5,"w":"195","h":"181"},
-            {"x":97.5,"y":2805.5,"w":"195","h":"181"},{"x":97.5,"y":3167.5,"w":"195","h":"181"},{"x":97.5,"y":3529.5,"w":"195","h":"181"},
-            {"x":-280,"y":724,"w":"154","h":"20"},{"x":280,"y":724,"w":"154","h":"20"}
+            {"x":-105.5,"y":90.5,"w":"462","h":"181"},{"x":-105.5,"y":271.5,"w":"308","h":"181"},{"x":-105.5,"y":452.5,"w":"462","h":"181"},
+            {"x":-105.5,"y":633.5,"w":"308","h":"181"},{"x":-105.5,"y":814.5,"w":"462","h":"181"},{"x":-105.5,"y":995.5,"w":"308","h":"181"},
+            {"x":-105.5,"y":1176.5,"w":"462","h":"181"},{"x":-105.5,"y":1357.5,"w":"308","h":"181"},{"x":-105.5,"y":1538.5,"w":"462","h":"181"},
+            {"x":-105.5,"y":1719.5,"w":"308","h":"181"},{"x":-105.5,"y":1900.5,"w":"462","h":"181"},{"x":-105.5,"y":2081.5,"w":"308","h":"181"},
+            {"x":-105.5,"y":2262.5,"w":"462","h":"181"},{"x":-105.5,"y":2443.5,"w":"308","h":"181"},{"x":-105.5,"y":2624.5,"w":"462","h":"181"},
+            {"x":-105.5,"y":2805.5,"w":"308","h":"181"},{"x":-105.5,"y":2986.5,"w":"462","h":"181"},{"x":-105.5,"y":3167.5,"w":"308","h":"181"},
+            {"x":-105.5,"y":3348.5,"w":"462","h":"181"},{"x":-105.5,"y":3529.5,"w":"308","h":"181"},{"x":-105.5,"y":3710.5,"w":"462","h":"181"},
+            {"x":-105.5,"y":3891.5,"w":"308","h":"181"},{"x":-105.5,"y":4072.5,"w":"462","h":"181"},{"x":-105.5,"y":4253.5,"w":"308","h":"181"},
+            {"x":-105.5,"y":4434.5,"w":"462","h":"181"},{"x":230,"y":760,"w":"160","h":"20"},{"x":230,"y":560,"w":"160","h":"20"},
+            {"x":230,"y":360,"w":"160","h":"20"},{"x":230,"y":160,"w":"160","h":"20"}
         ],
         "item":[
-            {"x":-105,"y":633.5,"w":3,"p":12,"n":"3001","g":0},{"x":-135,"y":995.5,"w":1,"p":3,"n":"1001","g":0},
-            {"x":135,"y":995.5,"w":1,"p":25,"n":"1001","g":0},{"x":50,"y":1357.5,"w":1,"p":26,"n":"1001","g":0},
-            {"x":-100,"y":1538.5,"w":3,"p":15,"n":"3001","g":0},{"x":105,"y":1900.5,"w":3,"p":16,"n":"3001","g":0},
-            {"x":-45,"y":2081.5,"w":1,"p":6,"n":"1001","g":0},{"x":-120,"y":2262.5,"w":1,"p":17,"n":"1001","g":0},
-            {"x":48,"y":2443.5,"w":1,"p":29,"n":"1001","g":0},{"x":0,"y":2624.5,"w":3,"p":18,"n":"3001","g":0},
-            {"x":-120,"y":2624.5,"w":3,"p":18,"n":"3001","g":0},{"x":280,"y":724,"w":3,"p":34,"n":"3001","g":0},
-            {"x":-93,"y":90.5,"w":4,"p":0,"n":"4014","g":0},{"x":-107.5,"y":814.5,"w":4,"p":13,"n":"4014","g":0},
-            {"x":98,"y":2986.5,"w":4,"p":19,"n":"4014","g":0},{"x":-98,"y":2986.5,"w":4,"p":19,"n":"4014","g":0},
-            {"x":-280,"y":724,"w":4,"p":33,"n":"4014","g":0},{"x":-280,"y":724,"w":4,"p":33,"n":"4014","g":0},
-            {"x":-281,"y":271.5,"w":2,"p":1,"n":"2018","g":0},{"x":50,"y":271.5,"w":2,"p":11,"n":"2018","g":0},
-            {"x":55,"y":995.5,"w":2,"p":25,"n":"2018","g":0},{"x":48,"y":1719.5,"w":1,"p":27,"n":"1003","g":0},
-            {"x":-128,"y":3167.5,"w":2,"p":9,"n":"2018","g":0},{"x":-280,"y":724,"w":2,"p":33,"n":"2018","g":0},
-            {"x":-50,"y":271.5,"w":2,"p":11,"n":"2016","g":0},{"x":181,"y":271.5,"w":2,"p":23,"n":"2016","g":0},
-            {"x":281,"y":271.5,"w":2,"p":23,"n":"2016","g":0},{"x":58,"y":2081.5,"w":2,"p":28,"n":"2016","g":0},
-            {"x":-128,"y":2805.5,"w":2,"p":8,"n":"2016","g":0},{"x":-280,"y":724,"w":2,"p":33,"n":"2016","g":0},
-            {"x":-181,"y":271.5,"w":2,"p":1,"n":"2006","g":0},{"x":-60,"y":995.5,"w":2,"p":3,"n":"2006","g":0},
-            {"x":-130,"y":1719.5,"w":2,"p":5,"n":"2006","g":0},{"x":-128,"y":2081.5,"w":2,"p":6,"n":"2006","g":0},
-            {"x":-125,"y":2443.5,"w":2,"p":7,"n":"2006","g":0},{"x":125,"y":2443.5,"w":2,"p":29,"n":"2006","g":0},
-            {"x":128,"y":2805.5,"w":2,"p":30,"n":"2006","g":0},{"x":45,"y":3348.5,"w":2,"p":20,"n":"2006","g":0},
-            {"x":-280,"y":724,"w":2,"p":33,"n":"2006","g":0},{"x":75,"y":452.5,"w":3,"p":24,"n":"3008","g":0},
-            {"x":-75,"y":452.5,"w":3,"p":2,"n":"3008","g":0},{"x":15,"y":633.5,"w":3,"p":12,"n":"3008","g":0},
-            {"x":120,"y":2624.5,"w":3,"p":18,"n":"3008","g":0},{"x":-280,"y":724,"w":3,"p":33,"n":"3008","g":0},
-            {"x":280,"y":724,"w":3,"p":34,"n":"3008","g":0},{"x":-5,"y":814.5,"w":1,"p":13,"n":"1002","g":0},
-            {"x":-50,"y":1357.5,"w":1,"p":4,"n":"1002","g":0},{"x":-48,"y":1719.5,"w":1,"p":5,"n":"1002","g":0},
-            {"x":-45,"y":2262.5,"w":1,"p":17,"n":"1002","g":0},{"x":49.5,"y":3529.5,"w":1,"p":32,"n":"1002","g":0},
-            {"x":280,"y":724,"w":1,"p":34,"n":"1002","g":0},{"x":-250,"y":90.5,"w":4,"p":0,"n":"4008","g":0},
-            {"x":250,"y":90.5,"w":4,"p":22,"n":"4008","g":0},{"x":93,"y":90.5,"w":4,"p":22,"n":"4008","g":0},
-            {"x":205,"y":452.5,"w":4,"p":24,"n":"4008","g":0},{"x":-205,"y":452.5,"w":4,"p":2,"n":"4008","g":0},
-            {"x":97.5,"y":814.5,"w":4,"p":13,"n":"4008","g":0},{"x":70,"y":1176.5,"w":4,"p":14,"n":"4008","g":0},
-            {"x":-70,"y":1176.5,"w":4,"p":14,"n":"4008","g":0},{"x":280,"y":724,"w":4,"p":34,"n":"4008","g":0},
-            {"x":128,"y":3167.5,"w":2,"p":31,"n":"2017","g":0},{"x":-128,"y":3348.5,"w":2,"p":20,"n":"2017","g":0},
-            {"x":-133,"y":3529.5,"w":2,"p":10,"n":"2017","g":0},{"x":128,"y":3529.5,"w":2,"p":32,"n":"2017","g":0},
-            {"x":-42,"y":3710.5,"w":2,"p":21,"n":"2017","g":0},{"x":47,"y":3710.5,"w":2,"p":21,"n":"2017","g":0},
-            {"x":120,"y":633.5,"w":2,"p":12,"n":"2004","g":0},{"x":15,"y":1538.5,"w":2,"p":15,"n":"2004","g":0},
-            {"x":120,"y":1538.5,"w":2,"p":15,"n":"2004","g":0},{"x":-15,"y":1900.5,"w":2,"p":16,"n":"2004","g":0},
-            {"x":-120,"y":1900.5,"w":2,"p":16,"n":"2004","g":0},{"x":280,"y":724,"w":2,"p":34,"n":"2004","g":0},
-            {"x":45,"y":2805.5,"w":1,"p":30,"n":"1007","g":0},{"x":-46,"y":3167.5,"w":1,"p":9,"n":"1007","g":0},
-            {"x":-54.5,"y":3529.5,"w":1,"p":10,"n":"1007","g":0},{"x":-128,"y":3710.5,"w":1,"p":21,"n":"1007","g":0},
-            {"x":128,"y":3710.5,"w":1,"p":21,"n":"1007","g":0},{"x":280,"y":724,"w":1,"p":34,"n":"1007","g":0},
-            {"x":135,"y":1357.5,"w":1,"p":26,"n":"1003","g":0},{"x":130,"y":1719.5,"w":2,"p":27,"n":"2018","g":0},
-            {"x":138,"y":2081.5,"w":1,"p":28,"n":"1003","g":0},{"x":-45,"y":2443.5,"w":1,"p":7,"n":"1003","g":0},
-            {"x":-45,"y":2805.5,"w":1,"p":8,"n":"1003","g":0},{"x":-40,"y":3348.5,"w":1,"p":20,"n":"1003","g":0},
-            {"x":-130,"y":1357.5,"w":1,"p":4,"n":"1011","g":0},{"x":45,"y":2262.5,"w":1,"p":17,"n":"1011","g":0},
-            {"x":120,"y":2262.5,"w":1,"p":17,"n":"1011","g":0},{"x":0,"y":2986.5,"w":1,"p":19,"n":"1011","g":0},
-            {"x":45,"y":3167.5,"w":1,"p":31,"n":"1011","g":0},{"x":128,"y":3348.5,"w":1,"p":20,"n":"1011","g":0}
+            {"x":40,"y":90.5,"w":3,"p":0,"n":"3002","g":0},{"x":-250,"y":90.5,"w":3,"p":0,"n":"3008","g":0},
+            {"x":-50,"y":271.5,"w":4,"p":1,"n":"4012","g":0},{"x":-105.5,"y":90.5,"w":3,"p":0,"n":"3002","g":0},
+            {"x":-170,"y":271.5,"w":2,"p":1,"n":"2008","g":0},{"x":40,"y":452.5,"w":4,"p":2,"n":"4001","g":0},
+            {"x":-250,"y":452.5,"w":3,"p":2,"n":"3006","g":0},{"x":-105.5,"y":452.5,"w":4,"p":2,"n":"4012","g":0},
+            {"x":-40,"y":633.5,"w":4,"p":3,"n":"4001","g":0},{"x":-190,"y":633.5,"w":3,"p":3,"n":"3002","g":0},
+            {"x":40,"y":814.5,"w":4,"p":4,"n":"4001","g":0},{"x":-250,"y":814.5,"w":4,"p":4,"n":"4012","g":0},
+            {"x":-105.5,"y":814.5,"w":2,"p":4,"n":"2016","g":0},{"x":-40,"y":995.5,"w":3,"p":5,"n":"3002","g":0},
+            {"x":-170,"y":995.5,"w":3,"p":5,"n":"3008","g":0},{"x":-200,"y":1357.5,"w":2,"p":7,"n":"2008","g":0},
+            {"x":-10,"y":1357.5,"w":2,"p":7,"n":"2018","g":0},{"x":-105.5,"y":1357.5,"w":2,"p":7,"n":"2009","g":0},
+            {"x":40,"y":1538.5,"w":2,"p":8,"n":"2016","g":0},{"x":-250,"y":1538.5,"w":3,"p":8,"n":"3001","g":0},
+            {"x":-95,"y":1538.5,"w":3,"p":8,"n":"3006","g":0},{"x":-200,"y":1719.5,"w":2,"p":9,"n":"2009","g":0},
+            {"x":-10,"y":1719.5,"w":2,"p":9,"n":"2018","g":0},{"x":-105.5,"y":1719.5,"w":2,"p":9,"n":"2008","g":0},
+            {"x":-250,"y":1900.5,"w":3,"p":10,"n":"3002","g":0},{"x":-105.5,"y":1900.5,"w":2,"p":10,"n":"2009","g":0},
+            {"x":-40,"y":2081.5,"w":3,"p":11,"n":"3008","g":0},{"x":-170,"y":2081.5,"w":3,"p":11,"n":"3001","g":0},
+            {"x":40,"y":2262.5,"w":2,"p":12,"n":"2008","g":0},{"x":-250,"y":2262.5,"w":3,"p":12,"n":"3008","g":0},
+            {"x":-95,"y":2262.5,"w":3,"p":12,"n":"3006","g":0},{"x":-40,"y":2443.5,"w":4,"p":13,"n":"4013","g":0},
+            {"x":-170,"y":2443.5,"w":2,"p":13,"n":"2018","g":0},{"x":40,"y":2624.5,"w":2,"p":14,"n":"2009","g":0},
+            {"x":-250,"y":2624.5,"w":4,"p":14,"n":"4001","g":0},{"x":-105.5,"y":2624.5,"w":3,"p":14,"n":"3006","g":0},
+            {"x":-40,"y":2805.5,"w":3,"p":15,"n":"3001","g":0},{"x":-170,"y":2805.5,"w":3,"p":15,"n":"3001","g":0},
+            {"x":40,"y":2986.5,"w":2,"p":16,"n":"2016","g":0},{"x":-250,"y":2986.5,"w":4,"p":16,"n":"4012","g":0},
+            {"x":-105.5,"y":2986.5,"w":3,"p":16,"n":"3001","g":0},{"x":-200,"y":3167.5,"w":2,"p":17,"n":"2009","g":0},
+            {"x":-10,"y":3167.5,"w":2,"p":17,"n":"2018","g":0},{"x":-105.5,"y":3167.5,"w":2,"p":17,"n":"2008","g":0},
+            {"x":40,"y":3348.5,"w":3,"p":18,"n":"3008","g":0},{"x":-105.5,"y":3348.5,"w":3,"p":18,"n":"3002","g":0},
+            {"x":-35,"y":3529.5,"w":4,"p":19,"n":"4013","g":0},{"x":-175,"y":3529.5,"w":4,"p":19,"n":"4013","g":0},
+            {"x":40,"y":3710.5,"w":3,"p":20,"n":"3011","g":0},{"x":-250,"y":3710.5,"w":3,"p":20,"n":"3001","g":0},
+            {"x":-105.5,"y":3710.5,"w":3,"p":20,"n":"3011","g":0},{"x":-35,"y":3891.5,"w":4,"p":21,"n":"4012","g":0},
+            {"x":-175,"y":3891.5,"w":4,"p":21,"n":"4012","g":0},{"x":40,"y":4072.5,"w":3,"p":22,"n":"3011","g":0},
+            {"x":-250,"y":4072.5,"w":3,"p":22,"n":"3008","g":0},{"x":-105.5,"y":4072.5,"w":3,"p":22,"n":"3001","g":0},
+            {"x":-200,"y":4253.5,"w":2,"p":23,"n":"2009","g":0},{"x":-10,"y":4253.5,"w":2,"p":23,"n":"2009","g":0},
+            {"x":-105.5,"y":4253.5,"w":2,"p":23,"n":"2018","g":0},{"x":40,"y":4434.5,"w":3,"p":24,"n":"3008","g":0},
+            {"x":-250,"y":4434.5,"w":3,"p":24,"n":"3001","g":0},{"x":230,"y":160,"w":4,"p":28,"n":"4013","g":0},
+            {"x":230,"y":160,"w":2,"p":28,"n":"2009","g":0},{"x":230,"y":160,"w":2,"p":28,"n":"2008","g":0},
+            {"x":230,"y":160,"w":3,"p":28,"n":"3006","g":0},{"x":230,"y":160,"w":4,"p":28,"n":"4001","g":0},
+            {"x":230,"y":360,"w":4,"p":27,"n":"4013","g":0},{"x":230,"y":360,"w":3,"p":27,"n":"3011","g":0},
+            {"x":230,"y":360,"w":4,"p":27,"n":"4001","g":0},{"x":230,"y":360,"w":3,"p":27,"n":"3011","g":0},
+            {"x":230,"y":360,"w":2,"p":27,"n":"2009","g":0},{"x":230,"y":560,"w":2,"p":26,"n":"2018","g":0},
+            {"x":230,"y":560,"w":3,"p":26,"n":"3008","g":0},{"x":230,"y":560,"w":4,"p":26,"n":"4013","g":0},
+            {"x":230,"y":560,"w":2,"p":26,"n":"2016","g":0},{"x":230,"y":560,"w":3,"p":26,"n":"3008","g":0},
+            {"x":230,"y":760,"w":2,"p":25,"n":"2016","g":0},{"x":230,"y":760,"w":3,"p":25,"n":"3011","g":0},
+            {"x":230,"y":760,"w":3,"p":25,"n":"3006","g":0},{"x":230,"y":760,"w":2,"p":25,"n":"2016","g":0},
+            {"x":230,"y":760,"w":3,"p":25,"n":"3001","g":0},{"x":40,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},
+            {"x":-250,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},{"x":-105.5,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},
+            {"x":40,"y":1900.5,"w":4,"p":10,"n":"4010","g":0},{"x":-250,"y":3348.5,"w":4,"p":18,"n":"4010","g":0},
+            {"x":-105.5,"y":4434.5,"w":4,"p":24,"n":"4010","g":0}
         ]
-    }
-    
+    };
+
     resPath = {
         levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/SortLevel' },
     }
@@ -148,18 +148,21 @@ export default class GameBox extends cc.Component {
     timeProp = { iceCount: 0, iceTotal: 12, addTotal: 10 };// 道具时间
 
     bottomParamArr: GoodParam[][] = [];// 物品数据（检测区）
-    bottomMax: number = 8;// 物品最大数量（检测区）
+    bottomMax: number = 7;// 物品最大数量（检测区）
     bottomDis: number = 90;// 物品间距（检测区）
     bottomDisY: number = -20;// 物品y轴偏移量（检测区）
     bottomScale: number = 0.5;// 物品缩放比率（检测区）
     bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
     bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
+    defaultDifficulty: number = 1;// 默认难度
     defaultObjW = { "left": 10, "right": 10 };// 默认左右留的宽度
     defaultTime: number = 300;// 默认关卡时间
     defaultLayer: number = 5.5;// 默认显示箱子层数
 
     mainScale: number = 1;// 箱子父节点缩放比例
+    mainLeftX: number = 0;// 箱子最左边
+    mainRightX: number = 0;// 箱子最后边
     winScaleByH: number = 1;// 屏幕缩放比例（根据高度判断）
     goodScaleBottom: number = 0.5;// 底部物品缩放比例
     nodeMainPosY: number = 0;// 箱子父节点Y值
@@ -229,10 +232,10 @@ export default class GameBox extends cc.Component {
 
         // 物品计数
         this.goodsCount = 0;
-        this.goodsTotal = this.dataLevel.item.length;
+        this.goodsTotal = this.levelParam.item.length;
 
         // 倒计时开始
-        this.timeGame.total = this.dataLevel['levelTime'] || this.defaultTime;
+        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
         this.timeGame.cur = this.timeGame.init;
         this.timeGame.count = this.timeGame.total;
     }
@@ -244,8 +247,8 @@ export default class GameBox extends cc.Component {
 
         // 配置箱子和物品数据
         this.objGame = {};
-        for (let index = 0, length = this.dataLevel.map.length; index < length; index++) {
-            const obj = this.dataLevel.map[index];
+        for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
+            const obj = this.levelParam.map[index];
             let x = Math.floor(Number(obj.x));
             let y = Math.floor(Number(obj.y));
             let w = Math.floor(Number(obj.w));
@@ -255,7 +258,7 @@ export default class GameBox extends cc.Component {
             };
             this.objGame[index] = boxParam;
         }
-        let goods = this.dataLevel.item;
+        let goods = this.levelParam.item;
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
             let keyGood = Number(obj.n);
@@ -264,8 +267,8 @@ export default class GameBox extends cc.Component {
             let h = this.goodsCfg[keyGood].h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
-            let x = obj.x - this.dataLevel.map[keyBox].x;
-            let y = obj.y - this.dataLevel.map[keyBox].y;
+            let x = obj.x - this.levelParam.map[keyBox].x;
+            let y = obj.y - this.levelParam.map[keyBox].y;
             let goodParam: GoodParam = {
                 index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false,
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
@@ -282,8 +285,8 @@ export default class GameBox extends cc.Component {
 
         // 配置箱子和物品数据
         this.objGame = {};
-        for (let index = 0, length = this.dataLevel.map.length; index < length; index++) {
-            const obj = this.dataLevel.map[index];
+        for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
+            const obj = this.levelParam.map[index];
             let x = Math.floor(Number(obj.x));
             let y = Math.floor(Number(obj.y));
             let w = Math.floor(Number(obj.w));
@@ -296,7 +299,7 @@ export default class GameBox extends cc.Component {
 
         /** 已解锁的物品 */
         let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
-        let goods = this.dataLevel.item;
+        let goods = this.levelParam.item;
         let objGood = {};
         let resetKey = (key) => {
             if (!objGood[key]) {
@@ -328,8 +331,8 @@ export default class GameBox extends cc.Component {
             let h = this.goodsCfg[keyGood].h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
-            let x = obj.x - this.dataLevel.map[keyBox].x;
-            let y = obj.y - this.dataLevel.map[keyBox].y;
+            let x = obj.x - this.levelParam.map[keyBox].x;
+            let y = obj.y - this.levelParam.map[keyBox].y;
             let goodParam: GoodParam = {
                 index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false,
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
@@ -378,15 +381,19 @@ export default class GameBox extends cc.Component {
             }
         }
 
-        // 控制箱子y值
-        let boxParamBottom: BoxParam = Common.clone(this.arrGame[0][0]);
-        arrBoxFrame.forEach((boxParam) => { boxParam.y -= boxParamBottom.y; });
-        for (let index = 0, length = this.arrGame.length; index < length; index++) {
-            let arrBoxParam = this.arrGame[index];
-            arrBoxParam.forEach((boxParam) => { boxParam.y -= boxParamBottom.y; });
-        }
         // 特殊箱子添加到第一层
         this.arrGame[0] = this.arrGame[0].concat(arrBoxFrame);
+        // 控制箱子y值
+        this.setLeftRight();
+        let disBoxX = (this.mainLeftX + this.mainRightX) * 0.5;
+        let disBoxY = this.arrGame[0][0].y;
+        for (let index = 0, length = this.arrGame.length; index < length; index++) {
+            let arrBoxParam = this.arrGame[index];
+            arrBoxParam.forEach((boxParam) => {
+                boxParam.x -= disBoxX;
+                boxParam.y -= disBoxY;
+             });
+        }
         // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
         this.arrGameCopy = Common.clone(this.arrGame);
 
@@ -424,7 +431,7 @@ export default class GameBox extends cc.Component {
         // 调整ui（nodeMain）
         this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
 
-        this.mainScale = this.getScaleReal();
+        this.setMainScale();
         this.nodeMain.scale = this.mainScale;
 
         // 箱子层级 y
@@ -438,7 +445,7 @@ export default class GameBox extends cc.Component {
         // 底部物品位置
         this.bottomParamArr = [];
         this.bottomPosArr = [];
-        let arrGoodPos = Common.getArrByName(this.uiBottom, 'pos');
+        let arrGoodPos = Common.getArrByName(this.uiBottom.getChildByName('pos'), 'pos');
         for (let index = 0, length = arrGoodPos.length; index < length; index++) {
             this.bottomPosArr.push(arrGoodPos[index].position);
         }
@@ -795,42 +802,41 @@ export default class GameBox extends cc.Component {
         }
     };
 
-    /**
-     * 获取真实缩放: 先计算适配宽时，能够显示的层级
-     * @param heigth 
-     * @returns 
-     */
-    getScaleReal() {
-        let scaleReal = 1;
-        let boxParam = this.arrGame[0][0];
-        let layer = (this.dataLevel['layer'] || this.defaultLayer);
-        let height = boxParam.h * layer;
-        let scaleByH = (cc.winSize.height * 0.5 - this.uiTop.height - this.nodeMain.y) / height;
-
-        let leftX = 0;
-        let rightX = 0;
+    /** 获取左右两侧x值 */
+    setLeftRight() {
         for (let index = 0, length = this.arrGame.length; index < length; index++) {
             let arrBoxParam = this.arrGame[index];
             arrBoxParam.forEach((boxParam) => {
-                if (leftX > boxParam.x - boxParam.w * 0.5) {
-                    leftX = boxParam.x - boxParam.w * 0.5;
+                if (this.mainLeftX > boxParam.x - boxParam.w * 0.5) {
+                    this.mainLeftX = boxParam.x - boxParam.w * 0.5;
                 }
-                if (rightX < boxParam.x + boxParam.w * 0.5) {
-                    rightX = boxParam.x + boxParam.w * 0.5;
+                if (this.mainRightX < boxParam.x + boxParam.w * 0.5) {
+                    this.mainRightX = boxParam.x + boxParam.w * 0.5;
                 }
             });
         }
-        let objW = this.dataLevel['objW'] || this.defaultObjW;
+    }
+
+    /** 设置真实缩放: 先计算适配宽时，能够显示的层级 */
+    setMainScale() {
+        let boxParam = this.arrGame[0][0];
+        let layer = (this.levelParam.layer || this.defaultLayer);
+        let height = boxParam.h * layer;
+        let scaleByH = (cc.winSize.height * 0.5 - this.uiTop.height - this.nodeMain.y) / height;
+
+        let objW = this.levelParam.objW || this.defaultObjW;
         let width = objW.left + objW.right;
-        let widthReal = rightX - leftX;
+        let widthDesign = cc.winSize.width - width;
+        let widthReal = this.mainRightX - this.mainLeftX;
+        let scaleByW = widthDesign / widthReal;
+
         if (widthReal * scaleByH + width > cc.winSize.width) {
-            let widthDesign = cc.winSize.width - width;
-            scaleReal = widthDesign / widthReal;
+            this.mainScale = scaleByW;
         }
         else {
-            scaleReal = scaleByH;
+            this.mainScale = scaleByH;
         }
-        return scaleReal;
+        Common.log('layer: ', layer, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, '; mainScale: ', this.mainScale);
     };
 
     getBoxIsFrame(h: number) {
@@ -1510,15 +1516,15 @@ export default class GameBox extends cc.Component {
 
     /** 游戏结束 */
     playAniGameOver() {
-        this.maskBottom.active = true;
         this.isLock = true;
         this.dataObj.isFinish = true;
+        this.maskBottom.active = true;
 
         if (this.goodsCount >= this.goodsTotal) {
-            console.log('胜利');
+            Common.log('胜利');
         }
         else {
-            console.log('失败');
+            Common.log('失败');
         }
     };
 
