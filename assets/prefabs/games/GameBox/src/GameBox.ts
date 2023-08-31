@@ -11,7 +11,7 @@ import ConfigGood from "../../../../src/config/ConfigGood";
 
 /** 关卡参数 */
 export interface LevelParam {
-    difficulty?: number,// 难度
+    difficulty?: number,// 难度（对应不同的过渡动画）
     isGolden?: boolean,// 是否有金币
     levelTime?: number,// 关卡时间
     layer?: number,// 关卡显示层级
@@ -44,6 +44,8 @@ export interface GoodParam {
     h: number;
     keyGood: number;
     isMove: boolean;
+    isEnough: boolean;
+    gold: { isGold: boolean, count: number, total: number },
     box: { name: string, key: number, x: number, y: number },
 }
 
@@ -57,81 +59,22 @@ export default class GameBox extends cc.Component {
     @property(cc.Node) nodeMain: cc.Node = null;// 箱子父节点
     @property(cc.Node) uiTop: cc.Node = null;// 顶部节点
     @property(cc.Node) uiProcess: cc.Node = null;// 进度节点
+    @property(cc.Node) uiMask: cc.Node = null;// 顶部的一部分遮挡按钮
     @property(cc.Node) uiTopLevel: cc.Node = null;// 等级ui
-    @property(cc.Node) uiTopTime: cc.Node = null;// 时间ui
-    @property(cc.Node) uiTopCoin: cc.Node = null;// 金币ui
+    @property(cc.Node) uiTopSuipian: cc.Node = null;// 碎片ui
     @property(cc.Node) uiTopProcess: cc.Node = null;// 进度ui
     @property(cc.Node) uiBottom: cc.Node = null;// 底部节点
     @property(cc.Node) uiBottomMain: cc.Node = null;// 底部物品父节点
+    @property(cc.Node) uiParticle: cc.Node = null;// 物品消除粒子
     @property(cc.Node) uiProp: cc.Node = null;// 道具父节点
     @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
     @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
 
-    levelParam: LevelParam = {
-        "difficulty": 1,
-        "isGolden":true,
-        "map":[
-            {"x":-105.5,"y":90.5,"w":"462","h":"181"},{"x":-105.5,"y":271.5,"w":"308","h":"181"},{"x":-105.5,"y":452.5,"w":"462","h":"181"},
-            {"x":-105.5,"y":633.5,"w":"308","h":"181"},{"x":-105.5,"y":814.5,"w":"462","h":"181"},{"x":-105.5,"y":995.5,"w":"308","h":"181"},
-            {"x":-105.5,"y":1176.5,"w":"462","h":"181"},{"x":-105.5,"y":1357.5,"w":"308","h":"181"},{"x":-105.5,"y":1538.5,"w":"462","h":"181"},
-            {"x":-105.5,"y":1719.5,"w":"308","h":"181"},{"x":-105.5,"y":1900.5,"w":"462","h":"181"},{"x":-105.5,"y":2081.5,"w":"308","h":"181"},
-            {"x":-105.5,"y":2262.5,"w":"462","h":"181"},{"x":-105.5,"y":2443.5,"w":"308","h":"181"},{"x":-105.5,"y":2624.5,"w":"462","h":"181"},
-            {"x":-105.5,"y":2805.5,"w":"308","h":"181"},{"x":-105.5,"y":2986.5,"w":"462","h":"181"},{"x":-105.5,"y":3167.5,"w":"308","h":"181"},
-            {"x":-105.5,"y":3348.5,"w":"462","h":"181"},{"x":-105.5,"y":3529.5,"w":"308","h":"181"},{"x":-105.5,"y":3710.5,"w":"462","h":"181"},
-            {"x":-105.5,"y":3891.5,"w":"308","h":"181"},{"x":-105.5,"y":4072.5,"w":"462","h":"181"},{"x":-105.5,"y":4253.5,"w":"308","h":"181"},
-            {"x":-105.5,"y":4434.5,"w":"462","h":"181"},{"x":230,"y":760,"w":"160","h":"20"},{"x":230,"y":560,"w":"160","h":"20"},
-            {"x":230,"y":360,"w":"160","h":"20"},{"x":230,"y":160,"w":"160","h":"20"}
-        ],
-        "item":[
-            {"x":40,"y":90.5,"w":3,"p":0,"n":"3002","g":0},{"x":-250,"y":90.5,"w":3,"p":0,"n":"3008","g":0},
-            {"x":-50,"y":271.5,"w":4,"p":1,"n":"4012","g":0},{"x":-105.5,"y":90.5,"w":3,"p":0,"n":"3002","g":0},
-            {"x":-170,"y":271.5,"w":2,"p":1,"n":"2008","g":0},{"x":40,"y":452.5,"w":4,"p":2,"n":"4001","g":0},
-            {"x":-250,"y":452.5,"w":3,"p":2,"n":"3006","g":0},{"x":-105.5,"y":452.5,"w":4,"p":2,"n":"4012","g":0},
-            {"x":-40,"y":633.5,"w":4,"p":3,"n":"4001","g":0},{"x":-190,"y":633.5,"w":3,"p":3,"n":"3002","g":0},
-            {"x":40,"y":814.5,"w":4,"p":4,"n":"4001","g":0},{"x":-250,"y":814.5,"w":4,"p":4,"n":"4012","g":0},
-            {"x":-105.5,"y":814.5,"w":2,"p":4,"n":"2016","g":0},{"x":-40,"y":995.5,"w":3,"p":5,"n":"3002","g":0},
-            {"x":-170,"y":995.5,"w":3,"p":5,"n":"3008","g":0},{"x":-200,"y":1357.5,"w":2,"p":7,"n":"2008","g":0},
-            {"x":-10,"y":1357.5,"w":2,"p":7,"n":"2018","g":0},{"x":-105.5,"y":1357.5,"w":2,"p":7,"n":"2009","g":0},
-            {"x":40,"y":1538.5,"w":2,"p":8,"n":"2016","g":0},{"x":-250,"y":1538.5,"w":3,"p":8,"n":"3001","g":0},
-            {"x":-95,"y":1538.5,"w":3,"p":8,"n":"3006","g":0},{"x":-200,"y":1719.5,"w":2,"p":9,"n":"2009","g":0},
-            {"x":-10,"y":1719.5,"w":2,"p":9,"n":"2018","g":0},{"x":-105.5,"y":1719.5,"w":2,"p":9,"n":"2008","g":0},
-            {"x":-250,"y":1900.5,"w":3,"p":10,"n":"3002","g":0},{"x":-105.5,"y":1900.5,"w":2,"p":10,"n":"2009","g":0},
-            {"x":-40,"y":2081.5,"w":3,"p":11,"n":"3008","g":0},{"x":-170,"y":2081.5,"w":3,"p":11,"n":"3001","g":0},
-            {"x":40,"y":2262.5,"w":2,"p":12,"n":"2008","g":0},{"x":-250,"y":2262.5,"w":3,"p":12,"n":"3008","g":0},
-            {"x":-95,"y":2262.5,"w":3,"p":12,"n":"3006","g":0},{"x":-40,"y":2443.5,"w":4,"p":13,"n":"4013","g":0},
-            {"x":-170,"y":2443.5,"w":2,"p":13,"n":"2018","g":0},{"x":40,"y":2624.5,"w":2,"p":14,"n":"2009","g":0},
-            {"x":-250,"y":2624.5,"w":4,"p":14,"n":"4001","g":0},{"x":-105.5,"y":2624.5,"w":3,"p":14,"n":"3006","g":0},
-            {"x":-40,"y":2805.5,"w":3,"p":15,"n":"3001","g":0},{"x":-170,"y":2805.5,"w":3,"p":15,"n":"3001","g":0},
-            {"x":40,"y":2986.5,"w":2,"p":16,"n":"2016","g":0},{"x":-250,"y":2986.5,"w":4,"p":16,"n":"4012","g":0},
-            {"x":-105.5,"y":2986.5,"w":3,"p":16,"n":"3001","g":0},{"x":-200,"y":3167.5,"w":2,"p":17,"n":"2009","g":0},
-            {"x":-10,"y":3167.5,"w":2,"p":17,"n":"2018","g":0},{"x":-105.5,"y":3167.5,"w":2,"p":17,"n":"2008","g":0},
-            {"x":40,"y":3348.5,"w":3,"p":18,"n":"3008","g":0},{"x":-105.5,"y":3348.5,"w":3,"p":18,"n":"3002","g":0},
-            {"x":-35,"y":3529.5,"w":4,"p":19,"n":"4013","g":0},{"x":-175,"y":3529.5,"w":4,"p":19,"n":"4013","g":0},
-            {"x":40,"y":3710.5,"w":3,"p":20,"n":"3011","g":0},{"x":-250,"y":3710.5,"w":3,"p":20,"n":"3001","g":0},
-            {"x":-105.5,"y":3710.5,"w":3,"p":20,"n":"3011","g":0},{"x":-35,"y":3891.5,"w":4,"p":21,"n":"4012","g":0},
-            {"x":-175,"y":3891.5,"w":4,"p":21,"n":"4012","g":0},{"x":40,"y":4072.5,"w":3,"p":22,"n":"3011","g":0},
-            {"x":-250,"y":4072.5,"w":3,"p":22,"n":"3008","g":0},{"x":-105.5,"y":4072.5,"w":3,"p":22,"n":"3001","g":0},
-            {"x":-200,"y":4253.5,"w":2,"p":23,"n":"2009","g":0},{"x":-10,"y":4253.5,"w":2,"p":23,"n":"2009","g":0},
-            {"x":-105.5,"y":4253.5,"w":2,"p":23,"n":"2018","g":0},{"x":40,"y":4434.5,"w":3,"p":24,"n":"3008","g":0},
-            {"x":-250,"y":4434.5,"w":3,"p":24,"n":"3001","g":0},{"x":230,"y":160,"w":4,"p":28,"n":"4013","g":0},
-            {"x":230,"y":160,"w":2,"p":28,"n":"2009","g":0},{"x":230,"y":160,"w":2,"p":28,"n":"2008","g":0},
-            {"x":230,"y":160,"w":3,"p":28,"n":"3006","g":0},{"x":230,"y":160,"w":4,"p":28,"n":"4001","g":0},
-            {"x":230,"y":360,"w":4,"p":27,"n":"4013","g":0},{"x":230,"y":360,"w":3,"p":27,"n":"3011","g":0},
-            {"x":230,"y":360,"w":4,"p":27,"n":"4001","g":0},{"x":230,"y":360,"w":3,"p":27,"n":"3011","g":0},
-            {"x":230,"y":360,"w":2,"p":27,"n":"2009","g":0},{"x":230,"y":560,"w":2,"p":26,"n":"2018","g":0},
-            {"x":230,"y":560,"w":3,"p":26,"n":"3008","g":0},{"x":230,"y":560,"w":4,"p":26,"n":"4013","g":0},
-            {"x":230,"y":560,"w":2,"p":26,"n":"2016","g":0},{"x":230,"y":560,"w":3,"p":26,"n":"3008","g":0},
-            {"x":230,"y":760,"w":2,"p":25,"n":"2016","g":0},{"x":230,"y":760,"w":3,"p":25,"n":"3011","g":0},
-            {"x":230,"y":760,"w":3,"p":25,"n":"3006","g":0},{"x":230,"y":760,"w":2,"p":25,"n":"2016","g":0},
-            {"x":230,"y":760,"w":3,"p":25,"n":"3001","g":0},{"x":40,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},
-            {"x":-250,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},{"x":-105.5,"y":1176.5,"w":4,"p":6,"n":"4010","g":0},
-            {"x":40,"y":1900.5,"w":4,"p":10,"n":"4010","g":0},{"x":-250,"y":3348.5,"w":4,"p":18,"n":"4010","g":0},
-            {"x":-105.5,"y":4434.5,"w":4,"p":24,"n":"4010","g":0}
-        ]
-    };
+    levelParam: LevelParam = null;
+    arrLevelLength: number[] = [94, 94 + 70, 94 + 70 + 70];
 
     resPath = {
-        levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/SortLevel' },
+        levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/level' },
     }
 
     /** 游戏用数据 */
@@ -164,8 +107,8 @@ export default class GameBox extends cc.Component {
     mainLeftX: number = 0;// 箱子最左边
     mainRightX: number = 0;// 箱子最后边
     winScaleByH: number = 1;// 屏幕缩放比例（根据高度判断）
+    processDisH: number = 8;// 进度条透明部分高度
     goodScaleBottom: number = 0.5;// 底部物品缩放比例
-    nodeMainPosY: number = 0;// 箱子父节点Y值
     arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
 
     baseTime: number = 1;// 1单位时间
@@ -173,10 +116,15 @@ export default class GameBox extends cc.Component {
     poolBox: cc.NodePool = null;// 箱子缓存
     poolGood: cc.NodePool = null;// 物品缓存
 
+    // 时间颜色
+    colorTime: cc.Color = cc.color(134, 77, 52);
+    colorTimeIce: cc.Color = cc.Color.BLUE;
+
     /** 移动速度 箱子 */
     speedBox = {
         speedCur: 0, speedDis: 2, speedInit: 0, speedMax: 20, isMove: false,
     };
+
     /** 移动速度 物品 */
     speedGood = {
         speedCur: 0, speedDis: 5, speedInit: 0, speedMax: 50, isMove: false,
@@ -201,25 +149,50 @@ export default class GameBox extends cc.Component {
     }
 
     /** 第一次开始 */
-    gameStart() {
+    async gameStart() {
         this.clear();
+        await this.loadData();
         this.initData();
         this.initBox();
         this.initUI();
-        this.loadLevel();
         this.initLevel();
         this.isLock = false;
     }
 
     /** 重新开始 */
-    gameRestart() {
+    async gameRestart() {
         this.clear();
+        await this.loadData();
         this.initData();
         this.resetBox();
         this.initUI();
-        this.loadLevel();
         this.initLevel();
         this.isLock = false;
+    }
+
+    async loadData() {
+        let cfg = this.resPath.levelPath;
+        let path = cfg.path;
+        let level = DataManager.data.boxData.level;
+        let index = 0;
+        if (level <= this.arrLevelLength[0]) {
+            path += '0';
+            index = level - 1;
+        }
+        else if (level <= this.arrLevelLength[1]) {
+            path += '1';
+            index = level - this.arrLevelLength[0] - 1;
+        }
+        else if (level <= this.arrLevelLength[2]) {
+            path += '2';
+            index = level - this.arrLevelLength[1] - 1;
+        }
+        else {
+            path += '2';
+            index = this.arrLevelLength[2] - 1;
+        }
+        let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
+        this.levelParam = asset.json[index];
     }
 
     initData() {
@@ -258,10 +231,22 @@ export default class GameBox extends cc.Component {
             };
             this.objGame[index] = boxParam;
         }
+
+        // 金币逻辑
+        let golden = this.levelParam.isGolden ? true : false;
+        let haveNum = 0;
+        let goldNum = Math.random() * (6 - 2) + 2;// 有金币的物品数量
+        let goodHaveGold = DataManager.data.boxData.goodGold;// 有金币的物品容器
         let goods = this.levelParam.item;
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
             let keyGood = Number(obj.n);
+            let isGold = false;
+            // 关卡内有金币  物品可以有金币  有金币的物品数量还有剩余
+            if (golden && goodHaveGold[keyGood] && haveNum < goldNum) {
+                haveNum++;
+                isGold = true;
+            }
             let nameRes = this.goodsCfg[keyGood].name;
             let w = this.goodsCfg[keyGood].w;
             let h = this.goodsCfg[keyGood].h;
@@ -270,7 +255,8 @@ export default class GameBox extends cc.Component {
             let x = obj.x - this.levelParam.map[keyBox].x;
             let y = obj.y - this.levelParam.map[keyBox].y;
             let goodParam: GoodParam = {
-                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false,
+                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
+                gold: { isGold: isGold, count: 0, total: 4 },
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
             };
             dataBox.goods[index] = goodParam;
@@ -296,6 +282,12 @@ export default class GameBox extends cc.Component {
             };
             this.objGame[index] = boxParam;
         }
+
+        // 金币逻辑
+        let golden = this.levelParam.isGolden ? true : false;
+        let haveNum = 0;
+        let goldNum = Math.random() * (6 - 2) + 2;// 有金币的物品数量
+        let goodHaveGold = DataManager.data.boxData.goodGold;// 有金币的物品容器
 
         /** 已解锁的物品 */
         let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
@@ -326,6 +318,12 @@ export default class GameBox extends cc.Component {
             const obj = goods[index];
             let key = Number(obj.n);
             let keyGood = resetKey(key);
+            let isGold = false;
+            // 关卡内有金币  物品可以有金币  有金币的物品数量还有剩余
+            if (golden && goodHaveGold[keyGood] && haveNum < goldNum) {
+                haveNum++;
+                isGold = true;
+            }
             let nameRes = this.goodsCfg[keyGood].name;
             let w = this.goodsCfg[keyGood].w;
             let h = this.goodsCfg[keyGood].h;
@@ -334,7 +332,8 @@ export default class GameBox extends cc.Component {
             let x = obj.x - this.levelParam.map[keyBox].x;
             let y = obj.y - this.levelParam.map[keyBox].y;
             let goodParam: GoodParam = {
-                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false,
+                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
+                gold: { isGold: isGold, count: 0, total: 4 },
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
             };
             dataBox.goods[index] = goodParam;
@@ -392,7 +391,7 @@ export default class GameBox extends cc.Component {
             arrBoxParam.forEach((boxParam) => {
                 boxParam.x -= disBoxX;
                 boxParam.y -= disBoxY;
-             });
+            });
         }
         // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
         this.arrGameCopy = Common.clone(this.arrGame);
@@ -418,7 +417,12 @@ export default class GameBox extends cc.Component {
                 item.scale = this.winScaleByH;
             }
         });
-        this.uiProcess.y = this.uiTop.y - this.uiTop.height * 0.5 + this.uiProcess.height * 0.5;
+        this.uiProcess.y = this.uiTop.y - this.uiTop.height * 0.5;
+        this.processDisH *= this.winScaleByH;
+
+        // 调整ui（uiMask）
+        this.uiMask.height = this.uiTop.height + this.uiProcess.height * 0.5 - this.processDisH;
+        this.uiMask.y = cc.winSize.height * 0.5;
 
         // 调整ui（uiProp）
         this.uiProp.height *= this.winScaleByH;
@@ -450,33 +454,11 @@ export default class GameBox extends cc.Component {
             this.bottomPosArr.push(arrGoodPos[index].position);
         }
 
+        this.setUILevel();// 设置关卡等级
+        this.setUISuipian();// 设置碎片数量
         this.setUITime();// 设置时间
+        this.setUITimeColor();// 设置时间颜色
         this.setUIProcess();// 设置进度
-    }
-
-    async loadLevel() {
-        // if (isSpecial) {
-        //     let cfg = this.resPath.levelPath;
-        //     let path = cfg.path + 'Else';
-        //     let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
-        //     return asset;
-        // }
-        // else {
-        //     let cfg = this.resPath.levelPath;
-        //     let path = cfg.path;
-        //     let sortLevel = DataManager.data.sortData.level;
-        //     if (sortLevel > 2000) { path = path + '1'; }
-        //     else if (sortLevel > 4000) { path = path + '2'; }
-        //     else if (sortLevel > 6000) { path = path + '3'; }
-        //     else if (sortLevel > 8000) { path = path + '4'; }
-        //     else if (sortLevel > 10000) { path = path + '5'; }
-        //     else if (sortLevel > 12000) { path = path + '6'; }
-        //     else if (sortLevel > 14000) { path = path + '7'; }
-        //     else if (sortLevel > 16000) { path = path + '8'; }
-        //     else if (sortLevel > 18000) { path = path + '9'; }
-        //     let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
-        //     return asset;
-        // }
     }
 
     /** 初始化游戏关卡 */
@@ -519,14 +501,30 @@ export default class GameBox extends cc.Component {
         });
     }
 
+    /** 设置关卡等级 */
+    setUILevel(){
+        let level = DataManager.data.boxData.level;
+        let label = this.uiTopLevel.getChildByName('label');
+        label.getComponent(cc.Label).string = 'Lv.' + level;
+    }
+
+    /** 设置碎片数量 */
+    setUISuipian(){
+        let numSuipian = DataManager.data.numSuipian;
+        let label = this.uiTopSuipian.getChildByName('label');
+        label.getComponent(cc.Label).string = 'x' + numSuipian;
+    }
+
     /** 设置时间 */
     setUITime() {
         let m = Math.floor(this.timeGame.count / 60);
         let s = Math.floor(this.timeGame.count % 60);
-        let strM = m < 10 ? '0' + m : String(m);
-        let strS = s < 10 ? '0' + s : String(s);
-        this.arrTimeLayer[0].getComponent(cc.Label).string = strM;
-        this.arrTimeLayer[1].getComponent(cc.Label).string = strS;
+        let strL = m < 10 ? '0' + m : '' + m;
+        let strR = s < 10 ? '0' + s : '' + s;
+        let strM = ':';
+        this.arrTimeLayer[0].getComponent(cc.Label).string = strL;
+        this.arrTimeLayer[1].getComponent(cc.Label).string = strR;
+        this.arrTimeLayer[2].getComponent(cc.Label).string = strM;
     }
 
     /** 设置进度 */
@@ -568,7 +566,7 @@ export default class GameBox extends cc.Component {
             this.timeProp.iceCount--;
             // 冻结 结束
             if (this.timeProp.iceCount <= 0) {
-                this.playAniIceFinish();
+                this.setUITimeColor();
             }
             return;
         }
@@ -802,8 +800,47 @@ export default class GameBox extends cc.Component {
         }
     };
 
+    /** 物品上的金色破碎 */
+    setGoldPosui() {
+        for (let index = 0, length = this.arrGame.length; index < length; index++) {
+            let arrBoxParam = this.arrGame[index];
+            arrBoxParam.forEach((boxParam) => {
+                for (const key in boxParam.goods) {
+                    // 属性不存在
+                    if (!Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                        continue;
+                    }
+                    // 物品上无金色遮罩
+                    let goodParam: GoodParam = boxParam.goods[key];
+                    if (!goodParam.gold.isGold) {
+                        continue;
+                    }
+                    // 物品没有显示出来
+                    let pointBox = Common.getLocalPos(this.nodeMain, cc.v3(0, boxParam.y), this.node);
+                    let pointTop = Common.getLocalPos(this.uiTop, cc.v3(0, -this.uiTop.height * 0.5), this.node);
+                    if (pointBox.y + boxParam.h >= pointTop.y) {
+                        continue;
+                    }
+                    // 物品节点不存在
+                    let box = this.nodeMain.getChildByName(boxParam.name);
+                    let good = box && box.getComponent(ItemBox).nodeMain.getChildByName(goodParam.name);
+                    if (!good) {
+                        continue;
+                    }
+                    // 遮罩破碎
+                    let scriptGood = good.getComponent(ItemGood);
+                    scriptGood.refreshGold();
+                    boxParam.goods[key] = scriptGood.param;
+                    console.log('pointBox: ', pointBox.y, '; pointTop: ', pointTop.y, '; good: ', JSON.stringify(boxParam.goods[key]));
+                }
+            });
+        }
+    };
+
     /** 获取左右两侧x值 */
     setLeftRight() {
+        this.mainLeftX = 0;
+        this.mainRightX = 0;
         for (let index = 0, length = this.arrGame.length; index < length; index++) {
             let arrBoxParam = this.arrGame[index];
             arrBoxParam.forEach((boxParam) => {
@@ -821,8 +858,9 @@ export default class GameBox extends cc.Component {
     setMainScale() {
         let boxParam = this.arrGame[0][0];
         let layer = (this.levelParam.layer || this.defaultLayer);
-        let height = boxParam.h * layer;
-        let scaleByH = (cc.winSize.height * 0.5 - this.uiTop.height - this.nodeMain.y) / height;
+        let heightBox = boxParam.h * layer;
+        let heightMain = cc.winSize.height * 0.5 - this.nodeMain.y - this.uiMask.height;
+        let scaleByH = heightMain / heightBox;
 
         let objW = this.levelParam.objW || this.defaultObjW;
         let width = objW.left + objW.right;
@@ -836,7 +874,7 @@ export default class GameBox extends cc.Component {
         else {
             this.mainScale = scaleByH;
         }
-        Common.log('layer: ', layer, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, '; mainScale: ', this.mainScale);
+        Common.log('level: ', DataManager.data.boxData.level, '; layer: ', layer, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, '; mainScale: ', this.mainScale);
     };
 
     getBoxIsFrame(h: number) {
@@ -880,6 +918,7 @@ export default class GameBox extends cc.Component {
             }
         }
         this.setMoveGood(true);
+        this.setGoldPosui();
         if (removeBoxNum > 0) {
             // 开始移动 箱子
             this.setMoveBox(true);
@@ -900,6 +939,7 @@ export default class GameBox extends cc.Component {
         good.scale = this.mainScale;
         good.active = true;
         scriptGood.refreshParams(pStart);
+        scriptGood.hideGold();
         this.goodParamsInsert(scriptGood.param);
 
         for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
@@ -1043,7 +1083,7 @@ export default class GameBox extends cc.Component {
             DataManager.poolPut(good, this.poolGood);
         }
         this.timeProp.iceCount = 0;
-        this.playAniIceFinish();
+        this.setUITimeColor();
     }
 
     /** 按钮事件 重玩 */
@@ -1062,8 +1102,8 @@ export default class GameBox extends cc.Component {
         };
         // 前30关，有一次免广告重玩的机会
         let level = DataManager.data.boxData.level;
-        if (level <= 30 && DataManager.data.rePlayNum > 0) {
-            DataManager.data.rePlayNum -= 1;
+        if (level <= 30 && DataManager.data.numReplay > 0) {
+            DataManager.data.numReplay -= 1;
             DataManager.setData();
             funcReplay();
             return;
@@ -1088,9 +1128,46 @@ export default class GameBox extends cc.Component {
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
+
         kit.Audio.playEffect(CConst.sound_path_click);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     }
+
+    /** 按钮事件 上一关 */
+    eventBtnLevelBack() {
+        if (this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        DataManager.data.boxData.level--;
+        let level = DataManager.data.boxData.level;
+        if (level <= this.arrLevelLength[0]) {
+            this.gameStart();
+        }
+        else if (level <= this.arrLevelLength[1]) {
+            this.gameRestart();
+        }
+        else {
+            this.gameRestart();
+        }
+    };
+
+    /** 按钮事件 下一关 */
+    eventBtnLevelNext() {
+        if (this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        DataManager.data.boxData.level++;
+        let level = DataManager.data.boxData.level;
+        if (level <= this.arrLevelLength[0]) {
+            this.gameStart();
+        }
+        else if (level <= this.arrLevelLength[1]) {
+            this.gameRestart();
+        }
+        else {
+            this.gameRestart();
+        }
+    };
 
     /** 按钮事件 上一步 */
     eventBtnReturn() {
@@ -1339,6 +1416,7 @@ export default class GameBox extends cc.Component {
                 goodParamA.w = goodParamB.w;
                 goodParamA.h = goodParamB.h;
                 goodParamA.keyGood = goodParamB.keyGood;
+                goodParamA.gold = goodParamB.gold;
                 let box = this.nodeMain.getChildByName(goodParamA.box.name);
                 let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParamA.name);
                 if (good) {
@@ -1450,7 +1528,7 @@ export default class GameBox extends cc.Component {
         }
         kit.Audio.playEffect(CConst.sound_path_click);
         this.timeProp.iceCount += this.timeProp.iceTotal;
-        this.playAniIceStart();
+        this.setUITimeColorIce();
     }
 
     /** 按钮事件 时间增加 */
@@ -1500,25 +1578,25 @@ export default class GameBox extends cc.Component {
         cc.tween(this.uiBottomMain).to(0.383, { opacity: opaFinish }, cc.easeSineInOut()).start();
     }
 
-    /** 动作 冻结开始 */
-    playAniIceStart() {
-        this.arrTimeLayer[0].node.color = cc.Color.BLUE;
-        this.arrTimeLayer[1].node.color = cc.Color.BLUE;
-        this.arrTimeLayer[2].node.color = cc.Color.BLUE;
+    /** ui颜色 时间 */
+    setUITimeColor() {
+        this.arrTimeLayer[0].node.color = this.colorTime;
+        this.arrTimeLayer[1].node.color = this.colorTime;
+        this.arrTimeLayer[2].node.color = this.colorTime;
     }
 
-    /** 动作 冻结结束 */
-    playAniIceFinish() {
-        this.arrTimeLayer[0].node.color = cc.Color.WHITE;
-        this.arrTimeLayer[1].node.color = cc.Color.WHITE;
-        this.arrTimeLayer[2].node.color = cc.Color.WHITE;
+    /** ui颜色 冻结 */
+    setUITimeColorIce() {
+        this.arrTimeLayer[0].node.color = this.colorTimeIce;
+        this.arrTimeLayer[1].node.color = this.colorTimeIce;
+        this.arrTimeLayer[2].node.color = this.colorTimeIce;
     }
 
     /** 游戏结束 */
     playAniGameOver() {
         this.isLock = true;
         this.dataObj.isFinish = true;
-        this.maskBottom.active = true;
+        // this.maskBottom.active = true;
 
         if (this.goodsCount >= this.goodsTotal) {
             Common.log('胜利');

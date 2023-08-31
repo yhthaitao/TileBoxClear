@@ -12,10 +12,6 @@ export default class MainMenu extends cc.Component {
     
     // 顶部ui
     @property(cc.Node) uiTop: cc.Node = null;
-    @property(cc.Node) topLabelStrengthNum: cc.Node = null;
-    @property(cc.Node) topLabelStrengthMax: cc.Node = null;
-    @property(cc.Node) topLabelStrengthTime: cc.Node = null;
-    @property(cc.Node) topLabelCoinNum: cc.Node = null;
     
     // 底部ui
     @property(cc.Node) uiBottom: cc.Node = null;
