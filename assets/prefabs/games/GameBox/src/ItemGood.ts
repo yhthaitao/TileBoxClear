@@ -1,4 +1,5 @@
 import Common from "../../../../src/config/Common";
+import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import GameBox, { GoodParam } from "./GameBox";
 
@@ -33,7 +34,7 @@ export default class ItemGood extends cc.Component {
         this.initGold();
 
         let path = this.resPath.path + this.param.nameRes;
-        kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
+        kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
                 Common.log(' 资源加载异常 good_path: ', path);
                 return;

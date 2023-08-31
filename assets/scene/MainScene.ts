@@ -73,7 +73,7 @@ export default class MainScene extends cc.Component {
         await DataManager.initData(this.nodeVideo);
         // 初始化音频
         kit.Audio.initAudio();
-        kit.Audio.playMusic(CConst.sound_path_music);
+        kit.Audio.playMusic(CConst.sound_music);
     };
 
     /** 初始化 ui */

@@ -36,12 +36,6 @@ export default class SpecialTip extends PopupBase {
     }
 
     protected onShow(): void {
-        if (DataManager.data.specialData.isFirst) {
-            DataManager.data.specialData.isFirst = false;
-            this.iconHand.active = true;
-            this.iconHand.opacity = 0;
-            cc.tween(this.iconHand).to(0.4, { opacity: 255 }).start();
-        }
         this.btnSkip.active = true;
         this.btnSkip.opacity = 0;
         cc.tween(this.btnSkip).delay(2.0).to(0.4, { opacity: 255 }).start();
@@ -54,13 +48,13 @@ export default class SpecialTip extends PopupBase {
     }
 
     eventBtnPlay() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.isSpecial = true;
         kit.Popup.hide();
     }
 
     eventBtnSkip() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.isSpecial = false;
         kit.Popup.hide();
     }

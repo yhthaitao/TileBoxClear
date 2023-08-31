@@ -59,6 +59,7 @@ const CConst = {
     event_log_wheel_click: 'wheel_click',
     /*************************************** end **************************************************/
 
+
     /*****************************************************************************************/
     /*************************************** 弹窗地址 ****************************************/
     /*****************************************************************************************/
@@ -73,13 +74,14 @@ const CConst = {
     /*************************************** 音频资源地址 ****************************************/
     /*****************************************************************************************/
     /** 音效：按键 */
-    sound_path_music: './audio/music',
-    sound_path_click: './audio/click',
-    sound_path_reward: './audio/reward',
-    sound_path_win: './audio/win',
-    sound_path_finish: './audio/finish',
-    sound_path_ballSort: './audio/ballSort',
-    sound_path_ballLong: './audio/ballLong',
+    sound_music: './audio/music',
+    sound_enterGame: './audio/enterGame',
+    sound_clickUI: './audio/clickUI',
+    sound_clickGood: './audio/clickGood',
+    sound_getProp: './audio/getProp',
+    sound_removeGood: './audio/removeGood',
+    sound_win: './audio/win',
+    sound_winXing: './audio/winXing',
     /*************************************** end **************************************************/
 
 

@@ -28,7 +28,7 @@ export default class GameWin extends cc.Component {
 
     /** 播放动画 进入结算界面 */
     playAniEnter() {
-        kit.Audio.playEffect(CConst.sound_path_win);
+        kit.Audio.playEffect(CConst.sound_win);
 
         // 隐藏 win标签
         this.nodeSign.opacity = 0;
@@ -86,7 +86,7 @@ export default class GameWin extends cc.Component {
             return;
         }
         this.isLock = true;
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.playAniLeave();
     }
 

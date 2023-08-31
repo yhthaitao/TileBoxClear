@@ -36,14 +36,14 @@ export default class SpecialQuit extends PopupBase {
         if (btnIndex < 0) {
             return;
         }
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.xingNum = btnIndex + 1;
         this.refreshXingxing();
     }
 
     /** 按钮事件 确定 */
     eventBtnSure() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         if (this.xingNum > this.xingMax - 1) {
             DataManager.data.isAllreadyEvaluate = true;
             DataManager.setData();
@@ -54,7 +54,7 @@ export default class SpecialQuit extends PopupBase {
 
     /** 按钮事件 退出 */
     eventBtnExit() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
     }
 

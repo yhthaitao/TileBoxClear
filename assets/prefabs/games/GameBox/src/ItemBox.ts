@@ -1,3 +1,4 @@
+import Common from "../../../../src/config/Common";
 import { BoxParam } from "./GameBox";
 import ItemGood from "./ItemGood";
 
@@ -14,7 +15,7 @@ export default class ItemBox extends cc.Component {
     };
     param: BoxParam = null;
     init(param: BoxParam) {
-        this.param = param;
+        this.param = Common.clone(param);
         this.node.x = this.param.x;
         this.node.y = this.param.y;
         this.node.name = this.param.name;
@@ -35,6 +36,7 @@ export default class ItemBox extends cc.Component {
             this.itemIcon.height = this.param.h;
             this.arrKuang.forEach((item)=>{ item.active = false; });
         }
+        this.nodeMain.removeAllChildren(true);
     };
 
     sortGood(){

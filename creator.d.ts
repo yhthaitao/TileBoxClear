@@ -2061,7 +2061,7 @@ declare namespace cc {
 		@param c2 c2
 		@param to to 
 		*/
-		bezierTo(duration: number, c1: Vec2, c2: Vec2, to: Vec2): Tween<T>;		
+		bezierTo(duration: number, c1: Vec2, c2: Vec2, to: Vec2, ...any): Tween<T>;		
 		/**
 		!#en Sets target's position property according to the bezier curve.
 		!#zh 按照贝塞尔路径设置目标的 position 属性。

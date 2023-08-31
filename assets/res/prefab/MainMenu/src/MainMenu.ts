@@ -50,13 +50,13 @@ export default class MainMenu extends cc.Component {
 
     /** 按钮事件 设置 */
     eventBtnSet() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     }
 
     /** 按钮事件 进入游戏sort */
     eventBtnStart() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Event.emit(CConst.event_enter_gameSort);
     }
 }

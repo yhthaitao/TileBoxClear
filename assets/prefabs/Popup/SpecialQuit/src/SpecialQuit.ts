@@ -30,13 +30,13 @@ export default class SpecialQuit extends PopupBase {
     }
 
     eventBtnSure() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.isSure = true;
         kit.Popup.hide();
     }
 
     eventBtnExit() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         this.isSure = false;
         kit.Popup.hide();
     }

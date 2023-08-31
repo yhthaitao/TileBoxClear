@@ -64,7 +64,7 @@ export default class Setting extends PopupBase {
         if (this.isMoving) {
             return;
         }
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         let funcPre = (uiSign: cc.Node, xStart: number, xFinish: number)=>{
             uiSign.active = true;
             uiSign.x = xStart;
@@ -85,13 +85,13 @@ export default class Setting extends PopupBase {
         }
         else{
             kit.Audio.setIsSound(true);
-            kit.Audio.playMusic(CConst.sound_path_music);
+            kit.Audio.playMusic(CConst.sound_music);
             funcPre(this.uiSignOn, this.xMin, this.xMax);
         }
     }
 
     eventBtnExit(){
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
     }
 }

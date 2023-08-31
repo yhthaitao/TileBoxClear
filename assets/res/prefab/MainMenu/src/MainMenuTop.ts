@@ -25,7 +25,7 @@ export default class MainMenuTop extends cc.Component {
 
     /** 按钮事件 设置 */
     eventBtnSet() {
-        kit.Audio.playEffect(CConst.sound_path_click);
+        kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
 }
