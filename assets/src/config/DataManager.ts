@@ -105,10 +105,11 @@ class DataManager {
         propAddTupe: 2,// 初始有两个加瓶子的道具
         // 体力参数
         strength: {
-            num: 5,// 当前体力值
-            tCur: 0, // 恢复体力计时
-            tNeed: 900,// 900秒恢复1体力
-            coin: 100,// 100金币购买1体力
+            numCur: 5,// 当前体力值
+            numTotal: 5,// 最大体力值
+            timeCur: 900, // 恢复体力计时
+            timeNeed: 900,// 900秒恢复1体力
+            coinNeed: 100,// 100金币购买1体力
         },
         numCoin: 300,// 金币数量
         numSuipian: 0,// 碎片数量

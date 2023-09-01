@@ -7,9 +7,9 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class ItemGood extends cc.Component {
 
-    @property(cc.Node) nodeIcon: cc.Node = null;
-    @property(cc.Node) nodeGold: cc.Node = null;
-    @property(cc.Node) nodeDragon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '物品节点-图' }) nodeIcon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '碎片节点-图' }) nodeGold: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '碎片节点-动画' }) nodeDragon: cc.Node = null;
 
     state: number = 0;
     isChose: boolean = false;
@@ -24,7 +24,7 @@ export default class ItemGood extends cc.Component {
         this.node.position = cc.v3(this.param.x, this.param.y);
 
         this.node.name = this.param.name;
-        
+
         let label = this.node.getChildByName('label');
         label.getComponent(cc.Label).string = String(this.param.keyGood);
         label.active = false;
@@ -129,7 +129,7 @@ export default class ItemGood extends cc.Component {
         posuiDragon.playAnimation('newAnimation', 1);
     };
 
-    hideGold(){
+    hideGold() {
         this.param.gold.isGold = false;
         this.nodeGold.active = false;
         this.nodeDragon.active = false;

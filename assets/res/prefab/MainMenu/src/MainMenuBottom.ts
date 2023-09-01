@@ -5,7 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class MainMenuTop extends cc.Component {
+export default class MainMenuBottom extends cc.Component {
 
     @property(cc.Node) labelStrengthNum: cc.Node = null;
     @property(cc.Node) labelStrengthMax: cc.Node = null;

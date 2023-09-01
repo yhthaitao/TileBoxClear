@@ -53,26 +53,28 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class GameBox extends cc.Component {
 
-    @property(cc.Node) maskTop: cc.Node = null;// 顶部屏蔽
-    @property(cc.Node) maskBottom: cc.Node = null;// 底部屏蔽
-    @property([cc.Label]) arrTimeLayer: cc.Label[] = [];// 时间
-    @property(cc.Node) nodeMain: cc.Node = null;// 箱子父节点
-    @property(cc.Node) uiTop: cc.Node = null;// 顶部节点
-    @property(cc.Node) uiProcess: cc.Node = null;// 进度节点
-    @property(cc.Node) uiMask: cc.Node = null;// 顶部的一部分遮挡按钮
-    @property(cc.Node) uiTopLevel: cc.Node = null;// 等级ui
-    @property(cc.Node) uiTopSuipian: cc.Node = null;// 碎片ui
-    @property(cc.Node) uiTopProcess: cc.Node = null;// 进度ui
-    @property(cc.Node) uiBottom: cc.Node = null;// 底部节点
-    @property(cc.Node) uiBottomMain: cc.Node = null;// 底部物品父节点
-    @property(cc.Node) uiParticle: cc.Node = null;// 物品消除粒子
-    @property(cc.Node) uiProp: cc.Node = null;// 道具父节点
-    @property(cc.Prefab) preBox: cc.Prefab = null;// 预制体：箱子
-    @property(cc.Prefab) preGood: cc.Prefab = null;// 预制体：物品
+    @property({ type: cc.Node, tooltip: '事件拦截-游戏底层' }) maskTop: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '事件拦截-游戏顶层' }) maskBottom: cc.Node = null;
+    @property({ type: [cc.Label], tooltip: '游戏事件label数组' }) arrTimeLayer: cc.Label[] = [];
+    @property({ type: cc.Node, tooltip: '箱子父节点' }) nodeMain: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-顶部' }) uiTop: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-顶部-关卡等级' }) uiTopLevel: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-顶部-碎片数量' }) uiTopSuipian: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '消除进度' }) uiProcess: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '事件拦截-操作区顶部' }) uiMask: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-底部' }) uiBottom: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-底部-检测区' }) uiBottomMain: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '消除动作节点' }) uiParticle: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具' }) uiProp: cc.Node = null;
+    @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
+    @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
 
+    /** 关卡数据 */
     levelParam: LevelParam = null;
+    /** 关卡文件长度 */
     arrLevelLength: number[] = [94, 94 + 70, 94 + 70 + 70];
 
+    /** 资源路径 */
     resPath = {
         levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/level' },
     }
@@ -117,9 +119,8 @@ export default class GameBox extends cc.Component {
     poolBox: cc.NodePool = null;// 箱子缓存
     poolGood: cc.NodePool = null;// 物品缓存
 
-    // 时间颜色
-    colorTime: cc.Color = cc.color(134, 77, 52);
-    colorTimeIce: cc.Color = cc.Color.BLUE;
+    colorTime: cc.Color = cc.color(134, 77, 52);// 时间颜色-起始
+    colorTimeIce: cc.Color = cc.Color.BLUE;// 时间颜色-冻结
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -177,22 +178,24 @@ export default class GameBox extends cc.Component {
         let path = cfg.path;
         let level = DataManager.data.boxData.level;
         let index = 0;
-        if (level <= this.arrLevelLength[0]) {
-            path += '0';
-            index = level - 1;
-        }
-        else if (level <= this.arrLevelLength[1]) {
-            path += '1';
-            index = level - this.arrLevelLength[0] - 1;
-        }
-        else if (level <= this.arrLevelLength[2]) {
-            path += '2';
-            index = level - this.arrLevelLength[1] - 1;
-        }
-        else {
-            path += '2';
-            index = this.arrLevelLength[2] - 1;
-        }
+        // if (level <= this.arrLevelLength[0]) {
+        //     path += '0';
+        //     index = level - 1;
+        // }
+        // else if (level <= this.arrLevelLength[1]) {
+        //     path += '1';
+        //     index = level - this.arrLevelLength[0] - 1;
+        // }
+        // else if (level <= this.arrLevelLength[2]) {
+        //     path += '2';
+        //     index = level - this.arrLevelLength[1] - 1;
+        // }
+        // else {
+        //     path += '2';
+        //     index = this.arrLevelLength[2] - 1;
+        // }
+        path += '0';
+        index = level > 234 ? 234 : level - 1;
         let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
         this.levelParam = asset.json[index];
     }
@@ -534,16 +537,16 @@ export default class GameBox extends cc.Component {
     /** 设置进度 */
     setUIProcess() {
         let wTotal = 682;
-        let bar = this.uiTopProcess.getChildByName('bar');
+        let bar = this.uiProcess.getChildByName('bar');
         if (this.goodsCount == 0) {
             bar.width = 0;
         }
         else {
             cc.tween(bar).to(0.3, { width: wTotal * this.goodsCount / this.goodsTotal }).start();
         }
-        let labelCur = this.uiTopProcess.getChildByName('labelCur');
+        let labelCur = this.uiProcess.getChildByName('labelCur');
         labelCur.getComponent(cc.Label).string = String(this.goodsCount);
-        let labelTotal = this.uiTopProcess.getChildByName('labelTotal');
+        let labelTotal = this.uiProcess.getChildByName('labelTotal');
         labelTotal.getComponent(cc.Label).string = String(this.goodsTotal);
     }
 
@@ -820,7 +823,12 @@ export default class GameBox extends cc.Component {
                 let boxParam = arrBoxParam[j];
                 // 特殊箱子 只检测 index 编号最小的
                 if (boxParam.isFrame) {
-                    let arrGoodParam: GoodParam[] = Common.getArrByFunc(Object.values(boxParam.goods), (a: GoodParam, b: GoodParam) => {
+                    let goodParams = Object.values(boxParam.goods);
+                    // 空箱子
+                    if (goodParams.length <= 0) {
+                        continue;
+                    }
+                    let arrGoodParam: GoodParam[] = Common.getArrByFunc(goodParams, (a: GoodParam, b: GoodParam) => {
                         return a.index - b.index;
                     });
                     // 物品上无金色遮罩
@@ -1628,7 +1636,7 @@ export default class GameBox extends cc.Component {
     }
 
     /** 播放动画（新增碎片） */
-    playAniAddSuipian(good: cc.Node){
+    playAniAddSuipian(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         if (scriptGood.param.gold.isGold) {
             DataManager.data.numSuipian++;
@@ -1640,7 +1648,7 @@ export default class GameBox extends cc.Component {
             let copy = cc.instantiate(suipian);
             copy.parent = nodeParent;
             copy.position = cc.v3();
-            let pGood = cc.v3(good.x, good.y + scriptGood.param.h * 0.4 * this.mainScale); 
+            let pGood = cc.v3(good.x, good.y + scriptGood.param.h * 0.4 * this.mainScale);
             let p1 = Common.getLocalPos(good.parent, pGood, copy.parent);
             let p2 = Common.getLocalPos(suipian.parent, suipian.position, copy.parent);
             copy.position = p1;
@@ -1654,8 +1662,8 @@ export default class GameBox extends cc.Component {
             copy.scale = obj.scale * 0.5;
             cc.tween(copy).parallel(
                 cc.tween().bezierTo(obj.time, obj.p1, obj.p2, obj.pTo, cc.easeSineOut()),
-                cc.tween().to(obj.time * 0.75, {scale: obj.scale}),
-            ).call(()=>{
+                cc.tween().to(obj.time * 0.75, { scale: obj.scale }),
+            ).call(() => {
                 copy.removeFromParent(true);
                 this.setUISuipian();
             }).start();

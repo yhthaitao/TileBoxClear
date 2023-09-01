@@ -7763,12 +7763,6 @@
     "uiTop": {
       "__id__": 53
     },
-    "uiProcess": {
-      "__id__": 105
-    },
-    "uiMask": {
-      "__id__": 50
-    },
     "uiTopLevel": {
       "__id__": 54
     },
@@ -7777,6 +7771,12 @@
     },
     "uiTopProcess": {
       "__id__": 105
+    },
+    "uiProcess": {
+      "__id__": 105
+    },
+    "uiMask": {
+      "__id__": 50
     },
     "uiBottom": {
       "__id__": 12
