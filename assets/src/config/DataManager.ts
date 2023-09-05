@@ -9,13 +9,6 @@ export const Design = {
     height: 1560,
 }
 
-/** 游戏状态 */
-export const GameState = {
-    stateLoading: 1,
-    stateMainMenu: 1 << 1,
-    stateGame: 1 << 2,
-}
-
 /** 本地化 文字 文件 */
 export const LangFile = {
     en: 'en',// 英文
@@ -57,12 +50,31 @@ export const LangImg = {
     word_win_title: "word_win_title",
 };
 
+/** 游戏状态 */
+export enum StateGame {
+    loading = 1,// 冰冻
+    menu = 1 << 1,// 提示
+    game = 1 << 2,// 返回上一步
+}
+
 /** 道具 */
-export enum PropType {
-    /** 道具 返回步数 */
-    propBack = 'back',
-    /** 道具 瓶子 */
-    propTube = 'tube',
+export enum TypeProp {
+    ice = 1,// 冰冻
+    tip = 1 << 1,// 提示
+    back = 1 << 2,// 返回上一步
+    refresh = 1 << 3,// 刷新
+    magnet = 1 << 4,// 磁铁
+    clock = 1 << 5,// 时钟
+    coin = 1 << 6,// 金币
+    tStrengthInfinite = 1 << 7,// 无限时间-体力
+    tMagnetInfinite = 1 << 8,// 无限时间-磁铁
+    tClockInfinite = 1 << 9,// 无限时间-时钟
+}
+
+/** 数据类型（碎片宝箱奖励） */
+export interface TypeReward {
+    total: number, // 碎片数量
+    reward: { type: TypeProp, number: number }[],// 奖励的类型和数量
 }
 
 /** 数据管理类 */
@@ -94,27 +106,49 @@ class DataManager {
     data = {
         // 用户初始化数据
         userInfo: { id: 0, name: "Tony" },
-        adsRemove: false,// 是否去除广告
-        adRecord: { time: 0, level: 0 },// 上一次广告计时
-        adCount: 0,// 广告计数
-        s2sCount: 0,// 回传计数
-        checkAdCpe: true,// 打点记录 只打一次
-        isAllreadyEvaluate: false,// 是否已经评价
+        // 广告参数
+        advert: {
+            isRemove: false,// 是否去除广告
+            record: { time: 0, level: 0 },// 广告计时
+            count: 0,// 广告计数
+            s2sCount: 0,// 回传计数
+            isCpe: false,// 打点记录 只打一次
+            revenue: '0',// 广告收入
+        },
+        isEvaluate: false,// 是否已经评价
         installtime: new Date().valueOf(),
-        revenue: '0',// 收入
-        propAddTupe: 2,// 初始有两个加瓶子的道具
+        numCoin: 300,// 金币数量
+        numReplay: 1,// 可以重玩的次数，限30关之前
         // 体力参数
         strength: {
-            numCur: 5,// 当前体力值
-            numTotal: 5,// 最大体力值
-            timeCur: 900, // 恢复体力计时
-            timeNeed: 900,// 900秒恢复1体力
-            coinNeed: 100,// 100金币购买1体力
+            count: 5,// 当前体力值
+            total: 5,// 最大体力值
+            tCount: 0, // 恢复体力计时
+            tTotal: 900,// 900秒恢复1体力
+            buyCoin: 100,// 100金币购买1体力
+            tInfinite: 0,// 无限时间
         },
-        numCoin: 300,// 金币数量
-        numSuipian: 0,// 碎片数量
-        numXingxing: 0,// 星星数量
-        numReplay: 1,// 可以重玩的次数，限30关之前
+        // 道具参数
+        prop: {
+            ice: { count: 5 },// 冰冻
+            tip: { count: 5 },// 提示
+            back: { count: 5 },// 返回上一步
+            refresh: { count: 5 },// 刷新
+            magnet: { count: 5, tInfinite: 0 },// 磁铁
+            clock: { count: 5, tInfinite: 0 },// 时钟
+        },
+        // 宝箱相关参数（碎片宝箱）
+        boxSuipian: { 
+            level: 1, count: 0, timeLunch: 0,
+        },
+        // 宝箱相关参数（关卡等级宝箱）
+        boxLevel: { 
+            level: 1, count: 0, loop: { start: 6, length: 3, },
+        },
+        // 宝箱相关参数（星星宝箱）
+        boxXingxing: { 
+            level: 1, count: 0, loop: { start: 6, length: 16, }, 
+        },
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
@@ -132,7 +166,7 @@ class DataManager {
             },
             // 有金币的物品
             goodGold: {
-                1001: 1, 1002: 1, 1003: 1, 
+                1001: 1, 1002: 1, 1003: 1,
                 // 1001: 1, 1002: 1, 1003: 1, 1004: 1, 1005: 1, 1006: 1, 1013: 1, 1014: 1, 1007: 1, 1011: 1, 1015: 1, 1010: 1,
                 // 2001: 1, 2002: 1, 2003: 1, 2016: 1, 2017: 1, 2018: 1, 2022: 1, 2013: 1, 2014: 1, 2015: 1, 2021: 1, 2010: 1, 2023: 1, 2024: 1,
                 // 3008: 1, 3009: 1, 3010: 1, 3013: 1, 3011: 1, 3014: 1, 3003: 1, 3015: 1, 3016: 1, 3001: 1, 3002: 1,
@@ -156,9 +190,9 @@ class DataManager {
         else {
             cc.sys.localStorage.setItem('gameData', JSON.stringify(this.data));
         }
-        
+
         // 初始化收入
-        NativeCall.setRevenue(this.data.revenue);
+        NativeCall.setRevenue(this.data.advert.revenue);
         // 初始化语言
         this.initLanguage();
         // 提前加载 本地化 文本
@@ -228,7 +262,7 @@ class DataManager {
 
     /** 检测是否有banner */
     public checkBanner() {
-        if (this.data.adsRemove) {
+        if (this.data.advert.isRemove) {
             return false;
         }
         return this.data.boxData.level > this.adStartLevel;
@@ -250,9 +284,9 @@ class DataManager {
         }
 
         let timeNow = Math.floor(new Date().getTime() * 0.001);
-        let timeRecord = this.data.adRecord.time;
+        let timeRecord = this.data.advert.record.time;
         let timeLast = timeNow - timeRecord;
-        let levelRecord = this.data.adRecord.level;
+        let levelRecord = this.data.advert.record.level;
         let levelLast = levelNow - levelRecord;
         Common.log(' 检测 时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
         if (levelNow > 20) {
@@ -307,12 +341,12 @@ class DataManager {
 
     /** 更新广告计数 */
     public updateAdCount() {
-        this.data.adCount++;
-        let dot = ConfigDot['dot_ad_revenue_track_flag_' + this.data.adCount];
+        this.data.advert.count++;
+        let dot = ConfigDot['dot_ad_revenue_track_flag_' + this.data.advert.count];
         dot && NativeCall.logEventOne(dot);
         // 过完35关、看广告次数达到50次打点，只记一次；
-        if (this.data.checkAdCpe && this.data.boxData.level > 35 && this.data.adCount >= 50) {
-            this.data.checkAdCpe = false;
+        if (!this.data.advert.isCpe && this.data.boxData.level > 35 && this.data.advert.count >= 50) {
+            this.data.advert.isCpe = true;
             NativeCall.logEventOne(ConfigDot.dot_applovin_cpe);
         }
         this.setData(false);
@@ -320,9 +354,9 @@ class DataManager {
 
     /** 更新回传计数 */
     public updateS2SCount(): number {
-        this.data.s2sCount++;
+        this.data.advert.s2sCount++;
         this.setData(false);
-        return this.data.s2sCount;
+        return this.data.advert.s2sCount;
     };
 
     /** 缓冲池处理 */

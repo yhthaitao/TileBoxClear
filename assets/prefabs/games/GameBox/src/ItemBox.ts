@@ -48,6 +48,7 @@ export default class ItemBox extends cc.Component {
 
     refreshGoods() {
         this.nodeMain.children.forEach((good: cc.Node, index: number) => {
+            good.x = 0;
             good.active = index == 0;
         });
     }

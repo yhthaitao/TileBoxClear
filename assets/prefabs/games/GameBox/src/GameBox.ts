@@ -80,7 +80,8 @@ export default class GameBox extends cc.Component {
     }
 
     /** 游戏用数据 */
-    dataObj = { stepCount: 0, passTime: 0, isFinish: false };
+    dataObj = { numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false };
+    heightObj = {};
 
     goodsCfg: any = {};// 物品配置
     goodsCount: number = 0;// 物品计数
@@ -133,7 +134,49 @@ export default class GameBox extends cc.Component {
     };
 
     protected onLoad(): void {
+        console.log('GameBox onLoad()');
+
         this.listernerRegist();
+
+        // 缩放数据
+        this.winScaleByH = cc.winSize.height / Design.height;
+        let disBackToProp = 60 * this.winScaleByH;
+        let disTopToProcess = 63 * this.winScaleByH;
+        let disPropToBottom = 60 * this.winScaleByH;
+        let disBottomToMain = 150 * this.winScaleByH;
+
+        // 调整ui（uiTop）
+        this.uiTop.height *= this.winScaleByH;
+        this.uiTop.children.forEach((item) => { item.scale = this.winScaleByH; });
+        this.uiTop.y = cc.winSize.height * 0.5 - this.uiTop.height * 0.5;
+
+        // 调整ui（uiProcess）
+        this.uiProcess.height *= this.winScaleByH;
+        this.uiProcess.children.forEach((item) => {
+            if (item.name == 'bar') {
+                item.height *= this.winScaleByH;
+            }
+            else {
+                item.scale = this.winScaleByH;
+            }
+        });
+        this.uiProcess.y = this.uiTop.y - disTopToProcess;
+        this.processDisH *= this.winScaleByH;
+
+        // 调整ui（uiMask）
+        this.uiMask.height = cc.winSize.height * 0.5 - this.uiProcess.y  + this.uiProcess.height * 0.5 - this.processDisH;
+        this.uiMask.y = cc.winSize.height * 0.5;
+
+        // 调整ui（uiProp）
+        this.uiProp.height *= this.winScaleByH;
+        this.uiProp.children.forEach((item) => { item.scale = this.winScaleByH; });
+        this.uiProp.y = -cc.winSize.height * 0.5 + this.uiProp.height * 0.5 + disBackToProp;
+
+        // 调整ui（uiBottom）
+        this.uiBottom.y = this.uiProp.y + this.uiProp.height * 0.5 + this.uiBottom.height * 0.5 + disPropToBottom;
+
+        // 调整ui（nodeMain）
+        this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
     }
 
     protected start(): void {
@@ -204,6 +247,7 @@ export default class GameBox extends cc.Component {
     initData() {
         /** 游戏用数据 */
         this.dataObj = {
+            numSuipian: 0,
             stepCount: 0,
             passTime: new Date().getTime(),
             isFinish: false,
@@ -260,7 +304,7 @@ export default class GameBox extends cc.Component {
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
             let x = obj.x - this.levelParam.map[keyBox].x;
-            let y = obj.y - this.levelParam.map[keyBox].y;
+            let y = obj.y - this.levelParam.map[keyBox].y + 5;
             let goodParam: GoodParam = {
                 index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
                 gold: { isGold: isGold, count: 0, total: 4 },
@@ -404,45 +448,6 @@ export default class GameBox extends cc.Component {
         // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
         this.arrGameCopy = Common.clone(this.arrGame);
 
-        // 缩放数据
-        this.winScaleByH = cc.winSize.height / Design.height;
-        let disBackToProp = 60 * this.winScaleByH;
-        let disPropToBottom = 60 * this.winScaleByH;
-        let disBottomToMain = 150 * this.winScaleByH;
-
-        // 调整ui（uiTop）
-        this.uiTop.height *= this.winScaleByH;
-        this.uiTop.children.forEach((item) => { item.scale = this.winScaleByH; });
-        this.uiTop.y = cc.winSize.height * 0.5 - this.uiTop.height * 0.5;
-
-        // 调整ui（uiProcess）
-        this.uiProcess.height *= this.winScaleByH;
-        this.uiProcess.children.forEach((item) => {
-            if (item.name == 'bar') {
-                item.height *= this.winScaleByH;
-            }
-            else {
-                item.scale = this.winScaleByH;
-            }
-        });
-        this.uiProcess.y = this.uiTop.y - this.uiTop.height * 0.5;
-        this.processDisH *= this.winScaleByH;
-
-        // 调整ui（uiMask）
-        this.uiMask.height = this.uiTop.height + this.uiProcess.height * 0.5 - this.processDisH;
-        this.uiMask.y = cc.winSize.height * 0.5;
-
-        // 调整ui（uiProp）
-        this.uiProp.height *= this.winScaleByH;
-        this.uiProp.children.forEach((item) => { item.scale = this.winScaleByH; });
-        this.uiProp.y = -cc.winSize.height * 0.5 + this.uiProp.height * 0.5 + disBackToProp;
-
-        // 调整ui（uiBottom）
-        this.uiBottom.y = this.uiProp.y + this.uiProp.height * 0.5 + this.uiBottom.height * 0.5 + disPropToBottom;
-
-        // 调整ui（nodeMain）
-        this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
-
         this.setMainScale();
         this.nodeMain.scale = this.mainScale;
 
@@ -517,9 +522,8 @@ export default class GameBox extends cc.Component {
 
     /** 设置碎片数量 */
     setUISuipian() {
-        let numSuipian = DataManager.data.numSuipian;
         let label = this.uiTopSuipian.getChildByName('label');
-        label.getComponent(cc.Label).string = 'x' + numSuipian;
+        label.getComponent(cc.Label).string = 'x' + this.dataObj.numSuipian;
     }
 
     /** 设置时间 */
@@ -937,7 +941,7 @@ export default class GameBox extends cc.Component {
     /** 检测 用户评价 */
     checkEvaluate() {
         let _data = DataManager.data;
-        if (_data.isAllreadyEvaluate) {
+        if (_data.isEvaluate) {
             return;
         }
         if (_data.boxData.level == 6 || _data.boxData.level == 26) {
@@ -987,7 +991,7 @@ export default class GameBox extends cc.Component {
         good.scale = this.mainScale;
         good.active = true;
         scriptGood.refreshParams(pStart);
-        this.playAniAddSuipian(good);
+        this.playAniSuipian(good);
         this.goodParamsInsert(scriptGood.param);
 
         for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
@@ -1575,6 +1579,7 @@ export default class GameBox extends cc.Component {
             return;
         }
         DataManager.data.boxData.level--;
+        DataManager.setData();
         let level = DataManager.data.boxData.level;
         if (level <= this.arrLevelLength[0]) {
             this.gameStart();
@@ -1593,6 +1598,7 @@ export default class GameBox extends cc.Component {
             return;
         }
         DataManager.data.boxData.level++;
+        DataManager.setData();
         let level = DataManager.data.boxData.level;
         if (level <= this.arrLevelLength[0]) {
             this.gameStart();
@@ -1636,10 +1642,11 @@ export default class GameBox extends cc.Component {
     }
 
     /** 播放动画（新增碎片） */
-    playAniAddSuipian(good: cc.Node) {
+    playAniSuipian(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         if (scriptGood.param.gold.isGold) {
-            DataManager.data.numSuipian++;
+            this.dataObj.numSuipian++;
+            DataManager.data.boxSuipian.count++;
             DataManager.setData();
 
             // 碎片开始移动
@@ -1649,9 +1656,9 @@ export default class GameBox extends cc.Component {
             copy.parent = nodeParent;
             copy.position = cc.v3();
             let pGood = cc.v3(good.x, good.y + scriptGood.param.h * 0.4 * this.mainScale);
-            let p1 = Common.getLocalPos(good.parent, pGood, copy.parent);
+            copy.position = Common.getLocalPos(good.parent, pGood, copy.parent);
+            let p1 = cc.v3(copy.x, copy.y - 50);
             let p2 = Common.getLocalPos(suipian.parent, suipian.position, copy.parent);
-            copy.position = p1;
             let obj = {
                 p1: cc.v2(p1.x, p1.y),
                 p2: cc.v2(p2.x, p1.y),
@@ -1660,7 +1667,7 @@ export default class GameBox extends cc.Component {
                 scale: copy.scale,
             };
             copy.scale = obj.scale * 0.5;
-            cc.tween(copy).parallel(
+            cc.tween(copy).to(0.25, { position: p1 }, cc.easeSineInOut()).parallel(
                 cc.tween().bezierTo(obj.time, obj.p1, obj.p2, obj.pTo, cc.easeSineOut()),
                 cc.tween().to(obj.time * 0.75, { scale: obj.scale }),
             ).call(() => {
@@ -1845,7 +1852,7 @@ export default class GameBox extends cc.Component {
             let gameData = DataManager.data.boxData;
             gameData.level += 1;
             DataManager.setData(true);
-            kit.Event.emit(CConst.event_enter_gameWin);
+            kit.Event.emit(CConst.event_enter_win);
         };
         let isPlayAds = DataManager.checkIsPlayAdvert(level);
         if (isPlayAds) {
@@ -1857,8 +1864,8 @@ export default class GameBox extends cc.Component {
                 funcNext();
 
                 // 广告计时
-                DataManager.data.adRecord.time = Math.floor(new Date().getTime() * 0.001);
-                DataManager.data.adRecord.level = level;
+                DataManager.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
+                DataManager.data.advert.record.level = level;
                 DataManager.setData();
             };
             let funcB = () => {

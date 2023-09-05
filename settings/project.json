@@ -8,13 +8,6 @@
     ]
   ],
   "excluded-modules": [
-    "Mesh",
-    "MotionStreak",
-    "Native Socket",
-    "Physics",
-    "RichText",
-    "Slider",
-    "Spine Skeleton",
     "3D",
     "3D Primitive",
     "3D Physics/cannon.js",
@@ -44,5 +37,5 @@
       "enable": false
     }
   },
-  "last-module-event-record-time": 1692856401735
+  "last-module-event-record-time": 1693536973426
 }

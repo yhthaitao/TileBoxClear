@@ -68,6 +68,26 @@ class Common {
         return baseTime * dis / baseDis;
     };
 
+    /** 获取当天的时间：起始（s） */
+    getTimeDayStart(){
+        var dateCur = new Date();//获取到当前的时间
+        let year = dateCur.getFullYear();
+        let month = dateCur.getMonth();
+        let day = dateCur.getDate();
+        let dateStart = new Date(year, month, day);
+        return Math.floor(dateStart.getTime()/1000);
+    };
+
+    /** 获取当天的时间：完结（s） */
+    getTimeDayFinish(){
+        var dateCur = new Date();//获取到当前的时间
+        let year = dateCur.getFullYear();
+        let month = dateCur.getMonth();
+        let day = dateCur.getDate();
+        let dateStart = new Date(year, month, day);
+        return Math.floor(dateStart.getTime()/1000) + 60 * 60 * 24;
+    };
+
     /** 获取贝塞尔参数 */
     getBezierObj(p1: cc.Vec3, p2: cc.Vec3, isHigh: boolean): { p1: cc.Vec2, p2: cc.Vec2, pTo: cc.Vec2 } {
         let disY = isHigh ? 350 : 0;

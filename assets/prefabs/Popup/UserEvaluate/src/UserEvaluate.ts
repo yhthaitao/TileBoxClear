@@ -45,7 +45,7 @@ export default class SpecialQuit extends PopupBase {
     eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         if (this.xingNum > this.xingMax - 1) {
-            DataManager.data.isAllreadyEvaluate = true;
+            DataManager.data.isEvaluate = true;
             DataManager.setData();
             NativeCall.evaluateShow();
         }

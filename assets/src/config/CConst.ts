@@ -32,19 +32,23 @@ const CConst = {
     /** loading完成 */
     event_complete_loading: 'event_complete_loading',
     /** 进入 菜单 */
-    event_enter_mainMenu: 'event_enter_mainMenu',
+    event_enter_menu: 'event_enter_menu',
     /** 进入 新手引导 */
     event_enter_newPlayer: 'event_enter_newPlayer',
-    /** 进入 游戏sort */
-    event_enter_gameSort: 'event_enter_gameSort',
+    /** 进入 游戏 */
+    event_enter_game: 'event_enter_game',
     /** 进入 胜利 */
-    event_enter_gameWin: 'event_enter_gameWin',
+    event_enter_win: 'event_enter_win',
     /** 进入 下一关游戏 */
     event_enter_nextLevel: 'event_enter_nextLevel',
     /** 提示 */
     event_notice: 'event_notices',
-    /** 提示：碰撞 */
-    event_collider_start: 'event_collider_start',
+    /** 更新数据（碎片宝箱） */
+    event_reset_suipian: 'event_reset_suipian',
+    /** 更新数据（星星宝箱） */
+    event_reset_xingxing: 'event_reset_xingxing',
+    /** 更新数据（关卡等级宝箱） */
+    event_reset_level: 'event_reset_level',
     /*************************************** end **************************************************/
 
 

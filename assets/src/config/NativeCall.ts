@@ -1,7 +1,7 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
-import DataManager, { PropType } from "./DataManager";
+import DataManager, { TypeProp } from "./DataManager";
 import ConfigDot from "./ConfigDot";
 
 /** 原生交互 */
@@ -17,6 +17,7 @@ class NativeCall {
 
     /** 云加载 开始 */
     public cloudLoadStart(): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: cloudLoadStart() 云加载 开始 ');
         let methodName = "loadGame";
@@ -26,6 +27,7 @@ class NativeCall {
 
     /** 云加载 成功 */
     public cloudLoadSucce(data: string) {
+        return;
         Common.log(' 未实现 javaToCocos cocos method: cloudLoadSucce() ');
         DataManager.isCloudLoad = true;
         if (data.length <= 0) {
@@ -35,12 +37,14 @@ class NativeCall {
 
     /** 云加载 失败 */
     public cloudLoadError() {
+        return;
         Common.log(' javaToCocos cocos method: cloudLoadError() ');
         DataManager.isCloudLoad = false;
     }
 
     /** 分享 */
     public share(level: string): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: share() 分享 ');
         this.logEventOne(CConst.event_log_share_click);
@@ -51,6 +55,7 @@ class NativeCall {
 
     /** 显示banner */
     public showBanner() {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         if (!DataManager.checkBanner()) {
             return;
@@ -63,6 +68,7 @@ class NativeCall {
     
     /** 隐藏banner */
     public closeBanner = function () {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         if (!DataManager.checkBanner()) {
             return;
@@ -75,6 +81,7 @@ class NativeCall {
 
     /** 视频 检测 */
     public videoCheck(): boolean {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return false;
         let methodName = "checkMopubRewardVideo";
         let methodSignature = "()Z";
@@ -87,6 +94,7 @@ class NativeCall {
     funcVideoFail: Function = null;
     /** 视频 播放 */
     public videoShow(funcA: Function, funcB: Function): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
 
         this.funcVideoSuccess = funcA;
@@ -132,6 +140,7 @@ class NativeCall {
 
     /** 广告 检测 */
     public advertCheck(): boolean {
+        return false;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return false;
         let methodName = "interAdReady";
         let methodSignature = "()Z";
@@ -144,6 +153,7 @@ class NativeCall {
     funcAdvertFail: Function = null;
     /** 广告 播放 */
     public advertShow(funcA: Function, funcB: Function) {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
 
         this.funcAdvertSuccess = funcA;
@@ -166,6 +176,7 @@ class NativeCall {
 
     /** 游戏从后台返回的调用 */
     public adsTimeTrue() {
+        return;
         Common.log(' javaToCocos cocos method: adsTimeTrue() ');
         // 打点 插屏广告请求（游戏从后台返回）
         this.logEventThree(ConfigDot.dot_adReq, "inter_backGame", "Interstital");
@@ -173,7 +184,7 @@ class NativeCall {
         if (isReady) {
             let funcA = () => {
                 // 打点 插屏播放成功（游戏从后台返回）
-                this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.sortData.level));
+                this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
             };
             let funcB = (err: any)=>{};
             DataManager.playAdvert(funcA, funcB);
@@ -198,6 +209,7 @@ class NativeCall {
 
     /** 打点 回传计数 */
     public sTsEvent() {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         let count = DataManager.updateS2SCount();
         Common.log(' cocosToJava cocos method: sTsEvent() count: ', count);
@@ -208,6 +220,7 @@ class NativeCall {
 
     /** 打点 带一个 字符串类型参数 */
     public logEventOne(param1: string): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: logEventOne() 打点（1个参数） ');
         let methodName = "facebookLogEvent";
@@ -217,6 +230,7 @@ class NativeCall {
 
     /** 打点 带两个 字符串类型参数 */
     public logEventTwo(param1: string, param2: string): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: logEventTwo() 打点（2个参数） ');
         let methodName = "valueLogEvent";
@@ -226,6 +240,7 @@ class NativeCall {
 
     /** 打点 带三个 字符串类型参数 */
     public logEventThree(param1: string, param2: string, param3: string): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: logEventThree() 打点（3个参数） ');
         let methodName = "reqLogEvent";
@@ -235,6 +250,7 @@ class NativeCall {
 
     /** 打点 带四个 字符串类型参数 */
     public logEventFore(param1: string, param2: string, param3: string, param4: string): void {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: logEventFore() 打点（4个参数） ');
         let methodName = "passLevelLogEvent";
@@ -244,6 +260,7 @@ class NativeCall {
 
     /** 应用内评价 */
     public evaluateFirst() {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: evaluateFirst() 进入游戏时调用 ');
         jsb.reflection.callStaticMethod("org/cocos2dx/javascript/AppActivity", "onCreateReview", "()V");
@@ -251,6 +268,7 @@ class NativeCall {
 
     /** 评价 */
     public evaluateShow() {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: evaluateShow() 用户评价');
         let methodName = "showComment";
@@ -260,6 +278,7 @@ class NativeCall {
 
     /** 收入设置 */
     public setRevenue(revenue: string) {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: setRevenue() ');
         let methodName = "setAdRevenue";
@@ -270,7 +289,7 @@ class NativeCall {
     /** 收入增加 */
     public adRevenueAdd(revenue: string) {
         Common.log(' javaToCocos cocos method: adRevenueAdd() revenue: ', revenue);
-        DataManager.data.revenue = revenue;
+        DataManager.data.advert.revenue = revenue;
         DataManager.setData();
     }
 
@@ -280,6 +299,7 @@ class NativeCall {
      * @returns 
      */
     public checkLang(langDefault: string) {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return langDefault;
         Common.log(' cocosToJava cocos method: checkLang() ');
         let language = jsb.reflection.callStaticMethod("org/cocos2dx/javascript/AppActivity", "getLanguage", "()Ljava/lang/String;");
@@ -288,33 +308,35 @@ class NativeCall {
 
     /*************************************************  暂无  *************************************************/
     /** 购买道具 */
-    public buyItem(prop: PropType){
+    public buyItem(type: TypeProp){
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
-        Common.log(' javaToCocos cocos method: buyItem() params: ', prop);
-        switch (prop) {
-            case PropType.propBack:
-                this.logEventTwo(ConfigDot.dot_buy_back_click, String(DataManager.data.sortData.level));
+        Common.log(' javaToCocos cocos method: buyItem() params: ', type);
+        switch (type) {
+            case TypeProp.ice:
+                this.logEventTwo(ConfigDot.dot_buy_back_click, String(DataManager.data.boxData.level));
                 break;
-            case PropType.propTube:
-                this.logEventTwo(ConfigDot.dot_buy_bottle_click, String(DataManager.data.sortData.level));
+            case TypeProp.tip:
+                this.logEventTwo(ConfigDot.dot_buy_bottle_click, String(DataManager.data.boxData.level));
                 break;
             default:
                 break;
         }
         let methodName = "buyItem";
         let methodSignature = "(Ljava/lang/String;)V";
-        jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, prop);
+        jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, type);
     }
 
     /** 购买成功 */
-    public buySucc(prop: PropType) {
-        Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', prop);
-        switch (prop) {
-            case PropType.propBack:
-                this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.sortData.level));
+    public buySucc(type: TypeProp) {
+        return;
+        Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', type);
+        switch (type) {
+            case TypeProp.ice:
+                this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
                 break;
-            case PropType.propTube:
-                this.logEventTwo(ConfigDot.dot_buy_bottle_succe, String(DataManager.data.sortData.level));
+            case TypeProp.tip:
+                this.logEventTwo(ConfigDot.dot_buy_bottle_succe, String(DataManager.data.boxData.level));
                 break;
             default:
                 break;

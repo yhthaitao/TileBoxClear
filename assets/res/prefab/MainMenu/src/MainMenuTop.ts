@@ -1,6 +1,6 @@
+import CConst from "../../../../src/config/CConst";
 import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import CConst from "../../../../src/config/CConst";
 import DataManager from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
@@ -13,6 +13,14 @@ export default class MainMenuTop extends cc.Component {
 
     @property(cc.Node) labelCoinNum: cc.Node = null;
 
+    protected onLoad(): void {
+        console.log('MainMenuTop onLoad()');    
+    }
+
+    protected start(): void {
+        this.init();
+    }
+
     init() {
         this.refreshStrength();
         this.refreshCoin();
@@ -20,34 +28,34 @@ export default class MainMenuTop extends cc.Component {
 
     /** 刷新体力 */
     refreshStrength() {
-        let numCur = DataManager.data.strength.numCur;
-        this.labelStrengthNum.getComponent(cc.Label).string = '' + numCur;
-        if (numCur > DataManager.data.strength.numTotal - 1) {
+        let count = DataManager.data.strength.count;
+        this.labelStrengthNum.getComponent(cc.Label).string = '' + count;
+        if (count > DataManager.data.strength.total - 1) {
             this.labelStrengthTime.active = false;
             this.labelStrengthMax.active = true;
         }
         else {
             this.labelStrengthMax.active = false;
             this.labelStrengthTime.active = true;
-            if (DataManager.data.strength.timeCur <= 0) {
-                DataManager.data.strength.timeCur = DataManager.data.strength.timeNeed;
+            if (DataManager.data.strength.tCount <= 0) {
+                DataManager.data.strength.tCount = DataManager.data.strength.tTotal;
             }
-            this.timeRefresh();
-            this.schedule(this.timeUpdate, 1.0);
+            this.tStrengthRefresh();
+            this.schedule(this.tStrengthUpdate, 1.0);
         }
     };
 
     /** 时间-更新 */
-    timeUpdate() {
-        DataManager.data.strength.timeCur--;
-        if (DataManager.data.strength.timeCur > 0) {
-            this.timeRefresh();
+    tStrengthUpdate() {
+        DataManager.data.strength.tCount--;
+        if (DataManager.data.strength.tCount > 0) {
+            this.tStrengthRefresh();
         }
-        else{
-            this.unschedule(this.timeUpdate);
-            DataManager.data.strength.numCur++;
-            if (DataManager.data.strength.numCur > DataManager.data.strength.numTotal) {
-                DataManager.data.strength.numCur = DataManager.data.strength.numTotal;
+        else {
+            this.unschedule(this.tStrengthUpdate);
+            DataManager.data.strength.count++;
+            if (DataManager.data.strength.count > DataManager.data.strength.total) {
+                DataManager.data.strength.count = DataManager.data.strength.total;
             }
             this.refreshStrength();
         }
@@ -55,10 +63,10 @@ export default class MainMenuTop extends cc.Component {
     };
 
     /** 时间-设置 */
-    timeRefresh() {
-        let timeCur = DataManager.data.strength.timeCur;
-        let m = Math.floor(timeCur / 60);
-        let s = Math.floor(timeCur % 60);
+    tStrengthRefresh() {
+        let count = DataManager.data.strength.tCount;
+        let m = Math.floor(count / 60);
+        let s = Math.floor(count % 60);
         let strL = m < 10 ? '0' + m : '' + m;
         let strR = s < 10 ? '0' + s : '' + s;
         let strM = ':';
@@ -73,6 +81,7 @@ export default class MainMenuTop extends cc.Component {
 
     /** 按钮事件 设置 */
     eventBtnSet() {
+        console.log('点击按钮: 设置');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
