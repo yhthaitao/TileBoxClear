@@ -1,7 +1,7 @@
 import { Design } from "../../../../src/config/DataManager";
 
 /** 菜单类型 */
-export enum TypeMenu {
+export enum StateMenu {
     shop = 0,// 冰冻
     menu = 1,// 提示
     theme = 2,// 返回上一步
@@ -28,6 +28,8 @@ export default class MainMenu extends cc.Component {
     @property(cc.Node) uiMid: cc.Node = null;
     // 中间ui--商店
     @property(cc.Node) midShop: cc.Node = null;
+    @property(cc.Node) midShopTop: cc.Node = null;
+    @property(cc.Node) midShopMid: cc.Node = null;
     // 中间ui--主菜单
     @property(cc.Node) midHome: cc.Node = null;
     @property(cc.Node) midHomeTop: cc.Node = null;
@@ -36,10 +38,14 @@ export default class MainMenu extends cc.Component {
     @property(cc.Node) midHomeRight: cc.Node = null;
     // 中间ui--主题
     @property(cc.Node) midTheme: cc.Node = null;
+    @property(cc.Node) midThemeTop: cc.Node = null;
+    @property(cc.Node) midThemeMidA: cc.Node = null;
+    @property(cc.Node) midThemeMidC: cc.Node = null;
 
-    typeMenu: TypeMenu = TypeMenu.menu;// 菜单类型
+    stateMenu: StateMenu = StateMenu.menu;// 菜单类型
     // 菜单数据
-    arrMenu: cc.Node[] = [];
+    arrMidMenu: cc.Node[] = [];
+    arrBottomMenu: cc.Node[] = [];
     // 是否锁屏
     isLock: boolean = false;
     // 菜单内节点属性变化
@@ -70,18 +76,25 @@ export default class MainMenu extends cc.Component {
         // 中间ui-home
         this.midShop.x = -cc.winSize.width;
         this.midTheme.x = cc.winSize.width;
-        let disTopToTop = 20 * winScaleByH;
-        let disTopToLeft = 15 * winScaleByH;
-        let disTopToRight = 15 * winScaleByH;
-        let disBottomToBottom = 100 * winScaleByH;
+        let home_dis_topToTop = 20 * winScaleByH;
+        let home_dis_topToLeft = 15 * winScaleByH;
+        let home_dis_topToRight = 15 * winScaleByH;
+        let home_dis_bottomToBottom = 100 * winScaleByH;
         this.midHome.x = 0;
-        this.midHomeTop.y = this.uiTop.y - this.uiTop.height * 0.5 - disTopToTop - this.midHomeTop.height * 0.5;
-        this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - disTopToLeft;
-        this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - disTopToRight;
-        this.midHomeBottom.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToBottom + this.midHomeBottom.height * 0.5;
-
+        this.midHomeTop.y = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop - this.midHomeTop.height * 0.5;
+        this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
+        this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
+        this.midHomeBottom.y = this.uiBottom.y + this.uiBottom.height * 0.5 + home_dis_bottomToBottom + this.midHomeBottom.height * 0.5;
+        // 中间ui-shop
+        this.midShopTop.y = this.midHomeTop.y;
+        this.midShopMid.y = 195 * winScaleByH;
+        // 中间ui-theme
+        this.midThemeTop.y = this.midHomeTop.y;
+        this.midThemeMidA.y = this.midThemeTop.y - this.midThemeTop.height * 0.5;
+        this.midThemeMidC.y = this.midThemeMidA.y;
         // 菜单数组
-        this.arrMenu = [this.bottomShop, this.bottomHome, this.bottomTheme];
+        this.arrMidMenu = [this.midShop, this.midHome, this.midTheme];
+        this.arrBottomMenu = [this.bottomShop, this.bottomHome, this.bottomTheme];
         this.widthUp = this.bottomLight.width;
         this.widthDown = (cc.winSize.width - this.widthUp) * 0.5;
 
@@ -90,14 +103,15 @@ export default class MainMenu extends cc.Component {
 
     initMenu() {
         this.setIsLock(false);
-        this.bottomLight.x = this.getMenuObj(this.typeMenu).x;
+        this.resetMenu(false);
+        this.bottomLight.x = this.getMenuObj(this.stateMenu).x;
         let menuX = -cc.winSize.width * 0.5;
-        for (let index = 0, length = this.arrMenu.length; index < length; index++) {
-            let menu = this.arrMenu[index];
+        for (let index = 0, length = this.arrBottomMenu.length; index < length; index++) {
+            let menu = this.arrBottomMenu[index];
             let label = menu.getChildByName('label');
             let item = menu.getChildByName('item');
             // param
-            if (index == this.typeMenu) {
+            if (index == this.stateMenu) {
                 item.y = this.mParams.item.up.y;
                 item.scale = this.mParams.item.up.scale;
                 item.getChildByName('selectY').active = true;
@@ -114,25 +128,37 @@ export default class MainMenu extends cc.Component {
             }
 
             // x
-            menu.width = index == this.typeMenu ? this.widthUp : this.widthDown;
+            menu.width = index == this.stateMenu ? this.widthUp : this.widthDown;
             if (index == 0) {
                 menuX += menu.width * 0.5;
                 menu.x = menuX;
             }
             else {
-                let menuLast = this.arrMenu[index - 1];
+                let menuLast = this.arrBottomMenu[index - 1];
                 menuX += (menuLast.width * 0.5 + menu.width * 0.5);
                 menu.x = menuX;
             }
         }
     };
 
+    /** 重置菜单项 */
+    resetMenu(isMove: boolean){
+        if (isMove) {
+            this.arrMidMenu.forEach((item)=>{ item.opacity = 255 });
+        }
+        else{
+            this.arrMidMenu.forEach((item, index)=>{ 
+                item.opacity = this.stateMenu == index ? 255 : 0 
+            });
+        }
+    };
+
     /** 获取菜单x值 */
-    getMenuObj(type: TypeMenu) {
+    getMenuObj(type: StateMenu) {
         let arrObj: { x: number, w: number }[] = [];
         let total = 0;
-        for (let index = 0, length = this.arrMenu.length; index < length; index++) {
-            let width = index == this.typeMenu ? this.widthUp : this.widthDown;
+        for (let index = 0, length = this.arrBottomMenu.length; index < length; index++) {
+            let width = index == this.stateMenu ? this.widthUp : this.widthDown;
             total += width;
             let x = total - width * 0.5 - cc.winSize.width * 0.5;
             arrObj.push({ x: x, w: width });
@@ -142,27 +168,31 @@ export default class MainMenu extends cc.Component {
     };
 
     /** 选择菜单 */
-    playAniResetMenu(type: TypeMenu) {
-        let start = this.typeMenu;
+    playAniResetMenu(type: StateMenu) {
+        // 显示所有菜单
+        this.resetMenu(true);
+        let start = this.stateMenu;
         let finish = type;
         let timeMove = 0.15 / Math.abs(start - finish);
         let funcMove = () => {
-            if (this.typeMenu == type) {
+            if (this.stateMenu == type) {
                 this.setIsLock(false);
+                // 显示当前菜单
+                this.resetMenu(false);
                 return;
             }
-            let cur = this.typeMenu;
-            if (this.typeMenu > type) {
-                this.typeMenu--;
+            let cur = this.stateMenu;
+            if (this.stateMenu > type) {
+                this.stateMenu--;
             }
             else {
-                this.typeMenu++;
+                this.stateMenu++;
             }
-            let next = this.typeMenu;
+            let next = this.stateMenu;
             let count = 0;
             let total = 2;
             // 当前按钮
-            let menuCur = this.arrMenu[cur];
+            let menuCur = this.arrBottomMenu[cur];
             let objCur = this.getMenuObj(cur);
             cc.tween(menuCur).parallel(
                 cc.tween().to(timeMove, { x: objCur.x }),
@@ -190,7 +220,7 @@ export default class MainMenu extends cc.Component {
                 cc.tween(itemLabel).to(timeMove * 0.5, { opacity: 0 }).start();
             }
             // 下个按钮
-            let menuNext = this.arrMenu[next];
+            let menuNext = this.arrBottomMenu[next];
             let objNext = this.getMenuObj(next);
             cc.tween(menuNext).parallel(
                 cc.tween().to(timeMove, { x: objNext.x }),
@@ -235,7 +265,7 @@ export default class MainMenu extends cc.Component {
     /** 菜单选项 */
     eventBtnChoseMenu(event: cc.Event.EventTouch, custom: string) {
         let type = Number(custom);
-        if (type == this.typeMenu) {
+        if (type == this.stateMenu) {
             return;
         }
         if (this.isLock) {

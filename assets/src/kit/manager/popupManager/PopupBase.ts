@@ -4,14 +4,15 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class PopupBase<Options = any> extends cc.Component {
 
-    @property({ type: cc.Node, tooltip: CC_DEV && '背景遮罩' })
-    public background: cc.Node = null;
+    @property({ type: cc.Node, tooltip: CC_DEV && '背景遮罩（下层）' })
+    public maskDown: cc.Node = null;
 
     @property({ type: cc.Node, tooltip: CC_DEV && '弹窗主体' })
-    public main: cc.Node = null;
+    public content: cc.Node = null;
 
-    /** 展示/隐藏动画的时长 */
-    public animDuration: number = 0.3;
+    @property({ type: cc.Node, tooltip: CC_DEV && '背景遮罩（上层）' })
+    public maskUp: cc.Node = null;
+
     /** 弹窗选项 */
     protected options: Options = null;
 
@@ -20,32 +21,36 @@ export default class PopupBase<Options = any> extends cc.Component {
      * @param options 弹窗选项
      * @param duration 动画时长
      */
-    public show(options?: Options, duration: number = this.animDuration) {
+    public show(options?: Options) {
+        this.maskDown.setContentSize(cc.winSize);
+        this.maskUp.setContentSize(cc.winSize);
+        
         return new Promise<void>(res => {
+            this.node.active = true;
+            // 开启拦截
+            this.maskUp.active = true;
             // 储存选项
             this.options = options;
-            // 初始化节点
-            const background = this.background;
-            background.active = true;
-            background.opacity = 0;
-            const main = this.main;
-            main.active = true;
-            main.scale = 0;
-            main.opacity = 0;
-            this.node.active = true;
             // 初始化
             this.init(this.options);
             // 更新样式
             this.updateDisplay(this.options);
             // 播放背景遮罩动画
-            cc.tween(background).to(0.245, { opacity: 200 }).start();
+            this.maskDown.active = true;
+            this.maskDown.opacity = 0;
+            cc.tween(this.maskDown).to(0.245, { opacity: 200 }).start();
             // 播放弹窗主体动画
-            cc.tween(main).parallel(
+            this.content.active = true;
+            this.content.scale = 0.5;
+            this.content.opacity = 0;
+            cc.tween(this.content).parallel(
                 cc.tween().to(0.233, { scale: 1.05 }, { easing: 'cubicOut' })
                     .to(0.233, { scale: 0.98 }, { easing: 'sineInOut' })
                     .to(0.233, { scale: 1 }, { easing: 'sineInOut' }),
                 cc.tween().to(0.215, { opacity: 255 }),
             ).call(() => {
+                // 关闭拦截
+                this.maskUp.active = false;
                 // 弹窗已完全展示
                 this.onShow && this.onShow();
                 // Done
@@ -54,34 +59,34 @@ export default class PopupBase<Options = any> extends cc.Component {
         });
     }
 
-
     /**
      * 隐藏弹窗
      * @param suspended 是否被挂起
      * @param duration 动画时长
      */
-    public hide(suspended: boolean = false, duration: number = this.animDuration) {
+    public hide(suspended: boolean = false) {
         return new Promise<void>(res => {
+            // 开启拦截
+            this.maskUp.active = true;
             // 播放背景遮罩动画
-            cc.tween(this.background).delay(0.2).to(0.233, { opacity: 0 }, { easing: 'sineInOut' }).start();
+            cc.tween(this.maskDown).delay(0.2).to(0.233, { opacity: 0 }, { easing: 'sineInOut' }).start();
             // 播放弹窗主体动画
-            cc.tween(this.main).parallel(
+            cc.tween(this.content).parallel(
                 cc.tween().delay(0.2).to(0.233, { opacity: 0 }, { easing: 'sineInOut' }),
                 cc.tween().to(0.2, { scale: 1.1 }, { easing: 'sineInOut' })
                     .to(0.233, { scale: 0.5 }, { easing: 'sineInOut' })
                     .to(0.02, { scale: 0 }, { easing: 'sineInOut' }),
             ).call(() => {
+                // 关闭拦截
+                this.maskUp.active = false;
                 // 关闭节点
                 this.node.active = false;
                 // 弹窗已完全隐藏（动画完毕）
                 this.onHide && this.onHide(suspended);
                 // 弹窗完成回调
                 this.finishCallback && this.finishCallback(suspended);
-
                 // Done
                 res();
-
-                this.node.destroy();
             }).start();
         });
     }

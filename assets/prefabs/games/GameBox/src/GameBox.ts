@@ -164,7 +164,7 @@ export default class GameBox extends cc.Component {
         this.processDisH *= this.winScaleByH;
 
         // 调整ui（uiMask）
-        this.uiMask.height = cc.winSize.height * 0.5 - this.uiProcess.y  + this.uiProcess.height * 0.5 - this.processDisH;
+        this.uiMask.height = cc.winSize.height * 0.5 - this.uiProcess.y + this.uiProcess.height * 0.5 - this.processDisH;
         this.uiMask.y = cc.winSize.height * 0.5;
 
         // 调整ui（uiProp）
@@ -934,6 +934,7 @@ export default class GameBox extends cc.Component {
         Common.log('dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
     };
 
+    /** 检测特殊箱子 */
     getBoxIsFrame(h: number) {
         return h < 100;
     };
@@ -1748,6 +1749,7 @@ export default class GameBox extends cc.Component {
         this.isLock = true;
         this.dataObj.isFinish = true;
         if (this.goodsCount >= this.goodsTotal) {
+            let xingNum = this.getXingxingNum();
             Common.log('胜利');
         }
         else {
@@ -1807,6 +1809,20 @@ export default class GameBox extends cc.Component {
             return CConst.newPlayer_guide_sort_3;
         }
         return null;
+    }
+
+    /** 获取星星数量（根据剩余时间获取） */
+    getXingxingNum() {
+        let xingNum = 1;
+        let ratio = 100 * this.timeGame.count/this.timeGame.total;
+        if (ratio > 60) {
+            xingNum = 3;
+        }
+        else if (ratio > 20) {
+            xingNum = 2;
+        }
+        Common.log('xingNum: ', xingNum, '; ratio: ', ratio);
+        return xingNum;
     }
 
     gameLog(sign: string) {

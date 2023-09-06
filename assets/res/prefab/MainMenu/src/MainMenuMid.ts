@@ -7,6 +7,12 @@ import ConfigBoxSuipian from "../../../../src/config/ConfigBoxSuipian";
 import ConfigBoxXingxing from "../../../../src/config/ConfigBoxXingxing";
 import ConfigBoxLevel from "../../../../src/config/ConfigBoxLevel";
 
+/** 主题类型 */
+export enum StateTheme {
+    areas = 0,// 主题栏
+    commodity = 1,// 物品奖励栏
+}
+
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainMenuMid extends cc.Component {
@@ -16,11 +22,39 @@ export default class MainMenuMid extends cc.Component {
     @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_start: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-右侧-等级宝箱进度' }) home_right_boxLevel_process: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主题-顶部' }) theme_top: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主题-中部-主题栏' }) theme_mid_areas: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主题-中部-主题栏-内同' }) theme_mid_areas_content: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主题-中部-物品奖励栏' }) theme_mid_commodity: cc.Node = null;
 
     tElseSuipian: number = 0;
     wProcessSuipian: number = 615;// 进度条宽度（碎片宝箱）
     wProcessXingxing: number = 110;// 进度条宽度（星星宝箱）
     wProcessLevel: number = 110;// 进度条宽度（关卡等级宝箱）
+
+    // 主题状态
+    stateTheme: StateTheme = StateTheme.areas;
+    objTheme = {
+        title: {
+            color: {
+                light: cc.color(184, 135, 84),
+                dark: cc.color(108, 108, 108),
+            },
+        },
+        areas: {
+            color: {
+                light: cc.color(136, 64, 0),
+                dark: cc.color(64, 64, 64),
+            },
+            config: [
+                { start: 1, finish: 20 },
+                { start: 21, finish: 40 },
+                { start: 41, finish: 80 },
+                { start: 81, finish: 120 },
+                { start: 121, finish: 160 },
+            ],
+        },
+    };
 
     protected onLoad(): void {
         console.log('MainMenuMid onLoad()');
@@ -33,12 +67,24 @@ export default class MainMenuMid extends cc.Component {
     }
 
     init() {
+        // menu
+        this.initHome();
+        // theme
+        this.initTheme();
+    };
+
+    /************************************************************************************************************************/
+    /*********************************************************  home  *******************************************************/
+    /************************************************************************************************************************/
+    /** 初始化主页面 */
+    initHome() {
         this.resetBoxSuipian();
         this.resetLevelStage();
         this.resetBoxXingxingProcess();
         this.resetBoxLevelProcess();
     };
 
+    /** 刷新-碎片进度 */
     resetBoxSuipian() {
         // 重置数据（碎片宝箱）
         let boxData = DataManager.data.boxSuipian;
@@ -62,7 +108,7 @@ export default class MainMenuMid extends cc.Component {
         this.refreshBoxSuipianTime();
     };
 
-    /** 刷新-碎片进度 */
+    /** 刷新-碎片-进度条 */
     resetBoxSuipianProcess() {
         let boxData = DataManager.data.boxSuipian;
         let count = boxData.count;
@@ -87,7 +133,7 @@ export default class MainMenuMid extends cc.Component {
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
     };
 
-    /** 刷新-碎片时间 */
+    /** 刷新-碎片-时间 */
     refreshBoxSuipianTime() {
         let timeCur = Math.floor(new Date().getTime() / 1000);
         this.tElseSuipian = Common.getTimeDayFinish() - timeCur;
@@ -169,40 +215,180 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 按钮事件 开始 */
-    eventBtnStart() {
+    eventBtnHomeStart() {
         console.log('点击按钮: 游戏开始');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Event.emit(CConst.event_enter_game);
     };
 
     /** 按钮事件 星星宝箱 */
-    eventBtnBoxXing() {
+    eventBtnHomeBoxXing() {
         console.log('点击按钮: 星星宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 每日签到 */
-    eventBtnDaily() {
+    eventBtnHomeDaily() {
         console.log('点击按钮: 每日签到');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 等级宝箱 */
-    eventBtnBoxLevel() {
+    eventBtnHomeBoxLevel() {
         console.log('点击按钮: 等级宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 银行 */
-    eventBtnBank() {
+    eventBtnHomeBank() {
         console.log('点击按钮: 银行');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
     };
 
+    /************************************************************************************************************************/
+    /*********************************************************  theme  *******************************************************/
+    /************************************************************************************************************************/
+    /** 重置主题 */
+    initTheme() {
+        this.initThemeAreas();
+        this.initThemeCommodity();
+        this.resetThemeButton();
+    };
+
+    initThemeAreas() {
+        let item = this.theme_mid_areas.getChildByName('item');
+        let objAreas = this.objTheme.areas;
+        let length = objAreas.config.length;
+        // 主题节点高度
+        this.theme_mid_areas.height = cc.winSize.height * 0.5 + this.theme_mid_areas.y;
+        // 主题容器高度
+        let layout = this.theme_mid_areas_content.getComponent(cc.Layout);
+        let hElse = layout.paddingTop + layout.spacingY * (length - 1) + layout.paddingBottom;
+        this.theme_mid_areas_content.height = item.height * length + hElse;
+        // 配置主题内容
+        for (let index = 0; index < length; index++) {
+            let cell = cc.instantiate(item);
+            this.initThemeAreasCell(index, cell);
+            cell.parent = this.theme_mid_areas_content;
+        }
+    };
+
+    /** 初始化 theme areas cell */
+    initThemeAreasCell(index: number, cell: cc.Node) {
+        let objAreas = this.objTheme.areas;
+        let level = DataManager.data.boxData.level;
+        let areas = DataManager.data.boxData.areas;
+        let param = objAreas.config[index];
+        cell.active = true;
+        cell.name = 'cell' + index;
+        let backLight = cell.getChildByName('backLight');
+        let backDark = cell.getChildByName('backDark');
+        let labelTitle = cell.getChildByName('labelTitle');
+        let labelLevel = cell.getChildByName('labelLevel');
+        let right = cell.getChildByName('right');
+        let lock = cell.getChildByName('lock');
+        if (level > param.start - 1) {
+            backLight.active = true;
+            backDark.active = false;
+            labelTitle.color = objAreas.color.light;
+            labelLevel.color = objAreas.color.light;
+            right.active = index == areas;
+            lock.active = false;
+        }
+        else {
+            backLight.active = false;
+            backDark.active = true;
+            labelTitle.color = objAreas.color.dark;
+            labelLevel.color = objAreas.color.dark;
+            right.active = false;
+            lock.active = true;
+        }
+    };
+
+    initThemeCommodity() {
+
+    };
+
+    /** 重置主题按钮 */
+    resetThemeButton() {
+        let objColor = this.objTheme.title.color;
+        let funcSet = (isLight: boolean, button: cc.Node) => {
+            button.getChildByName('light').active = isLight;
+            button.getChildByName('dark').active = !isLight;
+            button.getChildByName('label').color = isLight ? objColor.light : objColor.dark;
+        };
+
+        let isAreas = this.stateTheme == StateTheme.areas;
+        // 主题界面按钮切换
+        let btnAreas = this.theme_top.getChildByName('btnAreas');
+        let btnCommodity = this.theme_top.getChildByName('btnCommodity');
+        funcSet(isAreas, btnAreas);
+        funcSet(!isAreas, btnCommodity);
+        // 主题栏和物品奖励栏切换
+        if (isAreas) {
+            this.theme_mid_areas.active = true;
+            this.theme_mid_commodity.active = false;
+        }
+        else {
+            this.theme_mid_areas.active = false;
+            this.theme_mid_commodity.active = true;
+        }
+    };
+
+    /** 按钮事件 主题栏 */
+    eventBtnThemeAreas() {
+        console.log('点击按钮: 进入主题栏');
+        if (this.stateTheme == StateTheme.areas) {
+            return;
+        }
+        this.stateTheme = StateTheme.areas;
+        this.resetThemeButton();
+    };
+
+    /** 按钮事件 主题选择 */
+    eventBtnThemeAreasItem() {
+        console.log('点击按钮: 主题栏内部选择');
+    };
+
+    /** 事件 theme-areas-scrollview */
+    eventThemeAreasScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
+        if (eventType == cc.ScrollView.EventType.SCROLLING) {
+            this.theme_mid_areas_content.children.forEach((item) => {
+                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
+                let topY = itemY + item.height * 0.5;
+                let bottomY = itemY - item.height * 0.5;
+                // 选项底部 超出 屏幕顶
+                if (bottomY > cc.winSize.height * 0.5) {
+                    item.opacity = 0;
+                }
+                // 选项顶部 超出 屏幕底
+                else if (topY < -cc.winSize.height * 0.5) {
+                    item.opacity = 0;
+                }
+                else {
+                    item.opacity = 255;
+                }
+            });
+        }
+    };
+
+    /** 按钮事件 物品奖励栏 */
+    eventBtnThemeCommodity() {
+        console.log('点击按钮: 进入物品奖励栏');
+        if (this.stateTheme == StateTheme.commodity) {
+            return;
+        }
+        this.stateTheme = StateTheme.commodity;
+        this.resetThemeButton();
+    };
+
+    /************************************************************************************************************************/
+    /*********************************************************  事件  *******************************************************/
+    /************************************************************************************************************************/
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_reset_suipian, this.eventBack_resetSuipian, this);

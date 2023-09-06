@@ -152,6 +152,7 @@ class DataManager {
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
+            areas: 1,// 当前主题
             newTip: {
                 cur: 0,
                 max: 3,
