@@ -10,6 +10,8 @@ export default class Loading extends cc.Component {
     @property(cc.Node) nodeLogo: cc.Node = null;
     @property(cc.Node) nodeProcess: cc.Node = null;
 
+    width: number = 596;
+
     protected onLoad(): void {
         Common.log('LayerLoading');
         this.initLabel();
@@ -19,10 +21,10 @@ export default class Loading extends cc.Component {
         this.nodeProcess.getChildByName('bar').width = 0;
     }
 
-    async initLabel(){
-        let chars = await DataManager.getString(LangChars.Loading);
-        let itemLabel = this.nodeProcess.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = chars;
+    initLabel() {
+        DataManager.setString(LangChars.Loading, (chars: string) => {
+            this.nodeProcess.getChildByName('label').getComponent(cc.Label).string = chars;
+        });
     }
 
     protected start(): void {
@@ -56,21 +58,23 @@ export default class Loading extends cc.Component {
     }
 
     /** 动画 loading 进度 */
-    async playAniProcess() {
+    playAniProcess() {
         let tShow = .383;
         let processBar = this.nodeProcess.getChildByName('bar');
-        cc.tween(processBar).to(tShow * 4, { width: this.nodeProcess.width * 0.8 }, cc.easeSineInOut()).call(() => {
+        cc.tween(processBar).to(tShow * 4, {width: this.width * 0.8}, cc.easeSineInOut()).call(() => {
             kit.Event.emit(CConst.event_complete_loading);
         }).start();
 
         // loading字符显示
-        let chars = await DataManager.getString(LangChars.Loading);
-        let label = this.nodeProcess.getChildByName('label').getComponent(cc.Label);
+        let itemLabel = this.nodeProcess.getChildByName('label');
+        let label = itemLabel.getComponent(cc.Label);
         let funcLabel = () => {
-            if (label.string == chars) label.string = chars + '.';
-            else if (label.string == chars + ".") label.string = chars + '..';
-            else if (label.string == chars + "..") label.string = chars + '...';
-            else label.string = chars;
+            DataManager.setString(LangChars.Loading, (chars: string) => {
+                if (label.string == chars) label.string = chars + '.';
+                else if (label.string == chars + '.') label.string = chars + '..';
+                else if (label.string == chars + '..') label.string = chars + '...';
+                else label.string = chars;
+            });
         };
         this.schedule(funcLabel, tShow);
     }

@@ -1,3 +1,5 @@
+import { kit } from "../kit/kit";
+import CConst from "./CConst";
 import DataManager, { ResType } from "./DataManager";
 
 const { ccclass, property } = cc._decorator;
@@ -13,22 +15,23 @@ export default class LocalImg extends cc.Component {
     /** 资源路径 */
     path: string = './language/img/' + DataManager.langCur + '/';
 
-    onLoad() {
-        this.setRes();
+    protected start(): void {
+        this.initRes();
     }
 
-    async setRes(){
-        let res = await DataManager.getResources(this.path + this.resName);
-        switch (this.resType) {
-            case ResType.PNG:
-                this.setTexture(res);
-                break;
-            case ResType.DRAGON:
-                this.setDragon(res);
-                break;
-            default:
-                break;
-        }
+    initRes(){
+        kit.Resources.loadRes(CConst.bundleCommon, this.path + this.resName, cc.Texture2D, (e: any, asset: cc.Texture2D)=>{
+            switch (this.resType) {
+                case ResType.PNG:
+                    this.setTexture(asset);
+                    break;
+                case ResType.DRAGON:
+                    this.setDragon(asset);
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     /** 设置素材 sprite */

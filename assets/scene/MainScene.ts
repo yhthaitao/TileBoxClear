@@ -92,8 +92,9 @@ export default class MainScene extends cc.Component {
 
     /** 无视频提示 */
     async initNoVideo() {
-        let tipVideo = await DataManager.getString(LangChars.CannotWatchAds);
-        this.noVideoTip.getComponent(cc.Label).string = tipVideo;
+        DataManager.setString(LangChars.CannotWatchAds, (chars: string)=>{
+            this.noVideoTip.getComponent(cc.Label).string = chars;
+        });
         this.noVideoTip.zIndex = CConst.zIndex_noVideo;
         this.noVideoTip.opacity = 0;
     }

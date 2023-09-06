@@ -23,15 +23,16 @@ export default class Setting extends PopupBase {
         this.initLabel();
     }
 
-    async initLabel(){
-        let charsTitle = await DataManager.getString(LangChars.SETTING);
-        this.labelTitle.getComponent(cc.Label).string = charsTitle;
-
-        let charsOn = await DataManager.getString(LangChars.ON);
-        this.labelOn.getComponent(cc.Label).string = charsOn;
-
-        let charsOff = await DataManager.getString(LangChars.OFF);
-        this.labelOff.getComponent(cc.Label).string = charsOff;
+    initLabel(){
+        DataManager.setString(LangChars.SETTING, (chars: string)=>{
+            this.labelTitle.getComponent(cc.Label).string = chars;
+        });
+        DataManager.setString(LangChars.ON, (chars: string)=>{
+            this.labelOn.getComponent(cc.Label).string = chars;
+        });
+        DataManager.setString(LangChars.OFF, (chars: string)=>{
+            this.labelOff.getComponent(cc.Label).string = chars;
+        });
     }
 
     protected start(): void {

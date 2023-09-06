@@ -1,3 +1,4 @@
+import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
 import ConfigDot from "./ConfigDot";
@@ -77,6 +78,12 @@ export interface TypeReward {
     reward: { type: TypeProp, number: number }[],// 奖励的类型和数量
 }
 
+/** 数据类型（资源） */
+export interface TypeResource {
+    bundle: string,
+    resPath: string,
+}
+
 /** 数据管理类 */
 class DataManager {
     private static _instance: DataManager;
@@ -93,8 +100,6 @@ class DataManager {
     stateLast: number = 0;
     /** 视频节点 */
     nodeVideo: cc.Node = null;
-    /** 资源 */
-    objResources: any = {};
     /** 本地语言 */
     langCur: string = LangFile.en;
     /** 云加载 */
@@ -138,16 +143,16 @@ class DataManager {
             clock: { count: 5, tInfinite: 0 },// 时钟
         },
         // 宝箱相关参数（碎片宝箱）
-        boxSuipian: { 
+        boxSuipian: {
             level: 1, count: 0, timeLunch: 0,
         },
         // 宝箱相关参数（关卡等级宝箱）
-        boxLevel: { 
+        boxLevel: {
             level: 1, count: 0, loop: { start: 6, length: 3, },
         },
         // 宝箱相关参数（星星宝箱）
-        boxXingxing: { 
-            level: 1, count: 0, loop: { start: 6, length: 16, }, 
+        boxXingxing: {
+            level: 1, count: 0, loop: { start: 6, length: 16, },
         },
         // 关卡数据 基础
         boxData: {
@@ -178,7 +183,7 @@ class DataManager {
 
     /** 初始化数据 */
     public async initData(nodeAni: cc.Node) {
-        let _data = JSON.parse(cc.sys.localStorage.getItem('gameData'));
+        let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
             // this.data = Common.clone(_data);
             let data = Common.clone(_data);
@@ -189,7 +194,7 @@ class DataManager {
             }
         }
         else {
-            cc.sys.localStorage.setItem('gameData', JSON.stringify(this.data));
+            cc.sys.localStorage.setItem(CConst.localDataKey, JSON.stringify(this.data));
         }
 
         // 初始化收入
@@ -197,12 +202,12 @@ class DataManager {
         // 初始化语言
         this.initLanguage();
         // 提前加载 本地化 文本
-        await this.getResources('./language/text/' + this.langCur);
+        await kit.Resources.loadRes(CConst.bundleCommon, CConst.pathLanguage + this.langCur, cc.JsonAsset);
         // 提前加载 本地化 图片
         let arrName = Object.keys(LangImg);
         for (let index = 0, length = arrName.length; index < length; index++) {
-            const element = arrName[index];
-            await this.getResources('./language/img/' + this.langCur + '/' + element);
+            let resPath = CConst.pathImage + this.langCur + '/' + arrName[index];
+            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.Texture2D);
         }
         // 初始化视频动画
         this.nodeVideo = nodeAni;
@@ -255,7 +260,7 @@ class DataManager {
      */
     public setData(isSaveCloud = false) {
         let dataString = JSON.stringify(this.data);
-        cc.sys.localStorage.setItem('gameData', dataString);
+        cc.sys.localStorage.setItem(CConst.localDataKey, dataString);
         if (typeof (jsb) === 'undefined' || !isSaveCloud) {
             return;
         }
@@ -376,37 +381,13 @@ class DataManager {
     };
 
     /** 获取字符串 */
-    public async getString(key: string): Promise<string> {
-        let assetJson: cc.JsonAsset = await this.getResources('./language/text/' + this.langCur);
-        return assetJson.json[key];
-    };
-
-    /** 获取资源 */
-    public async getResources(path: string): Promise<any> {
-        if (!this.objResources[path]) {
-            let asset = await this.loadResLoacl(path);
-            this.objResources[path] = asset;
-        }
-        return this.objResources[path];
-    };
-
-    /**
-     * 加载resource资源
-     * @param path 
-     * @returns 
-     */
-    public loadResLoacl(path): Promise<any> {
-        return new Promise((resolve) => {
-            cc.resources.load(path, function (err, asset) {
-                if (err) {
-                    Common.log("加载失败：", path);
-                }
-                else {
-                    Common.log("加载资源：", path);
-                    resolve(asset);
-                }
-            });
+    public setString(key: string, callback) {
+        let resPath = CConst.pathLanguage + this.langCur;
+        kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.JsonAsset, (e: any, jsonAsset: cc.JsonAsset)=>{
+            if (jsonAsset) {
+                callback && callback(jsonAsset.json[key]);
+            }
         });
-    }
+    };
 };
 export default DataManager.instance;

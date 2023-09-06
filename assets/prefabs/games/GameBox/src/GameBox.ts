@@ -1798,14 +1798,14 @@ export default class GameBox extends cc.Component {
     /** 检测新手引导状态 */
     checkNewPlayerState() {
         return null;
-        let gameData = DataManager.data.boxData;
-        if (gameData.level == 1 && gameData.newTip.cur == 0) {
+        let data = DataManager.data.boxData;
+        if (data.level == 1 && data.newTip.cur == 0) {
             return CConst.newPlayer_guide_sort_1;
         }
-        else if (gameData.level == 1 && gameData.newTip.cur == 1) {
+        else if (data.level == 1 && data.newTip.cur == 1) {
             return CConst.newPlayer_guide_sort_2;
         }
-        else if (gameData.level == 2 && gameData.newTip.cur == 2) {
+        else if (data.level == 2 && data.newTip.cur == 2) {
             return CConst.newPlayer_guide_sort_3;
         }
         return null;
@@ -1865,8 +1865,7 @@ export default class GameBox extends cc.Component {
 
         // 进入下一关
         let funcNext = () => {
-            let gameData = DataManager.data.boxData;
-            gameData.level += 1;
+            DataManager.data.boxData.level += 1;
             DataManager.setData(true);
             kit.Event.emit(CConst.event_enter_win);
         };

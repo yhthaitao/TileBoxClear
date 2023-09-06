@@ -1,7 +1,7 @@
 {
   "ver": "1.1.2",
-  "uuid": "4157decb-388a-4cb5-a628-7fe809d12774",
-  "isBundle": false,
+  "uuid": "ca0fee7d-ce07-46bc-9162-170a555d204e",
+  "isBundle": true,
   "bundleName": "",
   "priority": 1,
   "compressionType": {},
