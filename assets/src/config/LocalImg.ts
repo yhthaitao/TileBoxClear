@@ -1,6 +1,6 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
-import DataManager, { ResType } from "./DataManager";
+import DataManager, { TypeRes } from "./DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -20,12 +20,12 @@ export default class LocalImg extends cc.Component {
     }
 
     initRes(){
-        kit.Resources.loadRes(CConst.bundleCommon, this.path + this.resName, cc.Texture2D, (e: any, asset: cc.Texture2D)=>{
+        kit.Resources.loadRes(CConst.bundleCommon, this.path + this.resName, cc.SpriteFrame, (e: any, asset: cc.SpriteFrame)=>{
             switch (this.resType) {
-                case ResType.PNG:
+                case TypeRes.PNG:
                     this.setTexture(asset);
                     break;
-                case ResType.DRAGON:
+                case TypeRes.DRAGON:
                     this.setDragon(asset);
                     break;
                 default:
@@ -37,7 +37,7 @@ export default class LocalImg extends cc.Component {
     /** 设置素材 sprite */
     setTexture(obj) {
         if (obj) {
-            this.node.getComponent(cc.Sprite).spriteFrame = new cc.SpriteFrame(obj);
+            this.node.getComponent(cc.Sprite).spriteFrame = obj;
         }
     }
 

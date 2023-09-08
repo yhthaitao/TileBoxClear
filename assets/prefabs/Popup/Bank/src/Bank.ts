@@ -1,7 +1,9 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { LangChars } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
+import Common from "../../../../src/config/Common";
+import { LangChars } from "../../../../src/config/ConfigLang";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -12,16 +14,23 @@ export default class Bank extends PopupBase {
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
     protected onLoad(): void {
+        Common.log('Bank onLoad()');
+    }
+
+    protected start(): void {
         this.initLabel();
     }
 
     initLabel(){
-        // DataManager.setString(LangChars.QUIT, (chars: string)=>{
-        //     this.itemLabelMid.getComponent(cc.Label).string = chars + '?';
-        // });
-        // DataManager.setString(LangChars.OK, (chars: string)=>{
-        //     this.itemLabelPlay.getComponent(cc.Label).string = chars;
-        // });
+        DataManager.setString(LangChars.bank_title, (chars: string)=>{
+            this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
+        });
+        DataManager.setString(LangChars.bank_desc, (chars: string)=>{
+            this.itemLabelMid.getComponent(cc.Label).string = chars + '?';
+        });
+        DataManager.setString(LangChars.CONTINUE, (chars: string)=>{
+            this.itemLabelPlay.getComponent(cc.Label).string = chars;
+        });
     }
 
     eventBtnSure() {

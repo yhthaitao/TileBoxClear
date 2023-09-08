@@ -218,14 +218,14 @@ export default class MainMenuMid extends cc.Component {
     eventBtnHomeStart() {
         console.log('点击按钮: 游戏开始');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Event.emit(CConst.event_enter_game);
+        kit.Popup.show(CConst.popup_path_before, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 星星宝箱 */
     eventBtnHomeBoxXing() {
         console.log('点击按钮: 星星宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_boxXingxing, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 每日签到 */
@@ -239,14 +239,14 @@ export default class MainMenuMid extends cc.Component {
     eventBtnHomeBoxLevel() {
         console.log('点击按钮: 等级宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_boxLevel, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 银行 */
     eventBtnHomeBank() {
         console.log('点击按钮: 银行');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_bank, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /************************************************************************************************************************/

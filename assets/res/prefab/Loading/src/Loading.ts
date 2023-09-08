@@ -1,7 +1,8 @@
 import { kit } from "../../../../src/kit/kit";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager, { LangChars } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
+import { LangChars } from "../../../../src/config/ConfigLang";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -22,7 +23,7 @@ export default class Loading extends cc.Component {
     }
 
     initLabel() {
-        DataManager.setString(LangChars.Loading, (chars: string) => {
+        DataManager.setString(LangChars.loading, (chars: string) => {
             this.nodeProcess.getChildByName('label').getComponent(cc.Label).string = chars;
         });
     }
@@ -69,7 +70,7 @@ export default class Loading extends cc.Component {
         let itemLabel = this.nodeProcess.getChildByName('label');
         let label = itemLabel.getComponent(cc.Label);
         let funcLabel = () => {
-            DataManager.setString(LangChars.Loading, (chars: string) => {
+            DataManager.setString(LangChars.loading, (chars: string) => {
                 if (label.string == chars) label.string = chars + '.';
                 else if (label.string == chars + '.') label.string = chars + '..';
                 else if (label.string == chars + '..') label.string = chars + '...';

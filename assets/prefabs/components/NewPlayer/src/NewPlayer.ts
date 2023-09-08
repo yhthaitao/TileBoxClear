@@ -1,7 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
-import DataManager, { LangChars } from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -21,9 +20,6 @@ export default class NewPlayer extends cc.Component {
         switch (type) {
             case CConst.newPlayer_guide_sort_1:
                 NativeCall.logEventOne(ConfigDot.dot_guide_adventure_01);
-                DataManager.setString(LangChars.sort1, (chars: string)=>{
-                    label.getComponent(cc.Label).string = chars;
-                });
                 this.scheduleOnce(() => {
                     this.hand.getChildByName("icon").getComponent(cc.Animation).play("handSort1");
                 }, .383)
@@ -31,17 +27,11 @@ export default class NewPlayer extends cc.Component {
             case CConst.newPlayer_guide_sort_2:
                 NativeCall.logEventOne(ConfigDot.dot_guide_adventure_02);
                 NativeCall.logEventTwo('sortFirstPlay', String(2));
-                DataManager.setString(LangChars.sort2, (chars: string)=>{
-                    label.getComponent(cc.Label).string = chars;
-                });
                 this.hand.x = -290;
                 break;
             case CConst.newPlayer_guide_sort_3:
                 NativeCall.logEventOne(ConfigDot.dot_guide_adventure_03);
                 NativeCall.logEventTwo('sortFirstPlay', String(3));
-                DataManager.setString(LangChars.sort3, (chars: string)=>{
-                    label.getComponent(cc.Label).string = chars;
-                });
                 this.sign.y = -400
                 break;
             default:

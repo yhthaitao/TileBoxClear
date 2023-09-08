@@ -3,7 +3,7 @@ import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import NativeCall from "../../../../src/config/NativeCall";
-import DataManager, { LangChars } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -25,9 +25,9 @@ export default class SpecialQuit extends PopupBase {
     }
 
     initLabel() {
-        DataManager.setString(LangChars.REVIEW, (chars: string)=>{
-            this.labelTitle.getComponent(cc.Label).string = chars;
-        });
+        // DataManager.setString(LangChars.REVIEW, (chars: string)=>{
+        //     this.labelTitle.getComponent(cc.Label).string = chars;
+        // });
     }
 
     /** 按钮事件 星星 */

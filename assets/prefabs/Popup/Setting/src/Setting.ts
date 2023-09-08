@@ -2,7 +2,6 @@ import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import Common from "../../../../src/config/Common";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { LangChars } from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -24,15 +23,15 @@ export default class Setting extends PopupBase {
     }
 
     initLabel(){
-        DataManager.setString(LangChars.SETTING, (chars: string)=>{
-            this.labelTitle.getComponent(cc.Label).string = chars;
-        });
-        DataManager.setString(LangChars.ON, (chars: string)=>{
-            this.labelOn.getComponent(cc.Label).string = chars;
-        });
-        DataManager.setString(LangChars.OFF, (chars: string)=>{
-            this.labelOff.getComponent(cc.Label).string = chars;
-        });
+        // DataManager.setString(LangChars.SETTING, (chars: string)=>{
+        //     this.labelTitle.getComponent(cc.Label).string = chars;
+        // });
+        // DataManager.setString(LangChars.ON, (chars: string)=>{
+        //     this.labelOn.getComponent(cc.Label).string = chars;
+        // });
+        // DataManager.setString(LangChars.OFF, (chars: string)=>{
+        //     this.labelOff.getComponent(cc.Label).string = chars;
+        // });
     }
 
     protected start(): void {

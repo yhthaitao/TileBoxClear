@@ -70,8 +70,10 @@ const CConst = {
     /*************************************** 弹窗地址 ****************************************/
     /*****************************************************************************************/
     popup_path_setting: './Popup/Setting/res/prefab/Setting',
-    popup_path_special_tip: './Popup/SpecialTip/res/prefab/SpecialTip',
-    popup_path_special_quit: './Popup/SpecialQuit/res/prefab/SpecialQuit',
+    popup_path_bank: './Popup/Bank/res/prefab/Bank',
+    popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
+    popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
+    popup_path_before: './Popup/Before/res/prefab/Before',
     popup_path_user_evaluate: './Popup/UserEvaluate/res/prefab/UserEvaluate',
     /*************************************** end **************************************************/
 
