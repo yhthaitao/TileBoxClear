@@ -31,10 +31,8 @@ export default class PopupBase<Options = any> extends cc.Component {
             this.maskUp.active = true;
             // 储存选项
             this.options = options;
-            // 初始化
-            this.init(this.options);
-            // 更新样式
-            this.updateDisplay(this.options);
+            // 展示前
+            this.showBefore(this.options);
             // 播放背景遮罩动画
             this.maskDown.active = true;
             this.maskDown.opacity = 0;
@@ -52,7 +50,7 @@ export default class PopupBase<Options = any> extends cc.Component {
                 // 关闭拦截
                 this.maskUp.active = false;
                 // 弹窗已完全展示
-                this.onShow && this.onShow();
+                this.showAfter && this.showAfter();
                 // Done
                 res();
             }).start();
@@ -68,6 +66,8 @@ export default class PopupBase<Options = any> extends cc.Component {
         return new Promise<void>(res => {
             // 开启拦截
             this.maskUp.active = true;
+            // 关闭前
+            this.hideBefore();
             // 播放背景遮罩动画
             cc.tween(this.maskDown).delay(0.2).to(0.233, { opacity: 0 }, { easing: 'sineInOut' }).start();
             // 播放弹窗主体动画
@@ -82,7 +82,7 @@ export default class PopupBase<Options = any> extends cc.Component {
                 // 关闭节点
                 this.node.active = false;
                 // 弹窗已完全隐藏（动画完毕）
-                this.onHide && this.onHide(suspended);
+                this.hideAfter && this.hideAfter(suspended);
                 // 弹窗完成回调
                 this.finishCallback && this.finishCallback(suspended);
                 // Done
@@ -94,24 +94,19 @@ export default class PopupBase<Options = any> extends cc.Component {
     /**
      * 初始化（派生类请重写此函数以实现自定义逻辑）
      */
-    protected init(options: Options) { }
+    protected showBefore(options: Options) { }
+
+    /** 弹窗已完全展示（派生类请重写此函数以实现自定义逻辑）*/
+    protected showAfter() { }
+
+    /** 弹窗隐藏前（派生类请重写此函数以实现自定义逻辑）*/
+    protected hideBefore() { }
 
     /**
-     * 更新样式（派生类请重写此函数以实现自定义样式）
-     * @param options 弹窗选项
+     * 弹窗已完全关闭
+     * @param suspended 
      */
-    protected updateDisplay(options: Options) { }
-
-    /**
-     * 弹窗已完全展示（派生类请重写此函数以实现自定义逻辑）
-     */
-    protected onShow() { }
-
-    /**
-     * 弹窗已完全隐藏（派生类请重写此函数以实现自定义逻辑）
-     * @param suspended 是否被挂起
-     */
-    protected onHide(suspended: boolean) { }
+    protected hideAfter(suspended: boolean) { }
 
     /**
      * 弹窗流程结束回调（注意：该回调为 PopupManager 专用，重写 hide 函数时记得调用该回调）

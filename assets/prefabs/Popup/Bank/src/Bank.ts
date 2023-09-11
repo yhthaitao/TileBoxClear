@@ -17,11 +17,9 @@ export default class Bank extends PopupBase {
         Common.log('Bank onLoad()');
     }
 
-    protected start(): void {
-        this.initLabel();
-    }
+    protected showBefore(options: any): void {
+        Common.log('Bank showBefore()');
 
-    initLabel(){
         DataManager.setString(LangChars.bank_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
         });

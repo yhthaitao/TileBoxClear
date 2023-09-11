@@ -6,6 +6,7 @@ import DataManager, { TypeReward } from "../../../../src/config/DataManager";
 import ConfigBoxSuipian from "../../../../src/config/ConfigBoxSuipian";
 import ConfigBoxXingxing from "../../../../src/config/ConfigBoxXingxing";
 import ConfigBoxLevel from "../../../../src/config/ConfigBoxLevel";
+import { LangChars } from "../../../../src/config/ConfigLang";
 
 /** 主题类型 */
 export enum StateTheme {
@@ -21,7 +22,9 @@ export default class MainMenuMid extends cc.Component {
     @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片时间' }) home_top_time: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_start: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-左侧-每日签到进度' }) home_left_calendar_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-右侧-等级宝箱进度' }) home_right_boxLevel_process: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-左侧-银行进度' }) home_right_bank_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主题-顶部' }) theme_top: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主题-中部-主题栏' }) theme_mid_areas: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主题-中部-主题栏-内同' }) theme_mid_areas_content: cc.Node = null;
@@ -82,6 +85,8 @@ export default class MainMenuMid extends cc.Component {
         this.resetLevelStage();
         this.resetBoxXingxingProcess();
         this.resetBoxLevelProcess();
+        this.resetCalendarProcess();
+        this.resetBankProcess();
     };
 
     /** 刷新-碎片进度 */
@@ -142,14 +147,17 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 时间-更新 */
-    tElseSuipianUpdate() {
+    async tElseSuipianUpdate() {
         let h = Math.floor(this.tElseSuipian / 3600);
         let mElse = this.tElseSuipian % 3600;
         let m = Math.floor(mElse / 60);
         let s = Math.floor(mElse % 60);
         // 文本
+        let valueH = await DataManager.getString(LangChars.hour);
+        let valueM = await DataManager.getString(LangChars.minite);
+        let valueS = await DataManager.getString(LangChars.second);
         let itemLabel = this.home_top_time.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = h + 'h:' + m + 'm:' + s + 's';
+        itemLabel.getComponent(cc.Label).string = h + valueH + ':' + m + valueM + ':' + s + valueS;
         this.tElseSuipian--;
         if (this.tElseSuipian < 0) {
             this.tElseSuipian = 0;
@@ -160,10 +168,7 @@ export default class MainMenuMid extends cc.Component {
 
     /** 刷新-关卡数 */
     resetLevelStage() {
-        let level = DataManager.data.boxData.level;
-        // 文本
-        let itemLabel = this.home_bottom_start.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = 'Level  ' + level;
+        this.refreshLabel_home_bottom();
     };
 
     /** 刷新-星星宝箱进度 */
@@ -190,6 +195,11 @@ export default class MainMenuMid extends cc.Component {
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
     };
 
+    /** 刷新-日历进度 */
+    resetCalendarProcess() {
+        this.refreshLabel_home_left();
+    };
+
     /** 刷新-等级宝箱进度 */
     resetBoxLevelProcess() {
         let boxData = DataManager.data.boxLevel;
@@ -214,6 +224,11 @@ export default class MainMenuMid extends cc.Component {
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
     };
 
+    /** 刷新-日历进度 */
+    resetBankProcess() {
+        this.refreshLabel_home_right();
+    };
+
     /** 按钮事件 开始 */
     eventBtnHomeStart() {
         console.log('点击按钮: 游戏开始');
@@ -232,7 +247,7 @@ export default class MainMenuMid extends cc.Component {
     eventBtnHomeDaily() {
         console.log('点击按钮: 每日签到');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_daily, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 等级宝箱 */
@@ -256,7 +271,7 @@ export default class MainMenuMid extends cc.Component {
     initTheme() {
         this.initThemeAreas();
         this.initThemeCommodity();
-        this.resetThemeButton();
+        this.initThemeButton();
     };
 
     initThemeAreas() {
@@ -275,6 +290,7 @@ export default class MainMenuMid extends cc.Component {
             this.initThemeAreasCell(index, cell);
             cell.parent = this.theme_mid_areas_content;
         }
+        this.refreshLabel_theme_areas();
     };
 
     /** 初始化 theme areas cell */
@@ -311,6 +327,33 @@ export default class MainMenuMid extends cc.Component {
 
     initThemeCommodity() {
 
+    };
+
+    /** 初始化主题按钮 */
+    initThemeButton() {
+        let objColor = this.objTheme.title.color;
+        let funcSet = (isLight: boolean, button: cc.Node) => {
+            button.getChildByName('light').active = isLight;
+            button.getChildByName('dark').active = !isLight;
+            button.getChildByName('label').color = isLight ? objColor.light : objColor.dark;
+        };
+
+        let isAreas = this.stateTheme == StateTheme.areas;
+        // 主题界面按钮切换
+        let btnAreas = this.theme_top.getChildByName('btnAreas');
+        let btnCommodity = this.theme_top.getChildByName('btnCommodity');
+        funcSet(isAreas, btnAreas);
+        funcSet(!isAreas, btnCommodity);
+        // 主题栏和物品奖励栏切换
+        if (isAreas) {
+            this.theme_mid_areas.active = true;
+            this.theme_mid_commodity.active = false;
+        }
+        else {
+            this.theme_mid_areas.active = false;
+            this.theme_mid_commodity.active = true;
+        }
+        this.refreshLabel_theme_top();
     };
 
     /** 重置主题按钮 */
@@ -389,12 +432,10 @@ export default class MainMenuMid extends cc.Component {
     /************************************************************************************************************************/
     /*********************************************************  事件  *******************************************************/
     /************************************************************************************************************************/
-    /** 监听-注册 */
-    listernerRegist(): void {
-        kit.Event.on(CConst.event_reset_suipian, this.eventBack_resetSuipian, this);
-        kit.Event.on(CConst.event_reset_xingxing, this.eventBack_resetXingxing, this);
-        kit.Event.on(CConst.event_reset_level, this.eventBack_resetLevel, this);
-    }
+    /** 更新语言 */
+    eventBack_refreshLanguage() {
+        this.refreshLanguage();
+    };
 
     eventBack_resetSuipian() {
         this.resetBoxSuipianProcess();
@@ -408,6 +449,14 @@ export default class MainMenuMid extends cc.Component {
         this.resetBoxLevelProcess();
     }
 
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+        kit.Event.on(CConst.event_reset_suipian, this.eventBack_resetSuipian, this);
+        kit.Event.on(CConst.event_reset_xingxing, this.eventBack_resetXingxing, this);
+        kit.Event.on(CConst.event_reset_level, this.eventBack_resetLevel, this);
+    }
+
     /** 监听-取消 */
     listernerIgnore(): void {
         kit.Event.removeByTarget(this);
@@ -415,5 +464,77 @@ export default class MainMenuMid extends cc.Component {
 
     protected onDestroy(): void {
         this.listernerIgnore();
-    }
+    };
+
+    /** 更新语言 */
+    refreshLanguage() {
+        this.refreshLabel_home_bottom();
+        this.refreshLabel_home_left();
+        this.refreshLabel_home_right();
+        this.refreshLabel_theme_top();
+        this.refreshLabel_theme_areas();
+        this.refreshLabel_theme_commodity();
+    };
+
+    /** label home bottom */
+    refreshLabel_home_bottom() {
+        DataManager.setString(LangChars.Level, (chars: string) => {
+            let level = DataManager.data.boxData.level;
+            let itemLabel = this.home_bottom_start.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = chars + '  ' + level;
+        });
+    };
+
+    /** label home left */
+    refreshLabel_home_left() {
+        DataManager.setString(LangChars.Daily, (chars: string) => {
+            let itemLabel = this.home_left_calendar_process.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = chars;
+        });
+    };
+
+    /** label home right */
+    refreshLabel_home_right() {
+        DataManager.setString(LangChars.Bank, (chars: string) => {
+            let itemLabel = this.home_right_bank_process.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = chars;
+        });
+    };
+
+    /** label theme top */
+    refreshLabel_theme_top(){
+        // 主题界面按钮切换
+        let btnAreas = this.theme_top.getChildByName('btnAreas');
+        DataManager.setString(LangChars.Areas, (chars: string) => {
+            let itemLabel = btnAreas.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = chars;
+        });
+        let btnCommodity = this.theme_top.getChildByName('btnCommodity');
+        DataManager.setString(LangChars.Commodity, (chars: string) => {
+            let itemLabel = btnCommodity.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = chars;
+        });
+    };
+
+    /** label theme areas */
+    refreshLabel_theme_areas(){
+        let objAreas = this.objTheme.areas;
+        this.theme_mid_areas_content.children.forEach((cell)=>{
+            DataManager.setString(LangChars.BreakTime, (chars: string) => {
+                let labelTitle = cell.getChildByName('labelTitle');
+                labelTitle.getComponent(cc.Label).string = chars;
+            });
+            let index = cell.name.substring(4);
+            let param = objAreas.config[index];
+            DataManager.setString(LangChars.Level, (chars: string) => {
+                let labelLevel = cell.getChildByName('labelLevel');
+                labelLevel.getComponent(cc.Label).string = chars + '  ' + param.start + '-' + param.finish;
+            });
+        });
+    };
+
+    /** label theme commodity */
+    refreshLabel_theme_commodity(){
+
+    };
 }

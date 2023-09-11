@@ -83,6 +83,6 @@ export default class MainMenuTop extends cc.Component {
     eventBtnSet() {
         console.log('点击按钮: 设置');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_settingHome, {}, { mode: PopupCacheMode.Frequent });
     };
 }

@@ -17,11 +17,9 @@ export default class BoxXingxing extends PopupBase {
         Common.log('BoxXingxing onLoad()');
     }
 
-    protected start(): void {
-        this.initLabel();
-    }
+    protected showBefore(options: any): void {
+        Common.log('BoxXingxing showBefore()');
 
-    initLabel(){
         DataManager.setString(LangChars.boxXingxing_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
         });

@@ -34,13 +34,15 @@ export default class Before extends PopupBase {
         Common.log('Before onLoad()');
     }
 
-    protected start(): void {
-        this.initLabel();
+    protected showBefore(options: any): void {
+        Common.log('Before showBefore()');
+
+        this.resetLabel();
         this.resetWins();
         this.resetProp();
     }
 
-    initLabel() {
+    resetLabel() {
         // 标题
         let labelTitle = this.nodeTitle.getChildByName('label');
         labelTitle.opacity = 0;
@@ -145,9 +147,11 @@ export default class Before extends PopupBase {
     }
 
     /** 按钮事件 游戏开始 */
-    eventBtnSure() {
+    async eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
+        await this.hide();
+        kit.Audio.playEffect(CConst.sound_enterGame);
+        kit.Event.emit(CConst.event_enter_game);
     }
 
     /** 按钮事件 退出 */

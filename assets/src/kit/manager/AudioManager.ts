@@ -13,7 +13,7 @@ export default class AudioManager {
     /**  */
     public static get config() { return this._config; }
     /** 默认配置 */
-    private static _config: ConfigAudio = { isPlayMusic: true, isPlayEffect: true, volumeMusic: 1.0, volumeEffect: 1.0, };
+    private static _config: ConfigAudio = { isPlayMusic: true, isPlayEffect: true, isPlayShake: true, volumeMusic: 1.0, volumeEffect: 1.0, };
 
     /** 初始化音乐 */
     public static initAudio() {
@@ -24,6 +24,15 @@ export default class AudioManager {
         else {
             cc.sys.localStorage.setItem("cfgAudio", JSON.stringify(this._config));
         }
+    }
+
+    /**
+     * 设置 震动
+     * @param isPlay 
+     */
+    public static setIsPlayShake(isPlay: boolean) {
+        this._config.isPlayShake = isPlay;
+        cc.sys.localStorage.setItem("cfgAudio", JSON.stringify(this._config));
     }
 
     /**
@@ -299,6 +308,8 @@ interface ConfigAudio {
     isPlayMusic: boolean;
     /** 是否开启 音效 */
     isPlayEffect: boolean;
+    /** 是否开启 震动 */
+    isPlayShake: boolean;
     /** 音量（音乐） */
     volumeMusic: number;
     /** 音量（音效） */

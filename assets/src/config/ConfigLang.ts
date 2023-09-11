@@ -1,9 +1,10 @@
 /** 本地化 文字 文件 */
-export const LangFile = {
-    en: 'en',// 英文
-    zh: 'zh',// 繁体中文
-    jp: 'jp',// 日文
-    kr: 'kr',// 韩文
+export enum LangFile {
+    no = 'no',// 无
+    en = 'en',// 英文
+    jp = 'jp',// 日文
+    kr = 'kr',// 韩文
+    zh = 'zh',// 繁体中文
 };
 
 /** 本地化 文字 字段 */
@@ -17,14 +18,14 @@ export const LangChars = {
     guide_clock: "guide_clock",
     over_timeout_title: "over_timeout_title",
     over_timeout_desc: "over_timeout_desc",
-    over_timeout_continue: "over_timeout_continue",
+    over_timeout_playon: "over_timeout_playon",
     over_timeout_giveup: "over_timeout_giveup",
     over_nospace_desc: "over_nospace_desc",
     over_nospace_gobackgood: "over_nospace_gobackgood",
     exit_confirm_desc: "exit_confirm_desc",
     exit_confirm_restart: "exit_confirm_restart",
     exit_confirm_giveup: "exit_confirm_giveup",
-    pause_desc: "pause_desc",
+    pause_title: "pause_title",
     pause_resume: "pause_resume",
     pause_quit: "pause_quit",
     exit_title: "exit_title",
@@ -40,6 +41,10 @@ export const LangChars = {
     Bank: "Bank",
     Home: "Home",
     Shop: "Shop",
+    Theme: "Theme",
+    Areas: "Areas",
+    Commodity: "Commodity",
+    BreakTime: "BreakTime",
     Collection: "Collection",
     CONTINUE: "CONTINUE",
     setting_title: "setting_title",
@@ -98,6 +103,7 @@ export const LangChars = {
     adsNetworkNo: "adsNetworkNo",
     adsNetworkElse: "adsNetworkElse",
     adsNotReady: "adsNotReady",
+    Daily: "Daily",
     dailyChallenge_January: "dailyChallenge_January",
     dailyChallenge_February: "dailyChallenge_February",
     dailyChallenge_March: "dailyChallenge_March",

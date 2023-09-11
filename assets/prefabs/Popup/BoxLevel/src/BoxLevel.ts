@@ -17,11 +17,9 @@ export default class BoxLevel extends PopupBase {
         Common.log('BoxLevel onLoad()');
     }
 
-    protected start(): void {
-        this.initLabel();
-    }
+    protected showBefore(options: any): void {
+        Common.log('BoxLevel showBefore()');
 
-    initLabel(){
         DataManager.setString(LangChars.boxLevel_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
         });

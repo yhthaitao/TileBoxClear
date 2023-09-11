@@ -27,14 +27,14 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 411
+        "__id__": 412
       },
       {
-        "__id__": 412
+        "__id__": 413
       }
     ],
     "_prefab": {
-      "__id__": 413
+      "__id__": 414
     },
     "_opacity": 255,
     "_color": {
@@ -219,7 +219,7 @@
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 410
+      "__id__": 411
     },
     "_opacity": 255,
     "_color": {
@@ -10385,8 +10385,14 @@
     "home_left_boxXing_process": {
       "__id__": 74
     },
+    "home_left_calendar_process": {
+      "__id__": 96
+    },
     "home_right_boxLevel_process": {
       "__id__": 117
+    },
+    "home_right_bank_process": {
+      "__id__": 139
     },
     "theme_top": {
       "__id__": 252
@@ -11774,10 +11780,13 @@
     "_components": [
       {
         "__id__": 408
+      },
+      {
+        "__id__": 409
       }
     ],
     "_prefab": {
-      "__id__": 409
+      "__id__": 410
     },
     "_opacity": 255,
     "_color": {
@@ -15024,6 +15033,25 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": null,
+    "_id": ""
+  },
+  {
+    "__type__": "88609cOgZlBC4GZ45XPkKNj",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 321
+    },
+    "_enabled": true,
+    "itemLabelShop": {
+      "__id__": 343
+    },
+    "itemLabelHome": {
+      "__id__": 367
+    },
+    "itemLabelTheme": {
+      "__id__": 399
+    },
     "_id": ""
   },
   {

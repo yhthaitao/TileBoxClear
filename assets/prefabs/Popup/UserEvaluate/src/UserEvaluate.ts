@@ -7,7 +7,7 @@ import DataManager from "../../../../src/config/DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class SpecialQuit extends PopupBase {
+export default class UserEvaluate extends PopupBase {
 
     @property(cc.Node) nodeXing: cc.Node = null;
     @property(cc.Node) labelTitle: cc.Node = null;
@@ -16,18 +16,15 @@ export default class SpecialQuit extends PopupBase {
     xingMax: number = 5;
 
     protected onLoad(): void {
-        this.initUI();
-        this.initLabel();
+        Common.log('UserEvaluate onLoad()');
     }
 
-    initUI() {
-        this.refreshXingxing();
-    }
-
-    initLabel() {
+    protected showBefore(options: any): void {
+        Common.log('UserEvaluate showBefore()');
         // DataManager.setString(LangChars.REVIEW, (chars: string)=>{
         //     this.labelTitle.getComponent(cc.Label).string = chars;
         // });
+        this.refreshXingxing();
     }
 
     /** 按钮事件 星星 */

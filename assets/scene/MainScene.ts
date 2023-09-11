@@ -93,9 +93,7 @@ export default class MainScene extends cc.Component {
 
     /** 无视频提示 */
     async initNoVideo() {
-        DataManager.setString(LangChars.adsNo, (chars: string)=>{
-            this.noVideoTip.getComponent(cc.Label).string = chars;
-        });
+        this.refreshLabel_noVideo();
         this.noVideoTip.zIndex = CConst.zIndex_noVideo;
         this.noVideoTip.opacity = 0;
     }
@@ -205,20 +203,15 @@ export default class MainScene extends cc.Component {
         }
     }
 
-    /** 监听-注册 */
-    listernerRegist(): void {
-        kit.Event.on(CConst.event_complete_loading, this.eventBack_loadingComplete, this);
-        kit.Event.on(CConst.event_enter_menu, this.eventBack_enterMenu, this);
-        kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
-        kit.Event.on(CConst.event_enter_win, this.eventBack_enterWin, this);
-        kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
-        kit.Event.on(CConst.event_enter_newPlayer, this.eventBack_enterNewPlayer, this);
-    }
-
     /** 事件回调：loading完成 */
     eventBack_loadingComplete() {
         this.isCompleteLoading = true;
         this.enterMenuLayer();
+    };
+
+    /** 更新语言 */
+    eventBack_refreshLanguage(){
+        this.refreshLanguage();
     };
 
     /** 事件回调：进入菜单 */
@@ -272,6 +265,17 @@ export default class MainScene extends cc.Component {
         anim.play();
     }
 
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_complete_loading, this.eventBack_loadingComplete, this);
+        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+        kit.Event.on(CConst.event_enter_menu, this.eventBack_enterMenu, this);
+        kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
+        kit.Event.on(CConst.event_enter_win, this.eventBack_enterWin, this);
+        kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
+        kit.Event.on(CConst.event_enter_newPlayer, this.eventBack_enterNewPlayer, this);
+    }
+
     /** 监听-取消 */
     listernerIgnore(): void {
         kit.Event.removeByTarget(this);
@@ -279,5 +283,15 @@ export default class MainScene extends cc.Component {
 
     protected onDestroy(): void {
         this.listernerIgnore();
-    }
+    };
+
+    refreshLanguage(){
+        this.refreshLabel_noVideo();
+    };
+
+    refreshLabel_noVideo(){
+        DataManager.setString(LangChars.adsNo, (chars: string)=>{
+            this.noVideoTip.getComponent(cc.Label).string = chars;
+        });
+    };
 }

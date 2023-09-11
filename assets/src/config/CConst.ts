@@ -33,16 +33,30 @@ const CConst = {
     /*****************************************************************************************/
     /** loading完成 */
     event_complete_loading: 'event_complete_loading',
+    /** 进入 刷新语言 */
+    event_refresh_language: 'event_reset_language',
     /** 进入 菜单 */
     event_enter_menu: 'event_enter_menu',
     /** 进入 新手引导 */
     event_enter_newPlayer: 'event_enter_newPlayer',
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
+    /** pause */
+    event_game_pause: 'event_pause',
+    /** resume */
+    event_game_resume: 'event_resume',
     /** 进入 胜利 */
     event_enter_win: 'event_enter_win',
     /** 进入 下一关游戏 */
     event_enter_nextLevel: 'event_enter_nextLevel',
+    /** 游戏胜利后 下一关 */
+    event_win_nextLevel: 'event_win_nextLevel',
+    /** 游戏胜利后 进入菜单 */
+    event_win_enterMenu: 'event_win_enterMenu',
+    /** 游戏失败后 继续 */
+    event_fail_playOn: 'event_fail_playOn',
+    /** 游戏失败后 放弃 */
+    event_fail_giveUp: 'event_fail_giveUp',
     /** 提示 */
     event_notice: 'event_notices',
     /** 更新数据（碎片宝箱） */
@@ -69,11 +83,15 @@ const CConst = {
     /*****************************************************************************************/
     /*************************************** 弹窗地址 ****************************************/
     /*****************************************************************************************/
-    popup_path_setting: './Popup/Setting/res/prefab/Setting',
-    popup_path_bank: './Popup/Bank/res/prefab/Bank',
-    popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
+    popup_path_settingHome: './Popup/Setting/res/prefab/SettingHome',
+    popup_path_settingGame: './Popup/Setting/res/prefab/SettingGame',
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
+    popup_path_daily: './Popup/Daily/res/prefab/Daily',
+    popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
+    popup_path_bank: './Popup/Bank/res/prefab/Bank',
     popup_path_before: './Popup/Before/res/prefab/Before',
+    popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
+    popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',
     popup_path_user_evaluate: './Popup/UserEvaluate/res/prefab/UserEvaluate',
     /*************************************** end **************************************************/
 

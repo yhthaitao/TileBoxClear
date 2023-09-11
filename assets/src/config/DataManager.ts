@@ -74,8 +74,6 @@ class DataManager {
     stateLast: number = 0;
     /** 视频节点 */
     nodeVideo: cc.Node = null;
-    /** 本地语言 */
-    langCur: string = LangFile.en;
     /** 云加载 */
     isCloudLoad: boolean = false;
     /** 插屏广告开启关卡 */
@@ -91,6 +89,7 @@ class DataManager {
 
     /** 初始数据 */
     data = {
+        langCur: LangFile.no,
         // 用户初始化数据
         userInfo: { id: 0, name: "Tony" },
         // 广告参数
@@ -104,7 +103,7 @@ class DataManager {
         },
         isEvaluate: false,// 是否已经评价
         installtime: new Date().valueOf(),
-        numCoin: 300,// 金币数量
+        numCoin: 100,// 金币数量
         numReplay: 1,// 可以重玩的次数，限30关之前
         // 体力参数
         strength: {
@@ -117,12 +116,12 @@ class DataManager {
         },
         // 道具参数
         prop: {
-            ice: { count: 5 },// 冰冻
-            tip: { count: 5 },// 提示
-            back: { count: 5 },// 返回上一步
-            refresh: { count: 5 },// 刷新
-            magnet: { count: 5, tInfinite: 0 },// 磁铁
-            clock: { count: 5, tInfinite: 0 },// 时钟
+            ice: { count: 3 },// 冰冻
+            tip: { count: 3 },// 提示
+            back: { count: 3 },// 返回上一步
+            refresh: { count: 3 },// 刷新
+            magnet: { count: 3, tInfinite: 0 },// 磁铁
+            clock: { count: 3, tInfinite: 0 },// 时钟
         },
         // 宝箱相关参数（碎片宝箱）
         boxSuipian: {
@@ -184,11 +183,11 @@ class DataManager {
         // 初始化语言
         this.initLanguage();
         // 提前加载 本地化 文本
-        await kit.Resources.loadRes(CConst.bundleCommon, CConst.pathLanguage + this.langCur, cc.JsonAsset);
+        await kit.Resources.loadRes(CConst.bundleCommon, CConst.pathLanguage + this.data.langCur, cc.JsonAsset);
         // 提前加载 本地化 图片
         let arrName = Object.keys(LangImg);
         for (let index = 0, length = arrName.length; index < length; index++) {
-            let resPath = CConst.pathImage + this.langCur + '/' + arrName[index];
+            let resPath = CConst.pathImage + this.data.langCur + '/' + arrName[index];
             await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
         }
         // 初始化视频动画
@@ -199,6 +198,9 @@ class DataManager {
 
     /** 多语言设置 */
     public initLanguage() {
+        if (this.data.langCur != LangFile.no) {
+            return;
+        }
         let language = NativeCall.checkLang(LangFile.en);
         switch (language) {
             case 'cn':
@@ -207,26 +209,26 @@ class DataManager {
             case 'ZH':
             case 'tw':
             case 'TW':
-                this.langCur = LangFile.zh;
+                this.data.langCur = LangFile.zh;
                 break;
             case 'ja':
             case 'JA':
             case 'jp':
             case 'JP':
-                this.langCur = LangFile.jp;
+                this.data.langCur = LangFile.jp;
                 break;
             case 'ko':
             case 'KO':
             case 'kr':
             case 'KR':
-                this.langCur = LangFile.kr;
+                this.data.langCur = LangFile.kr;
                 break;
             default:
-                this.langCur = LangFile.en;
+                this.data.langCur = LangFile.en;
                 break;
         }
-        Common.log(' 初始化语言：', this.langCur);
-        return this.langCur;
+        Common.log(' 初始化语言：', this.data.langCur);
+        this.setData();
     }
 
     /** 设置游戏状态 */
@@ -363,8 +365,15 @@ class DataManager {
     };
 
     /** 获取字符串 */
+    public async getString(key: string): Promise<string> {
+        let resPath = CConst.pathLanguage + this.data.langCur;
+        let jsonAsset: cc.JsonAsset = await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.JsonAsset);
+        return jsonAsset.json[key];
+    };
+
+    /** 获取字符串 */
     public setString(key: string, callback) {
-        let resPath = CConst.pathLanguage + this.langCur;
+        let resPath = CConst.pathLanguage + this.data.langCur;
         kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.JsonAsset, (e: any, jsonAsset: cc.JsonAsset) => {
             if (jsonAsset) {
                 callback && callback(jsonAsset.json[key]);

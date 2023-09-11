@@ -68,6 +68,7 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Node, tooltip: 'ui-道具' }) uiProp: cc.Node = null;
     @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
     @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
+    @property({ type: cc.Node, tooltip: '冰冻效果节点' }) nodeIce: cc.Node = null;
 
     /** 关卡数据 */
     levelParam: LevelParam = null;
@@ -80,7 +81,9 @@ export default class GameBox extends cc.Component {
     }
 
     /** 游戏用数据 */
-    dataObj = { numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false };
+    dataObj = { 
+        numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false 
+    };
     heightObj = {};
 
     goodsCfg: any = {};// 物品配置
@@ -119,9 +122,6 @@ export default class GameBox extends cc.Component {
     baseDis: number = 2000;// 单位时间移动距离
     poolBox: cc.NodePool = null;// 箱子缓存
     poolGood: cc.NodePool = null;// 物品缓存
-
-    colorTime: cc.Color = cc.color(134, 77, 52);// 时间颜色-起始
-    colorTimeIce: cc.Color = cc.Color.BLUE;// 时间颜色-冻结
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -201,7 +201,7 @@ export default class GameBox extends cc.Component {
         this.initBox();
         this.initUI();
         this.initLevel();
-        this.isLock = false;
+        this.setIsLock(false);
     }
 
     /** 重新开始 */
@@ -212,7 +212,7 @@ export default class GameBox extends cc.Component {
         this.resetBox();
         this.initUI();
         this.initLevel();
-        this.isLock = false;
+        this.setIsLock(false);
     }
 
     /** 加载关卡数据 */
@@ -470,7 +470,7 @@ export default class GameBox extends cc.Component {
         this.setUILevel();// 设置关卡等级
         this.setUISuipian();// 设置碎片数量
         this.setUITime();// 设置时间
-        this.setUITimeColor();// 设置时间颜色
+        this.setIceHide();// 设置时间颜色
         this.setUIProcess();// 设置进度
     }
 
@@ -577,7 +577,7 @@ export default class GameBox extends cc.Component {
             this.timeProp.iceCount--;
             // 冻结 结束
             if (this.timeProp.iceCount <= 0) {
-                this.setUITimeColor();
+                this.setIceHide();
             }
             return;
         }
@@ -1131,7 +1131,7 @@ export default class GameBox extends cc.Component {
             DataManager.poolPut(good, this.poolGood);
         }
         this.timeProp.iceCount = 0;
-        this.setUITimeColor();
+        this.setIceHide();
     }
 
     /** 按钮事件 重玩 */
@@ -1178,7 +1178,8 @@ export default class GameBox extends cc.Component {
         }
 
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_setting, {}, { mode: PopupCacheMode.Frequent });
+        this.setIsLock(true);
+        kit.Popup.show(CConst.popup_path_settingGame, {}, { mode: PopupCacheMode.Frequent });
     }
 
     /** 按钮事件 上一步 */
@@ -1540,7 +1541,7 @@ export default class GameBox extends cc.Component {
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
         this.timeProp.iceCount += this.timeProp.iceTotal;
-        this.setUITimeColorIce();
+        this.setIceShow();
     }
 
     /** 按钮事件 时间增加 */
@@ -1612,18 +1613,22 @@ export default class GameBox extends cc.Component {
         }
     };
 
-    /** ui颜色 时间 */
-    setUITimeColor() {
-        this.arrTimeLayer[0].node.color = this.colorTime;
-        this.arrTimeLayer[1].node.color = this.colorTime;
-        this.arrTimeLayer[2].node.color = this.colorTime;
-    }
+    setIceShow() {
+        let itemTime = this.uiTop.getChildByName('time');
+        let itemIce = itemTime.getChildByName('ice');
+        itemIce.active = true;
+        this.nodeIce.active = true;
+    };
 
-    /** ui颜色 冻结 */
-    setUITimeColorIce() {
-        this.arrTimeLayer[0].node.color = this.colorTimeIce;
-        this.arrTimeLayer[1].node.color = this.colorTimeIce;
-        this.arrTimeLayer[2].node.color = this.colorTimeIce;
+    setIceHide() {
+        let itemTime = this.uiTop.getChildByName('time');
+        let itemIce = itemTime.getChildByName('ice');
+        itemIce.active = false;
+        this.nodeIce.active = false;
+    };
+
+    setIsLock(isLock) {
+        this.isLock = isLock;
     }
 
     /** 播放动画（游戏显隐） */
@@ -1749,8 +1754,13 @@ export default class GameBox extends cc.Component {
         this.isLock = true;
         this.dataObj.isFinish = true;
         if (this.goodsCount >= this.goodsTotal) {
-            let xingNum = this.getXingxingNum();
             Common.log('胜利');
+            let xingNum = this.getXingxingNum();
+            const options = {
+                star: xingNum,
+                tCount: this.timeGame.count,
+            };
+            kit.Popup.show(CConst.popup_path_gameWin, options, { mode: PopupCacheMode.Frequent });
         }
         else {
             Common.log('失败');
@@ -1814,7 +1824,7 @@ export default class GameBox extends cc.Component {
     /** 获取星星数量（根据剩余时间获取） */
     getXingxingNum() {
         let xingNum = 1;
-        let ratio = 100 * this.timeGame.count/this.timeGame.total;
+        let ratio = 100 * this.timeGame.count / this.timeGame.total;
         if (ratio > 60) {
             xingNum = 3;
         }
@@ -1899,6 +1909,8 @@ export default class GameBox extends cc.Component {
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_enter_nextLevel, this.gameStart, this);
+        kit.Event.on(CConst.event_win_nextLevel, this.gameStart, this);
+        kit.Event.on(CConst.event_game_resume, this.setIsLock.bind(this, false), this);
     }
 
     /** 监听-取消 */
