@@ -49,6 +49,14 @@ export interface GoodParam {
     box: { name: string, key: number, x: number, y: number },
 }
 
+/** 参数枚举（游戏胜利） */
+export interface ParamsWin {
+    star: number;
+    tCount: number;
+    level: number;
+    suipian: number;
+}
+
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class GameBox extends cc.Component {
@@ -66,9 +74,13 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Node, tooltip: 'ui-底部-检测区' }) uiBottomMain: cc.Node = null;
     @property({ type: cc.Node, tooltip: '消除动作节点' }) uiParticle: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具' }) uiProp: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-冰冻' }) uiPropIce: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-提示' }) uiPropTip: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-回退' }) uiPropReturn: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-刷新' }) uiPropRefresh: cc.Node = null;
     @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
     @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
-    @property({ type: cc.Node, tooltip: '冰冻效果节点' }) nodeIce: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '冰冻效果节点' }) effectIce: cc.Node = null;
 
     /** 关卡数据 */
     levelParam: LevelParam = null;
@@ -81,8 +93,8 @@ export default class GameBox extends cc.Component {
     }
 
     /** 游戏用数据 */
-    dataObj = { 
-        numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false 
+    dataObj = {
+        numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false
     };
     heightObj = {};
 
@@ -472,6 +484,11 @@ export default class GameBox extends cc.Component {
         this.setUITime();// 设置时间
         this.setIceHide();// 设置时间颜色
         this.setUIProcess();// 设置进度
+        // 设置道具栏
+        this.setUIProp(this.uiPropIce, DataManager.data.prop.ice.count);
+        this.setUIProp(this.uiPropTip, DataManager.data.prop.tip.count);
+        this.setUIProp(this.uiPropReturn, DataManager.data.prop.return.count);
+        this.setUIProp(this.uiPropRefresh, DataManager.data.prop.refresh.count);
     }
 
     /** 初始化游戏关卡 */
@@ -553,6 +570,23 @@ export default class GameBox extends cc.Component {
         let labelTotal = this.uiProcess.getChildByName('labelTotal');
         labelTotal.getComponent(cc.Label).string = String(this.goodsTotal);
     }
+
+    /** 设置道具栏 */
+    setUIProp(prop: cc.Node, propCount: number) {
+        let nodeY = prop.getChildByName('nodeY');
+        let nodeN = prop.getChildByName('nodeN');
+        if (propCount > 0) {
+            nodeY.active = true;
+            nodeN.active = false;
+            let itemLabel = nodeY.getChildByName('label');
+            itemLabel.getComponent(cc.Label).string = '' + propCount;
+        }
+        else {
+            nodeY.active = false;
+            nodeN.active = true;
+        }
+    };
+
 
     protected update(dt: number): void {
         this.cycleTime(dt);
@@ -1182,7 +1216,125 @@ export default class GameBox extends cc.Component {
         kit.Popup.show(CConst.popup_path_settingGame, {}, { mode: PopupCacheMode.Frequent });
     }
 
-    /** 按钮事件 上一步 */
+    /** 道具 按钮事件 时间冻结 */
+    eventBtnTimeIce() {
+        Common.log('按钮 冻结时间 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        // 使用道具-冰冻
+        let count = DataManager.data.prop.ice.count;
+        if (count <= 0) {
+            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+            return;
+        }
+        count--;
+        DataManager.data.prop.ice.count = count;
+        DataManager.setData();
+        this.setUIProp(this.uiPropIce, count);
+
+        this.timeProp.iceCount += this.timeProp.iceTotal;
+        this.setIceShow();
+    }
+
+    /** 道具 按钮事件 提示 */
+    eventBtnTip() {
+        // 锁定 或 物品移动过程中，不触发道具
+        Common.log('按钮 提示 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
+        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        // 使用道具-提示
+        let count = DataManager.data.prop.tip.count;
+        if (count <= 0) {
+            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+            return;
+        }
+        count--;
+        DataManager.data.prop.tip.count = count;
+        DataManager.setData();
+        this.setUIProp(this.uiPropTip, count);
+
+        let needNum = 3;
+        let keyGood = 0;
+        if (this.bottomParamArr.length > 0) {
+            for (let index = 0; index < this.bottomParamArr.length; index++) {
+                let arrGoodParam = this.bottomParamArr[index];
+                needNum = 3 - arrGoodParam.length;
+                if (needNum <= this.bottomMax - this.getBottomGoodNum()) {
+                    keyGood = arrGoodParam[0].keyGood;
+                    break;
+                }
+            }
+            // 物品标识为0，提示失败；
+            if (keyGood == 0) {
+                kit.Event.emit(CConst.event_notice, "Can't be used now");
+                return;
+            }
+        }
+        else {
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                let arrBoxParam = this.arrGame[i];
+                for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                    let boxParam = arrBoxParam[j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            keyGood = goodParam.keyGood;
+                            break;
+                        }
+                    }
+                    if (keyGood != 0) {
+                        break;
+                    }
+                }
+                if (keyGood != 0) {
+                    break;
+                }
+            }
+            if (keyGood == 0) {
+                this.isLock = false;
+                Common.log('eventBtnTip 箱子里没有物品')
+                return;
+            }
+        }
+
+        let isEnough: boolean = false;
+        let arrChose: GoodParam[] = [];
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                let goodKeys = Object.keys(boxParam.goods);
+                goodKeys.sort((a: string, b: string) => { return boxParam.goods[a].index - boxParam.goods[b].index; });
+                for (let k = 0, lenC = goodKeys.length; k < lenC; k++) {
+                    let value = goodKeys[k];
+                    let goodParam: GoodParam = boxParam.goods[value];
+                    if (goodParam.keyGood == keyGood) {
+                        arrChose.push(goodParam);
+                        if (arrChose.length > needNum - 1) {
+                            isEnough = true;
+                            break;
+                        }
+                    }
+                }
+                if (isEnough) {
+                    break;
+                }
+            }
+            if (isEnough) {
+                break;
+            }
+        }
+
+        this.eventTouchAfter(arrChose);
+    }
+
+    /** 道具 按钮事件 上一步 */
     eventBtnReturn() {
         // 锁定 或 物品移动过程中，不触发道具
         Common.log('按钮 返回上一步 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
@@ -1197,6 +1349,17 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, "Can't be used now");
             return;
         }
+        // 使用道具-返回上一步
+        let count = DataManager.data.prop.return.count;
+        if (count <= 0) {
+            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+            return;
+        }
+        count--;
+        DataManager.data.prop.return.count = count;
+        DataManager.setData();
+        this.setUIProp(this.uiPropReturn, count);
+
         this.isLock = true;
 
         // 删除检测区物品数据 并 获取物品参数
@@ -1371,15 +1534,27 @@ export default class GameBox extends cc.Component {
         }
     }
 
-    /** 按钮事件 刷新 */
+    /** 道具 按钮事件 刷新 */
     eventBtnRefresh() {
         // 锁定 或 物品移动过程中，不触发道具
         Common.log('按钮 刷新 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
-        this.isLock = true;
         kit.Audio.playEffect(CConst.sound_clickUI);
+
+        // 使用道具-刷新
+        let count = DataManager.data.prop.refresh.count;
+        if (count <= 0) {
+            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+            return;
+        }
+        count--;
+        DataManager.data.prop.refresh.count = count;
+        DataManager.setData();
+        this.setUIProp(this.uiPropRefresh, count);
+
+        this.isLock = true;
         /*****************************************************组合物品数组*************************************************************/
         let arrGoodParam: GoodParam[][] = [];
         let composeArr = (boxParam: BoxParam) => {
@@ -1419,7 +1594,6 @@ export default class GameBox extends cc.Component {
             }
         }
 
-
         /**********************************************重新排序后的物品数组 赋值给 物品数组, 并执行更新*************************************************/
         let voluationArr = (arrParamA: GoodParam[], arrParamB: GoodParam[]) => {
             for (let index = 0, length = arrParamA.length; index < length; index++) {
@@ -1447,101 +1621,6 @@ export default class GameBox extends cc.Component {
 
         /** 延时解锁 */
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
-    }
-
-    /** 按钮事件 提示 */
-    eventBtnTip() {
-        // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 提示 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        let needNum = 3;
-        let keyGood = 0;
-        if (this.bottomParamArr.length > 0) {
-            for (let index = 0; index < this.bottomParamArr.length; index++) {
-                let arrGoodParam = this.bottomParamArr[index];
-                needNum = 3 - arrGoodParam.length;
-                if (needNum <= this.bottomMax - this.getBottomGoodNum()) {
-                    keyGood = arrGoodParam[0].keyGood;
-                    break;
-                }
-            }
-            // 物品标识为0，提示失败；
-            if (keyGood == 0) {
-                kit.Event.emit(CConst.event_notice, "Can't be used now");
-                return;
-            }
-        }
-        else {
-            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
-                let arrBoxParam = this.arrGame[i];
-                for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
-                    let boxParam = arrBoxParam[j];
-                    for (const key in boxParam.goods) {
-                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
-                            let goodParam: GoodParam = boxParam.goods[key];
-                            keyGood = goodParam.keyGood;
-                            break;
-                        }
-                    }
-                    if (keyGood != 0) {
-                        break;
-                    }
-                }
-                if (keyGood != 0) {
-                    break;
-                }
-            }
-            if (keyGood == 0) {
-                this.isLock = false;
-                Common.log('eventBtnTip 箱子里没有物品')
-                return;
-            }
-        }
-
-        let isEnough: boolean = false;
-        let arrChose: GoodParam[] = [];
-        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
-            let arrBoxParam = this.arrGame[i];
-            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
-                let boxParam = arrBoxParam[j];
-                let goodKeys = Object.keys(boxParam.goods);
-                goodKeys.sort((a: string, b: string) => { return boxParam.goods[a].index - boxParam.goods[b].index; });
-                for (let k = 0, lenC = goodKeys.length; k < lenC; k++) {
-                    let value = goodKeys[k];
-                    let goodParam: GoodParam = boxParam.goods[value];
-                    if (goodParam.keyGood == keyGood) {
-                        arrChose.push(goodParam);
-                        if (arrChose.length > needNum - 1) {
-                            isEnough = true;
-                            break;
-                        }
-                    }
-                }
-                if (isEnough) {
-                    break;
-                }
-            }
-            if (isEnough) {
-                break;
-            }
-        }
-
-        this.eventTouchAfter(arrChose);
-    }
-
-    /** 按钮事件 时间冻结 */
-    eventBtnTimeIce() {
-        // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 冻结时间 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        this.timeProp.iceCount += this.timeProp.iceTotal;
-        this.setIceShow();
     }
 
     /** 按钮事件 时间增加 */
@@ -1592,7 +1671,7 @@ export default class GameBox extends cc.Component {
         else {
             this.gameRestart();
         }
-    };
+    }
 
     /** 按钮事件 下一关 */
     eventBtnLevelNext() {
@@ -1611,21 +1690,21 @@ export default class GameBox extends cc.Component {
         else {
             this.gameRestart();
         }
-    };
+    }
 
     setIceShow() {
         let itemTime = this.uiTop.getChildByName('time');
         let itemIce = itemTime.getChildByName('ice');
         itemIce.active = true;
-        this.nodeIce.active = true;
-    };
+        this.effectIce.active = true;
+    }
 
     setIceHide() {
         let itemTime = this.uiTop.getChildByName('time');
         let itemIce = itemTime.getChildByName('ice');
         itemIce.active = false;
-        this.nodeIce.active = false;
-    };
+        this.effectIce.active = false;
+    }
 
     setIsLock(isLock) {
         this.isLock = isLock;
@@ -1755,9 +1834,13 @@ export default class GameBox extends cc.Component {
         this.dataObj.isFinish = true;
         if (this.goodsCount >= this.goodsTotal) {
             Common.log('胜利');
+            DataManager.refreshDataAfterWin();
+            
             let xingNum = this.getXingxingNum();
             const options = {
                 star: xingNum,
+                level: 1,
+                suipian: this.dataObj.numSuipian,
                 tCount: this.timeGame.count,
             };
             kit.Popup.show(CConst.popup_path_gameWin, options, { mode: PopupCacheMode.Frequent });

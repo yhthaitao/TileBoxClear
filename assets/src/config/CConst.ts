@@ -83,6 +83,8 @@ const CConst = {
     /*****************************************************************************************/
     /*************************************** 弹窗地址 ****************************************/
     /*****************************************************************************************/
+    
+    popup_path_actPass: './Popup/ActPass/res/prefab/ActPass',
     popup_path_settingHome: './Popup/Setting/res/prefab/SettingHome',
     popup_path_settingGame: './Popup/Setting/res/prefab/SettingGame',
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',

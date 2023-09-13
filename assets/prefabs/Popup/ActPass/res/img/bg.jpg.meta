@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "e25a0b2d-ba4e-47ed-b1d7-190df9379334",
+  "uuid": "806340dd-d003-4802-b44c-518cdc4063d6",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -11,10 +11,10 @@
   "height": 1600,
   "platformSettings": {},
   "subMetas": {
-    "游戏内暂停按钮": {
+    "bg": {
       "ver": "1.0.4",
-      "uuid": "7c2e72d6-3447-4d77-acb2-88282695acdf",
-      "rawTextureUuid": "e25a0b2d-ba4e-47ed-b1d7-190df9379334",
+      "uuid": "a0f85a1e-e628-45e1-9d94-d30f8229145f",
+      "rawTextureUuid": "806340dd-d003-4802-b44c-518cdc4063d6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -15,10 +15,6 @@ export default class UserEvaluate extends PopupBase {
     xingNum: number = 0;
     xingMax: number = 5;
 
-    protected onLoad(): void {
-        Common.log('UserEvaluate onLoad()');
-    }
-
     protected showBefore(options: any): void {
         Common.log('UserEvaluate showBefore()');
         // DataManager.setString(LangChars.REVIEW, (chars: string)=>{

@@ -173,10 +173,13 @@ export default class PopupManager {
     }
 
     /** 隐藏当前弹窗 */
-    public static hide() {
-        if (this._current && this._current.popup) {
-            this._current.popup.hide();
-        }
+    public static hide(): Promise<void> {
+        return new Promise(async res => {
+            if (this._current && this._current.popup) {
+                await this._current.popup.hide();
+            }
+            res();
+        });
     }
 
     /**

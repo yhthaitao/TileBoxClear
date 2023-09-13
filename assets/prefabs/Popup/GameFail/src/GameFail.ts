@@ -23,10 +23,6 @@ export default class GameFail extends PopupBase {
 
     params: ParamsFail = null;
 
-    protected onLoad(): void {
-        Common.log('GameFail onLoad()');
-    }
-
     protected showBefore(options: any): void {
         Common.log('GameFail showBefore()');
         this.params = Common.clone(options);
@@ -75,19 +71,26 @@ export default class GameFail extends PopupBase {
 
     async eventBtnPlayOn() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        kit.Event.emit(CConst.event_enter_nextLevel, false, true);
+        let count = DataManager.data.strength.count;
+        if (count > 0) {
+            DataManager.data.strength.count--;
+            await this.hide();
+            kit.Event.emit(CConst.event_enter_nextLevel);
+        }
+        else{
+            kit.Event.emit(CConst.event_notice, '没体力了');
+        }
     }
 
     async eventBtnGiveUp() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await this.hide();
-        kit.Event.emit(CConst.event_enter_nextLevel, false, true);
+        kit.Event.emit(CConst.event_enter_nextLevel);
     }
 
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await this.hide();
-        kit.Event.emit(CConst.event_enter_menu, false, true);
+        kit.Event.emit(CConst.event_enter_menu);
     }
 }

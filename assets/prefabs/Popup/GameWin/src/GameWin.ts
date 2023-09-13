@@ -4,12 +4,8 @@ import CConst from "../../../../src/config/CConst";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
-
-/** 参数枚举（游戏胜利） */
-export interface ParamsWin {
-    star: number;
-    tCount: number;
-}
+import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
+import { ParamsWin } from "../../../games/GameBox/src/GameBox";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -21,15 +17,13 @@ export default class GameWin extends PopupBase {
     @property([cc.Node]) arrNodeXingxing: cc.Node[] = [];
 
     params: ParamsWin = null;
-
-    protected onLoad(): void {
-        Common.log('GameWin onLoad()');
-    }
+    isNext: boolean = false;
 
     protected showBefore(options: any): void {
         Common.log('GameWin showBefore()');
         this.params = Common.clone(options);
 
+        // 时间
         let m = Math.floor(this.params.tCount / 60);
         let s = Math.floor(this.params.tCount % 60);
         this.itemLabelTime.getComponent(cc.Label).string = m + ':' + s;
@@ -37,18 +31,29 @@ export default class GameWin extends PopupBase {
         DataManager.setString(LangChars.win_finish, (chars: string) => {
             this.itemLabelTitle.getComponent(cc.Label).string = chars;
         });
-        DataManager.setString(LangChars.win_next, (chars: string) => {
+
+        // continue 和 param
+        this.isNext = true;
+        let _data = DataManager.data;
+        if (this.params.level && _data.boxLevel.count + this.params.level >= DataManager.getRewardBoxLevel().total
+            || this.params.star && _data.boxXingxing.count + this.params.star >= DataManager.getRewardBoxXinging().total
+            || this.params.suipian && _data.boxSuipian.count + this.params.suipian >= DataManager.getRewardBoxSuipian().total) {
+            this.isNext = false;
+        }
+        DataManager.setString(this.isNext ? LangChars.win_next : LangChars.CONTINUE, (chars: string) => {
             this.itemLabelNext.getComponent(cc.Label).string = chars;
         });
-    }
 
-    protected showAfter(): void {
-        Common.log('GameWin showAfter()');
+        // 星星隐藏
         this.arrNodeXingxing.forEach((xing) => {
             let icon = xing.getChildByName('icon');
             icon.opacity = 0;
             cc.Tween.stopAllByTarget(icon);
         });
+    }
+
+    protected showAfter(): void {
+        Common.log('GameWin showAfter()');
         let total = this.params.star;
         let funcXing = (index: number = 0) => {
             if (index < total) {
@@ -81,13 +86,19 @@ export default class GameWin extends PopupBase {
 
     async eventBtnNext() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        kit.Event.emit(CConst.event_win_nextLevel);
+        kit.Popup.hide();
+        kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+        if (this.isNext) {
+            kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+        }
+        else{
+            kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+        }
     }
 
-    async eventBtnExit() {
+    eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        kit.Event.emit(CConst.event_win_enterMenu);
+        kit.Popup.hide();
+        kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
     }
 }

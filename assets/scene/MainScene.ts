@@ -142,6 +142,7 @@ export default class MainScene extends cc.Component {
 
     /** 更新游戏状态 */
     async setGameState(state: StateGame) {
+        Common.log('MainScene setGameState() state: ', state, '; cur: ', DataManager.stateCur, '; last: ', DataManager.stateLast);
         if (state == DataManager.stateCur) {
             return;
         }

@@ -13,10 +13,6 @@ export default class BoxLevel extends PopupBase {
     @property(cc.Node) itemLabelMid: cc.Node = null;
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
-    protected onLoad(): void {
-        Common.log('BoxLevel onLoad()');
-    }
-
     protected showBefore(options: any): void {
         Common.log('BoxLevel showBefore()');
 

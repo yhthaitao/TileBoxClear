@@ -45,6 +45,9 @@ export enum TypeProp {
     tMagnetInfinite = 1 << 8,// 无限时间-磁铁
     tClockInfinite = 1 << 9,// 无限时间-时钟
 }
+import ConfigBoxLevel from "./ConfigBoxLevel";
+import ConfigBoxSuipian from "./ConfigBoxSuipian";
+import ConfigBoxXingxing from "./ConfigBoxXingxing";
 
 /** 数据类型（碎片宝箱奖励） */
 export interface TypeReward {
@@ -79,13 +82,7 @@ class DataManager {
     /** 插屏广告开启关卡 */
     adStartLevel: number = 4;
     /** 游戏开始前界面状态 */
-    objBefore = {
-        wins: 0,
-        propState: [
-            { type: TypeProp.magnet, state: StateBeforeProp.lock },
-            { type: TypeProp.clock, state: StateBeforeProp.lock },
-        ]
-    };
+    beforeWins: number = 0;
 
     /** 初始数据 */
     data = {
@@ -105,12 +102,17 @@ class DataManager {
         installtime: new Date().valueOf(),
         numCoin: 100,// 金币数量
         numReplay: 1,// 可以重玩的次数，限30关之前
+        // 游戏开始前界面状态
+        beforeProp: [
+            { type: TypeProp.magnet, state: StateBeforeProp.lock, unlock: 12 },
+            { type: TypeProp.clock, state: StateBeforeProp.lock, unlock: 15 },
+        ],
         // 体力参数
         strength: {
             count: 5,// 当前体力值
             total: 5,// 最大体力值
             tCount: 0, // 恢复体力计时
-            tTotal: 900,// 900秒恢复1体力
+            tTotal: 60,// 900秒恢复1体力
             buyCoin: 100,// 100金币购买1体力
             tInfinite: 0,// 无限时间
         },
@@ -118,7 +120,7 @@ class DataManager {
         prop: {
             ice: { count: 3 },// 冰冻
             tip: { count: 3 },// 提示
-            back: { count: 3 },// 返回上一步
+            return: { count: 3 },// 返回上一步
             refresh: { count: 3 },// 刷新
             magnet: { count: 3, tInfinite: 0 },// 磁铁
             clock: { count: 3, tInfinite: 0 },// 时钟
@@ -138,7 +140,7 @@ class DataManager {
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
-            areas: 1,// 当前主题
+            areasId: 1,// 当前主题
             newTip: {
                 cur: 0,
                 max: 3,
@@ -236,6 +238,104 @@ class DataManager {
         this.stateLast = this.stateCur;
         this.stateCur = state;
     }
+
+    /** 数据更新（游戏胜利后） */
+    public refreshDataAfterWin(){
+        // 等级变化
+        this.data.boxData.level++;
+        // 道具解锁（游戏开始前界面）
+        this.data.beforeProp.forEach((obj: {type: TypeProp, state: StateBeforeProp, unlock: number}, index: number)=>{
+            if (obj.state == StateBeforeProp.lock) {
+                if (this.data.boxData.level >= obj.unlock) {
+                    obj.state = StateBeforeProp.unChoose;
+                }
+            }
+            // 连胜奖励
+            if (obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
+                this.beforeWins++;
+                switch (this.beforeWins) {
+                    case 1:
+                        this.data.prop.magnet.count += 1;
+                        break;
+                    case 2:
+                        this.data.prop.magnet.count += 2;
+                        break;
+                    case 3:
+                        this.data.prop.magnet.count += 3;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        this.setData();
+    }
+
+    public addBeforeWins() {
+        if (this.data.beforeProp[0].state != StateBeforeProp.lock) {
+            this.beforeWins++;
+            switch (this.beforeWins) {
+                case 1:
+                    this.data.prop.magnet.count += 1;
+                    break;
+                case 2:
+                    this.data.prop.magnet.count += 2;
+                    break;
+                case 3:
+                    this.data.prop.magnet.count += 3;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /** 获取奖励参数（等级宝箱） */
+    public getRewardBoxLevel() {
+        let boxData = this.data.boxLevel;
+        let index = boxData.level;
+        if (index < 1) {
+            index = 1;
+        }
+        else {
+            if (index > boxData.loop.start - 1) {
+                index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
+            }
+        }
+        return ConfigBoxLevel[index];
+    };
+
+    /** 获取奖励参数（星星宝箱） */
+    public getRewardBoxXinging(): TypeReward {
+        let boxData = this.data.boxXingxing;
+        let index = boxData.level;
+        if (index < 1) {
+            index = 1;
+        }
+        else {
+            if (index > boxData.loop.start - 1) {
+                index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
+            }
+        }
+        let config: TypeReward = ConfigBoxXingxing[index];
+        return config;
+    };
+
+    /** 获取奖励参数（碎片宝箱） */
+    public getRewardBoxSuipian(): TypeReward {
+        let index = this.data.boxSuipian.level;
+        if (index < 1) {
+            index = 1;
+        }
+        else {
+            let max = Number(Object.keys(ConfigBoxSuipian).pop());
+            if (index > max) {
+                index = max;
+            }
+        }
+        let config: TypeReward = ConfigBoxSuipian[index];
+        return config;
+    };
 
     /**
      * 存储数据

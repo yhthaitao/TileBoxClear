@@ -13,10 +13,6 @@ export default class BoxXingxing extends PopupBase {
     @property(cc.Node) itemLabelMid: cc.Node = null;
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
-    protected onLoad(): void {
-        Common.log('BoxXingxing onLoad()');
-    }
-
     protected showBefore(options: any): void {
         Common.log('BoxXingxing showBefore()');
 

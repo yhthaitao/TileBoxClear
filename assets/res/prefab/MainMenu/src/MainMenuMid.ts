@@ -2,10 +2,7 @@ import { kit } from "../../../../src/kit/kit";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import DataManager, { TypeReward } from "../../../../src/config/DataManager";
-import ConfigBoxSuipian from "../../../../src/config/ConfigBoxSuipian";
-import ConfigBoxXingxing from "../../../../src/config/ConfigBoxXingxing";
-import ConfigBoxLevel from "../../../../src/config/ConfigBoxLevel";
+import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 
 /** 主题类型 */
@@ -65,8 +62,12 @@ export default class MainMenuMid extends cc.Component {
         this.listernerRegist();
     }
 
-    protected start(): void {
+    protected onEnable(): void {
         this.init();
+    }
+
+    protected onDisable(): void {
+        this.unscheduleAllCallbacks();
     }
 
     init() {
@@ -115,21 +116,8 @@ export default class MainMenuMid extends cc.Component {
 
     /** 刷新-碎片-进度条 */
     resetBoxSuipianProcess() {
-        let boxData = DataManager.data.boxSuipian;
-        let count = boxData.count;
-        // 查找对应奖励数据
-        let index = boxData.level;
-        if (index < 1) {
-            index = 1;
-        }
-        else {
-            let max = Number(Object.keys(ConfigBoxSuipian).pop());
-            if (index > max) {
-                index = max;
-            }
-        }
-        let config: TypeReward = ConfigBoxSuipian[index];
-        let total = config.total;
+        let count = DataManager.data.boxSuipian.count;
+        let total = DataManager.getRewardBoxSuipian().total;
         // 进度条
         let itemBar = this.home_top_process.getChildByName('bar');
         itemBar.width = this.wProcessSuipian * count / total;
@@ -173,20 +161,8 @@ export default class MainMenuMid extends cc.Component {
 
     /** 刷新-星星宝箱进度 */
     resetBoxXingxingProcess() {
-        let boxData = DataManager.data.boxXingxing;
-        let count = boxData.count;
-        // 查找对应奖励数据
-        let index = boxData.level;
-        if (index < 1) {
-            index = 1;
-        }
-        else {
-            if (index > boxData.loop.start - 1) {
-                index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
-            }
-        }
-        let config: TypeReward = ConfigBoxXingxing[index];
-        let total = config.total;
+        let count = DataManager.data.boxXingxing.count;
+        let total = DataManager.getRewardBoxXinging().total;
         // 进度条
         let itemBar = this.home_left_boxXing_process.getChildByName('bar');
         itemBar.width = this.wProcessXingxing * count / total;
@@ -202,20 +178,8 @@ export default class MainMenuMid extends cc.Component {
 
     /** 刷新-等级宝箱进度 */
     resetBoxLevelProcess() {
-        let boxData = DataManager.data.boxLevel;
-        let count = boxData.count;
-        // 查找对应奖励数据
-        let index = boxData.level;
-        if (index < 1) {
-            index = 1;
-        }
-        else {
-            if (index > boxData.loop.start - 1) {
-                index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
-            }
-        }
-        let config: TypeReward = ConfigBoxLevel[index];
-        let total = config.total;
+        let count = DataManager.data.boxLevel.count;
+        let total = DataManager.getRewardBoxLevel().total;
         // 进度条
         let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
         itemBar.width = this.wProcessLevel * count / total;
@@ -297,7 +261,8 @@ export default class MainMenuMid extends cc.Component {
     initThemeAreasCell(index: number, cell: cc.Node) {
         let objAreas = this.objTheme.areas;
         let level = DataManager.data.boxData.level;
-        let areas = DataManager.data.boxData.areas;
+        let areasId = DataManager.data.boxData.areasId;
+        let choseId = index + 1;
         let param = objAreas.config[index];
         cell.active = true;
         cell.name = 'cell' + index;
@@ -312,7 +277,7 @@ export default class MainMenuMid extends cc.Component {
             backDark.active = false;
             labelTitle.color = objAreas.color.light;
             labelLevel.color = objAreas.color.light;
-            right.active = index == areas;
+            right.active = choseId == areasId;
             lock.active = false;
         }
         else {
@@ -393,8 +358,13 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 按钮事件 主题选择 */
-    eventBtnThemeAreasItem() {
-        console.log('点击按钮: 主题栏内部选择');
+    eventBtnThemeAreasItem(event: cc.Event.EventTouch) {
+        let areasId = DataManager.data.boxData.areasId;
+        let chodsId = Number(event.target.name.substring(4)) + 1;
+        console.log('点击按钮 主题栏内部选择 chodsId: ', chodsId, '; areasId: ', areasId);
+        if (chodsId == areasId) {
+            return;
+        }
     };
 
     /** 事件 theme-areas-scrollview */

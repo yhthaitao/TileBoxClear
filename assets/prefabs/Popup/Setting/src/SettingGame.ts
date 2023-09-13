@@ -4,6 +4,7 @@ import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
+import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -29,10 +30,6 @@ export default class SettingGame extends PopupBase {
         },
     };
     isLock: boolean = false;
-
-    protected onLoad(): void {
-        Common.log('SettingGame onLoad()');
-    }
 
     protected showBefore(options: any): void {
         Common.log('SettingGame showBefore()');
@@ -205,14 +202,14 @@ export default class SettingGame extends PopupBase {
         this.nodeQuit.active = true;
     };
 
-    /** 按钮事件 恢复 */
-    async eventQuitBtnResume() {
+    /** 按钮事件 重新开始 */
+    eventQuitBtnRestart() {
         if (this.isLock) {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        kit.Event.emit(CConst.event_game_resume);
+        kit.Popup.hide();
+        kit.Popup.show(CConst.popup_path_before, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 退出 */
@@ -226,12 +223,13 @@ export default class SettingGame extends PopupBase {
     };
 
     /** 按钮事件 退出 */
-    eventQuitBtnExit() {
+    async eventQuitBtnExit() {
         if (this.isLock) {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        this.setPauseUI();
+        await this.hide();
+        kit.Event.emit(CConst.event_game_resume);
     };
 
     /** 刷新 语言 */
@@ -274,9 +272,9 @@ export default class SettingGame extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 按钮
-        let itemResume = this.nodeQuitButton.getChildByName('btnResume');
-        DataManager.setString(LangChars.exit_resume, (chars: string) => {
-            let itemLabel = itemResume.getChildByName('label');
+        let itemRestart = this.nodeQuitButton.getChildByName('btnRestart');
+        DataManager.setString(LangChars.exit_confirm_restart, (chars: string) => {
+            let itemLabel = itemRestart.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
         let itemQuit = this.nodeQuitButton.getChildByName('btnQuit');

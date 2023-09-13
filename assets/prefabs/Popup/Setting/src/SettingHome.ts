@@ -33,7 +33,7 @@ export default class SettingHome extends PopupBase {
     isLock: boolean = false;
 
     protected onLoad(): void {
-        Common.log('SettingHome onLoad()');
+        super.onLoad();
         this.listernerRegist();
     }
 

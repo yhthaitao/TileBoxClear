@@ -1,7 +1,7 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { StateBeforeProp, TypeProp } from "../../../../src/config/DataManager";
+import DataManager, { StateBeforeProp, StateGame, TypeProp } from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 
@@ -24,15 +24,7 @@ export default class Before extends PopupBase {
             light: [{ x: -140, w: 110 }, { x: -10, w: 120 }, { x: 135, w: 120 },],
             process: [{ w: 108 }, { w: 244 }, { w: 384 },],
         },
-        prop: [
-            { type: TypeProp.magnet, unlock: 12 },
-            { type: TypeProp.clock, unlock: 15 },
-        ],
     };
-
-    protected onLoad(): void {
-        Common.log('Before onLoad()');
-    }
 
     protected showBefore(options: any): void {
         Common.log('Before showBefore()');
@@ -84,7 +76,7 @@ export default class Before extends PopupBase {
         this.winLight.opacity = 0;
         this.winProcess.opacity = 0;
         this.arrNodeWin.forEach((win) => { win.opacity = this.obj.win.opaFalse });
-        let wins = DataManager.objBefore.wins;
+        let wins = DataManager.beforeWins;
         if (wins > 0) {
             let index = wins - 1;
             // 连胜光罩
@@ -120,7 +112,7 @@ export default class Before extends PopupBase {
             signAdd.active = false;
             labelNum.active = false;
             button.active = false;
-            let objState = DataManager.objBefore.propState[index];
+            let objState = DataManager.data.beforeProp[index];
             switch (objState.state) {
                 case StateBeforeProp.lock:// 未解锁
                     backLock.active = true;
@@ -149,15 +141,32 @@ export default class Before extends PopupBase {
     /** 按钮事件 游戏开始 */
     async eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        kit.Audio.playEffect(CConst.sound_enterGame);
-        kit.Event.emit(CConst.event_enter_game);
+        await kit.Popup.hide();
+        if (DataManager.data.strength.count > 0) {
+            kit.Audio.playEffect(CConst.sound_enterGame);
+            DataManager.data.strength.count--;
+            DataManager.data.strength.tCount = Math.floor(new Date().getTime() / 1000);
+            DataManager.setData();
+
+            if (DataManager.stateCur == StateGame.menu) {
+                kit.Event.emit(CConst.event_enter_game);
+            }
+            else{
+                kit.Event.emit(CConst.event_win_nextLevel);
+            }
+        }
+        else{
+            kit.Event.emit(CConst.event_notice, '没体力了');
+        }
     }
 
     /** 按钮事件 退出 */
-    eventBtnExit() {
+    async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
+        await this.hide();
+        if (DataManager.stateCur == StateGame.game) {
+            kit.Event.emit(CConst.event_enter_menu);
+        }
     }
 
     /** 按钮事件 道具选择 */
@@ -165,9 +174,13 @@ export default class Before extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         let index = Number(custom);
-        let objState = DataManager.objBefore.propState[index];
+        let objState = DataManager.data.beforeProp[index];
         if (!objState) {
             Common.log('Before 点击异常 sortBtn: ', index);
+            return;
+        }
+        if (objState.state == StateBeforeProp.lock) {
+            Common.log('prop 未解锁 sortBtn: ', index);
             return;
         }
         switch (objState.state) {
@@ -185,5 +198,6 @@ export default class Before extends PopupBase {
             default:
                 break;
         }
+        DataManager.setData();
     }
 }

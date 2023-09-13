@@ -1,3 +1,5 @@
+import Common from "../../../config/Common";
+
 const { ccclass, property } = cc._decorator;
 
 /** 弹窗基类 */
@@ -15,6 +17,11 @@ export default class PopupBase<Options = any> extends cc.Component {
 
     /** 弹窗选项 */
     protected options: Options = null;
+
+    protected onLoad(): void {
+        Common.log('PopupBase onLoad()');
+        this.node.active = false;
+    }
 
     /**
      * 展示弹窗
@@ -62,7 +69,7 @@ export default class PopupBase<Options = any> extends cc.Component {
      * @param suspended 是否被挂起
      * @param duration 动画时长
      */
-    public hide(suspended: boolean = false) {
+    public hide(suspended: boolean = false): Promise<void> {
         return new Promise<void>(res => {
             // 开启拦截
             this.maskUp.active = true;

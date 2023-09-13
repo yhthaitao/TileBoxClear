@@ -4952,7 +4952,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btnResume",
+    "_name": "btnRestart",
     "_objFlags": 0,
     "_parent": {
       "__id__": 130
@@ -5207,8 +5207,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Resume",
-    "_N$string": "Resume",
+    "_string": "Restart",
+    "_N$string": "Restart",
     "_fontSize": 36,
     "_lineHeight": 36,
     "_enableWrapText": true,
@@ -5317,7 +5317,7 @@
     },
     "component": "",
     "_componentId": "531e80EOxlPdYiC45jjwg1K",
-    "handler": "eventQuitBtnResume",
+    "handler": "eventQuitBtnRestart",
     "customEventData": ""
   },
   {

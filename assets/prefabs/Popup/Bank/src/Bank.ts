@@ -13,10 +13,6 @@ export default class Bank extends PopupBase {
     @property(cc.Node) itemLabelMid: cc.Node = null;
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
-    protected onLoad(): void {
-        Common.log('Bank onLoad()');
-    }
-
     protected showBefore(options: any): void {
         Common.log('Bank showBefore()');
 
