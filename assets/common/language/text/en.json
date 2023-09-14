@@ -10,7 +10,7 @@
     "over_timeout_desc": "You will lose",
     "over_timeout_playon": "Play on",
     "over_timeout_giveup": "Give up",
-    "over_nospace_desc": "OUT OF MOVE",
+    "over_nospace_title": "OUT OF MOVE",
     "over_nospace_gobackgood": "Return 3 goods",
     "exit_confirm_desc": "Quit Level",
     "exit_confirm_restart": "Restart",

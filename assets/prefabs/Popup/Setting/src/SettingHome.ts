@@ -38,7 +38,7 @@ export default class SettingHome extends PopupBase {
     }
 
     protected showBefore(options: any): void {
-        Common.log('SettingHome showBefore()');
+        Common.log('弹窗 设置页面 主页内 showBefore()');
         this.setIsLock(false);
 
         this.refreshLanguage();

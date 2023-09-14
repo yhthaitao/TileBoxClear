@@ -1,6 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager, { Design } from "../../../../src/config/DataManager";
+import DataManager, { Design, ParamsFail, ParamsWin, TypeFinish } from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
@@ -47,14 +47,6 @@ export interface GoodParam {
     isEnough: boolean;
     gold: { isGold: boolean, count: number, total: number },
     box: { name: string, key: number, x: number, y: number },
-}
-
-/** 参数枚举（游戏胜利） */
-export interface ParamsWin {
-    star: number;
-    tCount: number;
-    level: number;
-    suipian: number;
 }
 
 const { ccclass, property } = cc._decorator;
@@ -146,7 +138,7 @@ export default class GameBox extends cc.Component {
     };
 
     protected onLoad(): void {
-        console.log('GameBox onLoad()');
+        Common.log('页面 游戏 onLoad()');
 
         this.listernerRegist();
 
@@ -207,6 +199,7 @@ export default class GameBox extends cc.Component {
 
     /** 第一次开始 */
     async gameStart() {
+        Common.log('功能：游戏开始');
         this.clear();
         await this.loadData();
         this.initData();
@@ -218,6 +211,7 @@ export default class GameBox extends cc.Component {
 
     /** 重新开始 */
     async gameRestart() {
+        Common.log('功能：重新开始');
         this.clear();
         await this.loadData();
         this.initData();
@@ -621,8 +615,7 @@ export default class GameBox extends cc.Component {
             this.timeGame.count--;
             this.setUITime();
             if (this.timeGame.count <= 0) {
-                Common.log('倒计时结束');
-                this.playAniGameOver();
+                this.playAniGameOver(TypeFinish.failTime);
             }
         }
     }
@@ -810,8 +803,7 @@ export default class GameBox extends cc.Component {
         if (!isContinueMove) {
             this.setMoveGood(false);
             if (this.getBottomGoodNum() > this.bottomMax - 1) {
-                Common.log('检测区 无空位 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
-                this.playAniGameOver();
+                this.playAniGameOver(TypeFinish.failSpace);
             }
         }
     }
@@ -964,8 +956,8 @@ export default class GameBox extends cc.Component {
             this.mainScale = scaleByH;
         }
         this.mainLayer = Math.floor(10 * hMain / (boxParam.h * this.mainScale)) * 0.1;
-        Common.log('level: ', DataManager.data.boxData.level, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, '; mainScale: ', this.mainScale);
-        Common.log('dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
+        Common.log('缩放设置: level: ', DataManager.data.boxData.level, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, 
+        '; mainScale: ', this.mainScale, 'dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
     };
 
     /** 检测特殊箱子 */
@@ -1131,8 +1123,7 @@ export default class GameBox extends cc.Component {
         this.goodsCount += arrParam.length;
         if (this.goodsCount >= this.goodsTotal) {
             this.goodsCount = this.goodsTotal;
-            Common.log('物品消完 goodsCount: ', this.goodsCount, '; goodsTotal: ', this.goodsTotal);
-            this.playAniGameOver();
+            this.playAniGameOver(TypeFinish.win);
         }
         this.setUIProcess();
     }
@@ -1171,7 +1162,6 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 重玩 */
     eventBtnReplay() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 重玩 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1206,19 +1196,17 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 设置 */
     eventBtnSetting() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 设置 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
 
         kit.Audio.playEffect(CConst.sound_clickUI);
-        this.setIsLock(true);
+        this.gamePause();
         kit.Popup.show(CConst.popup_path_settingGame, {}, { mode: PopupCacheMode.Frequent });
     }
 
     /** 道具 按钮事件 时间冻结 */
     eventBtnTimeIce() {
-        Common.log('按钮 冻结时间 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1242,7 +1230,6 @@ export default class GameBox extends cc.Component {
     /** 道具 按钮事件 提示 */
     eventBtnTip() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 提示 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1298,7 +1285,6 @@ export default class GameBox extends cc.Component {
             }
             if (keyGood == 0) {
                 this.isLock = false;
-                Common.log('eventBtnTip 箱子里没有物品')
                 return;
             }
         }
@@ -1337,7 +1323,6 @@ export default class GameBox extends cc.Component {
     /** 道具 按钮事件 上一步 */
     eventBtnReturn() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 返回上一步 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1537,7 +1522,6 @@ export default class GameBox extends cc.Component {
     /** 道具 按钮事件 刷新 */
     eventBtnRefresh() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 刷新 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1626,7 +1610,6 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 时间增加 */
     eventBtnTimeAdd() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 增加事件 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1639,7 +1622,6 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 使用磁铁 1 */
     eventBtnMagnetOne() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 磁铁1 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1648,7 +1630,6 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 使用磁铁 2 */
     eventBtnMagnetTwo() {
         // 锁定 或 物品移动过程中，不触发道具
-        Common.log('按钮 磁铁2 isLock: ', this.isLock, '; speedBox: ', this.speedBox.isMove, '; speedGood: ', this.speedGood.isMove);
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
         }
@@ -1690,6 +1671,183 @@ export default class GameBox extends cc.Component {
         else {
             this.gameRestart();
         }
+    }
+
+    /** 道具 按钮事件 上一步 */
+    returnGoods(): Promise<void> {
+        return new Promise((res) => {
+            let numGoodArr = this.bottomParamArr.length;
+            // 删除检测区物品数据 并 获取物品参数
+            let arrGood = this.bottomParamArr[numGoodArr - 1];
+            let goodParam = arrGood.splice(arrGood.length - 1, 1)[0];
+            if (arrGood.length < 1) {
+                this.bottomParamArr.splice(numGoodArr - 1, 1);
+            }
+    
+            let good = this.uiBottomMain.getChildByName(goodParam.name);
+            let box = this.nodeMain.getChildByName(goodParam.box.name);
+            // 物品原来的箱子存在
+            if (box) {
+                let scriptBox = box.getComponent(ItemBox);
+                let goodP1 = good.position;
+                let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
+                let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
+                cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
+                    good.parent = scriptBox.nodeMain;
+                    good.scale = 1.0;
+                    scriptBox.param.goods[goodParam.index] = goodParam;
+                    if (scriptBox.param.isFrame) {
+                        scriptBox.sortGood();
+                    }
+                    good.getComponent(ItemGood).resetParams(goodParam);
+                    this.refreshBoxParam(scriptBox.param);
+    
+                    res();
+                }).start();
+            }
+            // 物品原来的箱子存在
+            else {
+                /**
+                 * 1.找到需要复原的箱子
+                 * 2.现有箱子+需要复原的箱子，组成一个包含箱子名字的数组
+                 * 3.对比游戏开始时所有箱子，排除掉已经消除的箱子
+                 * 4.剩余箱子物品复原 并 重新排列位置，
+                 * 5.根据数据移动现有箱子，底部物品返回到箱子中
+                 */
+    
+                // 获取矩形
+                let getRect = (boxParam: BoxParam) => {
+                    return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
+                };
+                // 获取箱子列数
+                let getBoxLayer = (boxParamCur: BoxParam, layerCur: number) => {
+                    let layer = 0;
+                    let rectA = getRect(boxParamCur);
+                    for (let i = layerCur - 1; i >= 0; i--) {
+                        let isInter = false;
+                        let arrLayer = this.arrGame[i];
+                        for (let j = 0; j < arrLayer.length; j++) {
+                            let boxParam = arrLayer[j];
+                            let rectB = getRect(boxParam);
+                            rectA.y = rectB.y + boxParamCur.h * 0.5;
+                            isInter = cc.Intersection.rectRect(rectA, rectB);
+                            if (isInter) {
+                                break;
+                            }
+                        }
+                        if (isInter) {
+                            layer = i + 1;
+                            break;
+                        }
+                    }
+                    return layer;
+                };
+    
+                // 拿到原箱子
+                let boxParamCur: BoxParam = Common.clone(this.objGame[goodParam.box.key]);
+                // 组合剩余箱子
+                let names = [boxParamCur.name];
+                for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                    for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                        names.push(this.arrGame[i][j].name);
+                    }
+                }
+                // 去除以消除箱子
+                let dataBox: BoxParam[][] = Common.clone(this.arrGameCopy);
+                for (let i = dataBox.length - 1; i >= 0; i--) {
+                    let arrBoxParam = dataBox[i];
+                    for (let j = arrBoxParam.length - 1; j >= 0; j--) {
+                        let boxParamB = arrBoxParam[j];
+                        if (names.indexOf(boxParamB.name) < 0) {
+                            arrBoxParam.splice(j, 1);
+                            if (arrBoxParam.length < 1) {
+                                dataBox.splice(i, 1);
+                            }
+                        }
+                    }
+                }
+    
+                // 添加箱子 刚出现时高度为0
+                boxParamCur.goods = {};
+                this.addBox(boxParamCur);
+                let objBox = {};
+                for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                    for (let j = 0; j < this.arrGame[i].length; j++) {
+                        let boxParam = this.arrGame[i][j];
+                        objBox[boxParam.index] = Common.clone(boxParam);
+                    }
+                }
+                // 重置箱子位置
+                this.arrGame = Common.clone(dataBox);// 赋值箱子
+                for (let i = 0; i < this.arrGame.length; i++) {
+                    let arrLayer = this.arrGame[i];
+                    for (let j = 0; j < arrLayer.length; j++) {
+                        let boxParam = arrLayer[j];
+                        let isBox = boxParam.name == boxParamCur.name;
+                        // 物品还原
+                        if (isBox) {
+                            boxParam.goods = {};
+                        }
+                        else {
+                            boxParam.goods = objBox[boxParam.index] ? objBox[boxParam.index].goods : {};
+                        }
+                        // 框不移动
+                        if (boxParam.isFrame) {
+                            continue;
+                        }
+                        // 箱子层级
+                        let layer = getBoxLayer(boxParam, i);
+                        boxParam.y = this.arrBoxY[layer].y;
+                        let box = this.nodeMain.getChildByName(boxParam.name);
+                        let boxP1 = box.position;
+                        let boxP2 = cc.v3(box.x, boxParam.y);
+                        let timeY = Common.getMoveTime(cc.v3(0, 0), cc.v3(0, boxParamCur.h), this.baseTime, this.baseDis);
+                        if (isBox) {
+                            box.position = boxP2;
+                            // 箱子高度变化+物品移动
+                            let boxH = boxParamCur.h;
+                            let scriptBox = box.getComponent(ItemBox);
+                            scriptBox.param.y = boxParam.y;
+                            scriptBox.itemIcon.height = 0;
+                            cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
+                                let goodP1 = good.position;
+                                let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
+                                let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
+                                // 物品移动
+                                cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
+                                    scriptBox.param.goods[goodParam.index] = goodParam;
+                                    good.parent = scriptBox.nodeMain;
+                                    good.scale = 1.0;
+                                    good.getComponent(ItemGood).resetParams(goodParam);
+                                    this.refreshBoxParam(scriptBox.param);
+    
+                                    res();
+                                }).start();
+                            }).start();
+                        }
+                        else {
+                            box.position = boxP1;
+                            cc.tween(box).to(timeY, { position: boxP2 }).call(() => {
+                                box.getComponent(ItemBox).refreshParams(boxParam.y);
+                            }).start();
+                        }
+                        if (layer == i) {
+                            continue;
+                        }
+                        // 转移箱子数据
+                        arrLayer.splice(j, 1);
+                        this.arrGame[layer].push(boxParam);
+                        j--;
+                    }
+                }
+                for (let i = this.arrGame.length - 1; i >= 0; i--) {
+                    let arrLayer = this.arrGame[i];
+                    if (arrLayer.length <= 0) {
+                        this.arrGame.splice(i, 1);
+                    }
+                }
+            }
+        });
     }
 
     setIceShow() {
@@ -1829,24 +1987,47 @@ export default class GameBox extends cc.Component {
     };
 
     /** 播放动画（游戏结束） */
-    playAniGameOver() {
+    playAniGameOver(type: TypeFinish) {
         this.isLock = true;
         this.dataObj.isFinish = true;
-        if (this.goodsCount >= this.goodsTotal) {
-            Common.log('胜利');
-            DataManager.refreshDataAfterWin();
-            
-            let xingNum = this.getXingxingNum();
-            const options = {
-                star: xingNum,
-                level: 1,
-                suipian: this.dataObj.numSuipian,
-                tCount: this.timeGame.count,
-            };
-            kit.Popup.show(CConst.popup_path_gameWin, options, { mode: PopupCacheMode.Frequent });
-        }
-        else {
-            Common.log('失败');
+        switch (type) {
+            case TypeFinish.win:
+                {
+                    let params: ParamsWin = {
+                        xingxing: this.getXingxingNum(),
+                        level: 1,
+                        suipian: this.dataObj.numSuipian,
+                        tCount: this.timeGame.count,
+                    };
+                    DataManager.refreshDataAfterWin(params);
+                    DataManager.setData();
+                    kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
+                }
+                break;
+            case TypeFinish.failSpace:
+                {
+                    let params: ParamsFail = {
+                        type: type,
+                        numSuipian: this.dataObj.numSuipian,
+                        numStrength: 1,
+                        numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
+                    };
+                    kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
+                }
+                break;
+            case TypeFinish.failTime:
+                {
+                    let params: ParamsFail = {
+                        type: type,
+                        numSuipian: this.dataObj.numSuipian,
+                        numStrength: 1,
+                        numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
+                    };
+                    kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
+                }
+                break;
+            default:
+                break;
         }
     };
 
@@ -1914,28 +2095,27 @@ export default class GameBox extends cc.Component {
         else if (ratio > 20) {
             xingNum = 2;
         }
-        Common.log('xingNum: ', xingNum, '; ratio: ', ratio);
         return xingNum;
     }
 
-    gameLog(sign: string) {
-        let name = { a: sign + ' 当前游戏数据：' };
-        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
-            for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
-                let boxParam = this.arrGame[i][j];
-                let key = '' + i + '-' + j + ': ';
-                let value = boxParam.name + ', y = ' + boxParam.y + ', ';
-                for (let key in boxParam.goods) {
-                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
-                        let goodParam: GoodParam = boxParam.goods[key];
-                        value += goodParam.name + ', ';
-                    }
-                }
-                name[key] = value;
-            }
-        }
-        Common.log(JSON.stringify(name, null, 4));
-    }
+    // gameLog(sign: string) {
+    //     let name = { a: sign + ' 当前游戏数据：' };
+    //     for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+    //         for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+    //             let boxParam = this.arrGame[i][j];
+    //             let key = '' + i + '-' + j + ': ';
+    //             let value = boxParam.name + ', y = ' + boxParam.y + ', ';
+    //             for (let key in boxParam.goods) {
+    //                 if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+    //                     let goodParam: GoodParam = boxParam.goods[key];
+    //                     value += goodParam.name + ', ';
+    //                 }
+    //             }
+    //             name[key] = value;
+    //         }
+    //     }
+    //     Common.log(JSON.stringify(name, null, 4));
+    // }
 
     /**
      * 关卡结束
@@ -1989,11 +2169,43 @@ export default class GameBox extends cc.Component {
         }
     }
 
+    /** 暂停 */
+    gamePause() {
+        Common.log('功能：游戏暂停');
+        this.setIsLock(true);
+    };
+
+    /** 恢复 */
+    gameResume() {
+        Common.log('功能：游戏恢复');
+        this.setIsLock(false);
+    };
+
+    /** 复活 */
+    async gameRevive(type: TypeFinish) {
+        Common.log('功能：游戏复活');
+        switch (type) {
+            case TypeFinish.failTime:// 超时复活 +60s
+                this.timeGame.count += 60;
+                break;
+            case TypeFinish.failSpace:// 无移动空间 回退3个物品
+                await this.returnGoods();
+                await this.returnGoods();
+                await this.returnGoods();
+                break;
+            default:
+                break;
+        }
+        this.objGame.isFinish = false;
+        this.setIsLock(false);
+    };
+
     /** 监听-注册 */
     listernerRegist(): void {
-        kit.Event.on(CConst.event_enter_nextLevel, this.gameStart, this);
-        kit.Event.on(CConst.event_win_nextLevel, this.gameStart, this);
-        kit.Event.on(CConst.event_game_resume, this.setIsLock.bind(this, false), this);
+        kit.Event.on(CConst.event_game_start, this.gameStart, this);
+        kit.Event.on(CConst.event_game_restart, this.gameRestart, this);
+        kit.Event.on(CConst.event_game_resume, this.gameResume, this);
+        kit.Event.on(CConst.event_game_revive, this.gameRevive, this);
     }
 
     /** 监听-取消 */

@@ -14,7 +14,7 @@ export default class Bank extends PopupBase {
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
     protected showBefore(options: any): void {
-        Common.log('Bank showBefore()');
+        Common.log('弹窗 银行页面 showBefore()');
 
         DataManager.setString(LangChars.bank_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';

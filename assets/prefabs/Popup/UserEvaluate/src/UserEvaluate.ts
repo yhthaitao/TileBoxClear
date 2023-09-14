@@ -16,7 +16,7 @@ export default class UserEvaluate extends PopupBase {
     xingMax: number = 5;
 
     protected showBefore(options: any): void {
-        Common.log('UserEvaluate showBefore()');
+        Common.log('弹窗 评价页面 showBefore()');
         // DataManager.setString(LangChars.REVIEW, (chars: string)=>{
         //     this.labelTitle.getComponent(cc.Label).string = chars;
         // });

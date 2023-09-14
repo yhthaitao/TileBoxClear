@@ -24,7 +24,7 @@ const CConst = {
     zIndex_mask: 1000,
     zIndex_video: 1001,
     zIndex_popup: 1002,
-    zIndex_noVideo: 1002,
+    zIndex_noVideo: 1003,
     /*************************************** end **************************************************/
 
 
@@ -41,16 +41,18 @@ const CConst = {
     event_enter_newPlayer: 'event_enter_newPlayer',
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
-    /** pause */
-    event_game_pause: 'event_pause',
-    /** resume */
-    event_game_resume: 'event_resume',
+    /** game start */
+    event_game_start: 'event_game_start',
+    /** game pause */
+    event_game_pause: 'event_game_pause',
+    /** game resume */
+    event_game_resume: 'event_game_resume',
+    /** game revive */
+    event_game_revive: 'event_game_revive',
+    /** game restart */
+    event_game_restart: 'event_game_restart',
     /** 进入 胜利 */
     event_enter_win: 'event_enter_win',
-    /** 进入 下一关游戏 */
-    event_enter_nextLevel: 'event_enter_nextLevel',
-    /** 游戏胜利后 下一关 */
-    event_win_nextLevel: 'event_win_nextLevel',
     /** 游戏胜利后 进入菜单 */
     event_win_enterMenu: 'event_win_enterMenu',
     /** 游戏失败后 继续 */
@@ -103,7 +105,7 @@ const CConst = {
     /*****************************************************************************************/
     /** 音效：按键 */
     sound_music: './audio/music',
-    sound_enterGame: './audio/enterGame',
+    sound_actPass: './audio/enterGame',
     sound_clickUI: './audio/clickUI',
     sound_clickGood: './audio/clickGood',
     sound_getProp: './audio/getProp',

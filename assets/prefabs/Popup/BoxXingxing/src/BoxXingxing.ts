@@ -14,7 +14,7 @@ export default class BoxXingxing extends PopupBase {
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
     protected showBefore(options: any): void {
-        Common.log('BoxXingxing showBefore()');
+        Common.log('弹窗 星星宝箱页面 showBefore()');
 
         DataManager.setString(LangChars.boxXingxing_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';

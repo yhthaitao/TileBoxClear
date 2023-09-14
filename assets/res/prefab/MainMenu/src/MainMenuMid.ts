@@ -2,13 +2,19 @@ import { kit } from "../../../../src/kit/kit";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import DataManager from "../../../../src/config/DataManager";
+import DataManager, { TypeBefore } from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 
 /** 主题类型 */
 export enum StateTheme {
     areas = 0,// 主题栏
     commodity = 1,// 物品奖励栏
+}
+
+/** 动作参数（宝箱相关） */
+interface ParamsAniBox {
+    objBar: { node: cc.Node, time: number, goal: number },
+    objLabel: { node: cc.Node, desc: string },
 }
 
 const { ccclass, property } = cc._decorator;
@@ -26,7 +32,11 @@ export default class MainMenuMid extends cc.Component {
     @property({ type: cc.Node, tooltip: '主题-中部-主题栏' }) theme_mid_areas: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主题-中部-主题栏-内同' }) theme_mid_areas_content: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主题-中部-物品奖励栏' }) theme_mid_commodity: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '拦截' }) menu_mask_bottom: cc.Node = null;
 
+    obj = {
+        ani: { level: false, suipian: false, xingxing: false },
+    };
     tElseSuipian: number = 0;
     wProcessSuipian: number = 615;// 进度条宽度（碎片宝箱）
     wProcessXingxing: number = 110;// 进度条宽度（星星宝箱）
@@ -57,8 +67,6 @@ export default class MainMenuMid extends cc.Component {
     };
 
     protected onLoad(): void {
-        console.log('MainMenuMid onLoad()');
-
         this.listernerRegist();
     }
 
@@ -71,10 +79,40 @@ export default class MainMenuMid extends cc.Component {
     }
 
     init() {
+        this.setIsLock(false);
         // menu
         this.initHome();
         // theme
         this.initTheme();
+    };
+
+    setIsLock(isLock) {
+        if (isLock) {
+            if (this.obj.ani.level && this.obj.ani.suipian && this.obj.ani.xingxing) {
+                this.menu_mask_bottom.active = false;
+                Common.log('功能：菜单界面 解除锁屏');
+            }
+        }
+        else {
+            this.obj.ani.level = false;
+            this.obj.ani.suipian = false;
+            this.obj.ani.xingxing = false;
+            this.menu_mask_bottom.active = true;
+            Common.log('功能：菜单界面 锁屏');
+        }
+    };
+
+    playAniBox(params: ParamsAniBox): Promise<void> {
+        return new Promise(res => {
+            cc.tween(params.objBar.node).parallel(
+                cc.tween().to(params.objBar.time, { width: params.objBar.goal }),
+                cc.tween().delay(params.objBar.time * 0.5).call(() => {
+                    params.objLabel.node.getComponent(cc.Label).string = params.objLabel.desc;
+                }),
+            ).call(() => {
+                res();
+            }).start();
+        });
     };
 
     /************************************************************************************************************************/
@@ -115,15 +153,69 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 刷新-碎片-进度条 */
-    resetBoxSuipianProcess() {
+    async resetBoxSuipianProcess() {
+        let boxReward = DataManager.getRewardBoxSuipian();
         let count = DataManager.data.boxSuipian.count;
-        let total = DataManager.getRewardBoxSuipian().total;
+        let total = boxReward.total;
         // 进度条
         let itemBar = this.home_top_process.getChildByName('bar');
         itemBar.width = this.wProcessSuipian * count / total;
         // 文本
         let itemLabel = this.home_top_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
+        // 进度变更
+        let boxData = DataManager.data.boxSuipian;
+        if (boxData.add > 0) {
+            let boxCount = boxData.count;
+            let boxAdd = boxData.add;
+            // 数据变更
+            boxData.count += boxData.add;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+            }
+            boxData.add = 0;
+            DataManager.setData();
+            // 其他数据
+            let boxAddElse = -1;
+            if (boxCount + boxAdd >= total) {
+                boxAddElse = boxCount + boxAdd - total;
+                boxAdd = boxAdd - boxAddElse;
+            }
+
+            // 进度条刷新
+            let time = 0.15;
+            for (let index = 0; index < boxAdd; index++) {
+                boxCount++;
+                let params: ParamsAniBox = {
+                    objBar: { node: itemBar, time: time, goal: this.wProcessSuipian * boxCount / total },
+                    objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                };
+                await this.playAniBox(params);
+            }
+            // 进度条再次刷新
+            if (boxAddElse >= 0) {
+                // 开启宝箱
+                boxData.level += 1;
+                boxData.count = boxAddElse;
+                DataManager.refreshDataAfterBox(boxReward);
+                DataManager.setData();
+                // 进度条再次刷新
+                boxCount = 0;
+                itemBar.width = 0;
+                itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
+                for (let index = 0; index < boxAddElse; index++) {
+                    boxCount++;
+                    let params: ParamsAniBox = {
+                        objBar: { node: itemBar, time: time, goal: this.wProcessSuipian * boxCount / total },
+                        objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                    };
+                    await this.playAniBox(params);
+                }
+            }
+        }
+
+        this.obj.ani.suipian = true;
+        this.setIsLock(true);
     };
 
     /** 刷新-碎片-时间 */
@@ -160,15 +252,70 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 刷新-星星宝箱进度 */
-    resetBoxXingxingProcess() {
+    async resetBoxXingxingProcess() {
+        let boxReward = DataManager.getRewardBoxXinging();
         let count = DataManager.data.boxXingxing.count;
-        let total = DataManager.getRewardBoxXinging().total;
+        let total = boxReward.total;
         // 进度条
         let itemBar = this.home_left_boxXing_process.getChildByName('bar');
         itemBar.width = this.wProcessXingxing * count / total;
         // 文本
         let itemLabel = this.home_left_boxXing_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
+        // 进度变更
+        let boxData = DataManager.data.boxXingxing;
+        if (boxData.add > 0) {
+            let boxCount = boxData.count;
+            let boxAdd = boxData.add;
+            // 数据变更
+            boxData.count += boxData.add;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+            }
+            boxData.add = 0;
+            DataManager.setData();
+            // 其他数据
+            let boxAddElse = -1;
+            if (boxCount + boxAdd >= total) {
+                boxAddElse = boxCount + boxAdd - total;
+                boxAdd = boxAdd - boxAddElse;
+            }
+
+            // 进度条刷新
+            let time = 0.15;
+            for (let index = 0; index < boxAdd; index++) {
+                boxCount++;
+                let params: ParamsAniBox = {
+                    objBar: { node: itemBar, time: time, goal: this.wProcessXingxing * boxCount / total },
+                    objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                };
+                await this.playAniBox(params);
+            }
+
+            // 进度条再次刷新
+            if (boxAddElse >= 0) {
+                // 开启宝箱
+                boxData.level += 1;
+                boxData.count = boxAddElse;
+                DataManager.refreshDataAfterBox(boxReward);
+                DataManager.setData();
+                // 进度条再次刷新
+                boxCount = 0;
+                itemBar.width = 0;
+                itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
+                for (let index = 0; index < boxAddElse; index++) {
+                    boxCount++;
+                    let params: ParamsAniBox = {
+                        objBar: { node: itemBar, time: time, goal: this.wProcessXingxing * boxCount / total },
+                        objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                    };
+                    await this.playAniBox(params);
+                }
+            }
+        }
+
+        this.obj.ani.xingxing = true;
+        this.setIsLock(true);
     };
 
     /** 刷新-日历进度 */
@@ -177,15 +324,70 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 刷新-等级宝箱进度 */
-    resetBoxLevelProcess() {
+    async resetBoxLevelProcess() {
+        let boxReward = DataManager.getRewardBoxLevel();
         let count = DataManager.data.boxLevel.count;
-        let total = DataManager.getRewardBoxLevel().total;
+        let total = boxReward.total;
         // 进度条
         let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
         itemBar.width = this.wProcessLevel * count / total;
         // 文本
         let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
+        // 进度变更
+        let boxData = DataManager.data.boxLevel;
+        if (boxData.add > 0) {
+            let boxCount = boxData.count;
+            let boxAdd = boxData.add;
+            // 数据变更
+            boxData.count += boxData.add;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+            }
+            boxData.add = 0;
+            DataManager.setData();
+            // 其他数据
+            let boxAddElse = -1;
+            if (boxCount + boxAdd >= total) {
+                boxAddElse = boxCount + boxAdd - total;
+                boxAdd = boxAdd - boxAddElse;
+            }
+
+            // 进度条刷新
+            let time = 0.15;
+            for (let index = 0; index < boxAdd; index++) {
+                boxCount++;
+                let params: ParamsAniBox = {
+                    objBar: { node: itemBar, time: time, goal: this.wProcessLevel * boxCount / total },
+                    objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                };
+                await this.playAniBox(params);
+            }
+
+            // 进度条再次刷新
+            if (boxAddElse >= 0) {
+                // 开启宝箱
+                boxData.level += 1;
+                boxData.count = boxAddElse;
+                DataManager.refreshDataAfterBox(boxReward);
+                DataManager.setData();
+                // 进度条再次刷新
+                boxCount = 0;
+                itemBar.width = 0;
+                itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
+                for (let index = 0; index < boxAddElse; index++) {
+                    boxCount++;
+                    let params: ParamsAniBox = {
+                        objBar: { node: itemBar, time: time, goal: this.wProcessLevel * boxCount / total },
+                        objLabel: { node: itemLabel, desc: boxCount + '/' + total },
+                    };
+                    await this.playAniBox(params);
+                }
+            }
+        }
+
+        this.obj.ani.level = true;
+        this.setIsLock(true);
     };
 
     /** 刷新-日历进度 */
@@ -195,35 +397,30 @@ export default class MainMenuMid extends cc.Component {
 
     /** 按钮事件 开始 */
     eventBtnHomeStart() {
-        console.log('点击按钮: 游戏开始');
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_before, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromMenu }, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 星星宝箱 */
     eventBtnHomeBoxXing() {
-        console.log('点击按钮: 星星宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_boxXingxing, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 每日签到 */
     eventBtnHomeDaily() {
-        console.log('点击按钮: 每日签到');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_daily, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 等级宝箱 */
     eventBtnHomeBoxLevel() {
-        console.log('点击按钮: 等级宝箱');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_boxLevel, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 银行 */
     eventBtnHomeBank() {
-        console.log('点击按钮: 银行');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_bank, {}, { mode: PopupCacheMode.Frequent });
     };
@@ -349,7 +546,6 @@ export default class MainMenuMid extends cc.Component {
 
     /** 按钮事件 主题栏 */
     eventBtnThemeAreas() {
-        console.log('点击按钮: 进入主题栏');
         if (this.stateTheme == StateTheme.areas) {
             return;
         }
@@ -361,7 +557,6 @@ export default class MainMenuMid extends cc.Component {
     eventBtnThemeAreasItem(event: cc.Event.EventTouch) {
         let areasId = DataManager.data.boxData.areasId;
         let chodsId = Number(event.target.name.substring(4)) + 1;
-        console.log('点击按钮 主题栏内部选择 chodsId: ', chodsId, '; areasId: ', areasId);
         if (chodsId == areasId) {
             return;
         }
@@ -391,7 +586,6 @@ export default class MainMenuMid extends cc.Component {
 
     /** 按钮事件 物品奖励栏 */
     eventBtnThemeCommodity() {
-        console.log('点击按钮: 进入物品奖励栏');
         if (this.stateTheme == StateTheme.commodity) {
             return;
         }
@@ -472,7 +666,7 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** label theme top */
-    refreshLabel_theme_top(){
+    refreshLabel_theme_top() {
         // 主题界面按钮切换
         let btnAreas = this.theme_top.getChildByName('btnAreas');
         DataManager.setString(LangChars.Areas, (chars: string) => {
@@ -487,9 +681,9 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** label theme areas */
-    refreshLabel_theme_areas(){
+    refreshLabel_theme_areas() {
         let objAreas = this.objTheme.areas;
-        this.theme_mid_areas_content.children.forEach((cell)=>{
+        this.theme_mid_areas_content.children.forEach((cell) => {
             DataManager.setString(LangChars.BreakTime, (chars: string) => {
                 let labelTitle = cell.getChildByName('labelTitle');
                 labelTitle.getComponent(cc.Label).string = chars;
@@ -504,7 +698,7 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** label theme commodity */
-    refreshLabel_theme_commodity(){
+    refreshLabel_theme_commodity() {
 
     };
 }

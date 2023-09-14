@@ -10,7 +10,7 @@
     "over_timeout_desc": "你將失去",
     "over_timeout_playon": "繼續",
     "over_timeout_giveup": "放棄",
-    "over_nospace_desc": "無法移動了",
+    "over_nospace_title": "無法移動了",
     "over_nospace_gobackgood": "退回 3 件物品",
     "exit_confirm_desc": "放棄關卡",
     "exit_confirm_restart": "重新開始",

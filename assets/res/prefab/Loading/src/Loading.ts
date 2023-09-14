@@ -14,7 +14,7 @@ export default class Loading extends cc.Component {
     width: number = 596;
 
     protected onLoad(): void {
-        Common.log('LayerLoading');
+        Common.log('页面 加载');
         this.initLabel();
         this.node.setContentSize(cc.winSize);
         this.nodeLogo.opacity = 0;

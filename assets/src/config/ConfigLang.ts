@@ -20,7 +20,7 @@ export const LangChars = {
     over_timeout_desc: "over_timeout_desc",
     over_timeout_playon: "over_timeout_playon",
     over_timeout_giveup: "over_timeout_giveup",
-    over_nospace_desc: "over_nospace_desc",
+    over_nospace_title: "over_nospace_title",
     over_nospace_gobackgood: "over_nospace_gobackgood",
     exit_confirm_desc: "exit_confirm_desc",
     exit_confirm_restart: "exit_confirm_restart",

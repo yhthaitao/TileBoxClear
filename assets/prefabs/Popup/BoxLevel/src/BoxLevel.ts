@@ -14,7 +14,7 @@ export default class BoxLevel extends PopupBase {
     @property(cc.Node) itemLabelPlay: cc.Node = null;
 
     protected showBefore(options: any): void {
-        Common.log('BoxLevel showBefore()');
+        Common.log('弹窗 等级宝箱页面 showBefore()');
 
         DataManager.setString(LangChars.boxLevel_title, (chars: string)=>{
             this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';

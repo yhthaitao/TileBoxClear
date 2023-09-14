@@ -19,7 +19,6 @@ export default class PopupBase<Options = any> extends cc.Component {
     protected options: Options = null;
 
     protected onLoad(): void {
-        Common.log('PopupBase onLoad()');
         this.node.active = false;
     }
 

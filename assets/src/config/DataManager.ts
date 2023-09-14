@@ -32,6 +32,37 @@ export enum StateBeforeProp {
     choose = 1 << 3,// 解锁 有道具 选中
 };
 
+/** 游戏结束枚举状态 */
+export enum TypeFinish {
+    win = 1,
+    failSpace = 1 << 1,
+    failTime = 1 << 2,
+}
+
+/** 弹窗枚举(游戏前弹窗类型) */
+export enum TypeBefore {
+    fromMenu = 1,
+    fromSettingGame = 1 << 1,
+    fromGameWin = 1 << 2,
+    fromGameFail = 1 << 3,
+}
+
+/** 参数枚举（游戏胜利） */
+export interface ParamsWin {
+    tCount: number;
+    level: number;
+    suipian: number;
+    xingxing: number;
+}
+
+/** 参数枚举（游戏失败） */
+export interface ParamsFail {
+    type: TypeFinish;
+    numStrength: number;
+    numSuipian: number;
+    numMagnet: number;
+}
+
 /** 道具类型 */
 export enum TypeProp {
     ice = 1,// 冰冻
@@ -82,7 +113,7 @@ class DataManager {
     /** 插屏广告开启关卡 */
     adStartLevel: number = 4;
     /** 游戏开始前界面状态 */
-    beforeWins: number = 0;
+    beforeWins = { count: 0, magnet: [0, 1, 2, 3], };
 
     /** 初始数据 */
     data = {
@@ -127,15 +158,15 @@ class DataManager {
         },
         // 宝箱相关参数（碎片宝箱）
         boxSuipian: {
-            level: 1, count: 0, timeLunch: 0,
+            level: 1, count: 0, add: 0, timeLunch: 0,
         },
         // 宝箱相关参数（关卡等级宝箱）
         boxLevel: {
-            level: 1, count: 0, loop: { start: 6, length: 3, },
+            level: 1, count: 0, add: 0, loop: { start: 6, length: 3, },
         },
         // 宝箱相关参数（星星宝箱）
         boxXingxing: {
-            level: 1, count: 0, loop: { start: 6, length: 16, },
+            level: 1, count: 0, add: 0, loop: { start: 6, length: 16, },
         },
         // 关卡数据 基础
         boxData: {
@@ -239,55 +270,74 @@ class DataManager {
         this.stateCur = state;
     }
 
+    /** 数据更新（开启宝箱后） */
+    public refreshDataAfterBox(params: TypeReward) {
+        params.reward.forEach((record) => {
+            switch (record.type) {
+                case TypeProp.coin:
+                    this.data.numCoin += record.number;
+                    break;
+                case TypeProp.ice:
+                    this.data.prop.ice.count += record.number;
+                    break;
+                case TypeProp.tip:
+                    this.data.prop.tip.count += record.number;
+                    break;
+                case TypeProp.back:
+                    this.data.prop.return.count += record.number;
+                    break;
+                case TypeProp.refresh:
+                    this.data.prop.refresh.count += record.number;
+                    break;
+                case TypeProp.magnet:
+                    this.data.prop.magnet.count += record.number;
+                    break;
+                case TypeProp.clock:
+                    this.data.prop.clock.count += record.number;
+                    break;
+                case TypeProp.tMagnetInfinite:
+                    this.data.prop.magnet.tInfinite += record.number;
+                    break;
+                case TypeProp.tClockInfinite:
+                    this.data.prop.clock.tInfinite += record.number;
+                    break;
+                case TypeProp.tStrengthInfinite:
+                    this.data.strength.tInfinite += record.number;
+                    break;
+                default:
+                    break;
+            }
+        });
+    };
+
     /** 数据更新（游戏胜利后） */
-    public refreshDataAfterWin(){
+    public refreshDataAfterWin(params: ParamsWin) {
         // 等级变化
         this.data.boxData.level++;
+        if (params.level && params.level > 0) {
+            this.data.boxLevel.add += params.level;
+        }
+        if (params.suipian && params.suipian > 0) {
+            this.data.boxSuipian.add += params.suipian;
+        }
+        if (params.xingxing && params.xingxing > 0) {
+            this.data.boxXingxing.add += params.xingxing;
+        }
+
         // 道具解锁（游戏开始前界面）
-        this.data.beforeProp.forEach((obj: {type: TypeProp, state: StateBeforeProp, unlock: number}, index: number)=>{
+        this.data.beforeProp.forEach((obj: { type: TypeProp, state: StateBeforeProp, unlock: number }, index: number) => {
             if (obj.state == StateBeforeProp.lock) {
                 if (this.data.boxData.level >= obj.unlock) {
                     obj.state = StateBeforeProp.unChoose;
                 }
             }
-            // 连胜奖励
-            if (obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
-                this.beforeWins++;
-                switch (this.beforeWins) {
-                    case 1:
-                        this.data.prop.magnet.count += 1;
-                        break;
-                    case 2:
-                        this.data.prop.magnet.count += 2;
-                        break;
-                    case 3:
-                        this.data.prop.magnet.count += 3;
-                        break;
-                    default:
-                        break;
+            // 连胜奖励在25关之后开启
+            if (this.data.boxData.level > 25 && obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
+                if (this.beforeWins.count < 3) {
+                    this.beforeWins.count++;
                 }
             }
         });
-        this.setData();
-    }
-
-    public addBeforeWins() {
-        if (this.data.beforeProp[0].state != StateBeforeProp.lock) {
-            this.beforeWins++;
-            switch (this.beforeWins) {
-                case 1:
-                    this.data.prop.magnet.count += 1;
-                    break;
-                case 2:
-                    this.data.prop.magnet.count += 2;
-                    break;
-                case 3:
-                    this.data.prop.magnet.count += 3;
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 
     /** 获取奖励参数（等级宝箱） */
@@ -365,7 +415,7 @@ class DataManager {
      */
     public checkIsPlayAdvert(levelNow: number) {
         let levelLimit = this.adStartLevel + 1;
-        Common.log(' cocos checkIsPlayAds() 插屏检测 levelNow: ', levelNow, '; levelLimit: ', levelLimit);
+        Common.log(' 广告检测 cocos checkIsPlayAds() 插屏检测 levelNow: ', levelNow, '; levelLimit: ', levelLimit);
         if (levelNow < levelLimit) {
             return false;
         }

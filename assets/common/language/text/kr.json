@@ -10,7 +10,7 @@
     "over_timeout_desc": "당신은 잃을 것이다",
     "over_timeout_playon": "계속하다",
     "over_timeout_giveup": "포기하다",
-    "over_nospace_desc": "이사 중",
+    "over_nospace_title": "이사 중",
     "over_nospace_gobackgood": "상품 3개 반품",
     "exit_confirm_desc": "포기 레벨",
     "exit_confirm_restart": "재시작",

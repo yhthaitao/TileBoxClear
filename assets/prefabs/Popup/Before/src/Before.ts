@@ -1,9 +1,10 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { StateBeforeProp, StateGame, TypeProp } from "../../../../src/config/DataManager";
+import DataManager, { ParamsWin, StateBeforeProp, StateGame, TypeBefore, TypeFinish, TypeProp } from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
+import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -26,8 +27,14 @@ export default class Before extends PopupBase {
         },
     };
 
+    params: {
+        type: TypeBefore,
+        paramWin?: ParamsWin,
+    };
+
     protected showBefore(options: any): void {
-        Common.log('Before showBefore()');
+        Common.log('弹窗 游戏开始前页面 showBefore()');
+        this.params = Common.clone(options);
 
         this.resetLabel();
         this.resetWins();
@@ -142,30 +149,75 @@ export default class Before extends PopupBase {
     async eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        if (DataManager.data.strength.count > 0) {
-            kit.Audio.playEffect(CConst.sound_enterGame);
+        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+        let reduceStrength = () => {
             DataManager.data.strength.count--;
             DataManager.data.strength.tCount = Math.floor(new Date().getTime() / 1000);
             DataManager.setData();
-
-            if (DataManager.stateCur == StateGame.menu) {
-                kit.Event.emit(CConst.event_enter_game);
-            }
-            else{
-                kit.Event.emit(CConst.event_win_nextLevel);
-            }
-        }
-        else{
-            kit.Event.emit(CConst.event_notice, '没体力了');
+            Common.log('消耗体力 剩余strength: ', DataManager.data.strength.count);
+        };
+        switch (this.params.type) {
+            case TypeBefore.fromMenu:
+                if (DataManager.data.strength.count > 0) {
+                    reduceStrength();
+                    kit.Event.emit(CConst.event_enter_game);
+                }
+                else {
+                    kit.Event.emit(CConst.event_notice, '没体力了');
+                }
+                break;
+            case TypeBefore.fromSettingGame:// 游戏中途设置
+                if (DataManager.data.strength.count > 0) {
+                    reduceStrength();
+                    kit.Event.emit(CConst.event_game_restart);
+                }
+                else {
+                    kit.Event.emit(CConst.event_enter_menu);
+                    kit.Event.emit(CConst.event_notice, '没体力了');
+                }
+                break;
+            case TypeBefore.fromGameWin:// 游戏胜利后
+                kit.Event.emit(CConst.event_game_start);
+                break;
+            case TypeBefore.fromGameFail:// 游戏失败
+                // 开始游戏
+                if (DataManager.data.strength.count > 0) {
+                    reduceStrength();
+                    kit.Event.emit(CConst.event_game_start);
+                }
+                // 返回菜单
+                else {
+                    kit.Event.emit(CConst.event_enter_menu);
+                    kit.Event.emit(CConst.event_notice, '没体力了');
+                }
+                break;
+            default:
+                break;
         }
     }
 
     /** 按钮事件 退出 */
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
-        if (DataManager.stateCur == StateGame.game) {
-            kit.Event.emit(CConst.event_enter_menu);
+        await kit.Popup.hide();
+        switch (this.params.type) {
+            case TypeBefore.fromSettingGame:// 游戏中途设置 点击退出
+                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                kit.Event.emit(CConst.event_enter_menu);
+                break;
+            case TypeBefore.fromGameWin:
+                // 胜利界面 进入菜单页（恢复消除的体力）
+                DataManager.data.strength.count++;
+                DataManager.setData();
+                Common.log('恢复体力 剩余strength: ', DataManager.data.strength.count);
+                kit.Event.emit(CConst.event_enter_menu);
+                break;
+            case TypeBefore.fromGameFail:// 游戏失败 点击退出
+                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                kit.Event.emit(CConst.event_enter_menu);
+                break;
+            default:
+                break;
         }
     }
 
@@ -176,17 +228,13 @@ export default class Before extends PopupBase {
         let index = Number(custom);
         let objState = DataManager.data.beforeProp[index];
         if (!objState) {
-            Common.log('Before 点击异常 sortBtn: ', index);
             return;
         }
+        // 未解锁 返回
         if (objState.state == StateBeforeProp.lock) {
-            Common.log('prop 未解锁 sortBtn: ', index);
             return;
         }
         switch (objState.state) {
-            case StateBeforeProp.noProp:// 解锁 无道具
-                Common.log('买不起');
-                break;
             case StateBeforeProp.unChoose:// 解锁 有道具 未选中
                 objState.state = StateBeforeProp.choose;
                 this.resetProp();

@@ -2,7 +2,7 @@ import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager from "../../../../src/config/DataManager";
+import DataManager, { TypeBefore } from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 
@@ -32,7 +32,7 @@ export default class SettingGame extends PopupBase {
     isLock: boolean = false;
 
     protected showBefore(options: any): void {
-        Common.log('SettingGame showBefore()');
+        Common.log('弹窗 设置页面 游戏内 showBefore()');
         this.setIsLock(false);
         this.refreshLanguage();
         this.setPauseUI();
@@ -171,7 +171,7 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
+        await kit.Popup.hide();
         kit.Event.emit(CConst.event_game_resume);
     };
 
@@ -190,7 +190,7 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
+        await kit.Popup.hide();
         kit.Event.emit(CConst.event_game_resume);
     };
 
@@ -203,13 +203,13 @@ export default class SettingGame extends PopupBase {
     };
 
     /** 按钮事件 重新开始 */
-    eventQuitBtnRestart() {
+    async eventQuitBtnRestart() {
         if (this.isLock) {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
-        kit.Popup.show(CConst.popup_path_before, {}, { mode: PopupCacheMode.Frequent });
+        await kit.Popup.hide();
+        kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromSettingGame }, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 退出 */
@@ -218,7 +218,10 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
+        await kit.Popup.hide();// 关闭
+        // 过度
+        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+        // 进入菜单页
         kit.Event.emit(CConst.event_enter_menu);
     };
 
@@ -228,7 +231,7 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await this.hide();
+        await kit.Popup.hide();
         kit.Event.emit(CConst.event_game_resume);
     };
 

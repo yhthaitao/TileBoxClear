@@ -45,7 +45,7 @@ export default class MainScene extends cc.Component {
     isCompleteLoadData: Boolean = false;
 
     protected onLoad(): void {
-        console.log('MainScene onLoad()');
+        Common.log('页面 主菜单 onLoad()');
 
         cc.macro.ENABLE_MULTI_TOUCH = false;//关闭多点触控
         this.listernerRegist();
@@ -130,11 +130,9 @@ export default class MainScene extends cc.Component {
             let isNewPlayer = boxData.newTip.cur < boxData.newTip.max;
             isNewPlayer = false;
             if (isNewPlayer) {
-                Common.log('新手 进入游戏');
                 this.setGameState(StateGame.game);
             }
             else {
-                Common.log('非新手 进入主界面');
                 this.setGameState(StateGame.menu);
             }
         });
@@ -142,7 +140,6 @@ export default class MainScene extends cc.Component {
 
     /** 更新游戏状态 */
     async setGameState(state: StateGame) {
-        Common.log('MainScene setGameState() state: ', state, '; cur: ', DataManager.stateCur, '; last: ', DataManager.stateLast);
         if (state == DataManager.stateCur) {
             return;
         }
@@ -174,12 +171,11 @@ export default class MainScene extends cc.Component {
             case StateGame.menu:
                 if (this.NodeMenu) {
                     this.NodeMenu.active = true;
-                    let script = this.NodeMenu.getComponent('MainMenu');
-                    script.initMenu();
                 }
                 else {
                     this.NodeMenu = cc.instantiate(this.preMainMenu);
                     this.NodeMenu.zIndex = CConst.zIndex_menu;
+                    this.NodeMenu.active = true;
                     this.NodeMenu.parent = this.node;
                 }
                 break;

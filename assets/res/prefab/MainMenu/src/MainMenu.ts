@@ -32,6 +32,7 @@ export default class MainMenu extends cc.Component {
     @property(cc.Node) midShopMid: cc.Node = null;
     // 中间ui--主菜单
     @property(cc.Node) midHome: cc.Node = null;
+    @property(cc.Node) midHomeBack: cc.Node = null;
     @property(cc.Node) midHomeTop: cc.Node = null;
     @property(cc.Node) midHomeBottom: cc.Node = null;
     @property(cc.Node) midHomeLeft: cc.Node = null;
@@ -63,10 +64,6 @@ export default class MainMenu extends cc.Component {
     widthUp: number = 0;
 
     protected onLoad(): void {
-        console.log('MainMenu onLoad()');
-    }
-
-    protected start(): void {
         // 缩放数据
         let winScaleByH = cc.winSize.height / Design.height;
         // 顶部ui
@@ -81,6 +78,7 @@ export default class MainMenu extends cc.Component {
         let home_dis_topToRight = 15 * winScaleByH;
         let home_dis_bottomToBottom = 100 * winScaleByH;
         this.midHome.x = 0;
+        this.midHomeBack.y = cc.winSize.height * 0.5 - this.midHomeBack.height * 0.5;
         this.midHomeTop.y = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop - this.midHomeTop.height * 0.5;
         this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
         this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
@@ -97,7 +95,9 @@ export default class MainMenu extends cc.Component {
         this.arrBottomMenu = [this.bottomShop, this.bottomHome, this.bottomTheme];
         this.widthUp = this.bottomLight.width;
         this.widthDown = (cc.winSize.width - this.widthUp) * 0.5;
+    }
 
+    protected onEnable(): void {
         this.initMenu();
     }
 

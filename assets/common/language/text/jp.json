@@ -10,7 +10,7 @@
     "over_timeout_desc": "以下のアイテムを失います",
     "over_timeout_playon": "続く",
     "over_timeout_giveup": "諦める",
-    "over_nospace_desc": "動けない",
+    "over_nospace_title": "動けない",
     "over_nospace_gobackgood": "3 個の商品を返品する",
     "exit_confirm_desc": "諦めレベル",
     "exit_confirm_restart": "再起動",

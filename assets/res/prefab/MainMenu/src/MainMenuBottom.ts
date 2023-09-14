@@ -13,7 +13,6 @@ export default class MainMenuBottom extends cc.Component {
     @property(cc.Node) itemLabelTheme: cc.Node = null;
 
     protected onLoad(): void {
-        console.log('MainMenuTop onLoad()');    
         this.listernerRegist();
     }
 

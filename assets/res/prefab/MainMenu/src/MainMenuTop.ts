@@ -14,7 +14,7 @@ export default class MainMenuTop extends cc.Component {
     @property(cc.Node) labelCoinNum: cc.Node = null;
 
     protected onLoad(): void {
-        console.log('MainMenuTop onLoad()');
+
     }
 
     protected onEnable(): void {
@@ -137,7 +137,6 @@ export default class MainMenuTop extends cc.Component {
 
     /** 按钮事件 设置 */
     eventBtnSet() {
-        console.log('点击按钮: 设置');
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_settingHome, {}, { mode: PopupCacheMode.Frequent });
     };

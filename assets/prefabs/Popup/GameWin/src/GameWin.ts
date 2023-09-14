@@ -1,11 +1,10 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager from "../../../../src/config/DataManager";
+import DataManager, { ParamsWin, TypeBefore } from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin } from "../../../games/GameBox/src/GameBox";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -20,7 +19,7 @@ export default class GameWin extends PopupBase {
     isNext: boolean = false;
 
     protected showBefore(options: any): void {
-        Common.log('GameWin showBefore()');
+        Common.log('弹窗 过关页面 showBefore()');
         this.params = Common.clone(options);
 
         // 时间
@@ -32,12 +31,12 @@ export default class GameWin extends PopupBase {
             this.itemLabelTitle.getComponent(cc.Label).string = chars;
         });
 
-        // continue 和 param
+        // next 或 continue
         this.isNext = true;
         let _data = DataManager.data;
-        if (this.params.level && _data.boxLevel.count + this.params.level >= DataManager.getRewardBoxLevel().total
-            || this.params.star && _data.boxXingxing.count + this.params.star >= DataManager.getRewardBoxXinging().total
-            || this.params.suipian && _data.boxSuipian.count + this.params.suipian >= DataManager.getRewardBoxSuipian().total) {
+        if (_data.boxLevel.count + _data.boxLevel.add >= DataManager.getRewardBoxLevel().total
+            || _data.boxSuipian.count + _data.boxSuipian.add >= DataManager.getRewardBoxSuipian().total
+            || _data.boxXingxing.count + _data.boxXingxing.add >= DataManager.getRewardBoxXinging().total) {
             this.isNext = false;
         }
         DataManager.setString(this.isNext ? LangChars.win_next : LangChars.CONTINUE, (chars: string) => {
@@ -53,8 +52,7 @@ export default class GameWin extends PopupBase {
     }
 
     protected showAfter(): void {
-        Common.log('GameWin showAfter()');
-        let total = this.params.star;
+        let total = this.params.xingxing;
         let funcXing = (index: number = 0) => {
             if (index < total) {
                 let xing = this.arrNodeXingxing[index];
@@ -73,32 +71,43 @@ export default class GameWin extends PopupBase {
     }
 
     protected hideBefore(): void {
-        Common.log('GameWin hideBefore()');
         this.arrNodeXingxing.forEach((xing, index) => {
             let icon = xing.getChildByName('icon');
             cc.Tween.stopAllByTarget(icon);
-            if (index < this.params.star) {
+            if (index < this.params.xingxing) {
                 icon.opacity = 255;
                 icon.scale = 1.0;
             }
         });
     }
 
+    /** 按钮事件 确定 */
     async eventBtnNext() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
-        kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+        await kit.Popup.hide();
         if (this.isNext) {
-            kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+            // next 游戏开始前页面
+            kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameWin }, { mode: PopupCacheMode.Frequent });
         }
-        else{
-            kit.Popup.show(CConst.popup_path_before, this.params, { mode: PopupCacheMode.Frequent });
+        else {
+            await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
+            // continue 进入菜单页（恢复消除的体力）
+            DataManager.data.strength.count++;
+            DataManager.setData();
+            Common.log('恢复体力 剩余strength: ', DataManager.data.strength.count);
+            kit.Event.emit(CConst.event_enter_menu);
         }
     }
 
-    eventBtnExit() {
+    /** 按钮事件 退出 */
+    async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
-        kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
+        await kit.Popup.hide();
+        await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
+        // 进入菜单页（恢复消除的体力）
+        DataManager.data.strength.count++;
+        DataManager.setData();
+        Common.log('恢复体力 剩余strength: ', DataManager.data.strength.count);
+        kit.Event.emit(CConst.event_enter_menu);
     }
 }
