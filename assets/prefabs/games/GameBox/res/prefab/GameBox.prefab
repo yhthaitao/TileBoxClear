@@ -6279,7 +6279,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "nodeReturn",
+    "_name": "nodeBack",
     "_objFlags": 0,
     "_parent": {
       "__id__": 129
@@ -6525,7 +6525,7 @@
     },
     "component": "",
     "_componentId": "836eaRGaoRNLoVLndli9sLK",
-    "handler": "eventBtnReturn",
+    "handler": "eventBtnBack",
     "customEventData": ""
   },
   {
@@ -8901,7 +8901,7 @@
     "uiPropTip": {
       "__id__": 150
     },
-    "uiPropReturn": {
+    "uiPropRack": {
       "__id__": 170
     },
     "uiPropRefresh": {

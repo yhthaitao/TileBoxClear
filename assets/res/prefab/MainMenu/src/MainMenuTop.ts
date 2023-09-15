@@ -107,9 +107,10 @@ export default class MainMenuTop extends cc.Component {
             // 更新ui
             this.labelStrengthNum.getComponent(cc.Label).string = '' + DataManager.data.strength.count;
             timeDis = timeCur - DataManager.data.strength.tCount;
+            timeDis = timeDis % DataManager.data.strength.tTotal;
             count = DataManager.data.strength.tTotal - timeDis;
             this.refreshTime(count);
-            
+
             // 计时结束
             if (DataManager.data.strength.count >= DataManager.data.strength.total) {
                 this.labelStrengthTime.active = false;

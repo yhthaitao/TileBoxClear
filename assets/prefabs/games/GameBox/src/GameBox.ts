@@ -1,6 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager, { Design, ParamsFail, ParamsWin, TypeFinish } from "../../../../src/config/DataManager";
+import DataManager, { Design, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
@@ -68,7 +68,7 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Node, tooltip: 'ui-道具' }) uiProp: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-冰冻' }) uiPropIce: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-提示' }) uiPropTip: cc.Node = null;
-    @property({ type: cc.Node, tooltip: 'ui-道具-回退' }) uiPropReturn: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-回退' }) uiPropRack: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-刷新' }) uiPropRefresh: cc.Node = null;
     @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
     @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
@@ -481,7 +481,7 @@ export default class GameBox extends cc.Component {
         // 设置道具栏
         this.setUIProp(this.uiPropIce, DataManager.data.prop.ice.count);
         this.setUIProp(this.uiPropTip, DataManager.data.prop.tip.count);
-        this.setUIProp(this.uiPropReturn, DataManager.data.prop.return.count);
+        this.setUIProp(this.uiPropRack, DataManager.data.prop.back.count);
         this.setUIProp(this.uiPropRefresh, DataManager.data.prop.refresh.count);
     }
 
@@ -541,12 +541,11 @@ export default class GameBox extends cc.Component {
     setUITime() {
         let m = Math.floor(this.timeGame.count / 60);
         let s = Math.floor(this.timeGame.count % 60);
-        let strL = m < 10 ? '0' + m : '' + m;
-        let strR = s < 10 ? '0' + s : '' + s;
-        let strM = ':';
-        this.arrTimeLayer[0].getComponent(cc.Label).string = strL;
-        this.arrTimeLayer[1].getComponent(cc.Label).string = strR;
-        this.arrTimeLayer[2].getComponent(cc.Label).string = strM;
+        let mm = m < 10 ? '0' + m : '' + m;
+        let ss = s < 10 ? '0' + s : '' + s;
+        this.arrTimeLayer[0].getComponent(cc.Label).string = mm;
+        this.arrTimeLayer[1].getComponent(cc.Label).string = ss;
+        this.arrTimeLayer[2].getComponent(cc.Label).string = ':';
     }
 
     /** 设置进度 */
@@ -967,13 +966,13 @@ export default class GameBox extends cc.Component {
 
     /** 检测 用户评价 */
     checkEvaluate() {
-        let _data = DataManager.data;
-        if (_data.isEvaluate) {
-            return;
-        }
-        if (_data.boxData.level == 6 || _data.boxData.level == 26) {
-            kit.Popup.show(CConst.popup_path_user_evaluate, {}, { mode: PopupCacheMode.Frequent });
-        }
+        // let _data = DataManager.data;
+        // if (_data.isEvaluate) {
+        //     return;
+        // }
+        // if (_data.boxData.level == 6 || _data.boxData.level == 26) {
+        //     kit.Popup.show(CConst.popup_path_user_evaluate, {}, { mode: PopupCacheMode.Frequent });
+        // }
     }
 
     /** 点击事件 */
@@ -1159,40 +1158,6 @@ export default class GameBox extends cc.Component {
         this.setIceHide();
     }
 
-    /** 按钮事件 重玩 */
-    eventBtnReplay() {
-        // 锁定 或 物品移动过程中，不触发道具
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        kit.Audio.playEffect(CConst.sound_clickUI);
-
-        let funcReplay = () => {
-            this.playAniShow(false, () => {
-                this.gameRestart();
-            });
-        };
-        // 前30关，有一次免广告重玩的机会
-        let level = DataManager.data.boxData.level;
-        if (level <= 30 && DataManager.data.numReplay > 0) {
-            DataManager.data.numReplay -= 1;
-            DataManager.setData();
-            funcReplay();
-            return;
-        }
-        // 打点 插屏广告请求（过关）
-        NativeCall.logEventThree(ConfigDot.dot_adReq, "inter_homeRestart", "Interstital");
-        let funcA = () => {
-            // 打点 插屏播放完成（点击重玩按钮）
-            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_rePlay, String(level));
-            funcReplay();
-        };
-        let isReady = DataManager.playAdvert(funcA, funcA);
-        if (!isReady) {
-            funcA();
-        }
-    }
-
     /** 按钮事件 设置 */
     eventBtnSetting() {
         // 锁定 或 物品移动过程中，不触发道具
@@ -1213,18 +1178,21 @@ export default class GameBox extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-冰冻
-        let count = DataManager.data.prop.ice.count;
-        if (count <= 0) {
-            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+        let propNum = DataManager.useProp(TypeProp.ice);
+        if (propNum < 0) {
+            kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        count--;
-        DataManager.data.prop.ice.count = count;
-        DataManager.setData();
-        this.setUIProp(this.uiPropIce, count);
+        else{
+            DataManager.setData();
+        }
 
-        this.timeProp.iceCount += this.timeProp.iceTotal;
+        // 更新ui
+        this.setUIProp(this.uiPropIce, propNum);
         this.setIceShow();
+
+        // 道具逻辑
+        this.timeProp.iceCount += this.timeProp.iceTotal;
     }
 
     /** 道具 按钮事件 提示 */
@@ -1236,16 +1204,19 @@ export default class GameBox extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-提示
-        let count = DataManager.data.prop.tip.count;
-        if (count <= 0) {
-            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+        let propNum = DataManager.useProp(TypeProp.tip);
+        if (propNum < 0) {
+            kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        count--;
-        DataManager.data.prop.tip.count = count;
-        DataManager.setData();
-        this.setUIProp(this.uiPropTip, count);
+        else{
+            DataManager.setData();
+        }
 
+        // 更新ui
+        this.setUIProp(this.uiPropTip, propNum);
+
+        // 道具逻辑
         let needNum = 3;
         let keyGood = 0;
         if (this.bottomParamArr.length > 0) {
@@ -1321,7 +1292,7 @@ export default class GameBox extends cc.Component {
     }
 
     /** 道具 按钮事件 上一步 */
-    eventBtnReturn() {
+    eventBtnBack() {
         // 锁定 或 物品移动过程中，不触发道具
         if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
             return;
@@ -1334,17 +1305,21 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, "Can't be used now");
             return;
         }
+
         // 使用道具-返回上一步
-        let count = DataManager.data.prop.return.count;
-        if (count <= 0) {
-            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+        let propNum = DataManager.useProp(TypeProp.back);
+        if (propNum < 0) {
+            kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        count--;
-        DataManager.data.prop.return.count = count;
-        DataManager.setData();
-        this.setUIProp(this.uiPropReturn, count);
+        else{
+            DataManager.setData();
+        }
 
+        // 更新ui
+        this.setUIProp(this.uiPropRack, propNum);
+
+        // 道具逻辑
         this.isLock = true;
 
         // 删除检测区物品数据 并 获取物品参数
@@ -1528,16 +1503,19 @@ export default class GameBox extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-刷新
-        let count = DataManager.data.prop.refresh.count;
-        if (count <= 0) {
-            kit.Event.emit(CConst.event_notice, '暂无购买道具');
+        let propNum = DataManager.useProp(TypeProp.refresh);
+        if (propNum < 0) {
+            kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        count--;
-        DataManager.data.prop.refresh.count = count;
-        DataManager.setData();
-        this.setUIProp(this.uiPropRefresh, count);
+        else{
+            DataManager.setData();
+        }
 
+        // 刷新ui
+        this.setUIProp(this.uiPropRefresh, propNum);
+
+        // 道具逻辑
         this.isLock = true;
         /*****************************************************组合物品数组*************************************************************/
         let arrGoodParam: GoodParam[][] = [];

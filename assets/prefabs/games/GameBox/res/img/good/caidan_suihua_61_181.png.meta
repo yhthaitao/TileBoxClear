@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "f435ec2c-57f3-4019-a422-58494d0dcee0",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 61,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "caidan_suihua_61_181": {
+      "ver": "1.0.4",
+      "uuid": "03ee4b26-1dff-424b-a654-741c736f4990",
+      "rawTextureUuid": "f435ec2c-57f3-4019-a422-58494d0dcee0",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -35,
+      "trimX": 0,
+      "trimY": 83,
+      "width": 61,
+      "height": 85,
+      "rawWidth": 61,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

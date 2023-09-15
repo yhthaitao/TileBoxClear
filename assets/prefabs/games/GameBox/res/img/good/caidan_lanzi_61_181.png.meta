@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "ecebe9df-8525-4afa-81e3-d500f5949154",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 61,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "caidan_lanzi_61_181": {
+      "ver": "1.0.4",
+      "uuid": "42746d7a-5d8e-4569-ae31-882f205816ea",
+      "rawTextureUuid": "ecebe9df-8525-4afa-81e3-d500f5949154",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": -35,
+      "trimX": 0,
+      "trimY": 83,
+      "width": 61,
+      "height": 85,
+      "rawWidth": 61,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

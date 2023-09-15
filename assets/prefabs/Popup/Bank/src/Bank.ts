@@ -17,10 +17,10 @@ export default class Bank extends PopupBase {
         Common.log('弹窗 银行页面 showBefore()');
 
         DataManager.setString(LangChars.bank_title, (chars: string)=>{
-            this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
+            this.itemLabelTitle.getComponent(cc.Label).string = chars;
         });
         DataManager.setString(LangChars.bank_desc, (chars: string)=>{
-            this.itemLabelMid.getComponent(cc.Label).string = chars + '?';
+            this.itemLabelMid.getComponent(cc.Label).string = chars;
         });
         DataManager.setString(LangChars.CONTINUE, (chars: string)=>{
             this.itemLabelPlay.getComponent(cc.Label).string = chars;

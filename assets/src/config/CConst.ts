@@ -94,6 +94,7 @@ const CConst = {
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
     popup_path_bank: './Popup/Bank/res/prefab/Bank',
     popup_path_before: './Popup/Before/res/prefab/Before',
+    popup_path_getLives: './Popup/GetLives/res/prefab/GetLives',
     popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
     popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',
     popup_path_user_evaluate: './Popup/UserEvaluate/res/prefab/UserEvaluate',

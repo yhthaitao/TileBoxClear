@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "d922aad6-1c2f-4b07-90a3-a4f33efcd793",
+  "uuid": "de71afc2-2e9e-4a38-8853-712ed47673d1",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -13,8 +13,8 @@
   "subMetas": {
     "maoWanJu_bai_134_181": {
       "ver": "1.0.4",
-      "uuid": "b3cd8796-76e5-41b3-b3bd-f65ac9a3b72d",
-      "rawTextureUuid": "d922aad6-1c2f-4b07-90a3-a4f33efcd793",
+      "uuid": "a7e96650-2958-4146-9f3f-3b1f4812f829",
+      "rawTextureUuid": "de71afc2-2e9e-4a38-8853-712ed47673d1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

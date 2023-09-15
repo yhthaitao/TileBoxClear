@@ -79,6 +79,8 @@ export enum TypeProp {
 import ConfigBoxLevel from "./ConfigBoxLevel";
 import ConfigBoxSuipian from "./ConfigBoxSuipian";
 import ConfigBoxXingxing from "./ConfigBoxXingxing";
+import ConfigGood from "./ConfigGood";
+import ConfigUnlock from "./ConfigUnlock";
 
 /** 数据类型（碎片宝箱奖励） */
 export interface TypeReward {
@@ -113,7 +115,7 @@ class DataManager {
     /** 插屏广告开启关卡 */
     adStartLevel: number = 4;
     /** 游戏开始前界面状态 */
-    beforeWins = { count: 0, magnet: [0, 1, 2, 3], };
+    beforeWins = { count: 0, magnet: [0, 1, 2, 3], unlock: 25 };
 
     /** 初始数据 */
     data = {
@@ -151,7 +153,7 @@ class DataManager {
         prop: {
             ice: { count: 3 },// 冰冻
             tip: { count: 3 },// 提示
-            return: { count: 3 },// 返回上一步
+            back: { count: 3 },// 返回上一步
             refresh: { count: 3 },// 刷新
             magnet: { count: 3, tInfinite: 0 },// 磁铁
             clock: { count: 3, tInfinite: 0 },// 时钟
@@ -167,6 +169,10 @@ class DataManager {
         // 宝箱相关参数（星星宝箱）
         boxXingxing: {
             level: 1, count: 0, add: 0, loop: { start: 6, length: 16, },
+        },
+        // 宝箱相关参数（物品宝箱）
+        boxGood: {
+            level: 1, count: 0, add: 0, max: 12
         },
         // 关卡数据 基础
         boxData: {
@@ -184,6 +190,7 @@ class DataManager {
                 3: [3001, 3008, 3011, 3012],
                 4: [4001, 4011, 4012, 4013, 4014, 4017],
             },
+            goodStore: [],// 所有物品的池子
             // 有金币的物品
             goodGold: {
                 1001: 1, 1002: 1, 1003: 1,
@@ -215,6 +222,8 @@ class DataManager {
         NativeCall.setRevenue(this.data.advert.revenue);
         // 初始化语言
         this.initLanguage();
+        // 初始化物品池子
+        this.initGoodStore();
         // 提前加载 本地化 文本
         await kit.Resources.loadRes(CConst.bundleCommon, CConst.pathLanguage + this.data.langCur, cc.JsonAsset);
         // 提前加载 本地化 图片
@@ -264,14 +273,147 @@ class DataManager {
         this.setData();
     }
 
+    /** 物品初始化 */
+    public initGoodStore() {
+        // 所有物品
+        let arrGoods = [];
+        ConfigGood.goodsConf.forEach((obj) => { arrGoods.push(obj.id); });
+        // 解锁物品
+        let goodUnlock = this.data.boxData.goodUnlock;
+        let arrUnlock = [].concat(goodUnlock[1], goodUnlock[2], goodUnlock[3], goodUnlock[4]);
+        // 物品全部解锁
+        if (arrUnlock.length >= arrGoods.length) {
+            this.data.boxData.goodStore = [];
+            return;
+        }
+        // 存储物品
+        if (this.data.boxData.goodStore.length == 0) {
+            arrGoods.forEach((goodId) => {
+                if (arrGoods.indexOf(goodId) < 0) {
+                    this.data.boxData.goodStore.push(goodId);
+                }
+            });
+        }
+    }
+
     /** 设置游戏状态 */
     public setGameState(state: number) {
         this.stateLast = this.stateCur;
         this.stateCur = state;
     }
 
+    /** 消耗体力 */
+    public strengthReduce() {
+        if (this.data.strength.count >= this.data.strength.total) {
+            this.data.strength.tCount = Math.floor(new Date().getTime() / 1000);
+        }
+        this.data.strength.count--;
+        Common.log('消耗体力 剩余strength: ', this.data.strength.count);
+    }
+
+    /** 恢复体力 */
+    public strengthResume() {
+        this.data.strength.count++;
+        if (this.data.strength.count >= this.data.strength.total) {
+            this.data.strength.count = this.data.strength.total;
+            this.data.strength.tCount = 0;
+        }
+        Common.log('恢复体力 剩余strength: ', this.data.strength.count);
+    }
+
+    /** 使用道具 */
+    public useProp(type: TypeProp) {
+        let propNum = -1;
+        switch (type) {
+            case TypeProp.ice:
+                if (this.data.prop.ice.count > 0) {
+                    this.data.prop.ice.count -= 1;
+                    propNum = this.data.prop.ice.count;
+                }
+                break;
+            case TypeProp.tip:
+                if (this.data.prop.tip.count > 0) {
+                    this.data.prop.tip.count -= 1;
+                    propNum = this.data.prop.tip.count;
+                }
+                break;
+            case TypeProp.back:
+                if (this.data.prop.back.count > 0) {
+                    this.data.prop.back.count -= 1;
+                    propNum = this.data.prop.back.count;
+                }
+                break;
+            case TypeProp.refresh:
+                if (this.data.prop.refresh.count > 0) {
+                    this.data.prop.refresh.count -= 1;
+                    propNum = this.data.prop.refresh.count;
+                }
+                break;
+            case TypeProp.magnet:
+                if (this.data.prop.magnet.tInfinite > 0) {
+                    propNum = this.data.prop.magnet.count;
+                }
+                else {
+                    if (this.data.prop.magnet.count > 0) {
+                        this.data.prop.magnet.count -= 1;
+                        propNum = this.data.prop.magnet.count;
+                    }
+                }
+                break;
+            case TypeProp.clock:
+                if (this.data.prop.clock.tInfinite > 0) {
+                    propNum = this.data.prop.clock.count;
+                }
+                else {
+                    if (this.data.prop.clock.count > 0) {
+                        this.data.prop.clock.count -= 1;
+                        propNum = this.data.prop.clock.count;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return propNum;
+    }
+
+    /** 数据更新（游戏胜利后） */
+    public refreshDataAfterWin(params: ParamsWin) {
+        // 等级变化
+        this.data.boxData.level++;
+        // 过关数据变更 关卡宝箱
+        if (params.level && params.level > 0) {
+            this.data.boxLevel.add += params.level;
+        }
+        // 过关数据变更 碎片宝箱
+        if (params.suipian && params.suipian > 0) {
+            this.data.boxSuipian.add += params.suipian;
+        }
+        // 过关数据变更 星星宝箱
+        if (params.xingxing && params.xingxing > 0) {
+            this.data.boxXingxing.add += params.xingxing;
+        }
+        // 过关数据变更 物品宝箱
+        this.data.boxGood.add += 1;
+
+        // 道具解锁（游戏开始前界面）
+        this.data.beforeProp.forEach((obj: { type: TypeProp, state: StateBeforeProp, unlock: number }, index: number) => {
+            if (obj.state == StateBeforeProp.lock) {
+                if (this.data.boxData.level >= obj.unlock) {
+                    obj.state = StateBeforeProp.unChoose;
+                }
+            }
+            // 连胜奖励在25关之后开启
+            if (this.data.boxData.level > 25 && obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
+                if (this.beforeWins.count < 3) {
+                    this.beforeWins.count++;
+                }
+            }
+        });
+    }
+
     /** 数据更新（开启宝箱后） */
-    public refreshDataAfterBox(params: TypeReward) {
+    public refreshDataAfterUnlockReward(params: TypeReward) {
         params.reward.forEach((record) => {
             switch (record.type) {
                 case TypeProp.coin:
@@ -284,7 +426,7 @@ class DataManager {
                     this.data.prop.tip.count += record.number;
                     break;
                 case TypeProp.back:
-                    this.data.prop.return.count += record.number;
+                    this.data.prop.back.count += record.number;
                     break;
                 case TypeProp.refresh:
                     this.data.prop.refresh.count += record.number;
@@ -308,40 +450,29 @@ class DataManager {
                     break;
             }
         });
-    };
+    }
 
-    /** 数据更新（游戏胜利后） */
-    public refreshDataAfterWin(params: ParamsWin) {
-        // 等级变化
-        this.data.boxData.level++;
-        if (params.level && params.level > 0) {
-            this.data.boxLevel.add += params.level;
-        }
-        if (params.suipian && params.suipian > 0) {
-            this.data.boxSuipian.add += params.suipian;
-        }
-        if (params.xingxing && params.xingxing > 0) {
-            this.data.boxXingxing.add += params.xingxing;
-        }
-
-        // 道具解锁（游戏开始前界面）
-        this.data.beforeProp.forEach((obj: { type: TypeProp, state: StateBeforeProp, unlock: number }, index: number) => {
-            if (obj.state == StateBeforeProp.lock) {
-                if (this.data.boxData.level >= obj.unlock) {
-                    obj.state = StateBeforeProp.unChoose;
-                }
+    /** 数据更新（解锁物品后） */
+    public refreshDataAfterUnlockGood(params: { total: number, goods: number[] }) {
+        params.goods.forEach((goodId) => {
+            // 从未解锁物品池子内删除
+            let index = this.data.boxData.goodStore.indexOf(goodId);
+            if (index >= 0) {
+                this.data.boxData.goodStore.splice(index, 1);
             }
-            // 连胜奖励在25关之后开启
-            if (this.data.boxData.level > 25 && obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
-                if (this.beforeWins.count < 3) {
-                    this.beforeWins.count++;
-                }
+            else {
+                Common.log('error 解锁物品异常 goodId: ', goodId);
+            }
+            // 添加到已解锁物品池子
+            let first = Math.floor(goodId * 0.001);
+            if (this.data.boxData.goodUnlock[first]) {
+                this.data.boxData.goodUnlock[first].push(goodId);
             }
         });
     }
 
     /** 获取奖励参数（等级宝箱） */
-    public getRewardBoxLevel() {
+    public getRewardBoxLevel(): TypeReward {
         let boxData = this.data.boxLevel;
         let index = boxData.level;
         if (index < 1) {
@@ -353,7 +484,7 @@ class DataManager {
             }
         }
         return ConfigBoxLevel[index];
-    };
+    }
 
     /** 获取奖励参数（星星宝箱） */
     public getRewardBoxXinging(): TypeReward {
@@ -369,7 +500,7 @@ class DataManager {
         }
         let config: TypeReward = ConfigBoxXingxing[index];
         return config;
-    };
+    }
 
     /** 获取奖励参数（碎片宝箱） */
     public getRewardBoxSuipian(): TypeReward {
@@ -385,7 +516,33 @@ class DataManager {
         }
         let config: TypeReward = ConfigBoxSuipian[index];
         return config;
-    };
+    }
+
+    /** 获取奖励参数（物品宝箱） */
+    public getRewardBoxGood(): { total: number, goods: number[] } {
+        let index = this.data.boxGood.level;
+        if (index <= this.data.boxGood.max) {
+            if (index < 1) {
+                index = 1;
+            }
+            return ConfigUnlock[index];
+        }
+        let config = { total: 10, goods: [] };
+        let boxData = this.data.boxData.goodStore;
+        if (boxData.length > 3) {
+            let random = Math.floor(Math.random() * boxData.length);
+            config.goods.concat(boxData.splice(random, 1));
+            random = Math.floor(Math.random() * boxData.length);
+            config.goods.concat(boxData.splice(random, 1));
+            random = Math.floor(Math.random() * boxData.length);
+            config.goods.concat(boxData.splice(random, 1));
+        }
+        else if (boxData.length > 0) {
+            config.goods = Common.clone(boxData);
+            boxData = [];
+        }
+        return config;
+    }
 
     /**
      * 存储数据

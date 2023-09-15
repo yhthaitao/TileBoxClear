@@ -28,6 +28,7 @@ export default class PopupBase<Options = any> extends cc.Component {
      * @param duration 动画时长
      */
     public show(options?: Options) {
+        this.node.scale = 1.2;
         this.maskDown.setContentSize(cc.winSize);
         this.maskUp.setContentSize(cc.winSize);
         

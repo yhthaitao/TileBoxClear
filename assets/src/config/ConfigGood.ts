@@ -181,6 +181,105 @@ const ConfigGood = {
             "isGolden": 0
         },
         {
+            "id": 1021,
+            "name": "caidan_bai_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1022,
+            "name": "caidan_caitiao_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1023,
+            "name": "caidan_fen_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1024,
+            "name": "caidan_juhuang_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1025,
+            "name": "caidan_lan_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1026,
+            "name": "caidan_lanzi_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1027,
+            "name": "caidan_lv_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1028,
+            "name": "caidan_suihua_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1029,
+            "name": "caidan_zhuhuang_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1030,
+            "name": "caidan_zi_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
+            "id": 1031,
+            "name": "wangqiu_61_181",
+            "series": 1,
+            "h": 181,
+            "w": 61,
+            "t": 1,
+            "isGolden": 0
+        },
+        {
             "id": 2001,
             "name": "gou_huang_86_181",
             "series": 1,
@@ -415,6 +514,69 @@ const ConfigGood = {
             "isGolden": 0
         },
         {
+            "id": 2027,
+            "name": "gaoerfuqiu_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2028,
+            "name": "shouji_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2029,
+            "name": "xiongMao_heibai_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2030,
+            "name": "yujinxiang_bai_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2031,
+            "name": "yujinxiang_fen_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2032,
+            "name": "yujinxiang_huang_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
+            "id": 2033,
+            "name": "deng_zi_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 2,
+            "isGolden": 0
+        },
+        {
             "id": 3001,
             "name": "shouTiBao_huang_116_181",
             "series": 1,
@@ -552,6 +714,69 @@ const ConfigGood = {
         {
             "id": 3016,
             "name": "gaoGenXie_hei_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3017,
+            "name": "daocao_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3018,
+            "name": "mianmao_hong_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3019,
+            "name": "mianmao_huang_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3020,
+            "name": "mianmao_lan_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3021,
+            "name": "moshumao_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3022,
+            "name": "paiqiu_116_181",
+            "series": 1,
+            "h": 181,
+            "w": 116,
+            "t": 3,
+            "isGolden": 0
+        },
+        {
+            "id": 3023,
+            "name": "xiangji_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -723,6 +948,42 @@ const ConfigGood = {
         {
             "id": 4019,
             "name": "yang_jin2_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4020,
+            "name": "diannao_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4021,
+            "name": "lanqiu_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4022,
+            "name": "wushimao_hei_134_181",
+            "series": 1,
+            "h": 181,
+            "w": 134,
+            "t": 4,
+            "isGolden": 0
+        },
+        {
+            "id": 4023,
+            "name": "wushimao_zi_134_181",
             "series": 1,
             "h": 181,
             "w": 134,
@@ -943,6 +1204,24 @@ const ConfigGood = {
             "h": 74,
             "w": 99,
             "t": 6,
+            "isGolden": 0
+        },
+        {
+            "id": 9001,
+            "name": "miaoBiao_daoji_86_181",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 6,
+            "isGolden": 0
+        },
+        {
+            "id": 9002,
+            "name": "ciTie_daoju_86_181.png",
+            "series": 1,
+            "h": 181,
+            "w": 86,
+            "t": 9,
             "isGolden": 0
         }
     ]

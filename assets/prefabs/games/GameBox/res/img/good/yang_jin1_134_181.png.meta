@@ -1,6 +1,6 @@
 {
   "ver": "2.3.5",
-  "uuid": "d2b5fac1-7ead-4ed7-8623-6ab0fd9be894",
+  "uuid": "9da30a19-c2b0-4dfe-9cc8-53224e206b00",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -13,8 +13,8 @@
   "subMetas": {
     "yang_jin1_134_181": {
       "ver": "1.0.4",
-      "uuid": "33f2de78-527c-4e9b-b305-5215883142e5",
-      "rawTextureUuid": "d2b5fac1-7ead-4ed7-8623-6ab0fd9be894",
+      "uuid": "70d41567-bae0-4632-bf2d-0936bd5205f3",
+      "rawTextureUuid": "9da30a19-c2b0-4dfe-9cc8-53224e206b00",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -17,10 +17,10 @@ export default class BoxXingxing extends PopupBase {
         Common.log('弹窗 星星宝箱页面 showBefore()');
 
         DataManager.setString(LangChars.boxXingxing_title, (chars: string)=>{
-            this.itemLabelTitle.getComponent(cc.Label).string = chars + '?';
+            this.itemLabelTitle.getComponent(cc.Label).string = chars;
         });
         DataManager.setString(LangChars.boxXingxing_desc, (chars: string)=>{
-            this.itemLabelMid.getComponent(cc.Label).string = chars + '?';
+            this.itemLabelMid.getComponent(cc.Label).string = chars;
         });
         DataManager.setString(LangChars.CONTINUE, (chars: string)=>{
             this.itemLabelPlay.getComponent(cc.Label).string = chars;

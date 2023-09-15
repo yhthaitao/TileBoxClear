@@ -35,12 +35,9 @@ export default class MainMenuMid extends cc.Component {
     @property({ type: cc.Node, tooltip: '拦截' }) menu_mask_bottom: cc.Node = null;
 
     obj = {
-        ani: { level: false, suipian: false, xingxing: false },
+        ani: { level: false, suipian: false, xingxing: false, time: 0.25 },
     };
     tElseSuipian: number = 0;
-    wProcessSuipian: number = 615;// 进度条宽度（碎片宝箱）
-    wProcessXingxing: number = 110;// 进度条宽度（星星宝箱）
-    wProcessLevel: number = 110;// 进度条宽度（关卡等级宝箱）
 
     // 主题状态
     stateTheme: StateTheme = StateTheme.areas;
@@ -104,8 +101,8 @@ export default class MainMenuMid extends cc.Component {
 
     playAniBox(params: ParamsAniBox): Promise<void> {
         return new Promise(res => {
-            cc.tween(params.objBar.node).parallel(
-                cc.tween().to(params.objBar.time, { width: params.objBar.goal }),
+            cc.tween(params.objBar.node.getComponent(cc.Sprite)).parallel(
+                cc.tween().to(params.objBar.time, { fillRange: params.objBar.goal }),
                 cc.tween().delay(params.objBar.time * 0.5).call(() => {
                     params.objLabel.node.getComponent(cc.Label).string = params.objLabel.desc;
                 }),
@@ -159,7 +156,8 @@ export default class MainMenuMid extends cc.Component {
         let total = boxReward.total;
         // 进度条
         let itemBar = this.home_top_process.getChildByName('bar');
-        itemBar.width = this.wProcessSuipian * count / total;
+        itemBar.getComponent(cc.Sprite).fillStart = 0;
+        itemBar.getComponent(cc.Sprite).fillRange = count / total;
         // 文本
         let itemLabel = this.home_top_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
@@ -168,26 +166,29 @@ export default class MainMenuMid extends cc.Component {
         if (boxData.add > 0) {
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
-            // 数据变更
-            boxData.count += boxData.add;
-            if (boxData.count >= total) {
-                boxData.count -= total;
-            }
-            boxData.add = 0;
-            DataManager.setData();
-            // 其他数据
             let boxAddElse = -1;
             if (boxCount + boxAdd >= total) {
                 boxAddElse = boxCount + boxAdd - total;
                 boxAdd = boxAdd - boxAddElse;
             }
 
+            // 数据变更
+            boxData.count += boxData.add;
+            boxData.add = 0;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+                boxData.level += 1;
+                DataManager.refreshDataAfterUnlockReward(boxReward);
+                console.log(JSON.stringify({ name: '碎片宝箱', param: boxReward }, null, 4));
+                kit.Event.emit(CConst.event_notice, '碎片宝箱');
+            }
+            DataManager.setData();
+
             // 进度条刷新
-            let time = 0.15;
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: time, goal: this.wProcessSuipian * boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -195,18 +196,16 @@ export default class MainMenuMid extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-                boxData.level += 1;
-                boxData.count = boxAddElse;
-                DataManager.refreshDataAfterBox(boxReward);
-                DataManager.setData();
+
                 // 进度条再次刷新
                 boxCount = 0;
+                total = DataManager.getRewardBoxSuipian().total;
                 itemBar.width = 0;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: time, goal: this.wProcessSuipian * boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);
@@ -258,7 +257,8 @@ export default class MainMenuMid extends cc.Component {
         let total = boxReward.total;
         // 进度条
         let itemBar = this.home_left_boxXing_process.getChildByName('bar');
-        itemBar.width = this.wProcessXingxing * count / total;
+        itemBar.getComponent(cc.Sprite).fillStart = 0;
+        itemBar.getComponent(cc.Sprite).fillRange = count / total;
         // 文本
         let itemLabel = this.home_left_boxXing_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
@@ -267,26 +267,29 @@ export default class MainMenuMid extends cc.Component {
         if (boxData.add > 0) {
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
-            // 数据变更
-            boxData.count += boxData.add;
-            if (boxData.count >= total) {
-                boxData.count -= total;
-            }
-            boxData.add = 0;
-            DataManager.setData();
-            // 其他数据
             let boxAddElse = -1;
             if (boxCount + boxAdd >= total) {
                 boxAddElse = boxCount + boxAdd - total;
                 boxAdd = boxAdd - boxAddElse;
             }
 
+            // 数据变更
+            boxData.count += boxData.add;
+            boxData.add = 0;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+                boxData.level += 1;
+                DataManager.refreshDataAfterUnlockReward(boxReward);
+                console.log(JSON.stringify({ name: '星星宝箱', param: boxReward }, null, 4));
+                kit.Event.emit(CConst.event_notice, '星星宝箱');
+            }
+            DataManager.setData();
+
             // 进度条刷新
-            let time = 0.15;
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: time, goal: this.wProcessXingxing * boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -295,18 +298,16 @@ export default class MainMenuMid extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-                boxData.level += 1;
-                boxData.count = boxAddElse;
-                DataManager.refreshDataAfterBox(boxReward);
-                DataManager.setData();
+
                 // 进度条再次刷新
                 boxCount = 0;
+                total = DataManager.getRewardBoxXinging().total;
                 itemBar.width = 0;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: time, goal: this.wProcessXingxing * boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);
@@ -330,7 +331,8 @@ export default class MainMenuMid extends cc.Component {
         let total = boxReward.total;
         // 进度条
         let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
-        itemBar.width = this.wProcessLevel * count / total;
+        itemBar.getComponent(cc.Sprite).fillStart = 0;
+        itemBar.getComponent(cc.Sprite).fillRange = count / total;
         // 文本
         let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
@@ -339,26 +341,29 @@ export default class MainMenuMid extends cc.Component {
         if (boxData.add > 0) {
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
-            // 数据变更
-            boxData.count += boxData.add;
-            if (boxData.count >= total) {
-                boxData.count -= total;
-            }
-            boxData.add = 0;
-            DataManager.setData();
-            // 其他数据
             let boxAddElse = -1;
             if (boxCount + boxAdd >= total) {
                 boxAddElse = boxCount + boxAdd - total;
                 boxAdd = boxAdd - boxAddElse;
             }
 
+            // 数据变更
+            boxData.count += boxData.add;
+            boxData.add = 0;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+                boxData.level += 1;
+                DataManager.refreshDataAfterUnlockReward(boxReward);
+                console.log(JSON.stringify({ name: '关卡等级宝箱', param: boxReward }, null, 4));
+                kit.Event.emit(CConst.event_notice, '关卡等级宝箱');
+            }
+            DataManager.setData();
+
             // 进度条刷新
-            let time = 0.15;
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: time, goal: this.wProcessLevel * boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -367,18 +372,16 @@ export default class MainMenuMid extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-                boxData.level += 1;
-                boxData.count = boxAddElse;
-                DataManager.refreshDataAfterBox(boxReward);
-                DataManager.setData();
+
                 // 进度条再次刷新
                 boxCount = 0;
+                total = DataManager.getRewardBoxLevel().total; 
                 itemBar.width = 0;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: time, goal: this.wProcessLevel * boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);

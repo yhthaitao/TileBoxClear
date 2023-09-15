@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "2947be72-015b-410d-80fc-366eb29ffc29",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 86,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "miaoBiao_daoji_86_181": {
+      "ver": "1.0.4",
+      "uuid": "d9bbb29d-ca67-4956-8fc5-981ab357dc82",
+      "rawTextureUuid": "2947be72-015b-410d-80fc-366eb29ffc29",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0.5,
+      "offsetY": -31,
+      "trimX": 1,
+      "trimY": 74,
+      "width": 85,
+      "height": 95,
+      "rawWidth": 86,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

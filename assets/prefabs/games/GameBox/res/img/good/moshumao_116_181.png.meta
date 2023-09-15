@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.5",
+  "uuid": "11c1184e-fcf3-4e7f-a081-d4bdd9b5cb16",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 116,
+  "height": 181,
+  "platformSettings": {},
+  "subMetas": {
+    "moshumao_116_181": {
+      "ver": "1.0.4",
+      "uuid": "247dbce6-3d3c-490b-a6d2-4998851d8f98",
+      "rawTextureUuid": "11c1184e-fcf3-4e7f-a081-d4bdd9b5cb16",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -0.5,
+      "offsetY": -37,
+      "trimX": 1,
+      "trimY": 86,
+      "width": 113,
+      "height": 83,
+      "rawWidth": 116,
+      "rawHeight": 181,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

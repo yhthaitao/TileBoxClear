@@ -11,12 +11,15 @@ const { ccclass, property } = cc._decorator;
 export default class Before extends PopupBase {
 
     @property(cc.Node) nodeTitle: cc.Node = null;
-    @property(cc.Node) nodeChose: cc.Node = null;
+    @property(cc.Node) nodeWin: cc.Node = null;
     @property(cc.Node) winLight: cc.Node = null;
     @property(cc.Node) winProcess: cc.Node = null;
     @property([cc.Node]) arrNodeWin: cc.Node[] = [];
+    @property(cc.Node) nodeChose: cc.Node = null;
+    @property(cc.Node) nodeProp: cc.Node = null;
     @property([cc.Node]) arrNodeProp: cc.Node[] = [];
-    @property(cc.Node) btnPlay: cc.Node = null;
+    @property(cc.Node) nodePlay: cc.Node = null;
+    @property(cc.Node) nodeButton: cc.Node = null;
 
     obj = {
         win: {
@@ -24,6 +27,10 @@ export default class Before extends PopupBase {
             opaFalse: 125,
             light: [{ x: -140, w: 110 }, { x: -10, w: 120 }, { x: 135, w: 120 },],
             process: [{ w: 108 }, { w: 244 }, { w: 384 },],
+        },
+        pos: {
+            unlock: { win: { y: 140 }, chose: { y: 5 }, prop: { y: -100 }, play: { y: -230 }, },
+            lock: { win: { y: 130 }, chose: { y: 150 }, prop: { y: 0 }, play: { y: -180 }, },
         },
     };
 
@@ -37,7 +44,7 @@ export default class Before extends PopupBase {
         this.params = Common.clone(options);
 
         this.resetLabel();
-        this.resetWins();
+        this.resetContent();
         this.resetProp();
     }
 
@@ -59,7 +66,7 @@ export default class Before extends PopupBase {
             labelChose.opacity = 255;
         });
         // 开始游戏
-        let labelPLay = this.btnPlay.getChildByName('label');
+        let labelPLay = this.nodePlay.getChildByName('label');
         labelPLay.opacity = 0;
         DataManager.setString(LangChars.gameBefore_play, (chars: string) => {
             let _string = chars;
@@ -78,14 +85,43 @@ export default class Before extends PopupBase {
         }
     }
 
+    /** 刷新节点内容 */
+    resetContent() {
+        // 连胜是否锁定
+        let isWinsLock = DataManager.data.boxData.level < DataManager.beforeWins.unlock;
+        if (isWinsLock) {
+            this.nodeWin.active = false;
+            
+            this.nodeChose.active = true;
+            this.nodeChose.y = this.obj.pos.lock.chose.y;
+            this.nodeProp.active = true;
+            this.nodeProp.y = this.obj.pos.lock.prop.y;
+            this.nodeButton.active = true;
+            this.nodeButton.y = this.obj.pos.lock.play.y;
+        }
+        else {
+            this.nodeWin.active = true;
+
+            this.nodeChose.active = true;
+            this.nodeChose.y = this.obj.pos.unlock.chose.y;
+            this.nodeProp.active = true;
+            this.nodeProp.y = this.obj.pos.unlock.prop.y;
+            this.nodeButton.active = true;
+            this.nodeButton.y = this.obj.pos.unlock.play.y;
+        }
+        if (this.nodeWin.active) {
+            this.resetWins();
+        }
+    };
+
     /** 重置节点（连胜） */
     resetWins() {
         this.winLight.opacity = 0;
         this.winProcess.opacity = 0;
         this.arrNodeWin.forEach((win) => { win.opacity = this.obj.win.opaFalse });
         let wins = DataManager.beforeWins;
-        if (wins > 0) {
-            let index = wins - 1;
+        if (wins.count > 0) {
+            let index = wins.count - 1;
             // 连胜光罩
             let light = this.obj.win.light[index]
             this.winLight.opacity = 255;
@@ -112,6 +148,7 @@ export default class Before extends PopupBase {
             let signAdd = prop.getChildByName('add');
             let button = prop.getChildByName('button');
             let labelNum = prop.getChildByName('label');
+            let right = prop.getChildByName('right');
             labelNum.getComponent(cc.Label).string = String(arrProp[index].count);
             backY.active = false;
             backN.active = false;
@@ -119,6 +156,7 @@ export default class Before extends PopupBase {
             signAdd.active = false;
             labelNum.active = false;
             button.active = false;
+            right.active = false;
             let objState = DataManager.data.beforeProp[index];
             switch (objState.state) {
                 case StateBeforeProp.lock:// 未解锁
@@ -138,6 +176,7 @@ export default class Before extends PopupBase {
                     backY.active = true;
                     labelNum.active = true;
                     button.active = true;
+                    right.active = true;
                     break;
                 default:
                     break;
@@ -149,46 +188,44 @@ export default class Before extends PopupBase {
     async eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-        let reduceStrength = () => {
-            DataManager.data.strength.count--;
-            DataManager.data.strength.tCount = Math.floor(new Date().getTime() / 1000);
-            DataManager.setData();
-            Common.log('消耗体力 剩余strength: ', DataManager.data.strength.count);
-        };
         switch (this.params.type) {
             case TypeBefore.fromMenu:
                 if (DataManager.data.strength.count > 0) {
-                    reduceStrength();
+                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                    DataManager.strengthReduce();
+                    DataManager.setData();
                     kit.Event.emit(CConst.event_enter_game);
                 }
                 else {
-                    kit.Event.emit(CConst.event_notice, '没体力了');
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
             case TypeBefore.fromSettingGame:// 游戏中途设置
                 if (DataManager.data.strength.count > 0) {
-                    reduceStrength();
+                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                    DataManager.strengthReduce();
+                    DataManager.setData();
                     kit.Event.emit(CConst.event_game_restart);
                 }
                 else {
-                    kit.Event.emit(CConst.event_enter_menu);
-                    kit.Event.emit(CConst.event_notice, '没体力了');
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
             case TypeBefore.fromGameWin:// 游戏胜利后
+                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                 kit.Event.emit(CConst.event_game_start);
                 break;
             case TypeBefore.fromGameFail:// 游戏失败
                 // 开始游戏
                 if (DataManager.data.strength.count > 0) {
-                    reduceStrength();
+                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                    DataManager.strengthReduce();
+                    DataManager.setData();
                     kit.Event.emit(CConst.event_game_start);
                 }
                 // 返回菜单
                 else {
-                    kit.Event.emit(CConst.event_enter_menu);
-                    kit.Event.emit(CConst.event_notice, '没体力了');
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
             default:
@@ -207,9 +244,8 @@ export default class Before extends PopupBase {
                 break;
             case TypeBefore.fromGameWin:
                 // 胜利界面 进入菜单页（恢复消除的体力）
-                DataManager.data.strength.count++;
+                DataManager.strengthResume();
                 DataManager.setData();
-                Common.log('恢复体力 剩余strength: ', DataManager.data.strength.count);
                 kit.Event.emit(CConst.event_enter_menu);
                 break;
             case TypeBefore.fromGameFail:// 游戏失败 点击退出

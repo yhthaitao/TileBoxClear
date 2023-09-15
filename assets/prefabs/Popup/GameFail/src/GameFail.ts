@@ -102,21 +102,5 @@ export default class GameFail extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameFail }, { mode: PopupCacheMode.Frequent });
-        // if (DataManager.stateCur == StateGame.game) {
-        //     if (this.params.level) {
-        //         DataManager.data.boxLevel.count += 1;
-        //     }
-        //     if (this.params.star) {
-        //         DataManager.data.boxXingxing.count += this.params.star;
-        //     }
-        //     if (this.params.suipian) {
-        //         DataManager.data.boxSuipian.count += this.params.suipian;
-        //     }
-        //     DataManager.setData();
-        //     kit.Event.emit(CConst.event_enter_menu);
-        // }
-        // else if(DataManager.stateCur == StateGame.menu){
-        //     kit.Event.emit(CConst.event_enter_game);
-        // }
     }
 }
