@@ -350,24 +350,44 @@ class DataManager {
                 }
                 break;
             case TypeProp.magnet:
+                // 磁铁选中
+                let stateMagnet = this.data.beforeProp[0];
                 if (this.data.prop.magnet.tInfinite > 0) {
                     propNum = this.data.prop.magnet.count;
+                    if (stateMagnet.state != StateBeforeProp.choose) {
+                        stateMagnet.state = StateBeforeProp.choose;
+                    }
                 }
                 else {
-                    if (this.data.prop.magnet.count > 0) {
-                        this.data.prop.magnet.count -= 1;
-                        propNum = this.data.prop.magnet.count;
+                    if (stateMagnet.state == StateBeforeProp.choose) {
+                        if (this.data.prop.magnet.count > 0) {
+                            this.data.prop.magnet.count -= 1;
+                            propNum = this.data.prop.magnet.count;
+                            if (this.data.prop.magnet.count <= 0) {
+                                stateMagnet.state = StateBeforeProp.noProp;
+                            }
+                        }
                     }
                 }
                 break;
             case TypeProp.clock:
+                // 时钟选中
+                let stateClock = this.data.beforeProp[1];
                 if (this.data.prop.clock.tInfinite > 0) {
                     propNum = this.data.prop.clock.count;
+                    if (stateClock.state != StateBeforeProp.choose) {
+                        stateClock.state = StateBeforeProp.choose;
+                    }
                 }
                 else {
-                    if (this.data.prop.clock.count > 0) {
-                        this.data.prop.clock.count -= 1;
-                        propNum = this.data.prop.clock.count;
+                    if (stateClock.state == StateBeforeProp.choose) {
+                        if (this.data.prop.clock.count > 0) {
+                            this.data.prop.clock.count -= 1;
+                            propNum = this.data.prop.clock.count;
+                            if (this.data.prop.clock.count <= 0) {
+                                stateClock.state = StateBeforeProp.noProp;
+                            }
+                        }
                     }
                 }
                 break;
@@ -433,9 +453,17 @@ class DataManager {
                     break;
                 case TypeProp.magnet:
                     this.data.prop.magnet.count += record.number;
+                    let stateMagnet = this.data.beforeProp[0];
+                    if (stateMagnet.state == StateBeforeProp.noProp) {
+                        stateMagnet.state = StateBeforeProp.unChoose;
+                    }
                     break;
                 case TypeProp.clock:
                     this.data.prop.clock.count += record.number;
+                    let stateClock = this.data.beforeProp[0];
+                    if (stateClock.state == StateBeforeProp.noProp) {
+                        stateClock.state = StateBeforeProp.unChoose;
+                    }
                     break;
                 case TypeProp.tMagnetInfinite:
                     this.data.prop.magnet.tInfinite += record.number;

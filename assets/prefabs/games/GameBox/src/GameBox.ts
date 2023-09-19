@@ -60,6 +60,7 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Node, tooltip: 'ui-顶部' }) uiTop: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-顶部-关卡等级' }) uiTopLevel: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-顶部-碎片数量' }) uiTopSuipian: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-顶部-时间' }) uiTopTime: cc.Node = null;
     @property({ type: cc.Node, tooltip: '消除进度' }) uiProcess: cc.Node = null;
     @property({ type: cc.Node, tooltip: '事件拦截-操作区顶部' }) uiMask: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-底部' }) uiBottom: cc.Node = null;
@@ -198,24 +199,12 @@ export default class GameBox extends cc.Component {
     }
 
     /** 第一次开始 */
-    async gameStart() {
+    async gameStart(isRestart = false) {
         Common.log('功能：游戏开始');
         this.clear();
         await this.loadData();
         this.initData();
-        this.initBox();
-        this.initUI();
-        this.initLevel();
-        this.setIsLock(false);
-    }
-
-    /** 重新开始 */
-    async gameRestart() {
-        Common.log('功能：重新开始');
-        this.clear();
-        await this.loadData();
-        this.initData();
-        this.resetBox();
+        this.initBox(isRestart);
         this.initUI();
         this.initLevel();
         this.setIsLock(false);
@@ -269,63 +258,16 @@ export default class GameBox extends cc.Component {
         this.timeGame.count = this.timeGame.total;
     }
 
-    /** 组合关卡数据 */
-    initBox() {
-        // 重构物品配置信息
-        this.goodsCfg = {};
-        ConfigGood.goodsConf.forEach((obj) => { this.goodsCfg[obj.id] = obj; });
-
-        // 配置箱子和物品数据
-        this.objGame = {};
-        for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
-            const obj = this.levelParam.map[index];
-            let x = Math.floor(Number(obj.x));
-            let y = Math.floor(Number(obj.y));
-            let w = Math.floor(Number(obj.w));
-            let h = Math.floor(Number(obj.h));
-            let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
-            };
-            this.objGame[index] = boxParam;
-        }
-
-        // 金币逻辑
-        let golden = this.levelParam.isGolden ? true : false;
-        let haveNum = 0;
-        let goldNum = Math.random() * (6 - 2) + 2;// 有金币的物品数量
-        let goodHaveGold = DataManager.data.boxData.goodGold;// 有金币的物品容器
-        let goods = this.levelParam.item;
-        for (let index = 0, length = goods.length; index < length; index++) {
-            const obj = goods[index];
-            let keyGood = Number(obj.n);
-            let isGold = false;
-            // 关卡内有金币  物品可以有金币  有金币的物品数量还有剩余
-            if (golden && goodHaveGold[keyGood] && haveNum < goldNum) {
-                haveNum++;
-                isGold = true;
-            }
-            let nameRes = this.goodsCfg[keyGood].name;
-            let w = this.goodsCfg[keyGood].w;
-            let h = this.goodsCfg[keyGood].h;
-            let keyBox = Number(obj.p);
-            let dataBox: BoxParam = this.objGame[keyBox];
-            let x = obj.x - this.levelParam.map[keyBox].x;
-            let y = obj.y - this.levelParam.map[keyBox].y + 5;
-            let goodParam: GoodParam = {
-                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
-                gold: { isGold: isGold, count: 0, total: 4 },
-                box: { name: dataBox.name, key: keyBox, x: x, y: y },
-            };
-            dataBox.goods[index] = goodParam;
-        }
-    }
-
     /** 重新组合关卡数据 */
-    resetBox() {
+    initBox(isRestart = false) {
         // 重构物品配置信息
         this.goodsCfg = {};
         ConfigGood.goodsConf.forEach((obj) => { this.goodsCfg[obj.id] = obj; });
-
+        // 用于磁铁和时钟功能
+        let topY = 0;
+        let topH = 0;
+        let topBoxIndex = this.levelParam.map.length - 1;
+        let topGoodIndex = this.levelParam.item.length - 1;
         // 配置箱子和物品数据
         this.objGame = {};
         for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
@@ -338,6 +280,10 @@ export default class GameBox extends cc.Component {
                 index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
             };
             this.objGame[index] = boxParam;
+            if (topY < y) {
+                topY = y;
+                topH = h;
+            }
         }
 
         // 金币逻辑
@@ -345,10 +291,10 @@ export default class GameBox extends cc.Component {
         let haveNum = 0;
         let goldNum = Math.random() * (6 - 2) + 2;// 有金币的物品数量
         let goodHaveGold = DataManager.data.boxData.goodGold;// 有金币的物品容器
-
-        /** 已解锁的物品 */
-        let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
         let goods = this.levelParam.item;
+
+        /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
+        let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
         let objGood = {};
         let resetKey = (key) => {
             if (!objGood[key]) {
@@ -373,27 +319,132 @@ export default class GameBox extends cc.Component {
         };
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
-            let key = Number(obj.n);
-            let keyGood = resetKey(key);
+            let keyGood = isRestart ? resetKey(Number(obj.n)) : Number(obj.n);
             let isGold = false;
             // 关卡内有金币  物品可以有金币  有金币的物品数量还有剩余
             if (golden && goodHaveGold[keyGood] && haveNum < goldNum) {
                 haveNum++;
                 isGold = true;
             }
-            let nameRes = this.goodsCfg[keyGood].name;
-            let w = this.goodsCfg[keyGood].w;
-            let h = this.goodsCfg[keyGood].h;
+            let cfg = this.goodsCfg[keyGood];
+            let res = cfg.name;
+            let w = cfg.w;
+            let h = cfg.h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
             let x = obj.x - this.levelParam.map[keyBox].x;
             let y = obj.y - this.levelParam.map[keyBox].y;
             let goodParam: GoodParam = {
-                index: index, keyGood: keyGood, nameRes: nameRes, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
+                index: index, keyGood: keyGood, nameRes: res, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
                 gold: { isGold: isGold, count: 0, total: 4 },
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
             };
             dataBox.goods[index] = goodParam;
+        }
+
+        // 使用 磁铁 和 时钟
+        let checkIsHaveBig = (objGoods: any) => {
+            let keyBig = null;
+            for (const key in objGoods) {
+                if (Object.prototype.hasOwnProperty.call(objGoods, key)) {
+                    let param: GoodParam = objGoods[key];
+                    let index = Number(String(param.keyGood).substring(0, 1));
+                    if (index > 1) {
+                        keyBig = key;
+                        break;
+                    }
+                }
+            }
+            return keyBig;
+        };
+        // 新箱子
+        let getBoxParam = (boxKey: string, index: number) => {
+            let boxParam: BoxParam = Common.clone(this.objGame[boxKey]);
+            boxParam.index = index;
+            boxParam.name = 'box_' + index;
+            boxParam.goods = {};
+            return boxParam;
+        };
+        // 新物品
+        let getGoodParam = (keyGood: number, index: number) => {
+            let cfg = this.goodsCfg[keyGood];
+            let res = cfg.name;
+            let goodMegnet: GoodParam = {
+                index: index, keyGood: keyGood, nameRes: res, name: 'good_' + index, x: 0, y: 0, w: cfg.w, h: cfg.h,
+                isMove: false, isEnough: false,
+                gold: { isGold: false, count: 0, total: 4 },
+                box: { name: '', key: 0, x: 0, y: 0 },
+            };
+            return goodMegnet;
+        };
+        // 添加新物品
+        let addGoodParam = (boxKey: string, goodId: number) => {
+            topY += topH;
+            topBoxIndex += 1;
+            topGoodIndex += 1;
+
+            let boxCur = this.objGame[boxKey];
+            // 新箱子
+            let boxNew = getBoxParam(boxKey, topBoxIndex);
+            this.objGame[topBoxIndex] = boxNew;
+
+            // 新物品
+            let goodNew = getGoodParam(goodId, topGoodIndex);
+
+            let bigKey = checkIsHaveBig(boxCur.goods);
+            // 有大物品
+            if (bigKey) {
+                // 新物品替换大物品
+                let goodBig: GoodParam = Common.clone(boxCur.goods[bigKey]);
+                delete boxCur.goods[bigKey];
+                boxCur.goods[topGoodIndex] = goodNew;
+                boxCur.goods[topGoodIndex].x = goodBig.x;
+                boxCur.goods[topGoodIndex].y = goodBig.y;
+                boxCur.goods[topGoodIndex].box = { name: boxCur.name, key: boxCur.index, x: goodBig.x, y: goodBig.y };
+                // 大物品转移到新箱子
+                boxNew.y = topY;
+                boxNew.goods[bigKey] = goodBig;
+                boxNew.goods[bigKey].box = { name: boxNew.name, key: boxNew.index, x: goodBig.x, y: goodBig.y };
+            }
+            // 全是小物品（当前箱子挪到最上边，新箱子取代其位置，新物品放到箱子里）
+            else {
+                boxNew.y = boxCur.y;
+                boxCur.y = topY;
+                boxNew.goods[topGoodIndex] = goodNew;
+                boxNew.goods[topGoodIndex].box = { name: boxNew.name, key: boxNew.index, x: goodNew.x, y: goodNew.y };
+            }
+        };
+        let arrIdBox = Object.keys(this.objGame);
+        arrIdBox.filter((key) => {
+            return !this.getBoxIsFrame(this.objGame[key].h);
+        });
+
+        // 使用道具-磁铁
+        if (DataManager.useProp(TypeProp.magnet) < 0) {
+            Common.log('道具 磁铁 未使用');
+        }
+        else {
+            Common.log('道具 磁铁 使用');
+            DataManager.setData();
+            for (let index = 0; index < 3; index++) {
+                let boxId = Math.floor(Math.random() * (arrIdBox.length - 1));
+                let boxKey = arrIdBox.splice(boxId, 1)[0];
+                addGoodParam(boxKey, 9002);
+            }
+        }
+
+        // 使用道具-时钟
+        if (DataManager.useProp(TypeProp.clock) < 0) {
+            Common.log('道具 时钟 未使用');
+        }
+        else {
+            Common.log('道具 时钟 使用');
+            DataManager.setData();
+            for (let index = 0; index < 3; index++) {
+                let boxId = Math.floor(Math.random() * (arrIdBox.length - 1));
+                let boxKey = arrIdBox.splice(boxId, 1)[0];
+                addGoodParam(boxKey, 9001);
+            }
         }
     }
 
@@ -521,6 +572,7 @@ export default class GameBox extends cc.Component {
                     break;
             }
             this.checkEvaluate();
+            this.usePropWins();
         });
     }
 
@@ -955,8 +1007,8 @@ export default class GameBox extends cc.Component {
             this.mainScale = scaleByH;
         }
         this.mainLayer = Math.floor(10 * hMain / (boxParam.h * this.mainScale)) * 0.1;
-        Common.log('缩放设置: level: ', DataManager.data.boxData.level, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW, 
-        '; mainScale: ', this.mainScale, 'dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
+        Common.log('缩放设置: level: ', DataManager.data.boxData.level, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW,
+            '; mainScale: ', this.mainScale, 'dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
     };
 
     /** 检测特殊箱子 */
@@ -983,6 +1035,19 @@ export default class GameBox extends cc.Component {
             scriptGood.state = 0;
             return;
         }
+
+        // 使用道具 时钟
+        if (scriptGood.param.keyGood == 9001) {
+            this.usePropClock(good);
+            return;
+        }
+
+        // 使用道具 磁铁
+        if (scriptGood.param.keyGood == 9002) {
+            this.usePropMagnet(good);
+            return;
+        }
+
         this.eventTouchAfter([scriptGood.param]);
     }
 
@@ -1183,7 +1248,7 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        else{
+        else {
             DataManager.setData();
         }
 
@@ -1209,7 +1274,7 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        else{
+        else {
             DataManager.setData();
         }
 
@@ -1312,7 +1377,7 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        else{
+        else {
             DataManager.setData();
         }
 
@@ -1508,7 +1573,7 @@ export default class GameBox extends cc.Component {
             kit.Event.emit(CConst.event_notice, '无道具');
             return;
         }
-        else{
+        else {
             DataManager.setData();
         }
 
@@ -1585,17 +1650,376 @@ export default class GameBox extends cc.Component {
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
 
-    /** 按钮事件 时间增加 */
-    eventBtnTimeAdd() {
-        // 锁定 或 物品移动过程中，不触发道具
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
+    /** 使用道具-时钟 */
+    usePropClock(good: cc.Node) {
+        if (this.isLock) {
             return;
         }
+
         kit.Audio.playEffect(CConst.sound_clickUI);
 
-        this.timeGame.count += this.timeProp.addTotal;
-        this.setUITime();
+        let p1 = Common.getLocalPos(good.parent, good.position, this.node);
+        let p2 = Common.getLocalPos(this.uiTopTime.parent, this.uiTopTime.position, this.node);
+        p2.y -= good.getComponent(ItemGood).param.h * 0.5 * this.mainScale;
+        let time = Common.getMoveTime(p1, p2, 1, 1500);
+        let obj = {
+            p1: cc.v2(p1.x, p1.y),
+            p2: cc.v2(p2.x, p1.y),
+            pTo: cc.v2(p2.x, p2.y),
+        };
+        good.parent = this.node;
+        good.position = p1;
+
+        // 删除物品节点 并 更新数据
+        let goodScript = good.getComponent(ItemGood);
+        let goodKey = goodScript.param.index;
+        let box = this.nodeMain.getChildByName(goodScript.param.box.name);
+        let boxScript = box.getComponent(ItemBox);
+        delete boxScript.param.goods[goodKey];
+        // 同步数据
+        let isFinish = false;
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                if (boxParam.index == boxScript.param.index) {
+                    isFinish = true;
+                    boxParam.goods = boxScript.param.goods;
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.poolBox);
+                    }
+                    break;
+                }
+            }
+            if (isFinish) {
+                break;
+            }
+        }
+        // 开始移动 箱子
+        this.setMoveBox(true);
+
+        // ui移动
+        cc.tween(good).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(() => {
+            DataManager.poolPut(good, this.poolGood);
+            cc.tween(this.uiTopTime).to(0.1, { scale: 1.1 }).call(() => {
+                // 道具逻辑
+                this.timeGame.count += this.timeProp.addTotal;
+                this.setUITime();
+            }).to(0.15, { scale: 1.0 }).start();
+        }).start();
     }
+
+    /** 使用道具-磁铁 */
+    usePropMagnet(good: cc.Node) {
+        if (this.isLock) {
+            return;
+        }
+        this.isLock = true;
+
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        let removeBottomGood = (node: cc.Node, parent: cc.Node) => {
+            // 复制新节点 添加到 父节点上
+            let p1 = Common.getLocalPos(node.parent, node.position, parent);
+            let bottomGood = cc.instantiate(node);
+            bottomGood.position = p1;
+            bottomGood.parent = parent;
+            return bottomGood;
+        };
+
+        // 删除磁铁
+        let timeMagnet = 0.15;
+        let timeMove = 0.2;
+
+        let uiMagnet = this.node.getChildByName('uiMagnet');
+        uiMagnet.active = true;
+        uiMagnet.x = 0;
+        let magnetIcon = uiMagnet.getChildByName('icon');
+        magnetIcon.x = -cc.winSize.width * 0.6;
+        magnetIcon.active = false;
+        cc.tween(magnetIcon).to(timeMagnet, { x: 0 }).start();
+        let magnetMain = uiMagnet.getChildByName('main');
+        magnetMain.active = true;
+        magnetMain.x = 0;
+
+        let magnetGood = this.removeMidGood(good, magnetMain);
+        magnetGood.zIndex = 0;
+        cc.tween(magnetGood).parallel(
+            cc.tween().to(timeMagnet, { scale: 1.25 }),
+            cc.tween().to(timeMagnet, { position: cc.v3() }),
+        ).start();
+
+        let needKey = 0;
+        let needNum = 3;
+        let bottomNum = 0;
+        if (this.bottomParamArr.length > 0) {
+            let arrParam = this.bottomParamArr.pop();
+            needKey = arrParam[0].keyGood;
+            bottomNum = arrParam.length;
+            for (let index = 0, length = arrParam.length; index < length; index++) {
+                let goodParam = arrParam[index];
+                let good = this.uiBottomMain.getChildByName(goodParam.name);
+                let bottomGood = removeBottomGood(good, magnetMain);
+                DataManager.poolPut(good, this.poolGood);
+                cc.tween(bottomGood).to(timeMove, { position: cc.v3() }).start();
+            }
+            let enough = false;
+            let midNum = needNum - bottomNum;
+            let arrSign: { i: number, j: number, key: string }[] = [];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= midNum;
+                                if (enough) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (enough) {
+                        break;
+                    }
+                }
+                if (enough) {
+                    break;
+                }
+            }
+            for (let index = arrSign.length - 1; index >= 0; index--) {
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
+                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+            }
+        }
+        else {
+            let enough = false;
+            let midNum = 3;
+            let arrSign: { i: number, j: number, key: string }[] = [];
+            let specialKey = [9001, 9002];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
+                                needKey = goodParam.keyGood;
+                            }
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= midNum;
+                                if (enough) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (enough) {
+                        break;
+                    }
+                }
+                if (enough) {
+                    break;
+                }
+            }
+            for (let index = arrSign.length - 1; index >= 0; index--) {
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
+                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+            }
+        }
+
+        magnetMain.active = true;
+        magnetMain.position = cc.v3();
+        cc.tween(magnetMain).delay(0.75)
+            .to(0.1, { x: -cc.winSize.width * 0.1 }, cc.easeSineOut())
+            .to(0.3, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
+                magnetMain.active = false;
+                magnetMain.position = cc.v3();
+                magnetMain.removeAllChildren();
+
+                // 更新ui
+                this.isLock = false;
+                this.goodsCount += 3;
+                if (this.goodsCount >= this.goodsTotal) {
+                    this.goodsCount = this.goodsTotal;
+                    this.playAniGameOver(TypeFinish.win);
+                }
+                this.setUIProcess();
+            }).start();
+
+        this.setMoveGood(true);
+        this.setGoldPosui();
+        this.setMoveBox(true);
+    }
+
+    /** 使用道具-连胜 */
+    usePropWins() {
+        if (this.isLock) {
+            return;
+        }
+        if (DataManager.beforeWins.count < 1) {
+            return;
+        }
+        this.isLock = true;
+
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        // 删除磁铁
+        let timeMagnet = 0.2;
+        let timeMove = 0.2;
+        let uiMagnet = this.node.getChildByName('uiMagnet');
+        uiMagnet.active = true;
+        uiMagnet.x = 0;
+        let magnetIcon = uiMagnet.getChildByName('icon');
+        magnetIcon.x = -cc.winSize.width * 0.6;
+        magnetIcon.active = true;
+        cc.tween(magnetIcon).to(timeMagnet, { x: 0 }).start();
+        let magnetMain = uiMagnet.getChildByName('main');
+        magnetMain.active = true;
+        magnetMain.x = 0;
+
+        let specialKey = [9001, 9002];
+        let moveGroup = (index) => {
+            let enough = false;
+            let needKey = 0;
+            let arrSign: { i: number, j: number, key: string }[] = [];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
+                                needKey = goodParam.keyGood;
+                            }
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= 3;
+                                if (enough) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (enough) {
+                        break;
+                    }
+                }
+                if (enough) {
+                    break;
+                }
+            }
+            for (let index = arrSign.length - 1; index >= 0; index--) {
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
+                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+            }
+        };
+        for (let index = 0; index < DataManager.beforeWins.count; index++) {
+            moveGroup(index);
+        }
+
+        uiMagnet.active = true;
+        uiMagnet.position = cc.v3();
+        cc.tween(uiMagnet).delay(1.0)
+            .to(0.1, { x: -cc.winSize.width * 0.1 }, cc.easeSineOut())
+            .to(0.3, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
+                uiMagnet.active = false;
+                uiMagnet.position = cc.v3();
+                magnetMain.removeAllChildren();
+
+                // 更新ui
+                this.isLock = false;
+                this.goodsCount += 3 * DataManager.beforeWins.count;
+                if (this.goodsCount >= this.goodsTotal) {
+                    this.goodsCount = this.goodsTotal;
+                    this.playAniGameOver(TypeFinish.win);
+                }
+                this.setUIProcess();
+            }).start();
+
+        this.setMoveGood(true);
+        this.setGoldPosui();
+        this.setMoveBox(true);
+    }
+
+    removeMidGood(node: cc.Node, parent: cc.Node) {
+        // 复制新节点 添加到 父节点上
+        let p1 = Common.getLocalPos(node.parent, node.position, parent);
+        let midGood = cc.instantiate(node);
+        midGood.position = p1;
+        midGood.parent = parent;
+        // 删除物品节点 并 更新数据
+        let goodScript = node.getComponent(ItemGood);
+        let goodKey = goodScript.param.index;
+        let box = this.nodeMain.getChildByName(goodScript.param.box.name);
+        let boxScript = box.getComponent(ItemBox);
+        delete boxScript.param.goods[goodKey];
+        node.removeFromParent();
+
+        // 同步数据
+        let isFinish = false;
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                if (boxParam.index == boxScript.param.index) {
+                    isFinish = true;
+                    boxParam.goods = boxScript.param.goods;
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.poolBox);
+                    }
+                    break;
+                }
+            }
+            if (isFinish) {
+                break;
+            }
+        }
+        return midGood;
+    };
+
+    removeMidParam(sign: { i: number, j: number, key: string }, parent: cc.Node) {
+        let boxParamArr = this.arrGame[sign.i];
+        let boxParamOne = boxParamArr[sign.j];
+        let boxNode = this.nodeMain.getChildByName(boxParamOne.name);
+        let boxScript = boxNode.getComponent(ItemBox);
+        let copyNode: cc.Node = null;
+        if (Object.prototype.hasOwnProperty.call(boxParamOne.goods, sign.key)) {
+            let goodParamOne: GoodParam = boxParamOne.goods[sign.key];
+
+            let goodNode = boxScript.nodeMain.getChildByName(goodParamOne.name);
+            this.playAniSuipian(goodNode);
+
+            let p1 = Common.getLocalPos(goodNode.parent, goodNode.position, parent);
+            copyNode = cc.instantiate(goodNode);
+            copyNode.position = p1;
+            copyNode.parent = parent;
+
+            delete boxParamOne.goods[sign.key];
+            boxScript.param = Common.clone(boxParamOne);
+            DataManager.poolPut(goodNode, this.poolGood);
+            // 特殊箱子 重新排布
+            if (boxScript.param.isFrame) {
+                boxScript.sortGood();
+            }
+            else {
+                if (Object.keys(boxParamOne.goods).length < 1) {
+                    boxParamArr.splice(sign.j, 1);
+                    DataManager.poolPut(boxNode, this.poolBox);
+                }
+            }
+        }
+        // 当前层无箱子 删除层数据
+        if (boxParamArr.length < 1) {
+            this.arrGame.splice(sign.i, 1);
+        }
+        return copyNode;
+    };
 
     /** 按钮事件 使用磁铁 1 */
     eventBtnMagnetOne() {
@@ -1625,10 +2049,10 @@ export default class GameBox extends cc.Component {
             this.gameStart();
         }
         else if (level <= this.arrLevelLength[1]) {
-            this.gameRestart();
+            this.gameStart(true);
         }
         else {
-            this.gameRestart();
+            this.gameStart(true);
         }
     }
 
@@ -1644,10 +2068,10 @@ export default class GameBox extends cc.Component {
             this.gameStart();
         }
         else if (level <= this.arrLevelLength[1]) {
-            this.gameRestart();
+            this.gameStart(true);
         }
         else {
-            this.gameRestart();
+            this.gameStart(true);
         }
     }
 
@@ -1661,7 +2085,7 @@ export default class GameBox extends cc.Component {
             if (arrGood.length < 1) {
                 this.bottomParamArr.splice(numGoodArr - 1, 1);
             }
-    
+
             let good = this.uiBottomMain.getChildByName(goodParam.name);
             let box = this.nodeMain.getChildByName(goodParam.box.name);
             // 物品原来的箱子存在
@@ -1679,7 +2103,7 @@ export default class GameBox extends cc.Component {
                     }
                     good.getComponent(ItemGood).resetParams(goodParam);
                     this.refreshBoxParam(scriptBox.param);
-    
+
                     res();
                 }).start();
             }
@@ -1692,7 +2116,7 @@ export default class GameBox extends cc.Component {
                  * 4.剩余箱子物品复原 并 重新排列位置，
                  * 5.根据数据移动现有箱子，底部物品返回到箱子中
                  */
-    
+
                 // 获取矩形
                 let getRect = (boxParam: BoxParam) => {
                     return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
@@ -1720,7 +2144,7 @@ export default class GameBox extends cc.Component {
                     }
                     return layer;
                 };
-    
+
                 // 拿到原箱子
                 let boxParamCur: BoxParam = Common.clone(this.objGame[goodParam.box.key]);
                 // 组合剩余箱子
@@ -1744,7 +2168,7 @@ export default class GameBox extends cc.Component {
                         }
                     }
                 }
-    
+
                 // 添加箱子 刚出现时高度为0
                 boxParamCur.goods = {};
                 this.addBox(boxParamCur);
@@ -1798,7 +2222,7 @@ export default class GameBox extends cc.Component {
                                     good.scale = 1.0;
                                     good.getComponent(ItemGood).resetParams(goodParam);
                                     this.refreshBoxParam(scriptBox.param);
-    
+
                                     res();
                                 }).start();
                             }).start();
@@ -2174,14 +2598,14 @@ export default class GameBox extends cc.Component {
             default:
                 break;
         }
-        this.objGame.isFinish = false;
+        this.dataObj.isFinish = false;
         this.setIsLock(false);
     };
 
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_game_start, this.gameStart, this);
-        kit.Event.on(CConst.event_game_restart, this.gameRestart, this);
+        kit.Event.on(CConst.event_game_restart, this.gameStart.bind(this, true), this);
         kit.Event.on(CConst.event_game_resume, this.gameResume, this);
         kit.Event.on(CConst.event_game_revive, this.gameRevive, this);
     }

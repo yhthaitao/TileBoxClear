@@ -1217,7 +1217,7 @@ const ConfigGood = {
         },
         {
             "id": 9002,
-            "name": "ciTie_daoju_86_181.png",
+            "name": "ciTie_daoju_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
