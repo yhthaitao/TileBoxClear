@@ -2,10 +2,14 @@ import CConst from "../../../../src/config/CConst";
 import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import DataManager from "../../../../src/config/DataManager";
+import Common from "../../../../src/config/Common";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainMenuTop extends cc.Component {
+
+    @property(cc.Node) iconStrengthMax: cc.Node = null;
+    @property(cc.Node) iconCoin: cc.Node = null;
 
     @property(cc.Node) labelStrengthNum: cc.Node = null;
     @property(cc.Node) labelStrengthMax: cc.Node = null;
@@ -14,7 +18,7 @@ export default class MainMenuTop extends cc.Component {
     @property(cc.Node) labelCoinNum: cc.Node = null;
 
     protected onLoad(): void {
-
+        this.listernerRegist();
     }
 
     protected onEnable(): void {
@@ -72,9 +76,9 @@ export default class MainMenuTop extends cc.Component {
 
     /** 刷新体力 */
     refreshStrength() {
-        let count = DataManager.data.strength.count;
-        this.labelStrengthNum.getComponent(cc.Label).string = '' + count;
-        if (count >= DataManager.data.strength.total) {
+        let data = DataManager.data.strength;
+        this.labelStrengthNum.getComponent(cc.Label).string = '' + data.count;
+        if (data.count >= data.total) {
             this.labelStrengthTime.active = false;
             this.labelStrengthMax.active = true;
         }
@@ -84,6 +88,9 @@ export default class MainMenuTop extends cc.Component {
             this.updateStrength();
             this.schedule(this.updateStrength, 1.0);
         }
+        // 无限体力
+        let time = Math.floor(new Date().getTime() / 1000);
+        this.iconStrengthMax.active = data.tInfinite > time;
     };
 
     /** 时间-更新 */
@@ -136,9 +143,65 @@ export default class MainMenuTop extends cc.Component {
         this.labelCoinNum.getComponent(cc.Label).string = '' + numCoin;
     };
 
+    playAniStrength(){
+        let data = DataManager.data.strength;
+        let time = Math.floor(new Date().getTime() / 1000);
+        this.iconStrengthMax.active = data.tInfinite > time;
+        this.iconStrengthMax.getComponent(cc.Animation).play();
+    };
+
+    playAniCoin(x: number, y: number) {
+        let coinCur = Number(this.labelCoinNum.getComponent(cc.Label).string);
+        let coinNext = DataManager.data.numCoin;
+        let coinDis = coinNext - coinCur;
+        let length = 10;
+        let pStart = Common.getLocalPos(this.node.parent, cc.v3(x, y), this.iconCoin.parent);
+        let pFinish = this.iconCoin.position;
+        for (let index = 0; index < length; index++) {
+            let coin = cc.instantiate(this.iconCoin);
+            coin.active = true;
+            coin.parent = this.iconCoin.parent;
+            coin.position = pStart;
+            let randomX = Math.floor(Math.random() * 100 - 50);
+            let randomY = Math.floor(Math.random() * 50 - 50);
+            let pMid = cc.v2(pStart.x + randomX, pStart.y + randomY);
+            let bezier1 = { p1: cc.v2(pStart.x, pStart.y), p2: cc.v2(pMid.x, pStart.y), pTo: cc.v2(pMid.x, pMid.y), time: 0.2, };
+            let bezier2 = { p1: cc.v2(pMid.x, pMid.y), p2: cc.v2(pFinish.x, pMid.y), pTo: cc.v2(pFinish.x, pFinish.y), time: Math.random() + 0.2, };
+            cc.tween(coin)
+                .delay(Math.random() * 0.1)
+                .bezierTo(bezier1.time, bezier1.p1, bezier1.p2, bezier1.pTo)
+                .delay(index * 0.02)
+                .parallel(
+                    cc.tween().bezierTo(bezier2.time, bezier2.p1, bezier2.p2, bezier2.pTo),
+                    cc.tween().to(bezier2.time, { scale: 0.75 }),
+                )
+                .call(() => {
+                    coin.removeFromParent();
+                    this.labelCoinNum.getComponent(cc.Label).string = '' + (coinCur + coinDis * (index + 1) / length);
+                    this.iconCoin.getComponent(cc.Animation).play();
+                })
+                .start();
+        }
+    };
+
     /** 按钮事件 设置 */
     eventBtnSet() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_settingHome, {}, { mode: PopupCacheMode.Frequent });
+    };
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_menu_strength, this.playAniStrength, this);
+        kit.Event.on(CConst.event_menu_coin, this.playAniCoin, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
+
+    protected onDestroy(): void {
+        this.listernerIgnore();
     };
 }

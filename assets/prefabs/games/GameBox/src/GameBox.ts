@@ -77,8 +77,6 @@ export default class GameBox extends cc.Component {
 
     /** 关卡数据 */
     levelParam: LevelParam = null;
-    /** 关卡文件长度 */
-    arrLevelLength: number[] = [94, 94 + 70, 94 + 70 + 70];
 
     /** 资源路径 */
     resPath = {
@@ -212,28 +210,20 @@ export default class GameBox extends cc.Component {
 
     /** 加载关卡数据 */
     async loadData() {
+        let index = 0;
         let cfg = this.resPath.levelPath;
         let path = cfg.path;
+        let lenLevel0 = 100;
+        let lenLevel1 = 174;
         let level = DataManager.data.boxData.level;
-        let index = 0;
-        // if (level <= this.arrLevelLength[0]) {
-        //     path += '0';
-        //     index = level - 1;
-        // }
-        // else if (level <= this.arrLevelLength[1]) {
-        //     path += '1';
-        //     index = level - this.arrLevelLength[0] - 1;
-        // }
-        // else if (level <= this.arrLevelLength[2]) {
-        //     path += '2';
-        //     index = level - this.arrLevelLength[1] - 1;
-        // }
-        // else {
-        //     path += '2';
-        //     index = this.arrLevelLength[2] - 1;
-        // }
-        path += '0';
-        index = level > 234 ? 234 : level - 1;
+        if (level <= 100) {
+            path = path + '0';
+            index = level - 1;
+        }
+        else {
+            path = path + '1';
+            index = (level - lenLevel0) % lenLevel1 - 1;
+        }
         let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
         this.levelParam = asset.json[index];
     }
@@ -1650,6 +1640,27 @@ export default class GameBox extends cc.Component {
         this.scheduleOnce(() => { this.isLock = false; }, 0.75);
     }
 
+    /** 按钮事件 上一关 */
+    eventBtnLevelBack() {
+        if (this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        DataManager.data.boxData.level--;
+        DataManager.setData();
+        this.gameStart();
+    }
+
+    /** 按钮事件 下一关 */
+    eventBtnLevelNext() {
+        if (this.speedBox.isMove || this.speedGood.isMove) {
+            return;
+        }
+        DataManager.data.boxData.level++;
+        DataManager.setData();
+        let level = DataManager.data.boxData.level;
+        this.gameStart();
+    }
+
     /** 使用道具-时钟 */
     usePropClock(good: cc.Node) {
         if (this.isLock) {
@@ -2020,60 +2031,6 @@ export default class GameBox extends cc.Component {
         }
         return copyNode;
     };
-
-    /** 按钮事件 使用磁铁 1 */
-    eventBtnMagnetOne() {
-        // 锁定 或 物品移动过程中，不触发道具
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-    }
-
-    /** 按钮事件 使用磁铁 2 */
-    eventBtnMagnetTwo() {
-        // 锁定 或 物品移动过程中，不触发道具
-        if (this.isLock || this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-    }
-
-    /** 按钮事件 上一关 */
-    eventBtnLevelBack() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        DataManager.data.boxData.level--;
-        DataManager.setData();
-        let level = DataManager.data.boxData.level;
-        if (level <= this.arrLevelLength[0]) {
-            this.gameStart();
-        }
-        else if (level <= this.arrLevelLength[1]) {
-            this.gameStart(true);
-        }
-        else {
-            this.gameStart(true);
-        }
-    }
-
-    /** 按钮事件 下一关 */
-    eventBtnLevelNext() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        DataManager.data.boxData.level++;
-        DataManager.setData();
-        let level = DataManager.data.boxData.level;
-        if (level <= this.arrLevelLength[0]) {
-            this.gameStart();
-        }
-        else if (level <= this.arrLevelLength[1]) {
-            this.gameStart(true);
-        }
-        else {
-            this.gameStart(true);
-        }
-    }
 
     /** 道具 按钮事件 上一步 */
     returnGoods(): Promise<void> {
@@ -2519,9 +2476,7 @@ export default class GameBox extends cc.Component {
     //     Common.log(JSON.stringify(name, null, 4));
     // }
 
-    /**
-     * 关卡结束
-     */
+    /** 关卡结束 */
     levelGameOver() {
         // 打点
         NativeCall.sTsEvent();

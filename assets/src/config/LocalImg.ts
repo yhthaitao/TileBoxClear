@@ -13,7 +13,7 @@ export default class LocalImg extends cc.Component {
     resName: string = '名字';
 
     /** 资源路径 */
-    path: string = './language/img/' + DataManager.langCur + '/';
+    path: string = './language/img/' + DataManager.data.langCur + '/';
 
     protected start(): void {
         this.initRes();

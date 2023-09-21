@@ -2,7 +2,7 @@
   "ver": "1.1.2",
   "uuid": "ca0fee7d-ce07-46bc-9162-170a555d204e",
   "isBundle": true,
-  "bundleName": "",
+  "bundleName": "common",
   "priority": 1,
   "compressionType": {},
   "optimizeHotUpdate": {},

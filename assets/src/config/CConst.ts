@@ -10,6 +10,8 @@ const CConst = {
     bundleCommon: 'common',
     pathLanguage: './language/text/',
     pathImage: './language/img/',
+    pathThemeLock: './theme/lock/',
+    pathThemeUnLock: './theme/unlock/',
     /*************************************** end **************************************************/
 
 
@@ -41,6 +43,14 @@ const CConst = {
     event_enter_newPlayer: 'event_enter_newPlayer',
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
+    /** 主页 刷新 */
+    event_menu_strength: 'event_menu_strength',
+    /** 主页 刷新 */
+    event_menu_coin: 'event_menu_coin',
+    /** 主页 刷新 */
+    event_menu_prop: 'event_menu_prop',
+    /** 主页 刷新 */
+    event_menu_updateSuipianReward: 'event_menu_updateSuipianReward',
     /** game start */
     event_game_start: 'event_game_start',
     /** game pause */
@@ -90,8 +100,11 @@ const CConst = {
     popup_path_settingHome: './Popup/Setting/res/prefab/SettingHome',
     popup_path_settingGame: './Popup/Setting/res/prefab/SettingGame',
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
-    popup_path_daily: './Popup/Daily/res/prefab/Daily',
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
+    popup_path_openBoxLevel: './Popup/OpenBox/res/prefab/OpenBoxLevel',
+    popup_path_openBoxSuipian: './Popup/OpenBox/res/prefab/OpenBoxSuipian',
+    popup_path_openBoxXingxing: './Popup/OpenBox/res/prefab/OpenBoxXingxing',
+    popup_path_daily: './Popup/Daily/res/prefab/Daily',
     popup_path_bank: './Popup/Bank/res/prefab/Bank',
     popup_path_before: './Popup/Before/res/prefab/Before',
     popup_path_getLives: './Popup/GetLives/res/prefab/GetLives',

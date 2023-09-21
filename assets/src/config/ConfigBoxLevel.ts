@@ -32,7 +32,7 @@ const ConfigBoxLevel = {
             { type: TypeProp.tMagnetInfinite, number: 25 * 60 } 
         ] 
     },
-    6: { 
+    6: {
         total: 10, 
         reward: [ 
             { type: TypeProp.tStrengthInfinite, number: 25 * 60 } 

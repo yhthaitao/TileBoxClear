@@ -206,7 +206,6 @@ class DataManager {
     public async initData(nodeAni: cc.Node) {
         let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
-            // this.data = Common.clone(_data);
             let data = Common.clone(_data);
             for (const key in data) {
                 if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -224,6 +223,8 @@ class DataManager {
         this.initLanguage();
         // 初始化物品池子
         this.initGoodStore();
+        // 初始化无线时间
+        this.initTimeInfinite();
         // 提前加载 本地化 文本
         await kit.Resources.loadRes(CConst.bundleCommon, CConst.pathLanguage + this.data.langCur, cc.JsonAsset);
         // 提前加载 本地化 图片
@@ -236,6 +237,7 @@ class DataManager {
         this.nodeVideo = nodeAni;
         this.nodeVideo.zIndex = CConst.zIndex_video;
         this.nodeVideo.active = false;
+        this.setData();
     }
 
     /** 多语言设置 */
@@ -293,6 +295,20 @@ class DataManager {
                     this.data.boxData.goodStore.push(goodId);
                 }
             });
+        }
+    }
+
+    /** 初始化无限时间 */
+    public initTimeInfinite() {
+        let time = Math.floor(new Date().getTime() / 1000);
+        if (this.data.strength.tInfinite <= 0) {
+            this.data.strength.tInfinite = time;
+        }
+        if (this.data.prop.magnet.tInfinite <= 0) {
+            this.data.prop.magnet.tInfinite = time;
+        }
+        if (this.data.prop.clock.tInfinite <= 0) {
+            this.data.prop.clock.tInfinite = time;
         }
     }
 
@@ -466,13 +482,34 @@ class DataManager {
                     }
                     break;
                 case TypeProp.tMagnetInfinite:
-                    this.data.prop.magnet.tInfinite += record.number;
-                    break;
                 case TypeProp.tClockInfinite:
-                    this.data.prop.clock.tInfinite += record.number;
-                    break;
                 case TypeProp.tStrengthInfinite:
-                    this.data.strength.tInfinite += record.number;
+                    // 没有无限时间 or 有无限时间
+                    let time = Math.floor(new Date().getTime() / 1000);
+                    if (record.type == TypeProp.tMagnetInfinite) {
+                        if (this.data.prop.magnet.tInfinite < time) {
+                            this.data.prop.magnet.tInfinite = time + record.number;
+                        }
+                        else{
+                            this.data.prop.magnet.tInfinite += record.number;
+                        }
+                    }
+                    else if (record.type == TypeProp.tClockInfinite) {
+                        if (this.data.prop.clock.tInfinite < time) {
+                            this.data.prop.clock.tInfinite = time + record.number;
+                        }
+                        else{
+                            this.data.prop.clock.tInfinite += record.number;
+                        }
+                    }
+                    else if (record.type == TypeProp.tStrengthInfinite) {
+                        if (this.data.strength.tInfinite < time) {
+                            this.data.strength.tInfinite = time + record.number;
+                        }
+                        else{
+                            this.data.strength.tInfinite += record.number;
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -697,6 +734,41 @@ class DataManager {
     public getTitlePosY() {
         let heightMax = cc.winSize.height * 0.5;
         return heightMax * 0.3 + 50;
+    };
+
+    /** 播放物品奖励动画（主界面） */
+    public playAniReward(node: cc.Node, pStart: cc.Vec3, pFinish: cc.Vec3): Promise<void> {
+        return new Promise((res) => {
+            node.active = true;
+            node.position = pStart;
+            node.scale = 0;
+            let obj = {
+                p1: cc.v2(pStart.x, pStart.y),
+                p2: cc.v2(pFinish.x, pStart.y),
+                pTo: cc.v2(pFinish.x, pFinish.y),
+                time: Common.getMoveTime(pStart, pFinish, 1, 1500),
+            };
+            cc.tween(node)
+                .to(0.2, { scale: 1.1 })
+                .to(0.1, { scale: 1.0 })
+                .delay(0.5)
+                .bezierTo(obj.time, obj.p1, obj.p2, obj.pTo)
+                .call(res)
+                .start();
+        });
+    };
+
+    /** 播放动画 */
+    public playAniDragon(node: cc.Node, armatureName: string, animationName: string, cb: Function = null): Promise<void> {
+        return new Promise((res) => {
+            let dragon = node.getComponent(dragonBones.ArmatureDisplay);
+            dragon.once(dragonBones.EventObject.COMPLETE, () => {
+                cb && cb();
+                res();
+            });
+            dragon.armatureName = armatureName;
+            dragon.playAnimation(animationName, 1);
+        });
     };
 
     /** 获取字符串 */

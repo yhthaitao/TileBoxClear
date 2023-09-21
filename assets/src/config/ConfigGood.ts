@@ -362,7 +362,7 @@ const ConfigGood = {
         },
         {
             "id": 2010,
-            "name": "deng_lan_86_181",
+            "name": "yujinxiang_fen_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -479,7 +479,7 @@ const ConfigGood = {
         },
         {
             "id": 2023,
-            "name": "deng_huang_86_181",
+            "name": "yujinxiang_bai_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -488,7 +488,7 @@ const ConfigGood = {
         },
         {
             "id": 2024,
-            "name": "deng_hong_86_181",
+            "name": "yujinxiang_huang_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -542,7 +542,7 @@ const ConfigGood = {
         },
         {
             "id": 2030,
-            "name": "yujinxiang_bai_86_181",
+            "name": "deng_huang_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -551,7 +551,7 @@ const ConfigGood = {
         },
         {
             "id": 2031,
-            "name": "yujinxiang_fen_86_181",
+            "name": "deng_lan_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -560,7 +560,7 @@ const ConfigGood = {
         },
         {
             "id": 2032,
-            "name": "yujinxiang_huang_86_181",
+            "name": "deng_hong_86_181",
             "series": 1,
             "h": 181,
             "w": 86,
@@ -587,7 +587,7 @@ const ConfigGood = {
         },
         {
             "id": 3002,
-            "name": "shengDanWa_hong_116_181",
+            "name": "xiangji_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -641,7 +641,7 @@ const ConfigGood = {
         },
         {
             "id": 3008,
-            "name": "fanBuXie_fen_116_181",
+            "name": "mianmao_hong_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -650,7 +650,7 @@ const ConfigGood = {
         },
         {
             "id": 3009,
-            "name": "fanBuXie_lan_116_181",
+            "name": "mianmao_huang_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -659,7 +659,7 @@ const ConfigGood = {
         },
         {
             "id": 3010,
-            "name": "fanBuXie_qianlan_116_181",
+            "name": "mianmao_lan_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -731,7 +731,7 @@ const ConfigGood = {
         },
         {
             "id": 3018,
-            "name": "mianmao_hong_116_181",
+            "name": "fanBuXie_fen_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -740,7 +740,7 @@ const ConfigGood = {
         },
         {
             "id": 3019,
-            "name": "mianmao_huang_116_181",
+            "name": "fanBuXie_lan_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -749,7 +749,7 @@ const ConfigGood = {
         },
         {
             "id": 3020,
-            "name": "mianmao_lan_116_181",
+            "name": "fanBuXie_qianlan_116_181",
             "series": 1,
             "h": 181,
             "w": 116,
@@ -776,7 +776,7 @@ const ConfigGood = {
         },
         {
             "id": 3023,
-            "name": "xiangji_116_181",
+            "name": "shengDanWa_hong_116_181",
             "series": 1,
             "h": 181,
             "w": 116,

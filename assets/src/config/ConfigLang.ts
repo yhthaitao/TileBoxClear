@@ -43,6 +43,7 @@ export const LangChars = {
     Shop: "Shop",
     Theme: "Theme",
     Areas: "Areas",
+    Reward: "Reward",
     Commodity: "Commodity",
     BreakTime: "BreakTime",
     Collection: "Collection",
