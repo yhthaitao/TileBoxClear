@@ -233,6 +233,27 @@ class DataManager {
             let resPath = CConst.pathImage + this.data.langCur + '/' + arrName[index];
             await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
         }
+        // game bg
+        for (let index = 1; index < 5; index++) {
+            let resPath = CConst.pathGameBg + index;
+            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+        }
+        // theme bg
+        for (let index = 1; index < 16; index++) {
+            let resPath = CConst.pathThemeBg + index;
+            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+        }
+
+        // theme lock
+        for (let index = 1; index < 16; index++) {
+            let resPath = CConst.pathThemeLock + index;
+            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+        }
+        // theme unlock
+        for (let index = 1; index < 16; index++) {
+            let resPath = CConst.pathThemeUnLock + index;
+            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+        }
         // 初始化视频动画
         this.nodeVideo = nodeAni;
         this.nodeVideo.zIndex = CConst.zIndex_video;
@@ -737,23 +758,19 @@ class DataManager {
     };
 
     /** 播放物品奖励动画（主界面） */
-    public playAniReward(node: cc.Node, pStart: cc.Vec3, pFinish: cc.Vec3): Promise<void> {
+    public playAniReward(node: cc.Node, obj: { p1: cc.Vec2, p2: cc.Vec2, pTo: cc.Vec2, time: number }): Promise<void> {
         return new Promise((res) => {
             node.active = true;
-            node.position = pStart;
             node.scale = 0;
-            let obj = {
-                p1: cc.v2(pStart.x, pStart.y),
-                p2: cc.v2(pFinish.x, pStart.y),
-                pTo: cc.v2(pFinish.x, pFinish.y),
-                time: Common.getMoveTime(pStart, pFinish, 1, 1500),
-            };
             cc.tween(node)
                 .to(0.2, { scale: 1.1 })
                 .to(0.1, { scale: 1.0 })
                 .delay(0.5)
                 .bezierTo(obj.time, obj.p1, obj.p2, obj.pTo)
-                .call(res)
+                .call(()=>{
+                    node.removeFromParent();
+                    res();
+                })
                 .start();
         });
     };

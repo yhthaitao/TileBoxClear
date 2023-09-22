@@ -199,7 +199,7 @@ export default class OpenBoxLevel extends PopupBase {
             };
             cc.tween(this.nodeReward).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
                 let reward = this.params.rewards.reward[0];
-                let name = reward.type == TypeProp.tStrengthInfinite ? CConst.event_menu_strength : CConst.event_menu_prop;
+                let name = reward.type == TypeProp.tStrengthInfinite ? CConst.event_scale_strength : CConst.event_scale_prop;
                 kit.Event.emit(name);
                 res();
             }).start();

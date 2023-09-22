@@ -313,9 +313,7 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "a8e0551d-b86b-427e-8e91-3568a8481a26"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 0,
     "_fillType": 0,
@@ -9112,6 +9110,9 @@
     },
     "maskBottom": {
       "__id__": 245
+    },
+    "bg": {
+      "__id__": 6
     },
     "arrTimeLayer": [
       {

@@ -246,7 +246,7 @@ export default class OpenBoxXingxing extends PopupBase {
                 let reward = rewards[index];
                 if (reward.type == TypeProp.coin) {
                     prop.opacity = 0;
-                    kit.Event.emit(CConst.event_menu_coin, p1.x, p1.y);
+                    kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
                     cc.tween(prop).delay(time).call(() => {
                         funcCount();
                     }).start();
@@ -258,7 +258,7 @@ export default class OpenBoxXingxing extends PopupBase {
                         pTo: cc.v2(p2.x, p2.y),
                     };
                     cc.tween(prop).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
-                        kit.Event.emit(CConst.event_menu_prop);
+                        kit.Event.emit(CConst.event_scale_prop);
                         funcCount();
                     }).start();
                 }

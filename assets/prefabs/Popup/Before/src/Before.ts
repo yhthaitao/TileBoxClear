@@ -174,7 +174,7 @@ export default class Before extends PopupBase {
                     break;
                 case StateBeforeProp.choose:// 解锁 有道具 选中
                     backY.active = true;
-                    labelNum.active = true;
+                    labelNum.active = false;
                     button.active = true;
                     right.active = true;
                     break;

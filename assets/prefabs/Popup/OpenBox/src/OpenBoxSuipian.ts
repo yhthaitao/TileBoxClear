@@ -10,7 +10,9 @@ const { ccclass, property } = cc._decorator;
 export default class OpenBoxLevel extends PopupBase {
 
     @property(cc.Node) nodeTitle: cc.Node = null;
+    @property(cc.Node) nodeBack: cc.Node = null;
     @property(cc.Node) nodeProp: cc.Node = null;
+    @property(cc.Node) nodeLight: cc.Node = null;
     @property(cc.Node) nodeContinue: cc.Node = null;
     @property([cc.SpriteFrame]) iconTexture: cc.SpriteFrame[] = [];
 
@@ -41,7 +43,9 @@ export default class OpenBoxLevel extends PopupBase {
 
         this.nodeTitle.active = false;
         this.nodeContinue.active = false;
+        this.nodeBack.active = false;
         this.nodeProp.active = false;
+        this.nodeLight.active = false;
     }
 
     public show(options?: any): Promise<void> {
@@ -64,6 +68,16 @@ export default class OpenBoxLevel extends PopupBase {
             this.nodeTitle.active = true;
             this.nodeTitle.opacity = 0;
             cc.tween(this.nodeTitle).to(0.245, { opacity: 255 }).start();
+
+            // 光效
+            this.nodeBack.active = true;
+            this.nodeBack.opacity = 0;
+            cc.tween(this.nodeBack).to(0.35, { opacity: 255 }).start();
+            this.nodeLight.active = true;
+            this.nodeLight.opacity = 0;
+            cc.tween(this.nodeLight).to(0.35, { opacity: 255 }).start();
+            let dargon = this.nodeLight.getChildByName('dragon');
+            dargon.getComponent(dragonBones.ArmatureDisplay).playAnimation('newAnimation', 0);
 
             this.setReward();
             cc.tween(this.nodeProp).parallel(
@@ -152,12 +166,24 @@ export default class OpenBoxLevel extends PopupBase {
 
     playAniHide(): Promise<void> {
         return new Promise((res) => {
+            // 光效
+            this.nodeBack.active = true;
+            this.nodeBack.opacity = 255;
+            cc.tween(this.nodeBack).to(0.35, { opacity: 0 }).call(()=>{
+                this.nodeBack.active = false;
+            }).start();
+            this.nodeLight.active = true;
+            this.nodeLight.opacity = 255;
+            cc.tween(this.nodeLight).to(0.35, { opacity: 0 }).call(()=>{
+                this.nodeLight.active = false;
+            }).start();
+
             let p1 = this.nodeProp.position;
             let time = Common.getMoveTime(p1, this.pFinish, 1, 1500);
             let reward = this.params.rewards.reward[0];
             if (reward.type == TypeProp.coin) {
                 this.nodeProp.active = false;
-                kit.Event.emit(CConst.event_menu_coin, p1.x, p1.y);
+                kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
                 this.scheduleOnce(() => {
                     kit.Event.emit(CConst.event_menu_updateSuipianReward, p1.x, p1.y, this.obj.prop.scale0, this.obj.prop.scale1);
                     res();
@@ -171,7 +197,7 @@ export default class OpenBoxLevel extends PopupBase {
                 };
                 cc.tween(this.nodeProp).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
                     this.nodeProp.active = false;
-                    kit.Event.emit(CConst.event_menu_strength);
+                    kit.Event.emit(CConst.event_scale_strength);
                     this.scheduleOnce(() => {
                         kit.Event.emit(CConst.event_menu_updateSuipianReward, p1.x, p1.y, this.obj.prop.scale0, this.obj.prop.scale1);
                         res();
@@ -181,7 +207,7 @@ export default class OpenBoxLevel extends PopupBase {
             else {
                 cc.tween(this.nodeProp).to(time, { position: this.pFinish }).call(() => {
                     this.nodeProp.active = false;
-                    kit.Event.emit(CConst.event_menu_prop);
+                    kit.Event.emit(CConst.event_scale_prop);
                     this.scheduleOnce(() => {
                         kit.Event.emit(CConst.event_menu_updateSuipianReward, p1.x, p1.y, this.obj.prop.scale0, this.obj.prop.scale1);
                         res();

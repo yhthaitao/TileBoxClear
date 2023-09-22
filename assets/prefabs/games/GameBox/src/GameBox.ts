@@ -55,6 +55,7 @@ export default class GameBox extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '事件拦截-游戏底层' }) maskTop: cc.Node = null;
     @property({ type: cc.Node, tooltip: '事件拦截-游戏顶层' }) maskBottom: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '背景' }) bg: cc.Node = null;
     @property({ type: [cc.Label], tooltip: '游戏事件label数组' }) arrTimeLayer: cc.Label[] = [];
     @property({ type: cc.Node, tooltip: '箱子父节点' }) nodeMain: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-顶部' }) uiTop: cc.Node = null;
@@ -224,6 +225,17 @@ export default class GameBox extends cc.Component {
             path = path + '1';
             index = (level - lenLevel0) % lenLevel1 - 1;
         }
+        // 加载背景
+        let lengthBg = 4;
+        let pathBg = CConst.pathGameBg + (level % lengthBg + 1);
+        kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+            if (err) {
+                Common.log(' 资源加载异常 bg: ', pathBg);
+                return;
+            }
+            this.bg.getComponent(cc.Sprite).spriteFrame = assets;
+        });
+        // 加载关卡数据
         let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
         this.levelParam = asset.json[index];
     }

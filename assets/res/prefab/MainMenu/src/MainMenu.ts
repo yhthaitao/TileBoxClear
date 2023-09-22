@@ -78,7 +78,7 @@ export default class MainMenu extends cc.Component {
         let home_dis_topToRight = 15 * winScaleByH;
         let home_dis_bottomToBottom = 100 * winScaleByH;
         this.midHome.x = 0;
-        this.midHomeBack.y = cc.winSize.height * 0.5 - this.midHomeBack.height * 0.5;
+        this.midHomeBack.y = cc.winSize.height * 0.5;
         this.midHomeTop.y = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop - this.midHomeTop.height * 0.5;
         this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
         this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;

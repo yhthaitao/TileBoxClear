@@ -21,13 +21,18 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainMenuMid extends cc.Component {
 
-    @property({ type: cc.Node, tooltip: '主菜单-顶部-体力图标' }) home_top_strength: cc.Node = null;
-    @property({ type: cc.Node, tooltip: '主菜单-顶部-金币图标' }) home_top_coin: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-金币图标' }) uiTop_coin_sign: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-体力图标' }) uiTop_strength_sign: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-背景' }) home_bg: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片icon' }) home_top_icon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片图标' }) home_top_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片进度' }) home_top_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片时间' }) home_top_time: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-奖励道具' }) home_top_prop: cc.Node = null;
     @property({ type: [cc.SpriteFrame], tooltip: '主菜单-顶部-奖励道具' }) arr_home_top_prop: cc.SpriteFrame[] = [];
     @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_start: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱' }) home_left_boxXing: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱图标' }) home_left_boxXing_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-每日签到进度' }) home_left_calendar_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-右侧-等级宝箱进度' }) home_right_boxLevel_process: cc.Node = null;
@@ -65,13 +70,6 @@ export default class MainMenuMid extends cc.Component {
                     dark: cc.color(64, 64, 64),
                 },
             },
-            config: [
-                { start: 1, finish: 20 },
-                { start: 21, finish: 40 },
-                { start: 41, finish: 80 },
-                { start: 81, finish: 120 },
-                { start: 121, finish: 160 },
-            ],
         },
     };
 
@@ -128,13 +126,33 @@ export default class MainMenuMid extends cc.Component {
     /*********************************************************  home  *******************************************************/
     /************************************************************************************************************************/
     /** 初始化主页面 */
-    initHome() {
-        this.resetBoxSuipian();
+    async initHome() {
+        this.resetBg();
         this.resetLevelStage();
-        this.resetBoxXingxingProcess();
-        this.resetBoxLevelProcess();
-        this.resetCalendarProcess();
-        this.resetBankProcess();
+        this.resetBoxSuipian();
+        this.resetBoxXingxing();
+        this.resetBoxLevel();
+
+        this.resetCalendar();
+        this.resetBank();
+
+        await this.resetBoxSuipianProcess();
+        await this.resetBoxXingxingProcess();
+        await this.resetBoxLevelProcess();
+    };
+
+    resetBg() {
+        let pathBg = CConst.pathThemeBg + DataManager.data.boxData.areasId;
+        kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+            if (err) {
+                Common.log(' 资源加载异常 bg: ', pathBg);
+                return;
+            }
+            this.home_bg.active = true;
+            this.home_bg.getComponent(cc.Sprite).spriteFrame = assets;
+            this.home_bg.opacity = 0;
+            cc.tween(this.home_bg).to(0.5, { opacity: 255 }).start();
+        });
     };
 
     /** 刷新-碎片进度 */
@@ -146,31 +164,32 @@ export default class MainMenuMid extends cc.Component {
             boxData.count = 0;
             boxData.timeLunch = Common.getTimeDayFinish();
         };
-        // 第一次启动游戏
-        if (boxData.timeLunch <= 0) {
+        if (boxData.timeLunch <= 0) {// 第一次启动游戏
             funcInit();
         }
-        else {
-            // 时间来到另一天
+        else {// 时间来到另一天
             let timeCur = Math.floor(new Date().getTime() / 1000);
             if (timeCur >= boxData.timeLunch) {
                 funcInit();
             }
         }
-        this.resetBoxSuipianReward();
-        this.resetBoxSuipianProcess();
-        this.refreshBoxSuipianTime();
-    };
 
-    /** 刷新-碎片-奖励 */
-    resetBoxSuipianReward() {
+        let boxReward = DataManager.getRewardBoxSuipian();
+        // 进度条
+        let count = boxData.count;
+        let total = boxReward.total;
+        let processBar = this.home_top_process.getChildByName('bar');
+        processBar.getComponent(cc.Sprite).fillStart = 0;
+        processBar.getComponent(cc.Sprite).fillRange = count / total;
+        let processLabel = this.home_top_process.getChildByName('label');
+        processLabel.getComponent(cc.Label).string = count + '/' + total;
+
+        // 奖励
         let types = [
             TypeProp.coin,
-            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh,
-            TypeProp.magnet, TypeProp.clock,
+            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh, TypeProp.magnet, TypeProp.clock,
             TypeProp.tStrengthInfinite,
         ];
-        let boxReward = DataManager.getRewardBoxSuipian();
         let reward = boxReward.reward[0];
         let index = types.indexOf(reward.type);
         if (index < 0) {
@@ -179,30 +198,40 @@ export default class MainMenuMid extends cc.Component {
         else if (index > types.length - 1) {
             index = types.length - 1;
         }
-        let itemIcon = this.home_top_prop.getChildByName('icon');
-        itemIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
-
-        let itemLabel = this.home_top_prop.getChildByName('label');
+        let propIcon = this.home_top_prop.getChildByName('icon');
+        propIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
         let num = reward.type == TypeProp.tStrengthInfinite ? Math.floor(reward.number / 60) : reward.number;
-        itemLabel.getComponent(cc.Label).string = '+' + num;
+        let propLabel = this.home_top_prop.getChildByName('label');
+        propLabel.getComponent(cc.Label).string = '+' + num;
+
+        this.refreshBoxSuipianTime();
     };
 
     /** 刷新-碎片-进度条 */
     async resetBoxSuipianProcess() {
-        let boxReward = DataManager.getRewardBoxSuipian();
-        let count = DataManager.data.boxSuipian.count;
-        let total = boxReward.total;
-
-        // 进度条
-        let itemBar = this.home_top_process.getChildByName('bar');
-        itemBar.getComponent(cc.Sprite).fillStart = 0;
-        itemBar.getComponent(cc.Sprite).fillRange = count / total;
-        // 文本
-        let itemLabel = this.home_top_process.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = count + '/' + total;
         // 进度变更
         let boxData = DataManager.data.boxSuipian;
         if (boxData.add > 0) {
+            // 增加碎片
+            let sign = cc.instantiate(this.home_top_sign);
+            let signLabel = sign.getChildByName('label');
+            signLabel.getComponent(cc.Label).string = '+' + boxData.add;
+            sign.parent = this.node;
+            sign.active = true;
+            sign.position = cc.v3();
+            let pGoal = Common.getLocalPos(this.home_top_sign.parent, this.home_top_sign.position, this.node);
+            let obj = {
+                p1: cc.v2(sign.x, sign.y),
+                p2: cc.v2(pGoal.x, sign.y),
+                pTo: cc.v2(pGoal.x, pGoal.y),
+                time: Common.getMoveTime(sign.position, pGoal, 1, 1500),
+            };
+            await DataManager.playAniReward(sign, obj);
+            kit.Event.emit(CConst.event_scale_suipian);
+
+            let boxReward = DataManager.getRewardBoxSuipian();
+            let total = boxReward.total;
+
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
             let boxAddElse = -1;
@@ -218,11 +247,13 @@ export default class MainMenuMid extends cc.Component {
                 boxData.count -= total;
                 boxData.level += 1;
                 DataManager.refreshDataAfterUnlockReward(boxReward);
-                console.log(JSON.stringify({ name: '碎片宝箱', param: boxReward }, null, 4));
-                kit.Event.emit(CConst.event_notice, '碎片宝箱');
             }
             DataManager.setData();
 
+            // 进度条
+            let itemBar = this.home_top_process.getChildByName('bar');
+            // 文本
+            let itemLabel = this.home_top_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
@@ -236,8 +267,8 @@ export default class MainMenuMid extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pStart = Common.getLocalPos(this.home_top_prop.parent, this.home_top_prop.position, this.node);
-                let pStrength = Common.getLocalPos(this.home_top_strength.parent, this.home_top_strength.position, this.node);
-                let pCoin = Common.getLocalPos(this.home_top_coin.parent, this.home_top_coin.position, this.node);
+                let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
+                let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
                 let param = {
                     pStart: { x: pStart.x, y: pStart.y },
@@ -302,8 +333,7 @@ export default class MainMenuMid extends cc.Component {
         this.refreshLabel_home_bottom();
     };
 
-    /** 刷新-星星宝箱进度 */
-    async resetBoxXingxingProcess() {
+    resetBoxXingxing() {
         let boxReward = DataManager.getRewardBoxXinging();
         let count = DataManager.data.boxXingxing.count;
         let total = boxReward.total;
@@ -315,9 +345,34 @@ export default class MainMenuMid extends cc.Component {
         // 文本
         let itemLabel = this.home_left_boxXing_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
+    };
+
+    /** 刷新-星星宝箱进度 */
+    async resetBoxXingxingProcess() {
         // 进度变更
         let boxData = DataManager.data.boxXingxing;
         if (boxData.add > 0) {
+            // 增加星星
+            let sign = cc.instantiate(this.home_left_boxXing_sign);
+            let signLabel = sign.getChildByName('label');
+            signLabel.getComponent(cc.Label).string = '+' + boxData.add;
+            sign.parent = this.home_left_boxXing_sign.parent;
+            sign.active = true;
+            let pGoal = this.home_left_boxXing_sign.position;
+            let pStart = cc.v3(pGoal.x + 150, pGoal.y);
+            sign.position = pStart;
+            let obj = {
+                p1: cc.v2(sign.x, sign.y),
+                p2: cc.v2((sign.x + pGoal.x) * 0.5, sign.y + 100),
+                pTo: cc.v2(pGoal.x, pGoal.y),
+                time: Common.getMoveTime(sign.position, pGoal, 1, 1500),
+            };
+            await DataManager.playAniReward(sign, obj);
+            kit.Event.emit(CConst.event_scale_xingxingBox);
+
+            let boxReward = DataManager.getRewardBoxXinging();
+            let total = boxReward.total;
+
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
             let boxAddElse = -1;
@@ -333,11 +388,13 @@ export default class MainMenuMid extends cc.Component {
                 boxData.count -= total;
                 boxData.level += 1;
                 DataManager.refreshDataAfterUnlockReward(boxReward);
-                console.log(JSON.stringify({ name: '星星宝箱', param: boxReward }, null, 4));
-                kit.Event.emit(CConst.event_notice, '星星宝箱');
             }
             DataManager.setData();
 
+            // 进度条
+            let itemBar = this.home_left_boxXing_process.getChildByName('bar');
+            // 文本
+            let itemLabel = this.home_left_boxXing_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
@@ -351,7 +408,7 @@ export default class MainMenuMid extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-                let pCoin = Common.getLocalPos(this.home_top_coin.parent, this.home_top_coin.position, this.node);
+                let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pProp = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
                 let param = { pCoin: { x: pCoin.x, y: pCoin.y }, pProp: { x: pProp.x, y: pProp.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxXingxing, param, { mode: PopupCacheMode.Frequent });
@@ -375,13 +432,7 @@ export default class MainMenuMid extends cc.Component {
         this.setIsLock(true);
     };
 
-    /** 刷新-日历进度 */
-    resetCalendarProcess() {
-        this.refreshLabel_home_left();
-    };
-
-    /** 刷新-等级宝箱进度 */
-    async resetBoxLevelProcess() {
+    resetBoxLevel() {
         let boxReward = DataManager.getRewardBoxLevel();
         let count = DataManager.data.boxLevel.count;
         let total = boxReward.total;
@@ -393,9 +444,16 @@ export default class MainMenuMid extends cc.Component {
         // 文本
         let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = count + '/' + total;
+    };
+
+    /** 刷新-等级宝箱进度 */
+    async resetBoxLevelProcess() {
         // 进度变更
         let boxData = DataManager.data.boxLevel;
         if (boxData.add > 0) {
+            let boxReward = DataManager.getRewardBoxLevel();
+            let total = boxReward.total;
+
             let boxCount = boxData.count;
             let boxAdd = boxData.add;
             let boxAddElse = -1;
@@ -414,6 +472,10 @@ export default class MainMenuMid extends cc.Component {
             }
             DataManager.setData();
 
+            // 进度条
+            let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
+            // 文本
+            let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
@@ -427,7 +489,7 @@ export default class MainMenuMid extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-                let pStrength = Common.getLocalPos(this.home_top_strength.parent, this.home_top_strength.position, this.node);
+                let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
                 let pBtnStart = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
                 let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pBtnStart.x, y: pBtnStart.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
@@ -452,13 +514,28 @@ export default class MainMenuMid extends cc.Component {
         this.setIsLock(true);
     };
 
-    /** 刷新-日历进度 */
-    resetBankProcess() {
+    /** 刷新日历 */
+    resetCalendar() {
+        this.refreshLabel_home_left();
+    };
+
+    /** 刷新银行 */
+    resetBank() {
         this.refreshLabel_home_right();
     };
 
-    playAniBottomButton() {
+    playAniScaleBtnstart() {
         this.home_bottom_start.getComponent(cc.Animation).play();
+    };
+
+    playAniScaleSuipian() {
+        this.home_top_icon.getComponent(cc.Animation).play();
+    };
+
+    playAniScaleXingxing() {
+        let button = this.home_left_boxXing.getChildByName('button');
+        let sign = button.getChildByName('sign');
+        sign.getComponent(cc.Animation).play();
     };
 
     playAniReviveSuipianReward(x: number, y: number, scale0: number, scale1: number) {
@@ -466,8 +543,7 @@ export default class MainMenuMid extends cc.Component {
         // 刷新道具
         let types = [
             TypeProp.coin,
-            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh,
-            TypeProp.magnet, TypeProp.clock,
+            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh, TypeProp.magnet, TypeProp.clock,
             TypeProp.tStrengthInfinite,
         ];
         let boxReward = DataManager.getRewardBoxSuipian();
@@ -544,8 +620,7 @@ export default class MainMenuMid extends cc.Component {
 
     initThemeAreas() {
         let item = this.theme_mid_areas.getChildByName('item');
-        let objAreas = this.objTheme.areas;
-        let length = objAreas.config.length;
+        let length = 15;
         // 主题节点高度
         this.theme_mid_areas.height = cc.winSize.height * 0.5 + this.theme_mid_areas.y;
         // 主题容器高度
@@ -567,7 +642,6 @@ export default class MainMenuMid extends cc.Component {
         let level = DataManager.data.boxData.level;
         let areasId = DataManager.data.boxData.areasId;
         let choseId = index + 1;
-        let param = objAreas.config[index];
         cell.active = true;
         cell.name = 'cell' + index;
         let back = cell.getChildByName('back');
@@ -580,7 +654,8 @@ export default class MainMenuMid extends cc.Component {
         let labelLevel = cell.getChildByName('labelLevel');
         let right = cell.getChildByName('right');
         let lock = cell.getChildByName('lock');
-        if (level > param.start - 1) {
+        let levelAreas = this.getLevelAreas(index);
+        if (level > levelAreas.start - 1) {
             pathBack = CConst.pathThemeUnLock + 'back';
             pathIcon = CConst.pathThemeUnLock + (index + 1);
             labelTitle.color = objAreas.title.color.light;
@@ -598,7 +673,7 @@ export default class MainMenuMid extends cc.Component {
             labelLevel.color = objAreas.level.color.dark;
             right.active = false;
             lock.active = true;
-            cell.getComponent(cc.Button).interactable = false;
+            cell.getComponent(cc.Button).interactable = true;
         }
         kit.Resources.loadRes(CConst.bundleCommon, pathBack, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
@@ -675,6 +750,24 @@ export default class MainMenuMid extends cc.Component {
         }
     };
 
+    /** 获取主题关卡范围 */
+    getLevelAreas(index: number): { start: number, finish: number } {
+        let start = 1;
+        let finish = 1;
+        let length = 1;
+        if (index < 2) {
+            length = 20;
+            start = index * length + 1;
+            finish = start + length - 1;
+        }
+        else {
+            length = 40;
+            start = (index - 1) * length + 1;
+            finish = start + length - 1;
+        }
+        return { start: start, finish: finish };
+    }
+
     /** 按钮事件 主题栏 */
     eventBtnThemeAreas() {
         if (this.stateTheme == StateTheme.areas) {
@@ -693,6 +786,7 @@ export default class MainMenuMid extends cc.Component {
         }
         DataManager.data.boxData.areasId = chodsId;
         DataManager.setData();
+        kit.Event.emit(CConst.event_menu_updateTheme);
 
         // 更新主题
         this.theme_mid_areas_content.children.forEach((cell) => {
@@ -744,26 +838,14 @@ export default class MainMenuMid extends cc.Component {
         this.refreshLanguage();
     };
 
-    eventBack_resetSuipian() {
-        this.resetBoxSuipianProcess();
-    }
-
-    eventBack_resetXingxing() {
-        this.resetBoxXingxingProcess();
-    }
-
-    eventBack_resetLevel() {
-        this.resetBoxLevelProcess();
-    }
-
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
-        kit.Event.on(CConst.event_reset_suipian, this.eventBack_resetSuipian, this);
-        kit.Event.on(CConst.event_reset_xingxing, this.eventBack_resetXingxing, this);
-        kit.Event.on(CConst.event_reset_level, this.eventBack_resetLevel, this);
-        kit.Event.on(CConst.event_menu_prop, this.playAniBottomButton, this);
+        kit.Event.on(CConst.event_scale_prop, this.playAniScaleBtnstart, this);
+        kit.Event.on(CConst.event_scale_suipian, this.playAniScaleSuipian, this);
+        kit.Event.on(CConst.event_scale_xingxingBox, this.playAniScaleXingxing, this);
         kit.Event.on(CConst.event_menu_updateSuipianReward, this.playAniReviveSuipianReward, this);
+        kit.Event.on(CConst.event_menu_updateTheme, this.resetBg, this);
     }
 
     /** 监听-取消 */
@@ -827,17 +909,16 @@ export default class MainMenuMid extends cc.Component {
 
     /** label theme areas */
     refreshLabel_theme_areas() {
-        let objAreas = this.objTheme.areas;
         this.theme_mid_areas_content.children.forEach((cell) => {
             DataManager.setString(LangChars.BreakTime, (chars: string) => {
                 let labelTitle = cell.getChildByName('labelTitle');
                 labelTitle.getComponent(cc.Label).string = chars;
             });
             let index = cell.name.substring(4);
-            let param = objAreas.config[index];
+            let levelAreas = this.getLevelAreas(Number(index));
             DataManager.setString(LangChars.Level, (chars: string) => {
                 let labelLevel = cell.getChildByName('labelLevel');
-                labelLevel.getComponent(cc.Label).string = chars + '  ' + param.start + '-' + param.finish;
+                labelLevel.getComponent(cc.Label).string = chars + '  ' + levelAreas.start + '-' + levelAreas.finish;
             });
         });
     };
@@ -847,3 +928,4 @@ export default class MainMenuMid extends cc.Component {
 
     };
 }
+

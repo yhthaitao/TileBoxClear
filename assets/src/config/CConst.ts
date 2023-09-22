@@ -10,8 +10,10 @@ const CConst = {
     bundleCommon: 'common',
     pathLanguage: './language/text/',
     pathImage: './language/img/',
+    pathThemeBg: './theme/bg/',
     pathThemeLock: './theme/lock/',
     pathThemeUnLock: './theme/unlock/',
+    pathGameBg: './game/bg/',
     /*************************************** end **************************************************/
 
 
@@ -44,13 +46,19 @@ const CConst = {
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
     /** 主页 刷新 */
-    event_menu_strength: 'event_menu_strength',
+    event_scale_strength: 'event_scale_strength',
     /** 主页 刷新 */
-    event_menu_coin: 'event_menu_coin',
+    event_scale_coin: 'event_scale_coin',
     /** 主页 刷新 */
-    event_menu_prop: 'event_menu_prop',
+    event_scale_prop: 'event_scale_prop',
+    /** 主页 刷新 */
+    event_scale_suipian: 'event_scale_suipian',
+    /** 主页 刷新 */
+    event_scale_xingxingBox: 'event_scale_xingxingBox',
     /** 主页 刷新 */
     event_menu_updateSuipianReward: 'event_menu_updateSuipianReward',
+    /** 主页 刷新 */
+    event_menu_updateTheme: 'event_menu_updateTheme',
     /** game start */
     event_game_start: 'event_game_start',
     /** game pause */
@@ -71,12 +79,6 @@ const CConst = {
     event_fail_giveUp: 'event_fail_giveUp',
     /** 提示 */
     event_notice: 'event_notices',
-    /** 更新数据（碎片宝箱） */
-    event_reset_suipian: 'event_reset_suipian',
-    /** 更新数据（星星宝箱） */
-    event_reset_xingxing: 'event_reset_xingxing',
-    /** 更新数据（关卡等级宝箱） */
-    event_reset_level: 'event_reset_level',
     /*************************************** end **************************************************/
 
 

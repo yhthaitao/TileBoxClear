@@ -192,8 +192,8 @@ export default class MainMenuTop extends cc.Component {
 
     /** 监听-注册 */
     listernerRegist(): void {
-        kit.Event.on(CConst.event_menu_strength, this.playAniStrength, this);
-        kit.Event.on(CConst.event_menu_coin, this.playAniCoin, this);
+        kit.Event.on(CConst.event_scale_strength, this.playAniStrength, this);
+        kit.Event.on(CConst.event_scale_coin, this.playAniCoin, this);
     }
 
     /** 监听-取消 */
