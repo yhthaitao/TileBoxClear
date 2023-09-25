@@ -1,4 +1,5 @@
 import Common from "../../../../src/config/Common";
+import ConfigGold from "../../../../src/config/ConfigGold";
 import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import GameBox, { GoodParam } from "./GameBox";
@@ -15,6 +16,7 @@ export default class ItemGood extends cc.Component {
     isChose: boolean = false;
     param: GoodParam = null;
     resPath = { bundle: 'prefabs', path: './games/GameBox/res/img/good/' };
+    resGold = { bundle: 'prefabs', path: './games/GameBox/res/img/gold/' };
 
     init(param: GoodParam) {
         this.state = 0;
@@ -82,7 +84,18 @@ export default class ItemGood extends cc.Component {
         if (this.param.gold.isGold) {
             this.nodeGold.active = true;
             let arrGold = Common.getArrByName(this.nodeGold, 'gold');
-            arrGold.forEach((item, index) => { item.active = index == this.param.gold.count });
+            arrGold.forEach((item, index) => { 
+                item.active = index == this.param.gold.count;
+                // 资源更新
+                let path = this.resGold.path + ConfigGold[this.param.keyGood] + '/' + index;
+                kit.Resources.loadRes(this.resGold.bundle, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+                    if (err) {
+                        Common.log(' 资源加载异常 gold_path: ', path);
+                        return;
+                    }
+                    item.getComponent(cc.Sprite).spriteFrame = assets;
+                });
+            });
 
             this.nodeDragon.active = true;
             this.nodeDragon.y = this.param.h * 0.5;

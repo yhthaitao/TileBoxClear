@@ -584,10 +584,23 @@ export default class MainMenuMid extends cc.Component {
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromMenu }, { mode: PopupCacheMode.Frequent });
     };
 
+    /** 按钮事件 开始 */
+    eventBtnHomeBoxSuipian() {
+        kit.Audio.playEffect(CConst.sound_clickUI);
+        kit.Popup.show(CConst.popup_path_boxSuipian, {}, { mode: PopupCacheMode.Frequent });
+    };
+
     /** 按钮事件 星星宝箱 */
     eventBtnHomeBoxXing() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_boxXingxing, {}, { mode: PopupCacheMode.Frequent });
+    };
+
+
+    /** 按钮事件 等级宝箱 */
+    eventBtnHomeBoxLevel() {
+        kit.Audio.playEffect(CConst.sound_clickUI);
+        kit.Popup.show(CConst.popup_path_boxLevel, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 每日签到 */
@@ -596,11 +609,7 @@ export default class MainMenuMid extends cc.Component {
         kit.Popup.show(CConst.popup_path_daily, {}, { mode: PopupCacheMode.Frequent });
     };
 
-    /** 按钮事件 等级宝箱 */
-    eventBtnHomeBoxLevel() {
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_boxLevel, {}, { mode: PopupCacheMode.Frequent });
-    };
+    
 
     /** 按钮事件 银行 */
     eventBtnHomeBank() {

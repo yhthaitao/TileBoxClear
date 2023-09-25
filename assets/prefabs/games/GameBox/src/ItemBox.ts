@@ -7,6 +7,7 @@ const { ccclass, property } = cc._decorator;
 export default class ItemBox extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '箱子节点-图-普通' }) itemIcon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '箱子节点-框' }) itemKuang: cc.Node = null;
     @property({ type: [cc.Node], tooltip: '箱子节点-图数组-框' }) arrKuang: cc.Node[] = [];
     @property({ type: cc.Node, tooltip: '物品父节点' }) nodeMain: cc.Node = null;
 
@@ -14,6 +15,7 @@ export default class ItemBox extends cc.Component {
         speedCur: 0, speedDis: 1, speedInit: 0, speedMax: 20, isMove: false,
     };
     param: BoxParam = null;
+    total: number = 0;
     init(param: BoxParam) {
         this.param = Common.clone(param);
         this.node.x = this.param.x;
@@ -39,11 +41,45 @@ export default class ItemBox extends cc.Component {
         this.nodeMain.removeAllChildren(true);
     };
 
-    sortGood() {
+    sortGood(isInit: boolean = false) {
         this.nodeMain.children.sort((a: cc.Node, b: cc.Node) => {
             return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
         });
         this.refreshGoods();
+        // 特殊框更新
+        let count = this.nodeMain.childrenCount;
+        if (isInit) {
+            this.total = count;
+            let nodeLine = this.itemKuang.getChildByName('line');
+            let widthTotal = nodeLine.width;
+            let widthDistance = widthTotal / this.total;
+            let arrLine = Common.getArrByName(nodeLine, 'line');
+            arrLine.forEach((line: cc.Node, index: number) => {
+                line.active = index < this.total - 1;
+                line.x = (index + 1) * widthDistance - widthTotal * 0.5;
+            });
+
+            let process = this.itemKuang.getChildByName('process');
+            let bar = process.getChildByName('bar');
+            bar.getComponent(cc.Sprite).fillRange = 1;
+        }
+        else {
+            // 显示物品
+            if (count > 0) {
+                this.showGood(this.nodeMain.children[0]);
+            }
+            let process = this.itemKuang.getChildByName('process');
+            let bar = process.getChildByName('bar');
+            bar.getComponent(cc.Sprite).fillRange = count / this.total;
+        }
+        let itemLabel = this.itemKuang.getChildByName('label');
+        itemLabel.getComponent(cc.Label).string = '' + count;
+    };
+
+    showGood(good: cc.Node) {
+        good.active = true;
+        good.scale = 0;
+        cc.tween(good).to(0.2, {scale: 1.1}).to(0.15, {scale: 1.0}).start();
     };
 
     refreshGoods() {

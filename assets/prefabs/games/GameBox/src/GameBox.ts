@@ -8,6 +8,7 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
 import ConfigGood from "../../../../src/config/ConfigGood";
+import ConfigGold from "../../../../src/config/ConfigGold";
 
 /** 关卡参数 */
 export interface LevelParam {
@@ -289,12 +290,12 @@ export default class GameBox extends cc.Component {
         }
 
         // 金币逻辑
-        let golden = this.levelParam.isGolden ? true : false;
-        let haveNum = 0;
-        let goldNum = Math.random() * (6 - 2) + 2;// 有金币的物品数量
-        let goodHaveGold = DataManager.data.boxData.goodGold;// 有金币的物品容器
-        let goods = this.levelParam.item;
-
+        let isGolden = this.levelParam.isGolden ? true : false;
+        let goldY = 0;
+        let goldCount = 0;
+        let goldTotal = Math.floor(Math.random() * (6 - 2) + 2);// 有金币的物品数量
+        Common.log('金币碎片 ' + (isGolden ? '存在' : '不存在') + '; 金币总量：', goldTotal);
+        
         /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
         let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
         let objGood = {};
@@ -319,15 +320,12 @@ export default class GameBox extends cc.Component {
             }
             return objGood[key];
         };
+
+        let goods = this.levelParam.item;
         for (let index = 0, length = goods.length; index < length; index++) {
             const obj = goods[index];
             let keyGood = isRestart ? resetKey(Number(obj.n)) : Number(obj.n);
             let isGold = false;
-            // 关卡内有金币  物品可以有金币  有金币的物品数量还有剩余
-            if (golden && goodHaveGold[keyGood] && haveNum < goldNum) {
-                haveNum++;
-                isGold = true;
-            }
             let cfg = this.goodsCfg[keyGood];
             let res = cfg.name;
             let w = cfg.w;
@@ -336,6 +334,13 @@ export default class GameBox extends cc.Component {
             let dataBox: BoxParam = this.objGame[keyBox];
             let x = obj.x - this.levelParam.map[keyBox].x;
             let y = obj.y - this.levelParam.map[keyBox].y;
+            // 关卡内有金币  物品可以有金币  物品空间高度上间隔两个箱子以上的距离  有金币的物品数量还有剩余
+            if (isGolden && ConfigGold[keyGood] && dataBox.y > goldY  &&  goldCount < goldTotal) {
+                goldCount++;
+                isGold = true;
+                Common.log('金币碎片: ' + keyGood + '; res: ' + res  + '; 金币计数：', goldCount, '; boxY: ', dataBox.y);
+                goldY = dataBox.y + dataBox.h * 2;
+            }
             let goodParam: GoodParam = {
                 index: index, keyGood: keyGood, nameRes: res, name: 'good_' + index, x: x, y: y, w: w, h: h, isMove: false, isEnough: false,
                 gold: { isGold: isGold, count: 0, total: 4 },
@@ -551,7 +556,7 @@ export default class GameBox extends cc.Component {
                     this.addGood(box, goodParam);
                 }
                 if (boxParam.isFrame) {
-                    box.getComponent(ItemBox).sortGood();
+                    box.getComponent(ItemBox).sortGood(true);
                 }
             });
         });
@@ -2277,12 +2282,12 @@ export default class GameBox extends cc.Component {
                 p1: cc.v2(p1.x, p1.y),
                 p2: cc.v2(p2.x, p1.y),
                 pTo: cc.v2(p2.x, p2.y),
-                time: Common.getMoveTime(p1, p2, 1, 1250),
+                time: Common.getMoveTime(p1, p2, 1, 1500),
                 scale: copy.scale,
             };
             copy.scale = obj.scale * 0.5;
             cc.tween(copy).to(0.25, { position: p1 }, cc.easeSineInOut()).parallel(
-                cc.tween().bezierTo(obj.time, obj.p1, obj.p2, obj.pTo, cc.easeSineOut()),
+                cc.tween().bezierTo(obj.time, obj.p1, obj.p2, obj.pTo),
                 cc.tween().to(obj.time * 0.75, { scale: obj.scale }),
             ).call(() => {
                 copy.removeFromParent(true);

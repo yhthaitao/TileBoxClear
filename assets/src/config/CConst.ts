@@ -101,6 +101,7 @@ const CConst = {
     popup_path_actPass: './Popup/ActPass/res/prefab/ActPass',
     popup_path_settingHome: './Popup/Setting/res/prefab/SettingHome',
     popup_path_settingGame: './Popup/Setting/res/prefab/SettingGame',
+    popup_path_boxSuipian: './Popup/BoxSuipian/res/prefab/BoxSuipian',
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
     popup_path_openBoxLevel: './Popup/OpenBox/res/prefab/OpenBoxLevel',
