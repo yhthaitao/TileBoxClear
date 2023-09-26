@@ -10,16 +10,21 @@ export default class Loading extends cc.Component {
 
     @property(cc.Node) nodeLogo: cc.Node = null;
     @property(cc.Node) nodeProcess: cc.Node = null;
+    @property(cc.Sprite) spriteProcessBar: cc.Sprite = null;
+    @property(cc.Label) labelLoading: cc.Label = null;
 
-    width: number = 596;
+    isStart: boolean = false;
+    objTime = { count: 0, total: 0.02, };
 
     protected onLoad(): void {
         Common.log('页面 加载');
         this.initLabel();
         this.node.setContentSize(cc.winSize);
+
+        this.isStart = false;
         this.nodeLogo.opacity = 0;
         this.nodeProcess.opacity = 0;
-        this.nodeProcess.getChildByName('bar').width = 0;
+        this.spriteProcessBar.fillRange = 0;
     }
 
     initLabel() {
@@ -30,6 +35,26 @@ export default class Loading extends cc.Component {
 
     protected start(): void {
         this.playAniEnter();
+    }
+
+    protected update(dt: number): void {
+        if (!this.isStart) {
+            return;
+        }
+        this.objTime.count += dt;
+        if (this.objTime.count < this.objTime.total) {
+            return;
+        }
+        this.objTime.count = 0;
+        // 刷新
+        this.spriteProcessBar.fillRange += 0.01;
+        DataManager.setString(LangChars.loading, (chars: string) => {
+            this.labelLoading.string = chars + '  ' + Math.floor(this.spriteProcessBar.fillRange * 100) + '%';
+        });
+        if (this.spriteProcessBar.fillRange >= 1) {
+            this.isStart = false;
+            kit.Event.emit(CConst.event_complete_loading);
+        }
     }
 
     /** 动画 loading 进入 */
@@ -54,49 +79,17 @@ export default class Loading extends cc.Component {
 
         this.nodeProcess.active = true;
         tween(this.nodeProcess).delay(tDelay)
-            .to(tOpa, { opacity: 255 }).call(this.playAniProcess.bind(this))
+            .to(tOpa, { opacity: 255 }).call(() => {
+                this.isStart = true;
+                this.spriteProcessBar.fillRange = 0;
+            })
             .start();
-    }
-
-    /** 动画 loading 进度 */
-    playAniProcess() {
-        let tShow = .383;
-        let processBar = this.nodeProcess.getChildByName('bar');
-        cc.tween(processBar).to(tShow * 4, {width: this.width * 0.8}, cc.easeSineInOut()).call(() => {
-            kit.Event.emit(CConst.event_complete_loading);
-        }).start();
-
-        // loading字符显示
-        let itemLabel = this.nodeProcess.getChildByName('label');
-        let label = itemLabel.getComponent(cc.Label);
-        let funcLabel = () => {
-            DataManager.setString(LangChars.loading, (chars: string) => {
-                if (label.string == chars) label.string = chars + '.';
-                else if (label.string == chars + '.') label.string = chars + '..';
-                else if (label.string == chars + '..') label.string = chars + '...';
-                else label.string = chars;
-            });
-        };
-        this.schedule(funcLabel, tShow);
     }
 
     /** 动画 loading 离开 */
     playAniLeave(callback: Function) {
-        let tShow = .383;
-        let tDelay = .383;
-        let processBar = this.nodeProcess.getChildByName('bar');
-        let tween = cc.tween;
-        tween(processBar)
-            .to(tShow, { width: this.nodeProcess.width }, cc.easeSineInOut())
-            .delay(tDelay)
-            .call(() => {
-                this.unscheduleAllCallbacks();
-                // 离开动画
-                let tOpa = .2;
-                tween(this.nodeProcess).to(tOpa, { opacity: 0 }).call(() => {
-                    callback && callback();
-                }).start();
-            })
-            .start();
+        cc.tween(this.nodeProcess).delay(0.75).to(0.25, { opacity: 0 }).call(() => {
+            callback && callback();
+        }).start();
     }
 }

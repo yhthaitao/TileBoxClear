@@ -179,7 +179,7 @@ class NativeCall {
         return;
         Common.log(' javaToCocos cocos method: adsTimeTrue() ');
         // 打点 插屏广告请求（游戏从后台返回）
-        this.logEventThree(ConfigDot.dot_adReq, "inter_backGame", "Interstital");
+        this.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
         let isReady = this.advertCheck();
         if (isReady) {
             let funcA = () => {
@@ -316,9 +316,6 @@ class NativeCall {
             case TypeProp.ice:
                 this.logEventTwo(ConfigDot.dot_buy_back_click, String(DataManager.data.boxData.level));
                 break;
-            case TypeProp.tip:
-                this.logEventTwo(ConfigDot.dot_buy_bottle_click, String(DataManager.data.boxData.level));
-                break;
             default:
                 break;
         }
@@ -334,9 +331,6 @@ class NativeCall {
         switch (type) {
             case TypeProp.ice:
                 this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
-                break;
-            case TypeProp.tip:
-                this.logEventTwo(ConfigDot.dot_buy_bottle_succe, String(DataManager.data.boxData.level));
                 break;
             default:
                 break;

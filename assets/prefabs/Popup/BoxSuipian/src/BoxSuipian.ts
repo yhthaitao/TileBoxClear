@@ -26,7 +26,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 等级宝箱页面 showBefore()');
 
-        DataManager.setString(LangChars.goldCollection, (chars: string)=>{
+        DataManager.setString(LangChars.goldCollection, (chars: string) => {
             let itemLabel = this.nodeTime.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
@@ -39,7 +39,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
     public show(options?: Options) {
         this.maskDown.setContentSize(cc.winSize);
         this.maskUp.setContentSize(cc.winSize);
-        
+
         return new Promise<void>(res => {
             this.node.active = true;
             // 开启拦截
@@ -119,9 +119,14 @@ export default class BoxSuipian<Options = any> extends PopupBase {
         this.nodeListContent.height = this.nodeListCell.height * length + hElse;
         // 配置内容 奖励等级从1开始
         for (let index = 1; index <= length; index++) {
-            let cell = cc.instantiate(this.nodeListCell);
+            let name = 'cell' + index;
+            let cell = this.nodeListContent.getChildByName(name);
+            if (!cell) {
+                cell = cc.instantiate(this.nodeListCell);
+                cell.name = name;
+                cell.parent = this.nodeListContent;
+            }
             this.setRewardCell(index, cell);
-            cell.parent = this.nodeListContent;
         }
     };
 
@@ -133,7 +138,6 @@ export default class BoxSuipian<Options = any> extends PopupBase {
     setRewardCell(rewardlevel: number, cell: cc.Node) {
         cell.active = true;
         let boxData = DataManager.data.boxSuipian;
-        boxData.level = 2;
         let objReward = this.getRewardBoxSuipian(rewardlevel);
         // 标题
         let nodeTitle = cell.getChildByName('nodeTitle');
@@ -176,24 +180,24 @@ export default class BoxSuipian<Options = any> extends PopupBase {
         let titleLabel = nodeTitle.getChildByName('label');
         titleLabel.getComponent(cc.Label).string = '' + rewardlevel;
 
-        let type = objReward.reward[0].type;
-        let spriteframeId = this.types.indexOf(type);
+        let raward = objReward.reward[0];
+        let spriteframeId = this.types.indexOf(raward.type);
         let rewardPropIcon = rewardProp.getChildByName('icon');
         rewardPropIcon.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[spriteframeId];
-        if (type == TypeProp.magnet) {
+        if (raward.type == TypeProp.magnet) {
             rewardPropIcon.position = cc.v3(10, 2);
             rewardPropIcon.scale = 0.75;
         }
-        else if (type == TypeProp.clock) {
+        else if (raward.type == TypeProp.clock) {
             rewardPropIcon.position = cc.v3(-10, 2);
             rewardPropIcon.scale = 0.75;
         }
-        else{
+        else {
             rewardPropIcon.position = cc.v3();
             rewardPropIcon.scale = 1.0;
         }
         let rewardPropLabel = rewardProp.getChildByName('label');
-        rewardPropLabel.getComponent(cc.Label).string = '' + objReward.total;
+        rewardPropLabel.getComponent(cc.Label).string = '' + raward.number;
     };
 
     /**

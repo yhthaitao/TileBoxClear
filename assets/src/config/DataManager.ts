@@ -114,7 +114,12 @@ class DataManager {
     isCloudLoad: boolean = false;
     /** 插屏广告开启关卡 */
     adStartLevel: number = 4;
-    /** 游戏开始前界面状态 */
+    /**
+     * 游戏开始前界面状态
+     * 1.游戏失败
+     * 2.游戏中途退出
+     * 3.游戏重新开始
+     */
     beforeWins = { count: 0, magnet: [0, 1, 2, 3], unlock: 25 };
 
     /** 初始数据 */
@@ -215,6 +220,8 @@ class DataManager {
         this.initLanguage();
         // 初始化物品池子
         this.initGoodStore();
+        // 初始化磁铁和时钟状态
+        this.initPropState();
         // 初始化无线时间
         this.initTimeInfinite();
         // 提前加载 本地化 文本
@@ -311,6 +318,58 @@ class DataManager {
         }
     }
 
+    public initPropState() {
+        let time = Math.floor(new Date().getTime() / 1000);
+        let level = this.data.boxData.level;
+        let beforeProp = this.data.beforeProp;
+        beforeProp.forEach((obj) => {
+            if (level > obj.unlock) {
+                // 状态：锁定 转 无道具
+                if (obj.state == StateBeforeProp.lock) {
+                    obj.state = StateBeforeProp.noProp;
+                }
+                // 磁铁
+                if (obj.type == TypeProp.magnet) {
+                    // 无限 状态：转 锁定
+                    if (this.data.prop.magnet.tInfinite - time > 0) {
+                        obj.state = StateBeforeProp.choose;
+                    }
+                    else {
+                        // 有道具 
+                        if (this.data.prop.magnet.count > 0) {
+                            // 状态：无道具 转 未选择
+                            if (obj.state == StateBeforeProp.noProp) {
+                                obj.state = StateBeforeProp.unChoose;
+                            }
+                        }
+                        else{
+                            obj.state = StateBeforeProp.noProp
+                        }
+                    }
+                }
+                // 时钟
+                if (obj.type == TypeProp.clock) {
+                    // 无限 状态：转 锁定
+                    if (this.data.prop.clock.tInfinite - time > 0) {
+                        obj.state = StateBeforeProp.choose;
+                    }
+                    else {
+                        // 有道具 
+                        if (this.data.prop.clock.count > 0) {
+                            // 状态：无道具 转 未选择
+                            if (obj.state == StateBeforeProp.noProp) {
+                                obj.state = StateBeforeProp.unChoose;
+                            }
+                        }
+                        else{
+                            obj.state = StateBeforeProp.noProp
+                        }
+                    }
+                }
+            }
+        });
+    };
+
     /** 初始化无限时间 */
     public initTimeInfinite() {
         let time = Math.floor(new Date().getTime() / 1000);
@@ -353,6 +412,7 @@ class DataManager {
     /** 使用道具 */
     public useProp(type: TypeProp) {
         let propNum = -1;
+        let time = Math.floor(new Date().getTime() / 1000);
         switch (type) {
             case TypeProp.ice:
                 if (this.data.prop.ice.count > 0) {
@@ -381,42 +441,26 @@ class DataManager {
             case TypeProp.magnet:
                 // 磁铁选中
                 let stateMagnet = this.data.beforeProp[0];
-                if (this.data.prop.magnet.tInfinite > 0) {
-                    propNum = this.data.prop.magnet.count;
-                    if (stateMagnet.state != StateBeforeProp.choose) {
-                        stateMagnet.state = StateBeforeProp.choose;
+                if (stateMagnet.state == StateBeforeProp.choose) {
+                    if (this.data.prop.magnet.tInfinite - time > 0) {
+                        propNum = this.data.prop.magnet.count;
                     }
-                }
-                else {
-                    if (stateMagnet.state == StateBeforeProp.choose) {
-                        if (this.data.prop.magnet.count > 0) {
-                            this.data.prop.magnet.count -= 1;
-                            propNum = this.data.prop.magnet.count;
-                            if (this.data.prop.magnet.count <= 0) {
-                                stateMagnet.state = StateBeforeProp.noProp;
-                            }
-                        }
+                    else {
+                        this.data.prop.magnet.count -= 1;
+                        propNum = this.data.prop.magnet.count;
                     }
                 }
                 break;
             case TypeProp.clock:
                 // 时钟选中
                 let stateClock = this.data.beforeProp[1];
-                if (this.data.prop.clock.tInfinite > 0) {
-                    propNum = this.data.prop.clock.count;
-                    if (stateClock.state != StateBeforeProp.choose) {
-                        stateClock.state = StateBeforeProp.choose;
+                if (stateClock.state == StateBeforeProp.choose) {
+                    if (this.data.prop.clock.tInfinite - time > 0) {
+                        propNum = this.data.prop.clock.count;
                     }
-                }
-                else {
-                    if (stateClock.state == StateBeforeProp.choose) {
-                        if (this.data.prop.clock.count > 0) {
-                            this.data.prop.clock.count -= 1;
-                            propNum = this.data.prop.clock.count;
-                            if (this.data.prop.clock.count <= 0) {
-                                stateClock.state = StateBeforeProp.noProp;
-                            }
-                        }
+                    else {
+                        this.data.prop.clock.count -= 1;
+                        propNum = this.data.prop.clock.count;
                     }
                 }
                 break;
@@ -430,6 +474,18 @@ class DataManager {
     public refreshDataAfterWin(params: ParamsWin) {
         // 等级变化
         this.data.boxData.level++;
+        // 主题变化
+        if (this.data.boxData.level == 21) {
+            this.data.boxData.areasId = 2;
+        }
+        else if (this.data.boxData.level == 41) {
+            this.data.boxData.areasId = 3;
+        }
+        else if (this.data.boxData.level > 41){
+            if ((this.data.boxData.level - 41)%40 == 0) {
+                this.data.boxData.areasId = 3 + Math.floor((this.data.boxData.level - 41)/40);
+            }
+        }
         // 过关数据变更 关卡宝箱
         if (params.level && params.level > 0) {
             this.data.boxLevel.add += params.level;
@@ -503,7 +559,7 @@ class DataManager {
                         if (this.data.prop.magnet.tInfinite < time) {
                             this.data.prop.magnet.tInfinite = time + record.number;
                         }
-                        else{
+                        else {
                             this.data.prop.magnet.tInfinite += record.number;
                         }
                     }
@@ -511,7 +567,7 @@ class DataManager {
                         if (this.data.prop.clock.tInfinite < time) {
                             this.data.prop.clock.tInfinite = time + record.number;
                         }
-                        else{
+                        else {
                             this.data.prop.clock.tInfinite += record.number;
                         }
                     }
@@ -519,7 +575,7 @@ class DataManager {
                         if (this.data.strength.tInfinite < time) {
                             this.data.strength.tInfinite = time + record.number;
                         }
-                        else{
+                        else {
                             this.data.strength.tInfinite += record.number;
                         }
                     }
@@ -746,7 +802,7 @@ class DataManager {
     /** titleY */
     public getTitlePosY() {
         let heightMax = cc.winSize.height * 0.5;
-        return heightMax * 0.3 + 50;
+        return heightMax * 0.25;
     };
 
     /** 播放物品奖励动画（主界面） */
@@ -759,7 +815,7 @@ class DataManager {
                 .to(0.1, { scale: 1.0 })
                 .delay(0.5)
                 .bezierTo(obj.time, obj.p1, obj.p2, obj.pTo)
-                .call(()=>{
+                .call(() => {
                     node.removeFromParent();
                     res();
                 })

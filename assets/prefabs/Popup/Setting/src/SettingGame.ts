@@ -197,7 +197,7 @@ export default class SettingGame extends PopupBase {
     /************************************************************************************************************************/
     /********************************************************** quit ********************************************************/
     /************************************************************************************************************************/
-    setQuitUI(){
+    setQuitUI() {
         this.nodePause.active = false;
         this.nodeQuit.active = true;
     };
@@ -209,6 +209,9 @@ export default class SettingGame extends PopupBase {
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
+        DataManager.beforeWins.count = 0;
+        DataManager.strengthReduce();
+        DataManager.setData();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromSettingGame }, { mode: PopupCacheMode.Frequent });
     };
 
@@ -222,6 +225,9 @@ export default class SettingGame extends PopupBase {
         // 过度
         await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
         // 进入菜单页
+        DataManager.beforeWins.count = 0;
+        DataManager.strengthReduce();
+        DataManager.setData();
         kit.Event.emit(CConst.event_enter_menu);
     };
 
@@ -236,13 +242,13 @@ export default class SettingGame extends PopupBase {
     };
 
     /** 刷新 语言 */
-    refreshLanguage(){
+    refreshLanguage() {
         this.refreshLabel_pause();
         this.refreshLabel_quit();
     };
 
     /** 刷新label 暂停界面 */
-    refreshLabel_pause(){
+    refreshLabel_pause() {
         // 标题
         DataManager.setString(LangChars.pause_title, (chars: string) => {
             let itemLabel = this.nodePauseTitle.getChildByName('label');
@@ -262,7 +268,7 @@ export default class SettingGame extends PopupBase {
     };
 
     /** 刷新label 退出确认界面 */
-    refreshLabel_quit(){
+    refreshLabel_quit() {
         // 标题
         DataManager.setString(LangChars.exit_title, (chars: string) => {
             let itemLabel = this.nodeQuitTitle.getChildByName('label');

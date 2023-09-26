@@ -14,6 +14,8 @@ const CConst = {
     pathThemeLock: './theme/lock/',
     pathThemeUnLock: './theme/unlock/',
     pathGameBg: './game/bg/',
+    pathGameGood: './game/good/',
+    pathGameGold: './game/gold/',
     /*************************************** end **************************************************/
 
 

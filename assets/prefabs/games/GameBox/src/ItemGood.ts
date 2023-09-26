@@ -1,3 +1,4 @@
+import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import ConfigGold from "../../../../src/config/ConfigGold";
 import DataManager from "../../../../src/config/DataManager";
@@ -15,10 +16,9 @@ export default class ItemGood extends cc.Component {
     state: number = 0;
     isChose: boolean = false;
     param: GoodParam = null;
-    resPath = { bundle: 'prefabs', path: './games/GameBox/res/img/good/' };
-    resGold = { bundle: 'prefabs', path: './games/GameBox/res/img/gold/' };
 
     init(param: GoodParam) {
+        param.y += 15;
         this.state = 0;
         this.param = Common.clone(param);
         this.node.scale = 1;
@@ -35,15 +35,15 @@ export default class ItemGood extends cc.Component {
 
         this.initGold();
 
-        let path = this.resPath.path + this.param.nameRes;
-        kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+        let path = CConst.pathGameGood + this.param.nameRes;
+        kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
                 Common.log(' 资源加载异常 good_path: ', path);
                 return;
             }
             this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
-            this.nodeIcon.width = this.param.w;
-            this.nodeIcon.height = this.param.h;
+            // this.nodeIcon.width = this.param.w;
+            // this.nodeIcon.height = this.param.h;
             this.node.opacity = 255;
         });
     };
@@ -51,8 +51,8 @@ export default class ItemGood extends cc.Component {
     refreshRes(param: GoodParam) {
         let timeOpa = 0.3;
         this.param = param;
-        this.param.w = param.w;
-        this.param.h = param.h;
+        // this.param.w = param.w;
+        // this.param.h = param.h;
         this.param.nameRes = param.nameRes;
         this.param.keyGood = param.keyGood;
         this.param.gold = param.gold;
@@ -60,8 +60,8 @@ export default class ItemGood extends cc.Component {
 
         cc.tween(this.node).to(timeOpa, { opacity: 0 }).call(async () => {
             this.initGold();
-            let path = this.resPath.path + this.param.nameRes;
-            await kit.Resources.loadRes(this.resPath.bundle, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
+            let path = CConst.pathGameGold + this.param.nameRes;
+            await kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
                 if (err) {
                     Common.log(' 资源加载异常 good_path: ', path);
                     return;
@@ -87,8 +87,8 @@ export default class ItemGood extends cc.Component {
             arrGold.forEach((item, index) => { 
                 item.active = index == this.param.gold.count;
                 // 资源更新
-                let path = this.resGold.path + ConfigGold[this.param.keyGood] + '/' + index;
-                kit.Resources.loadRes(this.resGold.bundle, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+                let path = CConst.pathGameGold + ConfigGold[this.param.keyGood] + '/' + index;
+                kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
                     if (err) {
                         Common.log(' 资源加载异常 gold_path: ', path);
                         return;

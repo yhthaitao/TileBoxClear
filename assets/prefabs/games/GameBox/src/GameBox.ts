@@ -103,9 +103,6 @@ export default class GameBox extends cc.Component {
 
     bottomParamArr: GoodParam[][] = [];// 物品数据（检测区）
     bottomMax: number = 7;// 物品最大数量（检测区）
-    bottomDis: number = 90;// 物品间距（检测区）
-    bottomDisY: number = -20;// 物品y轴偏移量（检测区）
-    bottomScale: number = 0.5;// 物品缩放比率（检测区）
     bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
     bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
@@ -120,7 +117,14 @@ export default class GameBox extends cc.Component {
     mainRightX: number = 0;// 箱子最后边
     winScaleByH: number = 1;// 屏幕缩放比例（根据高度判断）
     processDisH: number = 8;// 进度条透明部分高度
-    goodScaleBottom: number = 0.5;// 底部物品缩放比例
+    // 底部物品缩放比例 61  86  116  134
+    goodScaleBottom = {
+        1: 0.5 * 134 / 90,
+        2: 0.5 * 134 / 90,
+        3: 0.5 * 134 / 105,
+        4: 0.5 * 134 / 110,
+        5: 0.5, 6: 0.5, 7: 0.5, 8: 0.5, 9: 0.5,
+    };
     arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
 
     baseTime: number = 1;// 1单位时间
@@ -201,6 +205,7 @@ export default class GameBox extends cc.Component {
     /** 第一次开始 */
     async gameStart(isRestart = false) {
         Common.log('功能：游戏开始');
+        NativeCall.logEventOne(ConfigDot.dot_levelStart);
         this.clear();
         await this.loadData();
         this.initData();
@@ -295,7 +300,7 @@ export default class GameBox extends cc.Component {
         let goldCount = 0;
         let goldTotal = Math.floor(Math.random() * (6 - 2) + 2);// 有金币的物品数量
         Common.log('金币碎片 ' + (isGolden ? '存在' : '不存在') + '; 金币总量：', goldTotal);
-        
+
         /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
         let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
         let objGood = {};
@@ -335,10 +340,10 @@ export default class GameBox extends cc.Component {
             let x = obj.x - this.levelParam.map[keyBox].x;
             let y = obj.y - this.levelParam.map[keyBox].y;
             // 关卡内有金币  物品可以有金币  物品空间高度上间隔两个箱子以上的距离  有金币的物品数量还有剩余
-            if (isGolden && ConfigGold[keyGood] && dataBox.y > goldY  &&  goldCount < goldTotal) {
+            if (isGolden && ConfigGold[keyGood] && dataBox.y > goldY && goldCount < goldTotal) {
                 goldCount++;
                 isGold = true;
-                Common.log('金币碎片: ' + keyGood + '; res: ' + res  + '; 金币计数：', goldCount, '; boxY: ', dataBox.y);
+                Common.log('金币碎片: ' + keyGood + '; res: ' + res + '; 金币计数：', goldCount, '; boxY: ', dataBox.y);
                 goldY = dataBox.y + dataBox.h * 2;
             }
             let goodParam: GoodParam = {
@@ -822,11 +827,13 @@ export default class GameBox extends cc.Component {
                 goodParam.x -= speedX;
                 goodParam.y -= speedY;
                 let nodeGood = this.uiBottomMain.getChildByName(goodParam.name);
-                if (nodeGood.scale > this.goodScaleBottom) {
+                let keyId = Number(String(goodParam.keyGood).substring(0, 1));
+                let scaleBottom = this.goodScaleBottom[Number(String(goodParam.keyGood).substring(0, 1))];
+                if (nodeGood.scale > scaleBottom) {
                     nodeGood.scale -= 0.04;
                 }
                 else {
-                    nodeGood.scale = this.goodScaleBottom;
+                    nodeGood.scale = scaleBottom;
                 }
                 if (Math.pow(disX, 2) + Math.pow(disY, 2) <= Math.pow(speed, 2)) {
                     goodParam.isMove = false;
@@ -834,7 +841,7 @@ export default class GameBox extends cc.Component {
                     goodParam.y = pY;
                     let good = this.uiBottomMain.getChildByName(goodParam.name);
                     good.getComponent(ItemGood).refreshParams(cc.v3(goodParam.x, goodParam.y));
-                    nodeGood.scale = 0.5;
+                    nodeGood.scale = scaleBottom;
                     continue;
                 }
                 else {
@@ -1771,16 +1778,10 @@ export default class GameBox extends cc.Component {
         magnetMain.active = true;
         magnetMain.x = 0;
 
-        let magnetGood = this.removeMidGood(good, magnetMain);
-        magnetGood.zIndex = 0;
-        cc.tween(magnetGood).parallel(
-            cc.tween().to(timeMagnet, { scale: 1.25 }),
-            cc.tween().to(timeMagnet, { position: cc.v3() }),
-        ).start();
-
         let needKey = 0;
         let needNum = 3;
         let bottomNum = 0;
+        let arrGoods: cc.Node[] = [];
         if (this.bottomParamArr.length > 0) {
             let arrParam = this.bottomParamArr.pop();
             needKey = arrParam[0].keyGood;
@@ -1790,7 +1791,7 @@ export default class GameBox extends cc.Component {
                 let good = this.uiBottomMain.getChildByName(goodParam.name);
                 let bottomGood = removeBottomGood(good, magnetMain);
                 DataManager.poolPut(good, this.poolGood);
-                cc.tween(bottomGood).to(timeMove, { position: cc.v3() }).start();
+                arrGoods.push(bottomGood);
             }
             let enough = false;
             let midNum = needNum - bottomNum;
@@ -1820,7 +1821,7 @@ export default class GameBox extends cc.Component {
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
                 let midGood = this.removeMidParam(arrSign[index], magnetMain);
-                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+                arrGoods.push(midGood);
             }
         }
         else {
@@ -1856,9 +1857,36 @@ export default class GameBox extends cc.Component {
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
                 let midGood = this.removeMidParam(arrSign[index], magnetMain);
-                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+                arrGoods.push(midGood);
             }
         }
+
+        // 磁铁移动
+        let magnetGood = this.removeMidGood(good, magnetMain);
+        magnetGood.zIndex = 0;
+        cc.tween(magnetGood).parallel(
+            cc.tween().to(timeMagnet, { scale: 1.25 }),
+            cc.tween().to(timeMagnet, { position: cc.v3() }),
+        ).start();
+        // 物品移动
+        let dis = 30;
+        let width = (arrGoods.length - 1) * dis;
+        arrGoods.forEach((good, index: number) => {
+            good.active = true;
+            good.zIndex = index == 1 ? 1 : 2;
+            let angle = 0;
+            if (index == 0) {
+                angle = 15;
+            }
+            else if (index == 2) {
+                angle = -15;
+            }
+            cc.tween(good).parallel(
+                cc.tween().to(timeMove, { position: cc.v3(index * dis - width * 0.5, index == 1 ? 25 : 15) }),
+                cc.tween().to(timeMove, { angle: angle }),
+                cc.tween().to(timeMove, { scale: 0.85 }),
+            ).start();
+        });
 
         magnetMain.active = true;
         magnetMain.position = cc.v3();
@@ -1910,8 +1938,9 @@ export default class GameBox extends cc.Component {
         magnetMain.active = true;
         magnetMain.x = 0;
 
+        let arrGoods: cc.Node[] = [];
         let specialKey = [9001, 9002];
-        let moveGroup = (index) => {
+        let moveGroup = () => {
             let enough = false;
             let needKey = 0;
             let arrSign: { i: number, j: number, key: string }[] = [];
@@ -1925,6 +1954,7 @@ export default class GameBox extends cc.Component {
                                 needKey = goodParam.keyGood;
                             }
                             if (goodParam.keyGood == needKey) {
+                                console.log('连胜磁铁 i: ', i, '; j: ', j, '; key: ', key);
                                 arrSign.push({ i: i, j: j, key: key });
                                 enough = arrSign.length >= 3;
                                 if (enough) {
@@ -1943,12 +1973,25 @@ export default class GameBox extends cc.Component {
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
                 let midGood = this.removeMidParam(arrSign[index], magnetMain);
-                cc.tween(midGood).to(timeMove, { position: cc.v3() }).start();
+                arrGoods.push(midGood);
             }
         };
         for (let index = 0; index < DataManager.beforeWins.count; index++) {
-            moveGroup(index);
+            moveGroup();
         }
+
+        // 移动物品
+        arrGoods.forEach((good) => {
+            good.active = true;
+            let x = Math.random()*80 - 40;
+            let y = Math.random()*15 + 15;
+            let angle = Math.random()*30 - 15;;
+            cc.tween(good).parallel(
+                cc.tween().to(timeMove, { position: cc.v3(x, y) }),
+                cc.tween().to(timeMove, { angle: angle }),
+                cc.tween().to(timeMove, { scale: 0.85 }),
+            ).start();
+        });
 
         uiMagnet.active = true;
         uiMagnet.position = cc.v3();
@@ -2368,17 +2411,7 @@ export default class GameBox extends cc.Component {
         this.dataObj.isFinish = true;
         switch (type) {
             case TypeFinish.win:
-                {
-                    let params: ParamsWin = {
-                        xingxing: this.getXingxingNum(),
-                        level: 1,
-                        suipian: this.dataObj.numSuipian,
-                        tCount: this.timeGame.count,
-                    };
-                    DataManager.refreshDataAfterWin(params);
-                    DataManager.setData();
-                    kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
-                }
+                this.gameStageWin();
                 break;
             case TypeFinish.failSpace:
                 {
@@ -2388,6 +2421,9 @@ export default class GameBox extends cc.Component {
                         numStrength: 1,
                         numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
                     };
+                    DataManager.beforeWins.count = 0;
+                    DataManager.strengthReduce();
+                    DataManager.setData();
                     kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
@@ -2399,11 +2435,67 @@ export default class GameBox extends cc.Component {
                         numStrength: 1,
                         numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
                     };
+                    DataManager.beforeWins.count = 0;
+                    DataManager.strengthReduce();
+                    DataManager.setData();
                     kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
             default:
                 break;
+        }
+    };
+
+    gameStageWin() {
+        // 打点
+        NativeCall.sTsEvent();
+
+        let stageLevel = DataManager.data.boxData.level
+        // 打点 过关
+        NativeCall.logEventOne(ConfigDot.dot_levelPass);
+        let dot = ConfigDot['dot_pass_level_' + stageLevel];
+        if (dot) {
+            let passTime = Math.floor((new Date().getTime() - this.dataObj.passTime) / 1000); //通关时间
+            NativeCall.logEventFore(dot, String(stageLevel), String(passTime), String(this.dataObj.stepCount));
+        }
+        NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
+
+        // 进入下一关
+        let funcNext = () => {
+            let params: ParamsWin = {
+                xingxing: this.getXingxingNum(),
+                level: 1,
+                suipian: this.dataObj.numSuipian,
+                tCount: this.timeGame.count,
+            };
+            DataManager.refreshDataAfterWin(params);
+            DataManager.setData();
+            kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
+        };
+        let isPlayAds = DataManager.checkIsPlayAdvert(stageLevel);
+        if (isPlayAds) {
+            // 打点 插屏广告请求（过关）
+            NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_nextlevel", "Interstital");
+            let funcA = () => {
+                // 打点 插屏播放完成
+                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(stageLevel));
+                funcNext();
+
+                // 广告计时
+                DataManager.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
+                DataManager.data.advert.record.level = stageLevel;
+                DataManager.setData();
+            };
+            let funcB = () => {
+                funcNext();
+            };
+            let isReady = DataManager.playAdvert(funcA, funcB);
+            if (!isReady) {
+                funcB();
+            }
+        }
+        else {
+            funcNext();
         }
     };
 
@@ -2492,56 +2584,6 @@ export default class GameBox extends cc.Component {
     //     }
     //     Common.log(JSON.stringify(name, null, 4));
     // }
-
-    /** 关卡结束 */
-    levelGameOver() {
-        // 打点
-        NativeCall.sTsEvent();
-        NativeCall.closeBanner();
-
-        let level = DataManager.data.boxData.level
-
-        // 打点 过关
-        NativeCall.logEventOne(ConfigDot.dot_levelPass);
-        let dot = ConfigDot['dot_pass_level_' + level];
-        if (dot) {
-            let passTime = Math.floor((new Date().getTime() - this.dataObj.passTime) / 1000); //通关时间
-            NativeCall.logEventFore(dot, String(level), String(passTime), String(this.dataObj.stepCount));
-        }
-        NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
-
-        // 进入下一关
-        let funcNext = () => {
-            DataManager.data.boxData.level += 1;
-            DataManager.setData(true);
-            kit.Event.emit(CConst.event_enter_win);
-        };
-        let isPlayAds = DataManager.checkIsPlayAdvert(level);
-        if (isPlayAds) {
-            // 打点 插屏广告请求（过关）
-            NativeCall.logEventThree(ConfigDot.dot_adReq, "inter_nextlevel", "Interstital");
-            let funcA = () => {
-                // 打点 插屏播放完成
-                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(level));
-                funcNext();
-
-                // 广告计时
-                DataManager.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
-                DataManager.data.advert.record.level = level;
-                DataManager.setData();
-            };
-            let funcB = () => {
-                funcNext();
-            };
-            let isReady = DataManager.playAdvert(funcA, funcB);
-            if (!isReady) {
-                funcB();
-            }
-        }
-        else {
-            funcNext();
-        }
-    }
 
     /** 暂停 */
     gamePause() {

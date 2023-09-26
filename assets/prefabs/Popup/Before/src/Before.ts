@@ -42,7 +42,6 @@ export default class Before extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 游戏开始前页面 showBefore()');
         this.params = Common.clone(options);
-
         this.resetLabel();
         this.resetContent();
         this.resetProp();
@@ -130,7 +129,8 @@ export default class Before extends PopupBase {
             // 连胜进度
             let process = this.obj.win.process[index];
             this.winProcess.opacity = 255;
-            this.winProcess.width = process.w;
+            this.winProcess.getChildByName('bar').width = process.w;
+            console.log('count: ', wins.count, '; index: ', index, '; x: ', light.x, '; width: ', process.w);
             // 连胜节点
             this.arrNodeWin[index].opacity = this.obj.win.opaTrue;
         }
@@ -192,8 +192,6 @@ export default class Before extends PopupBase {
             case TypeBefore.fromMenu:
                 if (DataManager.data.strength.count > 0) {
                     await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    DataManager.strengthReduce();
-                    DataManager.setData();
                     kit.Event.emit(CConst.event_enter_game);
                 }
                 else {
@@ -203,8 +201,6 @@ export default class Before extends PopupBase {
             case TypeBefore.fromSettingGame:// 游戏中途设置
                 if (DataManager.data.strength.count > 0) {
                     await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    DataManager.strengthReduce();
-                    DataManager.setData();
                     kit.Event.emit(CConst.event_game_restart);
                 }
                 else {
@@ -219,8 +215,6 @@ export default class Before extends PopupBase {
                 // 开始游戏
                 if (DataManager.data.strength.count > 0) {
                     await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    DataManager.strengthReduce();
-                    DataManager.setData();
                     kit.Event.emit(CConst.event_game_start);
                 }
                 // 返回菜单
@@ -242,10 +236,7 @@ export default class Before extends PopupBase {
                 await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                 kit.Event.emit(CConst.event_enter_menu);
                 break;
-            case TypeBefore.fromGameWin:
-                // 胜利界面 进入菜单页（恢复消除的体力）
-                DataManager.strengthResume();
-                DataManager.setData();
+            case TypeBefore.fromGameWin:// 胜利界面 进入菜单页（恢复消除的体力）
                 kit.Event.emit(CConst.event_enter_menu);
                 break;
             case TypeBefore.fromGameFail:// 游戏失败 点击退出

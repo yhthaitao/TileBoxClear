@@ -609,8 +609,6 @@ export default class MainMenuMid extends cc.Component {
         kit.Popup.show(CConst.popup_path_daily, {}, { mode: PopupCacheMode.Frequent });
     };
 
-    
-
     /** 按钮事件 银行 */
     eventBtnHomeBank() {
         kit.Audio.playEffect(CConst.sound_clickUI);
@@ -638,7 +636,11 @@ export default class MainMenuMid extends cc.Component {
         this.theme_mid_areas_content.height = item.height * length + hElse;
         // 配置主题内容
         for (let index = 0; index < length; index++) {
-            let cell = cc.instantiate(item);
+            let name = 'cell' + index;
+            let cell = this.theme_mid_areas_content.getChildByName(name);
+            if (!cell) {
+                cell = cc.instantiate(item);
+            }
             this.initThemeAreasCell(index, cell);
             cell.parent = this.theme_mid_areas_content;
         }

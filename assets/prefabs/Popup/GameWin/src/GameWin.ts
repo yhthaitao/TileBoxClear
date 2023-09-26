@@ -252,9 +252,6 @@ export default class GameWin extends PopupBase {
         }
         else {
             await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
-            // continue 进入菜单页（恢复消除的体力）
-            DataManager.strengthResume();
-            DataManager.setData();
             kit.Event.emit(CConst.event_enter_menu);
         }
     }
@@ -264,9 +261,6 @@ export default class GameWin extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
-        // 进入菜单页（恢复消除的体力）
-        DataManager.strengthResume();
-        DataManager.setData();
         kit.Event.emit(CConst.event_enter_menu);
     }
 }
