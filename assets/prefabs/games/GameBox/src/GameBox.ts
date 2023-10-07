@@ -232,8 +232,8 @@ export default class GameBox extends cc.Component {
             index = (level - lenLevel0) % lenLevel1 - 1;
         }
         // 加载背景
-        let lengthBg = 4;
-        let pathBg = CConst.pathGameBg + (level % lengthBg + 1);
+        let bgId = Math.floor((level - 1) / 5 % 4) + 1;
+        let pathBg = CConst.pathGameBg + bgId;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
                 Common.log(' 资源加载异常 bg: ', pathBg);
@@ -274,6 +274,7 @@ export default class GameBox extends cc.Component {
         // 用于磁铁和时钟功能
         let topY = 0;
         let topH = 0;
+        let frameY = 0;
         let topBoxIndex = this.levelParam.map.length - 1;
         let topGoodIndex = this.levelParam.item.length - 1;
         // 配置箱子和物品数据
@@ -284,14 +285,17 @@ export default class GameBox extends cc.Component {
             let y = Math.floor(Number(obj.y));
             let w = Math.floor(Number(obj.w));
             let h = Math.floor(Number(obj.h));
-            let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
-            };
-            this.objGame[index] = boxParam;
             if (topY < y) {
                 topY = y;
                 topH = h;
             }
+            if (this.getBoxIsFrame(h) && y > frameY) {
+                frameY = y;
+            }
+            let boxParam: BoxParam = {
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
+            };
+            this.objGame[index] = boxParam;
         }
 
         // 金币逻辑
@@ -338,7 +342,10 @@ export default class GameBox extends cc.Component {
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
             let x = obj.x - this.levelParam.map[keyBox].x;
-            let y = obj.y - this.levelParam.map[keyBox].y;
+            let y = obj.y - this.levelParam.map[keyBox].y + 15;
+            if (dataBox.isFrame) {
+                y = 15;
+            }
             // 关卡内有金币  物品可以有金币  物品空间高度上间隔两个箱子以上的距离  有金币的物品数量还有剩余
             if (isGolden && ConfigGold[keyGood] && dataBox.y > goldY && goldCount < goldTotal) {
                 goldCount++;
@@ -354,7 +361,8 @@ export default class GameBox extends cc.Component {
             dataBox.goods[index] = goodParam;
         }
 
-        // 使用 磁铁 和 时钟
+        /********************************************** 使用 磁铁 和 时钟 **************************************************/
+        // 检测是否有大物品
         let checkIsHaveBig = (objGoods: any) => {
             let keyBig = null;
             for (const key in objGoods) {
@@ -373,6 +381,7 @@ export default class GameBox extends cc.Component {
         let getBoxParam = (boxKey: string, index: number) => {
             let boxParam: BoxParam = Common.clone(this.objGame[boxKey]);
             boxParam.index = index;
+            boxParam.x = 0;
             boxParam.name = 'box_' + index;
             boxParam.goods = {};
             return boxParam;
@@ -382,7 +391,7 @@ export default class GameBox extends cc.Component {
             let cfg = this.goodsCfg[keyGood];
             let res = cfg.name;
             let goodMegnet: GoodParam = {
-                index: index, keyGood: keyGood, nameRes: res, name: 'good_' + index, x: 0, y: 0, w: cfg.w, h: cfg.h,
+                index: index, keyGood: keyGood, nameRes: res, name: 'good_' + index, x: 0, y: 0 + 15, w: cfg.w, h: cfg.h,
                 isMove: false, isEnough: false,
                 gold: { isGold: false, count: 0, total: 4 },
                 box: { name: '', key: 0, x: 0, y: 0 },
@@ -427,8 +436,14 @@ export default class GameBox extends cc.Component {
             }
         };
         let arrIdBox = Object.keys(this.objGame);
-        arrIdBox.filter((key) => {
-            return !this.getBoxIsFrame(this.objGame[key].h);
+        arrIdBox = arrIdBox.filter((key) => {
+            let obj = this.objGame[key];
+            if (frameY > 0) {
+                return !this.getBoxIsFrame(Number(obj.h)) && Number(obj.y) > frameY;
+            }
+            else {
+                return !this.getBoxIsFrame(Number(obj.h));
+            }
         });
 
         // 使用道具-磁铁
@@ -1954,7 +1969,6 @@ export default class GameBox extends cc.Component {
                                 needKey = goodParam.keyGood;
                             }
                             if (goodParam.keyGood == needKey) {
-                                console.log('连胜磁铁 i: ', i, '; j: ', j, '; key: ', key);
                                 arrSign.push({ i: i, j: j, key: key });
                                 enough = arrSign.length >= 3;
                                 if (enough) {
@@ -1983,9 +1997,9 @@ export default class GameBox extends cc.Component {
         // 移动物品
         arrGoods.forEach((good) => {
             good.active = true;
-            let x = Math.random()*80 - 40;
-            let y = Math.random()*15 + 15;
-            let angle = Math.random()*30 - 15;;
+            let x = Math.random() * 80 - 40;
+            let y = Math.random() * 15 + 15;
+            let angle = Math.random() * 30 - 15;;
             cc.tween(good).parallel(
                 cc.tween().to(timeMove, { position: cc.v3(x, y) }),
                 cc.tween().to(timeMove, { angle: angle }),
@@ -2308,7 +2322,6 @@ export default class GameBox extends cc.Component {
         let scriptGood = good.getComponent(ItemGood);
         if (scriptGood.param.gold.isGold) {
             this.dataObj.numSuipian++;
-            DataManager.data.boxSuipian.count++;
             DataManager.setData();
 
             // 碎片开始移动
