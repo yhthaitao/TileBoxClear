@@ -684,7 +684,7 @@ export default class MainMenuMid extends cc.Component {
             labelLevel.color = objAreas.level.color.dark;
             right.active = false;
             lock.active = true;
-            cell.getComponent(cc.Button).interactable = true;
+            cell.getComponent(cc.Button).interactable = false;
         }
         kit.Resources.loadRes(CConst.bundleCommon, pathBack, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
@@ -921,12 +921,14 @@ export default class MainMenuMid extends cc.Component {
     /** label theme areas */
     refreshLabel_theme_areas() {
         this.theme_mid_areas_content.children.forEach((cell) => {
-            DataManager.setString(LangChars.BreakTime, (chars: string) => {
-                let labelTitle = cell.getChildByName('labelTitle');
-                labelTitle.getComponent(cc.Label).string = chars;
+            let index = Number(cell.name.substring(4));
+            DataManager.setString(LangChars['areas_' + (index + 1)], (chars: string) => {
+                if (chars) {
+                    let labelTitle = cell.getChildByName('labelTitle');
+                    labelTitle.getComponent(cc.Label).string = chars;
+                }
             });
-            let index = cell.name.substring(4);
-            let levelAreas = this.getLevelAreas(Number(index));
+            let levelAreas = this.getLevelAreas(index);
             DataManager.setString(LangChars.Level, (chars: string) => {
                 let labelLevel = cell.getChildByName('labelLevel');
                 labelLevel.getComponent(cc.Label).string = chars + '  ' + levelAreas.start + '-' + levelAreas.finish;
