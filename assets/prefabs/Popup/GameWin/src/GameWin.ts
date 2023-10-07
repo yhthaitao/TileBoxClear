@@ -74,7 +74,7 @@ export default class GameWin extends PopupBase {
         });
 
         // 刷新ui
-        this.resetContent();
+        // this.resetContent();
         
         this.setIsLock(true);
     }
@@ -225,10 +225,13 @@ export default class GameWin extends PopupBase {
                     funcXing(index);
                 }).start();
             }
+            else{
+                this.setIsLock(false);
+            }
         };
         funcXing();
 
-        this.playAniBoxGood();
+        // this.playAniBoxGood();
     }
 
     protected hideBefore(): void {

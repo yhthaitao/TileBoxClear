@@ -24,7 +24,7 @@ export default class ItemBox extends cc.Component {
 
         let layer = this.node.getChildByName('layer');
         layer.getComponent(cc.Label).string = String(this.param.index);
-        layer.active = false;
+        // layer.active = true;
 
         // 特殊箱子
         if (this.param.isFrame) {
@@ -45,11 +45,10 @@ export default class ItemBox extends cc.Component {
         this.nodeMain.children.sort((a: cc.Node, b: cc.Node) => {
             return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
         });
-        this.refreshGoods();
         // 特殊框更新
-        let count = this.nodeMain.childrenCount;
+        let goodNum = this.nodeMain.childrenCount;
         if (isInit) {
-            this.total = count;
+            this.total = goodNum;
             let nodeLine = this.itemKuang.getChildByName('line');
             let widthTotal = nodeLine.width;
             let widthDistance = widthTotal / this.total;
@@ -62,30 +61,37 @@ export default class ItemBox extends cc.Component {
             let process = this.itemKuang.getChildByName('process');
             let bar = process.getChildByName('bar');
             bar.getComponent(cc.Sprite).fillRange = 1;
+            this.initGoods();
         }
         else {
-            // 显示物品
-            if (count > 0) {
-                this.showGood(this.nodeMain.children[0]);
-            }
             let process = this.itemKuang.getChildByName('process');
             let bar = process.getChildByName('bar');
-            bar.getComponent(cc.Sprite).fillRange = count / this.total;
+            bar.getComponent(cc.Sprite).fillRange = goodNum / this.total;
+            this.refreshGoods();
         }
         let itemLabel = this.itemKuang.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = '' + count;
+        itemLabel.getComponent(cc.Label).string = '' + goodNum;
     };
 
-    showGood(good: cc.Node) {
-        good.active = true;
-        good.scale = 0;
-        cc.tween(good).to(0.2, {scale: 1.1}).to(0.15, {scale: 1.0}).start();
-    };
-
-    refreshGoods() {
+    initGoods(){
         this.nodeMain.children.forEach((good: cc.Node, index: number) => {
             good.x = 0;
             good.active = index == 0;
+        });
+    }
+
+    refreshGoods() {
+        this.nodeMain.children.forEach((good: cc.Node, index: number) => {
+            if (index == 0) {
+                if (!good.active) {
+                    good.active = true;
+                    good.scale = 0;
+                    cc.tween(good).to(0.2, { scale: 1.1 }).to(0.15, { scale: 1.0 }).start();
+                }
+            }
+            else{
+                good.active = false;
+            }
         });
     }
 

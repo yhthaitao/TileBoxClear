@@ -78,6 +78,7 @@ export default class Loading extends cc.Component {
             .start();
 
         this.nodeProcess.active = true;
+        this.nodeProcess.y = -cc.winSize.height * 0.5 * 0.6;
         tween(this.nodeProcess).delay(tDelay)
             .to(tOpa, { opacity: 255 }).call(() => {
                 this.isStart = true;

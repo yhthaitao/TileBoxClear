@@ -154,10 +154,11 @@ export default class MainMenuTop extends cc.Component {
         let coinCur = Number(this.labelCoinNum.getComponent(cc.Label).string);
         let coinNext = DataManager.data.numCoin;
         let coinDis = coinNext - coinCur;
-        let length = 10;
+        let count = 0;
+        let total = 20;
         let pStart = Common.getLocalPos(this.node.parent, cc.v3(x, y), this.iconCoin.parent);
         let pFinish = this.iconCoin.position;
-        for (let index = 0; index < length; index++) {
+        for (let index = 0; index < total; index++) {
             let coin = cc.instantiate(this.iconCoin);
             coin.active = true;
             coin.parent = this.iconCoin.parent;
@@ -168,16 +169,18 @@ export default class MainMenuTop extends cc.Component {
             let bezier1 = { p1: cc.v2(pStart.x, pStart.y), p2: cc.v2(pMid.x, pStart.y), pTo: cc.v2(pMid.x, pMid.y), time: 0.2, };
             let bezier2 = { p1: cc.v2(pMid.x, pMid.y), p2: cc.v2(pFinish.x, pMid.y), pTo: cc.v2(pFinish.x, pFinish.y), time: Math.random() + 0.2, };
             cc.tween(coin)
-                .delay(Math.random() * 0.1)
+                .delay(index * 0.01)
                 .bezierTo(bezier1.time, bezier1.p1, bezier1.p2, bezier1.pTo)
-                .delay(index * 0.02)
+                .delay(index * 0.01)
                 .parallel(
                     cc.tween().bezierTo(bezier2.time, bezier2.p1, bezier2.p2, bezier2.pTo),
                     cc.tween().to(bezier2.time, { scale: 0.75 }),
                 )
                 .call(() => {
                     coin.removeFromParent();
-                    this.labelCoinNum.getComponent(cc.Label).string = '' + (coinCur + coinDis * (index + 1) / length);
+                    count++;
+                    let number = coinCur + coinDis * count / total;
+                    this.labelCoinNum.getComponent(cc.Label).string = '' + Math.floor(number);
                     this.iconCoin.getComponent(cc.Animation).play();
                 })
                 .start();

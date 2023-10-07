@@ -18,7 +18,6 @@ export default class ItemGood extends cc.Component {
     param: GoodParam = null;
 
     init(param: GoodParam) {
-        param.y += 15;
         this.state = 0;
         this.param = Common.clone(param);
         this.node.scale = 1;
@@ -42,8 +41,8 @@ export default class ItemGood extends cc.Component {
                 return;
             }
             this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
-            // this.nodeIcon.width = this.param.w;
-            // this.nodeIcon.height = this.param.h;
+            this.nodeIcon.width = this.param.w;
+            this.nodeIcon.height = this.param.h;
             this.node.opacity = 255;
         });
     };
@@ -51,8 +50,8 @@ export default class ItemGood extends cc.Component {
     refreshRes(param: GoodParam) {
         let timeOpa = 0.3;
         this.param = param;
-        // this.param.w = param.w;
-        // this.param.h = param.h;
+        this.param.w = param.w;
+        this.param.h = param.h;
         this.param.nameRes = param.nameRes;
         this.param.keyGood = param.keyGood;
         this.param.gold = param.gold;
@@ -60,7 +59,7 @@ export default class ItemGood extends cc.Component {
 
         cc.tween(this.node).to(timeOpa, { opacity: 0 }).call(async () => {
             this.initGold();
-            let path = CConst.pathGameGold + this.param.nameRes;
+            let path = CConst.pathGameGood + this.param.nameRes;
             await kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err, assets: cc.SpriteFrame) => {
                 if (err) {
                     Common.log(' 资源加载异常 good_path: ', path);
