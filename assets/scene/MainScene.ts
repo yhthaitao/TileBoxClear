@@ -38,11 +38,8 @@ export default class MainScene extends cc.Component {
 
     /** 节点-弹窗父节点 */
     nodePopup: cc.Node = null;
-
-    /** 是否完成-loading动画 */
-    isCompleteLoading: Boolean = false;
-    /** 是否完成-数据加载 */
-    isCompleteLoadData: Boolean = false;
+    /** 是否加载完成 */
+    objComplete = { loading: false, data: false, ui: false }; 
 
     protected onLoad(): void {
         Common.log('页面 主菜单 onLoad()');
@@ -56,7 +53,8 @@ export default class MainScene extends cc.Component {
     }
 
     async init() {
-        await this.initData();
+        this.initLoading();
+        this.initData();
         this.initUI();
         // 应用内评价（启动游戏时调用）
         let funcEvaluate = () => {
@@ -69,26 +67,29 @@ export default class MainScene extends cc.Component {
         funcEvaluate();
     }
 
-    /** 初始化 数据*/
-    async initData() {
-        // 初始化游戏数据
-        await DataManager.initData(this.nodeVideo);
-        // 初始化音频
-        kit.Audio.initAudio();
-        kit.Audio.playMusic(CConst.sound_music);
-    };
-
-    /** 初始化 ui */
-    initUI(): void {
-        this.initLoading();
-        this.initNoVideo();
-        this.initPopup();
-        this.loadComponents();
-    };
-
     /** 加载界面 初始化 */
     initLoading(): void {
         this.setGameState(StateGame.loading);
+    };
+
+    /** 初始化 数据*/
+    async initData() {
+        // 初始化音频
+        kit.Audio.initAudio();
+        kit.Audio.playMusic(CConst.sound_music);
+        // 初始化游戏数据
+        await DataManager.initData(this.nodeVideo);
+        this.objComplete.data = true;
+        this.enterMenuLayer();
+    };
+
+    /** 初始化 ui */
+    async initUI() {
+        this.initNoVideo();
+        this.initPopup();
+        await this.loadComponents();
+        this.objComplete.ui = true;
+        this.enterMenuLayer();
     };
 
     /** 无视频提示 */
@@ -113,17 +114,13 @@ export default class MainScene extends cc.Component {
         await kit.Resources.loadRes(ResPath.preGameBox.bundle, ResPath.preGameBox.path, cc.Prefab);
 
         NativeCall.logEventOne(ConfigDot.dot_resource_load_success);
-        this.isCompleteLoadData = true;
-
-        this.enterMenuLayer();
     }
 
     /** 进入主菜单 */
     enterMenuLayer() {
-        if (!this.isCompleteLoading || !this.isCompleteLoadData) {
+        if (!this.objComplete.loading || !this.objComplete.data || !this.objComplete.ui) {
             return;
         }
-
         let script = this.nodeLoading.getComponent(Loading);
         script.playAniLeave(()=>{
             let boxData = DataManager.data.boxData;
@@ -202,7 +199,7 @@ export default class MainScene extends cc.Component {
 
     /** 事件回调：loading完成 */
     eventBack_loadingComplete() {
-        this.isCompleteLoading = true;
+        this.objComplete.loading = true;
         this.enterMenuLayer();
     };
 
