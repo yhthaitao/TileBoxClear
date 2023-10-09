@@ -302,7 +302,7 @@ export default class GameBox extends cc.Component {
         let isGolden = this.levelParam.isGolden ? true : false;
         let goldY = 0;
         let goldCount = 0;
-        let goldTotal = Math.floor(Math.random() * (6 - 2) + 2);// 有金币的物品数量
+        let goldTotal = Math.floor(Math.random() * (8 - 6) + 6);// 有金币的物品数量
         Common.log('金币碎片 ' + (isGolden ? '存在' : '不存在') + '; 金币总量：', goldTotal);
 
         /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
@@ -361,6 +361,7 @@ export default class GameBox extends cc.Component {
             dataBox.goods[index] = goodParam;
         }
 
+        let isStoreData = false;
         /********************************************** 使用 磁铁 和 时钟 **************************************************/
         // 检测是否有大物品
         let checkIsHaveBig = (objGoods: any) => {
@@ -451,7 +452,7 @@ export default class GameBox extends cc.Component {
         }
         else {
             Common.log('道具 磁铁 使用');
-            DataManager.setData();
+            isStoreData = true;
             for (let index = 0; index < 3; index++) {
                 let boxId = Math.floor(Math.random() * (arrIdBox.length - 1));
                 let boxKey = arrIdBox.splice(boxId, 1)[0];
@@ -465,12 +466,16 @@ export default class GameBox extends cc.Component {
         }
         else {
             Common.log('道具 时钟 使用');
-            DataManager.setData();
+            isStoreData = true;
             for (let index = 0; index < 3; index++) {
                 let boxId = Math.floor(Math.random() * (arrIdBox.length - 1));
                 let boxKey = arrIdBox.splice(boxId, 1)[0];
                 addGoodParam(boxKey, 9001);
             }
+        }
+        // 存储数据
+        if (isStoreData) {
+            DataManager.setData();
         }
     }
 
@@ -1932,8 +1937,8 @@ export default class GameBox extends cc.Component {
         if (this.isLock) {
             return;
         }
-        DataManager.beforeWins.count = 2;
-        if (DataManager.beforeWins.count < 1) {
+        let wins = DataManager.data.wins.count - DataManager.data.wins.start;
+        if (wins < 1) {
             return;
         }
         this.isLock = true;
@@ -1991,7 +1996,7 @@ export default class GameBox extends cc.Component {
                 arrGoods.push(midGood);
             }
         };
-        for (let index = 0; index < DataManager.beforeWins.count; index++) {
+        for (let index = 1; index < wins; index++) {
             moveGroup();
         }
 
@@ -2019,7 +2024,7 @@ export default class GameBox extends cc.Component {
 
                 // 更新ui
                 this.isLock = false;
-                this.goodsCount += 3 * DataManager.beforeWins.count;
+                this.goodsCount += 3 * wins;
                 if (this.goodsCount >= this.goodsTotal) {
                     this.goodsCount = this.goodsTotal;
                     this.playAniGameOver(TypeFinish.win);
@@ -2428,32 +2433,16 @@ export default class GameBox extends cc.Component {
                 this.gameStageWin();
                 break;
             case TypeFinish.failSpace:
-                {
-                    let params: ParamsFail = {
-                        type: type,
-                        numSuipian: this.dataObj.numSuipian,
-                        numStrength: 1,
-                        numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
-                    };
-                    DataManager.beforeWins.count = 0;
-                    DataManager.strengthReduce();
-                    DataManager.setData();
-                    kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
-                }
-                break;
             case TypeFinish.failTime:
-                {
-                    let params: ParamsFail = {
-                        type: type,
-                        numSuipian: this.dataObj.numSuipian,
-                        numStrength: 1,
-                        numMagnet: DataManager.beforeWins.magnet[DataManager.beforeWins.count],
-                    };
-                    DataManager.beforeWins.count = 0;
-                    DataManager.strengthReduce();
-                    DataManager.setData();
-                    kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
-                }
+                let params: ParamsFail = {
+                    type: type,
+                    numSuipian: this.dataObj.numSuipian,
+                    numStrength: 1,
+                    numMagnet: DataManager.data.wins.count - DataManager.data.wins.start,
+                };
+                DataManager.strengthReduce();
+                DataManager.setData();
+                kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
                 break;
             default:
                 break;

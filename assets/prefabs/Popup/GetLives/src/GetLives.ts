@@ -31,9 +31,12 @@ export default class GetLives extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 描述
+        let count = DataManager.data.boxData.timesLive.count;
+        let total = DataManager.data.boxData.timesLive.total;
+        let button = this.btnFree.getComponent(cc.Button);
+        button.interactable = count > 0;
+        this.btnFree.opacity = button.interactable ? 255 : 100;
         DataManager.setString(LangChars.addCoin_desc_0, (chars: string) => {
-            let count = DataManager.data.boxData.timesLive.count;
-            let total = DataManager.data.boxData.timesLive.total;
             let itemLabel = this.nodeProp.getChildByName('labelDesc');
             itemLabel.getComponent(cc.Label).string = count + '/' + total + chars;
         });
@@ -113,7 +116,13 @@ export default class GetLives extends PopupBase {
     /** 按钮事件 免费获取体力 */
     eventBtnFree() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Event.emit(CConst.event_notice, '功能暂无');
+        let strength = DataManager.data.strength;
+        if (strength.count >= strength.total) {
+
+        }
+        else {
+            kit.Event.emit(CConst.event_notice, '体力值已满');
+        }
     };
 
     /** 按钮事件 退出 */

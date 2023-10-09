@@ -90,7 +90,7 @@ export default class Before extends PopupBase {
     /** 刷新节点内容 */
     resetContent() {
         // 连胜是否锁定
-        let isWinsLock = DataManager.data.boxData.level < DataManager.beforeWins.unlock;
+        let isWinsLock = DataManager.data.boxData.level < DataManager.data.wins.unlock;
         if (isWinsLock) {
             this.nodeWin.active = false;
 
@@ -121,9 +121,9 @@ export default class Before extends PopupBase {
         this.winLight.opacity = 0;
         this.winProcess.opacity = 0;
         this.arrNodeWin.forEach((win) => { win.opacity = this.obj.win.opaFalse });
-        let wins = DataManager.beforeWins;
-        if (wins.count > 0) {
-            let index = wins.count - 1;
+        let wins = DataManager.data.wins.count - DataManager.data.wins.start;
+        if (wins > 0) {
+            let index = wins - 1;
             // 连胜光罩
             let light = this.obj.win.light[index]
             this.winLight.opacity = 255;
@@ -133,7 +133,7 @@ export default class Before extends PopupBase {
             let process = this.obj.win.process[index];
             this.winProcess.opacity = 255;
             this.winProcess.getChildByName('bar').width = process.w;
-            console.log('count: ', wins.count, '; index: ', index, '; x: ', light.x, '; width: ', process.w);
+            console.log('wins: ', wins, '; index: ', index, '; x: ', light.x, '; width: ', process.w);
             // 连胜节点
             this.arrNodeWin[index].opacity = this.obj.win.opaTrue;
         }
@@ -208,6 +208,9 @@ export default class Before extends PopupBase {
             case TypeBefore.fromGameFail:// 游戏失败
                 if (DataManager.data.strength.count > 0) {
                     let funcNext = async () => {
+                        // 重新开始游戏 中断连胜
+                        DataManager.data.wins.count = 0;
+                        DataManager.setData();
                         await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                         kit.Event.emit(CConst.event_game_restart);
                     };
@@ -234,6 +237,9 @@ export default class Before extends PopupBase {
             case TypeBefore.fromSettingGame:// 游戏中途设置 进入重新开始界面 点击退出
             case TypeBefore.fromGameFail:// 游戏失败 进入重新开始界面 点击退出
                 let funcNext = async () => {
+                    // 游戏失败 中断连胜
+                    DataManager.data.wins.count = 0;
+                    DataManager.setData();
                     await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                     kit.Event.emit(CConst.event_enter_menu);
                 };

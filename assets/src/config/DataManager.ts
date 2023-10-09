@@ -114,13 +114,6 @@ class DataManager {
     isCloudLoad: boolean = false;
     /** 插屏广告开启关卡 */
     adStartLevel: number = 12;
-    /**
-     * 游戏开始前界面状态
-     * 1.游戏失败
-     * 2.游戏中途退出
-     * 3.游戏重新开始
-     */
-    beforeWins = { count: 0, magnet: [0, 1, 2, 3], unlock: 25 };
 
     /** 初始数据 */
     data = {
@@ -163,6 +156,9 @@ class DataManager {
             refresh: { count: 3 },// 刷新
             magnet: { count: 3, tInfinite: 0 },// 磁铁
             clock: { count: 3, tInfinite: 0 },// 时钟
+        },
+        wins: { 
+            count: 0, start: 1, unlock: 25 
         },
         // 宝箱相关参数（碎片宝箱）
         boxSuipian: {
@@ -537,8 +533,9 @@ class DataManager {
             }
             // 连胜奖励在25关之后开启
             if (this.data.boxData.level > 25 && obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
-                if (this.beforeWins.count < 3) {
-                    this.beforeWins.count++;
+                let wins = this.data.wins.count - this.data.wins.start;
+                if (wins < 3) {
+                    this.data.wins.count++;
                 }
             }
         });

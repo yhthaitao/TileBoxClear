@@ -23,9 +23,12 @@ export default class GetCoin extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 描述
+        let count = DataManager.data.boxData.timesCoin.count;
+        let total = DataManager.data.boxData.timesCoin.total;
+        let button = this.btnFree.getComponent(cc.Button);
+        button.interactable = count > 0;
+        this.btnFree.opacity = button.interactable ? 255 : 100;
         DataManager.setString(LangChars.addCoin_desc_0, (chars: string) => {
-            let count = DataManager.data.boxData.timesCoin.count;
-            let total = DataManager.data.boxData.timesCoin.total;
             let itemLabel = this.nodeProp.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = count + '/' + total + chars;
         });
