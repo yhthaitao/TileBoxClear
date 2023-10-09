@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "62b125b4-3bb7-4f16-9113-60fa7758d872",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xiaoMao_fen_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "6172b6cf-4706-47d2-b5df-c09da73579da",
+      "importer": "sprite-frame",
       "rawTextureUuid": "62b125b4-3bb7-4f16-9113-60fa7758d872",
       "trimType": "auto",
       "trimThreshold": 1,

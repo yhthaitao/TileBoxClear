@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "e2988f8e-7ba1-4371-919a-db2e2ea6fdd5",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "gou_huang_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "1cb9be8e-491c-4c81-8c9b-9384f76ca4d7",
+      "importer": "sprite-frame",
       "rawTextureUuid": "e2988f8e-7ba1-4371-919a-db2e2ea6fdd5",
       "trimType": "auto",
       "trimThreshold": 1,

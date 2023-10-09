@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "d0dfc5ce-9190-482d-bee1-346a05bea39d",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "signBoxXing": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "f2310607-6a0e-427a-bc4e-cf129ee3470d",
+      "importer": "sprite-frame",
       "rawTextureUuid": "d0dfc5ce-9190-482d-bee1-346a05bea39d",
       "trimType": "auto",
       "trimThreshold": 1,

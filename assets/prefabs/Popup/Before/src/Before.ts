@@ -67,7 +67,10 @@ export default class Before extends PopupBase {
         // 开始游戏
         let labelPLay = this.nodePlay.getChildByName('label');
         labelPLay.opacity = 0;
-        DataManager.setString(LangChars.gameBefore_play, (chars: string) => {
+        let isRestart = this.params.type == TypeBefore.fromSettingGame
+            || this.params.type == TypeBefore.fromGameFail;
+        let playString = isRestart ? LangChars.exit_confirm_restart : LangChars.gameBefore_play;
+        DataManager.setString(playString, (chars: string) => {
             let _string = chars;
             labelPLay.getComponent(cc.Label).string = _string;
             labelPLay.opacity = 255;
@@ -90,7 +93,7 @@ export default class Before extends PopupBase {
         let isWinsLock = DataManager.data.boxData.level < DataManager.beforeWins.unlock;
         if (isWinsLock) {
             this.nodeWin.active = false;
-            
+
             this.nodeChose.active = true;
             this.nodeChose.y = this.obj.pos.lock.chose.y;
             this.nodeProp.active = true;
@@ -191,17 +194,24 @@ export default class Before extends PopupBase {
         switch (this.params.type) {
             case TypeBefore.fromMenu:
                 if (DataManager.data.strength.count > 0) {
-                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    kit.Event.emit(CConst.event_enter_game);
+                    let funcNext = async () => {
+                        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                        kit.Event.emit(CConst.event_enter_game);
+                    };
+                    DataManager.playAdvert(funcNext);
                 }
                 else {
                     kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
                 }
                 break;
             case TypeBefore.fromSettingGame:// 游戏中途设置
+            case TypeBefore.fromGameFail:// 游戏失败
                 if (DataManager.data.strength.count > 0) {
-                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    kit.Event.emit(CConst.event_game_restart);
+                    let funcNext = async () => {
+                        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                        kit.Event.emit(CConst.event_game_restart);
+                    };
+                    DataManager.playAdvert(funcNext);
                 }
                 else {
                     kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
@@ -210,17 +220,6 @@ export default class Before extends PopupBase {
             case TypeBefore.fromGameWin:// 游戏胜利后
                 await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                 kit.Event.emit(CConst.event_game_start);
-                break;
-            case TypeBefore.fromGameFail:// 游戏失败
-                // 开始游戏
-                if (DataManager.data.strength.count > 0) {
-                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    kit.Event.emit(CConst.event_game_start);
-                }
-                // 返回菜单
-                else {
-                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
-                }
                 break;
             default:
                 break;
@@ -232,15 +231,15 @@ export default class Before extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         switch (this.params.type) {
-            case TypeBefore.fromSettingGame:// 游戏中途设置 点击退出
-                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                kit.Event.emit(CConst.event_enter_menu);
+            case TypeBefore.fromSettingGame:// 游戏中途设置 进入重新开始界面 点击退出
+            case TypeBefore.fromGameFail:// 游戏失败 进入重新开始界面 点击退出
+                let funcNext = async () => {
+                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                    kit.Event.emit(CConst.event_enter_menu);
+                };
+                DataManager.playAdvert(funcNext);
                 break;
             case TypeBefore.fromGameWin:// 胜利界面 进入菜单页（恢复消除的体力）
-                kit.Event.emit(CConst.event_enter_menu);
-                break;
-            case TypeBefore.fromGameFail:// 游戏失败 点击退出
-                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                 kit.Event.emit(CConst.event_enter_menu);
                 break;
             default:

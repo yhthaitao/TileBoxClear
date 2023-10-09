@@ -13,6 +13,7 @@ const CConst = {
     pathThemeBg: './theme/bg/',
     pathThemeLock: './theme/lock/',
     pathThemeUnLock: './theme/unlock/',
+    pathAchieve: './achieve/color/',
     pathGameBg: './game/bg/',
     pathGameGood: './game/good/',
     pathGameGold: './game/gold/',
@@ -99,19 +100,21 @@ const CConst = {
     /*****************************************************************************************/
     /*************************************** 弹窗地址 ****************************************/
     /*****************************************************************************************/
-    
+    popup_path_achieve: './Popup/Achieve/res/prefab/Achieve',
     popup_path_actPass: './Popup/ActPass/res/prefab/ActPass',
     popup_path_settingHome: './Popup/Setting/res/prefab/SettingHome',
     popup_path_settingGame: './Popup/Setting/res/prefab/SettingGame',
     popup_path_boxSuipian: './Popup/BoxSuipian/res/prefab/BoxSuipian',
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
+    popup_path_boxGood: './Popup/BoxGood/res/prefab/BoxGood',
     popup_path_openBoxLevel: './Popup/OpenBox/res/prefab/OpenBoxLevel',
     popup_path_openBoxSuipian: './Popup/OpenBox/res/prefab/OpenBoxSuipian',
     popup_path_openBoxXingxing: './Popup/OpenBox/res/prefab/OpenBoxXingxing',
     popup_path_daily: './Popup/Daily/res/prefab/Daily',
     popup_path_bank: './Popup/Bank/res/prefab/Bank',
     popup_path_before: './Popup/Before/res/prefab/Before',
+    popup_path_getCoins: './Popup/GetCoins/res/prefab/GetCoins',
     popup_path_getLives: './Popup/GetLives/res/prefab/GetLives',
     popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
     popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',

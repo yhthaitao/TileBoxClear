@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "937cd419-4ff2-4c36-9a6a-bcb5b201115c",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "fanBuXie_qianlan_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "f2d14acb-a3f8-4aff-8ffa-56dd3d38b22c",
+      "importer": "sprite-frame",
       "rawTextureUuid": "937cd419-4ff2-4c36-9a6a-bcb5b201115c",
       "trimType": "auto",
       "trimThreshold": 1,

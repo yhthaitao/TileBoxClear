@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "49228772-0852-4450-b529-53934612bcdf",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "huaBan_fen_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "287632cb-dd86-4a03-ac5c-a14472d19d9e",
+      "importer": "sprite-frame",
       "rawTextureUuid": "49228772-0852-4450-b529-53934612bcdf",
       "trimType": "auto",
       "trimThreshold": 1,

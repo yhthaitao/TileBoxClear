@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "ecebe9df-8525-4afa-81e3-d500f5949154",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "caidan_lanzi_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "42746d7a-5d8e-4569-ae31-882f205816ea",
+      "importer": "sprite-frame",
       "rawTextureUuid": "ecebe9df-8525-4afa-81e3-d500f5949154",
       "trimType": "auto",
       "trimThreshold": 1,

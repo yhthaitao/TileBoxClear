@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "86c529a6-0791-42a5-9cbf-5c4a630cbd43",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "fanBuXie_fen_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "374bb85b-bc70-4e9d-ac8d-bda27835bd18",
+      "importer": "sprite-frame",
       "rawTextureUuid": "86c529a6-0791-42a5-9cbf-5c4a630cbd43",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "2c210be5-9b08-43f6-80fe-8e8c81397eb6",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "wushimao_hei_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "231a7559-b935-4172-afa9-399b891c038e",
+      "importer": "sprite-frame",
       "rawTextureUuid": "2c210be5-9b08-43f6-80fe-8e8c81397eb6",
       "trimType": "auto",
       "trimThreshold": 1,

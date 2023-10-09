@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "ac3e5ff4-c213-4628-a738-68505c8d4bbe",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "tiBao_hong_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "a6bbabf6-755c-4528-a771-954e48a3db14",
+      "importer": "sprite-frame",
       "rawTextureUuid": "ac3e5ff4-c213-4628-a738-68505c8d4bbe",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -381,7 +381,6 @@ export default class GameBox extends cc.Component {
         let getBoxParam = (boxKey: string, index: number) => {
             let boxParam: BoxParam = Common.clone(this.objGame[boxKey]);
             boxParam.index = index;
-            boxParam.x = 0;
             boxParam.name = 'box_' + index;
             boxParam.goods = {};
             return boxParam;
@@ -527,6 +526,7 @@ export default class GameBox extends cc.Component {
             arrBoxParam.forEach((boxParam) => {
                 boxParam.x -= disBoxX;
                 boxParam.y -= disBoxY;
+                this.objGame[boxParam.index].x -= boxParam.x;
             });
         }
         // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
@@ -1932,6 +1932,7 @@ export default class GameBox extends cc.Component {
         if (this.isLock) {
             return;
         }
+        DataManager.beforeWins.count = 2;
         if (DataManager.beforeWins.count < 1) {
             return;
         }
@@ -1998,7 +1999,7 @@ export default class GameBox extends cc.Component {
         arrGoods.forEach((good) => {
             good.active = true;
             let x = Math.random() * 80 - 40;
-            let y = Math.random() * 15 + 15;
+            let y = Math.random() * 15 - 15;
             let angle = Math.random() * 30 - 15;;
             cc.tween(good).parallel(
                 cc.tween().to(timeMove, { position: cc.v3(x, y) }),
@@ -2485,31 +2486,7 @@ export default class GameBox extends cc.Component {
             DataManager.setData();
             kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
         };
-        let isPlayAds = DataManager.checkIsPlayAdvert(stageLevel);
-        if (isPlayAds) {
-            // 打点 插屏广告请求（过关）
-            NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_nextlevel", "Interstital");
-            let funcA = () => {
-                // 打点 插屏播放完成
-                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(stageLevel));
-                funcNext();
-
-                // 广告计时
-                DataManager.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
-                DataManager.data.advert.record.level = stageLevel;
-                DataManager.setData();
-            };
-            let funcB = () => {
-                funcNext();
-            };
-            let isReady = DataManager.playAdvert(funcA, funcB);
-            if (!isReady) {
-                funcB();
-            }
-        }
-        else {
-            funcNext();
-        }
+        DataManager.playAdvert(funcNext);
     };
 
     /** 添加 箱子 */

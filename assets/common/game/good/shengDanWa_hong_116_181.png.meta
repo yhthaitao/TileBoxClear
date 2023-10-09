@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "9dcd7020-7452-4cb5-8bb9-5db0c6525abc",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "shengDanWa_hong_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "fcd0a390-4beb-4083-85b7-ead108f0acdb",
+      "importer": "sprite-frame",
       "rawTextureUuid": "9dcd7020-7452-4cb5-8bb9-5db0c6525abc",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "b15bafeb-d67e-401c-b600-a243c2bc9463",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "ciTie_daoju_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "e2788850-5c22-4b7c-b7db-01667ab10eec",
+      "importer": "sprite-frame",
       "rawTextureUuid": "b15bafeb-d67e-401c-b600-a243c2bc9463",
       "trimType": "auto",
       "trimThreshold": 1,

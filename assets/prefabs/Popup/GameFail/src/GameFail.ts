@@ -93,7 +93,7 @@ export default class GameFail extends PopupBase {
             kit.Event.emit(CConst.event_game_revive, this.params.type);
         }
         else{
-            kit.Event.emit(CConst.event_notice, '没钱了');
+            kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
         }
     }
 

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "f076c8f0-9eb1-4f00-a6fc-ff08b7da099b",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "小猪银行弹窗": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "4dc440ec-1fb4-4790-b307-013d390d5507",
+      "importer": "sprite-frame",
       "rawTextureUuid": "f076c8f0-9eb1-4f00-a6fc-ff08b7da099b",
       "trimType": "auto",
       "trimThreshold": 1,

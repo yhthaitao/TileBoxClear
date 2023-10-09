@@ -14,7 +14,7 @@ export default class Loading extends cc.Component {
     @property(cc.Label) labelLoading: cc.Label = null;
 
     isStart: boolean = false;
-    objTime = { count: 0, total: 0.02, };
+    objTime = { count: 0, total: 0.015, };
 
     protected onLoad(): void {
         Common.log('页面 加载');

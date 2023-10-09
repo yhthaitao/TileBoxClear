@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "f218fb95-95c7-4b2c-9c09-9c6dae6528f6",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "mai_bai_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "bf751e35-bbb7-4512-af61-71bb025377d3",
+      "importer": "sprite-frame",
       "rawTextureUuid": "f218fb95-95c7-4b2c-9c09-9c6dae6528f6",
       "trimType": "auto",
       "trimThreshold": 1,

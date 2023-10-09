@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "24f9f630-f9bc-4832-b1aa-728954d84313",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "主页点击设置按钮预览": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "b5624cbb-f7e6-4189-98ba-32ad69849b0c",
+      "importer": "sprite-frame",
       "rawTextureUuid": "24f9f630-f9bc-4832-b1aa-728954d84313",
       "trimType": "auto",
       "trimThreshold": 1,

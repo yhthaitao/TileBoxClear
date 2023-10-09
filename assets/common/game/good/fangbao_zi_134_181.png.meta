@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "70de6985-454c-474d-8948-2e9c0566acf3",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "fangbao_zi_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "dac8cb07-4fd8-4236-aaec-e3bad56e80c1",
+      "importer": "sprite-frame",
       "rawTextureUuid": "70de6985-454c-474d-8948-2e9c0566acf3",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "3ae3b0fb-26ed-42e2-afae-fa0dc76bfaa4",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "mianmao_lan_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "cc3234a7-1331-402e-a5cb-943de182ed6c",
+      "importer": "sprite-frame",
       "rawTextureUuid": "3ae3b0fb-26ed-42e2-afae-fa0dc76bfaa4",
       "trimType": "auto",
       "trimThreshold": 1,

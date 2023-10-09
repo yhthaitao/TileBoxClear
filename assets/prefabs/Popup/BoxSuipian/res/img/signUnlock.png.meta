@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "f4d0335b-e030-4741-9932-63aa1fa0b734",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "signUnlock": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "3ec2ffc2-ae7d-4ad8-ac83-1b65ce822ed1",
+      "importer": "sprite-frame",
       "rawTextureUuid": "f4d0335b-e030-4741-9932-63aa1fa0b734",
       "trimType": "auto",
       "trimThreshold": 1,

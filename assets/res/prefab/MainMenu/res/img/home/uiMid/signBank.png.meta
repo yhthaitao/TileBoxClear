@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "0334fe27-42f1-4c13-8857-4ded3ced9333",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "signBank": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "6445bd09-2a0a-486b-b418-93d0fa64d0a5",
+      "importer": "sprite-frame",
       "rawTextureUuid": "0334fe27-42f1-4c13-8857-4ded3ced9333",
       "trimType": "auto",
       "trimThreshold": 1,

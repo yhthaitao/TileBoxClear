@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "64686141-fa82-42b4-920e-f165bc78a05e",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "piJia_huang_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "644015cf-d785-4597-927a-6d728bbc4d20",
+      "importer": "sprite-frame",
       "rawTextureUuid": "64686141-fa82-42b4-920e-f165bc78a05e",
       "trimType": "auto",
       "trimThreshold": 1,

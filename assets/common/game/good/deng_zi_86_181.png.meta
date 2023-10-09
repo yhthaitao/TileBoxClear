@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "12cd3200-2f2d-431f-b44a-b5dffe17f219",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "deng_zi_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "e599e0c9-7c40-4857-a722-42e5722c126d",
+      "importer": "sprite-frame",
       "rawTextureUuid": "12cd3200-2f2d-431f-b44a-b5dffe17f219",
       "trimType": "auto",
       "trimThreshold": 1,

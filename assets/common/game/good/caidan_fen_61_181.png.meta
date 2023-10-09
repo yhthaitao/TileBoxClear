@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "9a85e6fd-d8db-4bfa-a13e-fe36dffd918e",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "caidan_fen_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "97d4f3a6-ed42-4906-bf0a-9c188efd2a42",
+      "importer": "sprite-frame",
       "rawTextureUuid": "9a85e6fd-d8db-4bfa-a13e-fe36dffd918e",
       "trimType": "auto",
       "trimThreshold": 1,

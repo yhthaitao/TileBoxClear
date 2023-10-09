@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "b0f860a5-e7ec-4396-bc0e-dceff908d2c4",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "金色碎片进度条点击弹窗": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "ec98b81e-4d45-41bb-b723-2658b6b1b252",
+      "importer": "sprite-frame",
       "rawTextureUuid": "b0f860a5-e7ec-4396-bc0e-dceff908d2c4",
       "trimType": "auto",
       "trimThreshold": 1,

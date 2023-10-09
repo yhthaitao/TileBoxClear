@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "6118ce7c-d1ce-4b71-a7f4-0477529eee54",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "fangbao_huang_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "22bda1c7-3515-49a2-b181-714d8f5c93f1",
+      "importer": "sprite-frame",
       "rawTextureUuid": "6118ce7c-d1ce-4b71-a7f4-0477529eee54",
       "trimType": "auto",
       "trimThreshold": 1,

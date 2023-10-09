@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "6e5a978b-c33c-4aa2-b09e-0a682d15552e",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "niuNai_fen_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "c5994008-73c9-4b5f-aec7-c1cf7a5c286b",
+      "importer": "sprite-frame",
       "rawTextureUuid": "6e5a978b-c33c-4aa2-b09e-0a682d15552e",
       "trimType": "auto",
       "trimThreshold": 1,

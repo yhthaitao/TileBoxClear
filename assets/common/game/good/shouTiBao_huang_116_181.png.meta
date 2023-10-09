@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "d72e6a6c-600a-420a-b7ac-295367d613ca",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "shouTiBao_huang_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "65b6a3bf-c840-498f-84f4-1e393135d29b",
+      "importer": "sprite-frame",
       "rawTextureUuid": "d72e6a6c-600a-420a-b7ac-295367d613ca",
       "trimType": "auto",
       "trimThreshold": 1,

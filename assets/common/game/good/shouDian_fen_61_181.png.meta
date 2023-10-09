@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "bcf16b17-b2fd-4de2-b610-218d9dfdf169",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "shouDian_fen_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "d1bc2f18-b01e-46a4-a3e1-33a1a7e233a9",
+      "importer": "sprite-frame",
       "rawTextureUuid": "bcf16b17-b2fd-4de2-b610-218d9dfdf169",
       "trimType": "auto",
       "trimThreshold": 1,

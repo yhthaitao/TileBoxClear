@@ -1,7 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import ConfigGold from "../../../../src/config/ConfigGold";
-import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import GameBox, { GoodParam } from "./GameBox";
 
@@ -11,11 +10,15 @@ export default class ItemGood extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '物品节点-图' }) nodeIcon: cc.Node = null;
     @property({ type: cc.Node, tooltip: '碎片节点-图' }) nodeGold: cc.Node = null;
-    @property({ type: cc.Node, tooltip: '碎片节点-动画' }) nodeDragon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '碎片节点-动画' }) goldDragon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '碎片节点-动画' }) propDragon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '碎片节点-动画' }) propLight: cc.Node = null;
 
     state: number = 0;
     isChose: boolean = false;
     param: GoodParam = null;
+    idClock: number = 9001;
+    idMagnet: number = 9002;
 
     init(param: GoodParam) {
         this.state = 0;
@@ -33,6 +36,7 @@ export default class ItemGood extends cc.Component {
         this.node.active = true;
 
         this.initGold();
+        this.initPorp();
 
         let path = CConst.pathGameGood + this.param.nameRes;
         kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
@@ -83,7 +87,7 @@ export default class ItemGood extends cc.Component {
         if (this.param.gold.isGold) {
             this.nodeGold.active = true;
             let arrGold = Common.getArrByName(this.nodeGold, 'gold');
-            arrGold.forEach((item, index) => { 
+            arrGold.forEach((item, index) => {
                 item.active = index == this.param.gold.count;
                 // 资源更新
                 let path = CConst.pathGameGold + ConfigGold[this.param.keyGood] + '/' + index;
@@ -96,20 +100,20 @@ export default class ItemGood extends cc.Component {
                 });
             });
 
-            this.nodeDragon.active = true;
-            this.nodeDragon.y = this.param.h * 0.5;
+            this.goldDragon.active = true;
+            this.goldDragon.y = this.param.h * 0.5;
             // 光
-            let lightNode = this.nodeDragon.getChildByName('light');
+            let lightNode = this.goldDragon.getChildByName('light');
             lightNode.active = true;
             let lightDragon = lightNode.getComponent(dragonBones.ArmatureDisplay);
             lightDragon.playAnimation('newAnimation', 0);
             // 破碎
-            let posuiNode = this.nodeDragon.getChildByName('posui');
+            let posuiNode = this.goldDragon.getChildByName('posui');
             posuiNode.active = false;
         }
         else {
             this.nodeGold.active = false;
-            this.nodeDragon.active = false;
+            this.goldDragon.active = false;
         }
     };
 
@@ -125,9 +129,9 @@ export default class ItemGood extends cc.Component {
         let arrGold = Common.getArrByName(this.nodeGold, 'gold');
         arrGold.forEach((item, index) => { item.active = index == this.param.gold.count });
 
-        this.nodeDragon.active = true;
+        this.goldDragon.active = true;
         // 破碎
-        let posuiNode = this.nodeDragon.getChildByName('posui');
+        let posuiNode = this.goldDragon.getChildByName('posui');
         posuiNode.active = true;
         let posuiDragon = posuiNode.getComponent(dragonBones.ArmatureDisplay)
         posuiDragon.once(dragonBones.EventObject.COMPLETE, () => {
@@ -135,7 +139,7 @@ export default class ItemGood extends cc.Component {
             // 金币脱落
             if (!this.param.gold.isGold) {
                 this.nodeGold.active = false;
-                this.nodeDragon.active = false;
+                this.goldDragon.active = false;
             }
         })
         posuiDragon.playAnimation('newAnimation', 1);
@@ -144,7 +148,54 @@ export default class ItemGood extends cc.Component {
     hideGold() {
         this.param.gold.isGold = false;
         this.nodeGold.active = false;
-        this.nodeDragon.active = false;
+        this.goldDragon.active = false;
+    };
+
+    initPorp() {
+        // 时钟
+        if (this.param.keyGood == this.idClock) {
+            this.propLight.active = true;
+            this.propLight.children.forEach((item)=>{
+                item.active = item.name == 'clock';
+                if (item.active) {
+                    let time = 1;
+                    let forever = cc.tween().parallel(
+                        cc.tween().to(time, {scale: 1.1}).to(time, {scale: 1.0}),
+                        cc.tween().to(time, {opacity: 200}).to(time, {opacity: 255}),
+                    );
+                    cc.tween(item).repeatForever(forever).start();
+                }
+            });
+            this.propDragon.active = true;
+            let itemDragon = this.propDragon.getChildByName('dragon');
+            let dragon = itemDragon.getComponent(dragonBones.ArmatureDisplay);
+            dragon.armatureName = 'shijianshanguan';
+            dragon.playAnimation('newAnimation', 0);
+        }
+        // 磁铁
+        else if (this.param.keyGood == this.idMagnet) {
+            this.propLight.active = true;
+            this.propLight.children.forEach((item)=>{
+                item.active = item.name == 'magnet';
+                if (item.active) {
+                    let time = 1;
+                    let forever = cc.tween().parallel(
+                        cc.tween().to(time, {scale: 1.1}).to(time, {scale: 1.0}),
+                        cc.tween().to(time, {opacity: 200}).to(time, {opacity: 255}),
+                    );
+                    cc.tween(item).repeatForever(forever).start();
+                }
+            });
+            this.propDragon.active = true;
+            let itemDragon = this.propDragon.getChildByName('dragon');
+            let dragon = itemDragon.getComponent(dragonBones.ArmatureDisplay);
+            dragon.armatureName = 'xitieshishanguang';
+            dragon.playAnimation('newAnimation', 0);
+        }
+        else {
+            this.propLight.active = false;
+            this.propDragon.active = false;
+        }
     };
 
     /** 点击事件 */

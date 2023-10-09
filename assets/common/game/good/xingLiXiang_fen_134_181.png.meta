@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "16300033-cf37-42cd-9131-e81b1ddd5a04",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xingLiXiang_fen_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "c1e5bcb6-e197-4b56-8060-f2439565cf9e",
+      "importer": "sprite-frame",
       "rawTextureUuid": "16300033-cf37-42cd-9131-e81b1ddd5a04",
       "trimType": "auto",
       "trimThreshold": 1,

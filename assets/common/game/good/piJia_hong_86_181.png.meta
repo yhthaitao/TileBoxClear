@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "e375d450-ab0a-4fa8-8d9c-2ebc847a5bb2",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "piJia_hong_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "2638fe3b-991b-4dab-bf35-755c2ef6aef2",
+      "importer": "sprite-frame",
       "rawTextureUuid": "e375d450-ab0a-4fa8-8d9c-2ebc847a5bb2",
       "trimType": "auto",
       "trimThreshold": 1,

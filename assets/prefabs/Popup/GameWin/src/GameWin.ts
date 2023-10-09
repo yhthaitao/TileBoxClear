@@ -74,8 +74,8 @@ export default class GameWin extends PopupBase {
         });
 
         // 刷新ui
-        // this.resetContent();
-        
+        this.resetContent();
+
         this.setIsLock(true);
     }
 
@@ -173,7 +173,7 @@ export default class GameWin extends PopupBase {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
-
+                await kit.Popup.show(CConst.popup_path_boxGood, {}, { mode: PopupCacheMode.Frequent });
                 // 进度条再次刷新
                 boxCount = 0;
                 total = DataManager.getRewardBoxGood().total;
@@ -205,7 +205,7 @@ export default class GameWin extends PopupBase {
         });
     }
 
-    setIsLock(islock){
+    setIsLock(islock) {
         this.islock = islock;
         this.maskBottom.active = this.islock;
     }
@@ -225,13 +225,10 @@ export default class GameWin extends PopupBase {
                     funcXing(index);
                 }).start();
             }
-            else{
-                this.setIsLock(false);
-            }
         };
         funcXing();
 
-        // this.playAniBoxGood();
+        this.playAniBoxGood();
     }
 
     protected hideBefore(): void {
@@ -262,8 +259,11 @@ export default class GameWin extends PopupBase {
     /** 按钮事件 退出 */
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
-        await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
-        kit.Event.emit(CConst.event_enter_menu);
+        let funcNext = async () => {
+            await kit.Popup.hide();
+            await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
+            kit.Event.emit(CConst.event_enter_menu);
+        };
+        DataManager.playAdvert(funcNext);
     }
 }

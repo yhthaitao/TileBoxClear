@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "6f974869-f723-4f4f-b2eb-e49067fdfb3a",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "点击语言切换按钮后": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "3d055592-cfad-4912-8399-99da2cf45a4d",
+      "importer": "sprite-frame",
       "rawTextureUuid": "6f974869-f723-4f4f-b2eb-e49067fdfb3a",
       "trimType": "auto",
       "trimThreshold": 1,

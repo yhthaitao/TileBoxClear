@@ -113,7 +113,7 @@ class DataManager {
     /** 云加载 */
     isCloudLoad: boolean = false;
     /** 插屏广告开启关卡 */
-    adStartLevel: number = 4;
+    adStartLevel: number = 12;
     /**
      * 游戏开始前界面状态
      * 1.游戏失败
@@ -136,6 +136,7 @@ class DataManager {
             isCpe: false,// 打点记录 只打一次
             revenue: '0',// 广告收入
         },
+        day: 0,
         isEvaluate: false,// 是否已经评价
         installtime: new Date().valueOf(),
         numCoin: 100,// 金币数量
@@ -179,10 +180,18 @@ class DataManager {
         boxGood: {
             level: 1, count: 0, add: 0, max: 12
         },
+        // 12个成就
+        boxAchieve: [
+            false, false, false, false,
+            false, false, false, false,
+            false, false, false, false,
+        ],
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
             areasId: 1,// 当前主题
+            timesCoin: { count: 20, total: 20 },
+            timesLive: { count: 20, total: 20 },
             newTip: {
                 cur: 0,
                 max: 3,
@@ -216,6 +225,8 @@ class DataManager {
 
         // 初始化收入
         NativeCall.setRevenue(this.data.advert.revenue);
+        // 初始化时间
+        this.initDay();
         // 初始化语言
         this.initLanguage();
         // 初始化物品池子
@@ -258,6 +269,22 @@ class DataManager {
         this.nodeVideo.zIndex = CConst.zIndex_video;
         this.nodeVideo.active = false;
         this.setData();
+    }
+
+    /** 初始化时间 */
+    public initDay() {
+        let resume = () => {
+            this.data.boxSuipian.level = 0;
+            this.data.boxSuipian.count = 0;
+            this.data.boxSuipian.add = 0;
+            this.data.boxData.timesCoin.count = this.data.boxData.timesCoin.total;
+            this.data.boxData.timesLive.count = this.data.boxData.timesLive.total;
+        };
+        let day = Math.floor(new Date().getTime() / 86400000);
+        if (this.data.day == 0 || this.data.day != day) {
+            this.data.day = day;
+            resume();
+        }
     }
 
     /** 多语言设置 */
@@ -342,7 +369,7 @@ class DataManager {
                                 obj.state = StateBeforeProp.unChoose;
                             }
                         }
-                        else{
+                        else {
                             obj.state = StateBeforeProp.noProp
                         }
                     }
@@ -361,7 +388,7 @@ class DataManager {
                                 obj.state = StateBeforeProp.unChoose;
                             }
                         }
-                        else{
+                        else {
                             obj.state = StateBeforeProp.noProp
                         }
                     }
@@ -481,9 +508,9 @@ class DataManager {
         else if (this.data.boxData.level == 41) {
             this.data.boxData.areasId = 3;
         }
-        else if (this.data.boxData.level > 41){
-            if ((this.data.boxData.level - 41)%40 == 0) {
-                this.data.boxData.areasId = 3 + Math.floor((this.data.boxData.level - 41)/40);
+        else if (this.data.boxData.level > 41) {
+            if ((this.data.boxData.level - 41) % 40 == 0) {
+                this.data.boxData.areasId = 3 + Math.floor((this.data.boxData.level - 41) / 40);
             }
         }
         // 过关数据变更 关卡宝箱
@@ -700,33 +727,63 @@ class DataManager {
     }
 
     /**
+     * 检测是否播放插屏
+     *      可：判断插屏是否准备好
+     *          准备好：播放funA
+     *          为准备：播放funB
+     *      否：执行funcN
+     * @param funcN 
+     */
+    public playAdvert(funcN: Function){
+        let level = this.data.boxData.level; 
+        let isAdvert = this.checkIsPlayAdvert(level);
+        if (isAdvert) {
+            // 打点 插屏广告请求（过关）
+            NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_nextlevel", "Interstital");
+            let funcA = () => {
+                // 打点 插屏播放完成
+                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(level));
+                funcN();
+                // 广告计时
+                this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
+                this.data.advert.record.level = level;
+                this.setData();
+            };
+            let funcB = () => {
+                funcN();
+            };
+            // 先判断是否准备好
+            let isReady = NativeCall.advertCheck();
+            if (isReady) {
+                this.startAdvert(funcA, funcB);
+            }
+            else{
+                funcB();
+            }
+        }
+        else{
+            funcN();
+        }
+    };
+
+    /**
      * 检测插屏是否开启(针对游戏结束自动弹出的广告)
-     * @param levelNow 检测时的关卡 
+     * @param level 检测时的关卡 
      * @returns 
      */
-    public checkIsPlayAdvert(levelNow: number) {
-        let levelLimit = this.adStartLevel + 1;
-        Common.log(' 广告检测 cocos checkIsPlayAds() 插屏检测 levelNow: ', levelNow, '; levelLimit: ', levelLimit);
-        if (levelNow < levelLimit) {
+    public checkIsPlayAdvert(level: number) {
+        Common.log(' 插屏广告检测 cocos checkIsPlayAds()  levelNow: ', level, '; adStartLevel: ', this.adStartLevel);
+        if (level <= this.adStartLevel) {
             return false;
-        }
-        else if (levelNow == levelLimit) {
-            return true;
         }
 
         let timeNow = Math.floor(new Date().getTime() * 0.001);
         let timeRecord = this.data.advert.record.time;
         let timeLast = timeNow - timeRecord;
-        let levelRecord = this.data.advert.record.level;
-        let levelLast = levelNow - levelRecord;
+        // let levelRecord = this.data.advert.record.level;
+        // let levelLast = level - levelRecord;
         Common.log(' 检测 时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
-        if (levelNow > 20) {
-            return timeLast >= 30;
-        }
-        else {
-            Common.log(' 检测 关卡 levelLast: ', levelLast, '; levelNow: ', levelNow, '; levelRecord: ', levelRecord);
-            return timeLast >= 90 || levelLast >= 3;
-        }
+        return timeLast >= 30;
     };
 
     /**
@@ -735,13 +792,9 @@ class DataManager {
      * @param funcB 
      * @returns
      */
-    public playVideo(funcA: Function, funcB: Function): boolean {
-        let isReady = NativeCall.videoCheck();
-        if (isReady) {
-            NativeCall.closeBanner();
-            this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, funcA, funcB));
-        }
-        return isReady;
+    public startVideo(funcA: Function, funcB: Function): void {
+        NativeCall.closeBanner();
+        this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, funcA, funcB));
     };
 
     /**
@@ -750,13 +803,9 @@ class DataManager {
      * @param funcB 
      * @returns 
      */
-    public playAdvert(funcA: Function, funcB: Function): boolean {
-        let isReady = NativeCall.advertCheck();
-        if (isReady) {
-            NativeCall.closeBanner();
-            this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, funcA, funcB));
-        }
-        return isReady;
+    public startAdvert(funcA: Function, funcB: Function): void {
+        NativeCall.closeBanner();
+        this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, funcA, funcB));
     }
 
     /** 播放动画 */

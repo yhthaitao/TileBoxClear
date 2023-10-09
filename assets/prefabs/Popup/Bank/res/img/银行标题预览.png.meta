@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "6f62ad0e-e30e-4267-b833-3cd60394e3de",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "银行标题预览": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "c28bed53-c528-4e72-b95e-cbe77e3aad1a",
+      "importer": "sprite-frame",
       "rawTextureUuid": "6f62ad0e-e30e-4267-b833-3cd60394e3de",
       "trimType": "auto",
       "trimThreshold": 1,

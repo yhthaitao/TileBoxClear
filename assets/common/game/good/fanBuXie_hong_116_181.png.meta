@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "1891fa99-9494-4479-ac80-e05fdd89280c",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "fanBuXie_hong_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "598cdafc-ce1a-4c24-a11f-255505861c75",
+      "importer": "sprite-frame",
       "rawTextureUuid": "1891fa99-9494-4479-ac80-e05fdd89280c",
       "trimType": "auto",
       "trimThreshold": 1,

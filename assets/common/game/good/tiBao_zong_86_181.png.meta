@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "d059b51b-e873-40c7-a69d-76478ae5ddc9",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "tiBao_zong_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "f71c7114-9a2c-4669-80e7-d5f87dfbee1c",
+      "importer": "sprite-frame",
       "rawTextureUuid": "d059b51b-e873-40c7-a69d-76478ae5ddc9",
       "trimType": "auto",
       "trimThreshold": 1,

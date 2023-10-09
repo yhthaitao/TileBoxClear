@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "41a4cc53-761d-497c-806d-9977497fd658",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "mai_lv_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "415ccb72-31bc-4762-9cb9-1a6b9216e471",
+      "importer": "sprite-frame",
       "rawTextureUuid": "41a4cc53-761d-497c-806d-9977497fd658",
       "trimType": "auto",
       "trimThreshold": 1,

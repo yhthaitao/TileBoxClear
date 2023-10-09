@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "fb116810-8276-492b-b4de-1053fe8af308",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "niuPiBao_zong_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "8654aa87-970c-4f58-9ce7-d04b8e4b56e4",
+      "importer": "sprite-frame",
       "rawTextureUuid": "fb116810-8276-492b-b4de-1053fe8af308",
       "trimType": "auto",
       "trimThreshold": 1,

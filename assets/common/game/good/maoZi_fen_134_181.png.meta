@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "99d0a373-a409-4eb6-bcd0-4436f34c9c4f",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "maoZi_fen_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "701bef96-2852-4f40-8265-e2e19ebb46fd",
+      "importer": "sprite-frame",
       "rawTextureUuid": "99d0a373-a409-4eb6-bcd0-4436f34c9c4f",
       "trimType": "auto",
       "trimThreshold": 1,

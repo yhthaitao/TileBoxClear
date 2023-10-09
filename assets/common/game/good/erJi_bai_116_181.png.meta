@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "1a87c843-d67c-4215-8de0-f01dbd65c9b4",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "erJi_bai_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "36eb80ef-025e-4545-84ea-bbd065ea37dd",
+      "importer": "sprite-frame",
       "rawTextureUuid": "1a87c843-d67c-4215-8de0-f01dbd65c9b4",
       "trimType": "auto",
       "trimThreshold": 1,

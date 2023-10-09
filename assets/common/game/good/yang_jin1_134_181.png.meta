@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "9da30a19-c2b0-4dfe-9cc8-53224e206b00",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "yang_jin1_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "70d41567-bae0-4632-bf2d-0936bd5205f3",
+      "importer": "sprite-frame",
       "rawTextureUuid": "9da30a19-c2b0-4dfe-9cc8-53224e206b00",
       "trimType": "auto",
       "trimThreshold": 1,

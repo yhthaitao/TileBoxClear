@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "4f004cc5-3160-4693-8a45-a0b1eb4771ac",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xianRenZhang_lv_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "5f2297a5-92a6-435e-824e-045d98649cff",
+      "importer": "sprite-frame",
       "rawTextureUuid": "4f004cc5-3160-4693-8a45-a0b1eb4771ac",
       "trimType": "auto",
       "trimThreshold": 1,

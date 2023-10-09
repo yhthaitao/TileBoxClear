@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "a0d95c50-4e47-48a1-b6ca-625a53cc029c",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "expProcessBar": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "aad8d888-9100-44d8-8ca8-e77f6f8a6b4d",
+      "importer": "sprite-frame",
       "rawTextureUuid": "a0d95c50-4e47-48a1-b6ca-625a53cc029c",
       "trimType": "auto",
       "trimThreshold": 1,

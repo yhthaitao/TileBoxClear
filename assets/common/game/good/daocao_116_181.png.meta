@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "86439f46-78d7-4412-b098-0932c91dab23",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "daocao_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "42935821-b1e5-4a59-a72d-31ae1632cc19",
+      "importer": "sprite-frame",
       "rawTextureUuid": "86439f46-78d7-4412-b098-0932c91dab23",
       "trimType": "auto",
       "trimThreshold": 1,

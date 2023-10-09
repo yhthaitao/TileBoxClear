@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "11c1184e-fcf3-4e7f-a081-d4bdd9b5cb16",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "moshumao_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "247dbce6-3d3c-490b-a6d2-4998851d8f98",
+      "importer": "sprite-frame",
       "rawTextureUuid": "11c1184e-fcf3-4e7f-a081-d4bdd9b5cb16",
       "trimType": "auto",
       "trimThreshold": 1,

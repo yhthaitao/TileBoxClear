@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "55611a8c-d5ad-4875-82e1-8dda8ee22fb5",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "qianBao_hua_116_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "461c3085-5fe2-4294-8886-324183e235d9",
+      "importer": "sprite-frame",
       "rawTextureUuid": "55611a8c-d5ad-4875-82e1-8dda8ee22fb5",
       "trimType": "auto",
       "trimThreshold": 1,

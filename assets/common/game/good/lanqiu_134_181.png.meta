@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "bc1bdac0-42d3-4ad4-81f2-bd5f9e88f75c",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "lanqiu_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "381e0d2d-c5e0-4242-bb07-c5f56a5555d2",
+      "importer": "sprite-frame",
       "rawTextureUuid": "bc1bdac0-42d3-4ad4-81f2-bd5f9e88f75c",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "bdb0a649-683e-43dc-bbb7-167df2425e60",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "shengDanShu_fen_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "0f16f96a-519e-4416-acf2-1efdba95529d",
+      "importer": "sprite-frame",
       "rawTextureUuid": "bdb0a649-683e-43dc-bbb7-167df2425e60",
       "trimType": "auto",
       "trimThreshold": 1,

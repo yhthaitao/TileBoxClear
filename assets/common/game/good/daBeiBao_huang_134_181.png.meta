@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "b2e78c57-584c-499d-a526-f562cc7b9d81",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "daBeiBao_huang_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "7d1d5f88-3e25-43ef-9742-8d52e0ab6675",
+      "importer": "sprite-frame",
       "rawTextureUuid": "b2e78c57-584c-499d-a526-f562cc7b9d81",
       "trimType": "auto",
       "trimThreshold": 1,

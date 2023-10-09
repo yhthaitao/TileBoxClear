@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "0453a992-05ab-4188-919c-e42e37839113",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xiongMao_heibai_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "7cb00cdd-6f59-4664-8bb2-24ca3c2f2543",
+      "importer": "sprite-frame",
       "rawTextureUuid": "0453a992-05ab-4188-919c-e42e37839113",
       "trimType": "auto",
       "trimThreshold": 1,

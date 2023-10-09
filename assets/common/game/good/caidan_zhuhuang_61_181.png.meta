@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "fd1552d1-7991-4229-9ebc-a87c73525c4a",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "caidan_zhuhuang_61_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "b99cc80c-bc75-45d4-b540-e60a207d41e1",
+      "importer": "sprite-frame",
       "rawTextureUuid": "fd1552d1-7991-4229-9ebc-a87c73525c4a",
       "trimType": "auto",
       "trimThreshold": 1,

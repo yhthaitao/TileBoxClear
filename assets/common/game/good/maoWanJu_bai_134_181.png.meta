@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "de71afc2-2e9e-4a38-8853-712ed47673d1",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "maoWanJu_bai_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "a7e96650-2958-4146-9f3f-3b1f4812f829",
+      "importer": "sprite-frame",
       "rawTextureUuid": "de71afc2-2e9e-4a38-8853-712ed47673d1",
       "trimType": "auto",
       "trimThreshold": 1,

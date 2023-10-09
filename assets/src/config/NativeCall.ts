@@ -130,7 +130,7 @@ class NativeCall {
         this.funcVideoFail && this.funcVideoFail();
     }
 
-    /** 广告 检测 */
+    /** 插屏广告 检测 */
     public advertCheck(): boolean {
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return false;
         let methodName = "interAdReady";
@@ -142,7 +142,7 @@ class NativeCall {
 
     funcAdvertSuccess: Function = null;
     funcAdvertFail: Function = null;
-    /** 广告 播放 */
+    /** 插屏广告 播放 */
     public advertShow(funcA: Function, funcB: Function) {
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
 
@@ -156,7 +156,7 @@ class NativeCall {
         this.logEventOne(ConfigDot.dot_ads_request_all);
     }
 
-    /** 广告 播放完成 */
+    /** 插屏广告 播放完成 */
     public advertFinish() {
         Common.log(' javaToCocos cocos method: advertFinish() 广告 播放完成 ');
         this.funcAdvertSuccess && this.funcAdvertSuccess();
@@ -176,7 +176,7 @@ class NativeCall {
                 this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
             };
             let funcB = (err: any)=>{};
-            DataManager.playAdvert(funcA, funcB);
+            DataManager.startAdvert(funcA, funcB);
         }
     }
 

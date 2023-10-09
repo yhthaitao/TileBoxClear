@@ -31,6 +31,13 @@ export default class GetLives extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 描述
+        DataManager.setString(LangChars.addCoin_desc_0, (chars: string) => {
+            let count = DataManager.data.boxData.timesLive.count;
+            let total = DataManager.data.boxData.timesLive.total;
+            let itemLabel = this.nodeProp.getChildByName('labelDesc');
+            itemLabel.getComponent(cc.Label).string = count + '/' + total + chars;
+        });
+        // 描述
         DataManager.setString(LangChars.addLife_nextFill, (chars: string) => {
             let itemLabel = this.nodeDesc.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars + ':';
@@ -41,7 +48,7 @@ export default class GetLives extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 免费
-        DataManager.setString(LangChars.addLife_free, (chars: string) => {
+        DataManager.setString(LangChars.addCoin_watch, (chars: string) => {
             let itemLabel = this.btnFree.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
@@ -52,7 +59,7 @@ export default class GetLives extends PopupBase {
     /** 刷新体力 */
     refreshStrength() {
         let count = DataManager.data.strength.count;
-        let itemLabel = this.nodeProp.getChildByName('label');
+        let itemLabel = this.nodeProp.getChildByName('labelNum');
         itemLabel.getComponent(cc.Label).string = '' + count;
         if (count < DataManager.data.strength.total) {
             this.updateStrength();
@@ -68,7 +75,7 @@ export default class GetLives extends PopupBase {
     updateStrength() {
         // 更新ui
         let count = DataManager.data.strength.count;
-        let itemLabel = this.nodeProp.getChildByName('label');
+        let itemLabel = this.nodeProp.getChildByName('labelNum');
         itemLabel.getComponent(cc.Label).string = '' + count;
 
         if (count < DataManager.data.strength.total) {
@@ -99,7 +106,7 @@ export default class GetLives extends PopupBase {
             kit.Popup.show(CConst.popup_path_before, { type: this.params.type }, { mode: PopupCacheMode.Frequent });
         }
         else {
-            kit.Event.emit(CConst.event_notice, '金币不足');
+            kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
         }
     };
 

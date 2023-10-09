@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "0b6c1bc1-605b-4a88-a4c9-f9ebe025e86d",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xiaoMao_huang_134_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "1d98687f-98e6-41b9-9b98-9280f4b9b1fd",
+      "importer": "sprite-frame",
       "rawTextureUuid": "0b6c1bc1-605b-4a88-a4c9-f9ebe025e86d",
       "trimType": "auto",
       "trimThreshold": 1,

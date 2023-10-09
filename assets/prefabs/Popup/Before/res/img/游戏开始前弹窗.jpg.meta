@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "90a8c00f-e0f8-4890-b19b-4fcad34a7726",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "游戏开始前弹窗": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "310dfbf9-9ac6-45f7-b146-d55212ee279f",
+      "importer": "sprite-frame",
       "rawTextureUuid": "90a8c00f-e0f8-4890-b19b-4fcad34a7726",
       "trimType": "auto",
       "trimThreshold": 1,

@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "878c6903-24d5-4b13-8860-3b39d20af0b1",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "jiuPing_lan_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "8911b408-b30b-4c2e-aa36-ce43f03b4f0e",
+      "importer": "sprite-frame",
       "rawTextureUuid": "878c6903-24d5-4b13-8860-3b39d20af0b1",
       "trimType": "auto",
       "trimThreshold": 1,

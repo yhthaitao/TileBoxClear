@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "c28c7457-a153-42ae-80ac-68241b6094a3",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "lightBack": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "a669f31f-37de-4ede-8cdb-8f3bc3170f84",
+      "importer": "sprite-frame",
       "rawTextureUuid": "c28c7457-a153-42ae-80ac-68241b6094a3",
       "trimType": "auto",
       "trimThreshold": 1,

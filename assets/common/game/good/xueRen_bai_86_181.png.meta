@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "9a374275-f538-4ee7-894e-b24463e78c58",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "xueRen_bai_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "a26e0f48-41e3-49f4-aa18-7d4fa43caf65",
+      "importer": "sprite-frame",
       "rawTextureUuid": "9a374275-f538-4ee7-894e-b24463e78c58",
       "trimType": "auto",
       "trimThreshold": 1,

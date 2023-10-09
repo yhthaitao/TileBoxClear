@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "47656251-2ca1-489c-b811-2b1950ddc05a",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "yujinxiang_bai_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "27b40a5a-cf64-4ffb-9b1f-5c3ca81585c3",
+      "importer": "sprite-frame",
       "rawTextureUuid": "47656251-2ca1-489c-b811-2b1950ddc05a",
       "trimType": "auto",
       "trimThreshold": 1,

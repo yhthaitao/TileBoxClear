@@ -1,6 +1,7 @@
 {
-  "ver": "2.3.5",
+  "ver": "2.3.7",
   "uuid": "6ef01e2b-a45f-470a-a0a7-bddcebb68ec2",
+  "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
@@ -12,8 +13,9 @@
   "platformSettings": {},
   "subMetas": {
     "shouji_86_181": {
-      "ver": "1.0.4",
+      "ver": "1.0.6",
       "uuid": "8b0b001f-720b-4159-bcd1-ba5c52bd1881",
+      "importer": "sprite-frame",
       "rawTextureUuid": "6ef01e2b-a45f-470a-a0a7-bddcebb68ec2",
       "trimType": "auto",
       "trimThreshold": 1,
