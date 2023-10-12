@@ -47,7 +47,7 @@ export default class MainMenuMid extends cc.Component {
     @property({ type: cc.Node, tooltip: '拦截' }) menu_mask_bottom: cc.Node = null;
 
     obj = {
-        ani: { level: false, suipian: false, xingxing: false, time: 0.25 },
+        ani: { boxLevel: false, boxSuipian: false, boxXingxing: false, time: 0.5 },
     };
     tElseSuipian: number = 0;
 
@@ -75,7 +75,7 @@ export default class MainMenuMid extends cc.Component {
             },
         },
         commodity: [
-            {}, {}, {}, {}, {}, {}, 
+            {}, {}, {}, {}, {}, {},
             {}, {}, {}, {}, {}, {},
         ],
     };
@@ -102,15 +102,15 @@ export default class MainMenuMid extends cc.Component {
 
     setIsLock(isLock): void {
         if (isLock) {
-            if (this.obj.ani.level && this.obj.ani.suipian && this.obj.ani.xingxing) {
+            if (this.obj.ani.boxLevel && this.obj.ani.boxSuipian && this.obj.ani.boxXingxing) {
                 this.menu_mask_bottom.active = false;
                 Common.log('功能：菜单界面 解除锁屏');
             }
         }
         else {
-            this.obj.ani.level = false;
-            this.obj.ani.suipian = false;
-            this.obj.ani.xingxing = false;
+            this.obj.ani.boxLevel = false;
+            this.obj.ani.boxSuipian = false;
+            this.obj.ani.boxXingxing = false;
             this.menu_mask_bottom.active = true;
             Common.log('功能：菜单界面 锁屏');
         }
@@ -164,32 +164,14 @@ export default class MainMenuMid extends cc.Component {
 
     /** 刷新-碎片进度 */
     resetBoxSuipian() {
-        // 重置数据（碎片宝箱）
-        let boxData = DataManager.data.boxSuipian;
-        let funcInit = () => {
-            boxData.level = 1;
-            boxData.count = 0;
-            boxData.timeLunch = Common.getTimeDayFinish();
-        };
-        if (boxData.timeLunch <= 0) {// 第一次启动游戏
-            funcInit();
-        }
-        else {// 时间来到另一天
-            let timeCur = Math.floor(new Date().getTime() / 1000);
-            if (timeCur >= boxData.timeLunch) {
-                funcInit();
-            }
-        }
-
         let boxReward = DataManager.getRewardBoxSuipian();
         // 进度条
-        let count = boxData.count;
+        let count = DataManager.data.boxSuipian.count;
         let total = boxReward.total;
-        let processBar = this.home_top_process.getChildByName('bar');
-        processBar.getComponent(cc.Sprite).fillStart = 0;
-        processBar.getComponent(cc.Sprite).fillRange = count / total;
-        let processLabel = this.home_top_process.getChildByName('label');
-        processLabel.getComponent(cc.Label).string = count + '/' + total;
+        let bar = this.home_top_process.getChildByName('bar');
+        bar.getComponent(cc.Sprite).fillRange = count / total;
+        let label = this.home_top_process.getChildByName('label');
+        label.getComponent(cc.Label).string = count + '/' + total;
 
         // 奖励
         let types = [
@@ -259,13 +241,14 @@ export default class MainMenuMid extends cc.Component {
 
             // 进度条
             let itemBar = this.home_top_process.getChildByName('bar');
+            itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
             // 文本
             let itemLabel = this.home_top_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time / boxAdd, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -277,6 +260,7 @@ export default class MainMenuMid extends cc.Component {
                 let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
+                pButton.y += this.home_bottom_start.height;
                 let param = {
                     pStart: { x: pStart.x, y: pStart.y },
                     pStrength: { x: pStrength.x, y: pStrength.y },
@@ -290,12 +274,12 @@ export default class MainMenuMid extends cc.Component {
                 // 进度条再次刷新
                 boxCount = 0;
                 total = DataManager.getRewardBoxSuipian().total;
-                itemBar.width = 0;
+                itemBar.getComponent(cc.Sprite).fillRange = 0;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time / boxAddElse, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);
@@ -303,7 +287,7 @@ export default class MainMenuMid extends cc.Component {
             }
         }
 
-        this.obj.ani.suipian = true;
+        this.obj.ani.boxSuipian = true;
         this.setIsLock(true);
     };
 
@@ -347,7 +331,6 @@ export default class MainMenuMid extends cc.Component {
 
         // 进度条
         let itemBar = this.home_left_boxXing_process.getChildByName('bar');
-        itemBar.getComponent(cc.Sprite).fillStart = 0;
         itemBar.getComponent(cc.Sprite).fillRange = count / total;
         // 文本
         let itemLabel = this.home_left_boxXing_process.getChildByName('label');
@@ -400,13 +383,14 @@ export default class MainMenuMid extends cc.Component {
 
             // 进度条
             let itemBar = this.home_left_boxXing_process.getChildByName('bar');
+            itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
             // 文本
             let itemLabel = this.home_left_boxXing_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time / boxAdd, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -416,18 +400,19 @@ export default class MainMenuMid extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
-                let pProp = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
-                let param = { pCoin: { x: pCoin.x, y: pCoin.y }, pProp: { x: pProp.x, y: pProp.y }, rewards: boxReward };
+                let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
+                pButton.y += this.home_bottom_start.height;
+                let param = { pCoin: { x: pCoin.x, y: pCoin.y }, pProp: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxXingxing, param, { mode: PopupCacheMode.Frequent });
                 // 进度条再次刷新
                 boxCount = 0;
                 total = DataManager.getRewardBoxXinging().total;
-                itemBar.width = 0;
+                itemBar.getComponent(cc.Sprite).fillRange = 0;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time / boxAddElse, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);
@@ -435,7 +420,7 @@ export default class MainMenuMid extends cc.Component {
             }
         }
 
-        this.obj.ani.xingxing = true;
+        this.obj.ani.boxXingxing = true;
         this.setIsLock(true);
     };
 
@@ -446,7 +431,6 @@ export default class MainMenuMid extends cc.Component {
 
         // 进度条
         let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
-        itemBar.getComponent(cc.Sprite).fillStart = 0;
         itemBar.getComponent(cc.Sprite).fillRange = count / total;
         // 文本
         let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
@@ -481,13 +465,14 @@ export default class MainMenuMid extends cc.Component {
 
             // 进度条
             let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
+            itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
             // 文本
             let itemLabel = this.home_right_boxLevel_process.getChildByName('label');
             // 进度条刷新
             for (let index = 0; index < boxAdd; index++) {
                 boxCount++;
                 let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                    objBar: { node: itemBar, time: this.obj.ani.time / boxAdd, goal: boxCount / total },
                     objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                 };
                 await this.playAniBox(params);
@@ -497,19 +482,20 @@ export default class MainMenuMid extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
-                let pBtnStart = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
-                let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pBtnStart.x, y: pBtnStart.y }, rewards: boxReward };
+                let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
+                pButton.y += this.home_bottom_start.height;
+                let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
 
                 // 进度条再次刷新
                 boxCount = 0;
                 total = DataManager.getRewardBoxLevel().total;
-                itemBar.width = 0;
+                itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
                 itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
                 for (let index = 0; index < boxAddElse; index++) {
                     boxCount++;
                     let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: this.obj.ani.time, goal: boxCount / total },
+                        objBar: { node: itemBar, time: this.obj.ani.time / boxAddElse, goal: boxCount / total },
                         objLabel: { node: itemLabel, desc: boxCount + '/' + total },
                     };
                     await this.playAniBox(params);
@@ -517,7 +503,7 @@ export default class MainMenuMid extends cc.Component {
             }
         }
 
-        this.obj.ani.level = true;
+        this.obj.ani.boxLevel = true;
         this.setIsLock(true);
     };
 
@@ -579,7 +565,7 @@ export default class MainMenuMid extends cc.Component {
             p2: cc.v2(p2.x, p1.y),
             pT0: cc.v2(p2.x, p2.y),
         };
-        cc.tween(this.home_top_prop).to(0.3, { scale: scale1 }).delay(1.0).parallel(
+        cc.tween(this.home_top_prop).to(0.15, { scale: scale1 }).delay(1.0).parallel(
             cc.tween().bezierTo(time, obj.p1, obj.p2, obj.pT0),
             cc.tween().to(time, { scale: scale0 }),
         ).start();
@@ -988,7 +974,7 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 事件 刷新 主题 */
-    refreshAreasItem(){
+    refreshAreasItem() {
         this.theme_mid_areas_content.children.forEach((item) => {
             let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
             let topY = itemY + item.height * 0.5;
@@ -1022,7 +1008,7 @@ export default class MainMenuMid extends cc.Component {
     };
 
     /** 刷新 成就 */
-    refreshCommodityItem(){
+    refreshCommodityItem() {
         this.theme_mid_commodity_content.children.forEach((item) => {
             let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
             let topY = itemY + item.height * 0.5;

@@ -17,6 +17,9 @@ const CConst = {
     pathGameBg: './game/bg/',
     pathGameGood: './game/good/',
     pathGameGold: './game/gold/',
+
+    bundlePrefabs: 'prefabs',
+    pathLevelData: './games/GameBox/res/level/',
     /*************************************** end **************************************************/
 
 
@@ -62,6 +65,12 @@ const CConst = {
     event_menu_updateSuipianReward: 'event_menu_updateSuipianReward',
     /** 主页 刷新 */
     event_menu_updateTheme: 'event_menu_updateTheme',
+    /** 加体力（花费金币） */
+    event_addStrength_byCoin: 'event_addStrength_byCoin',
+    /** 加体力（看视频） */
+    event_addStrength_byWatch: 'event_addStrength_byWatch',
+    /** 加体力（看视频） */
+    event_addCoin_byWatch: 'event_addCoin_byWatch',
     /** game start */
     event_game_start: 'event_game_start',
     /** game pause */

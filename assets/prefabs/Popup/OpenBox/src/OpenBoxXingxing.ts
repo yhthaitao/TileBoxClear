@@ -33,7 +33,7 @@ export default class OpenBoxXingxing extends PopupBase {
     pFinishArr: cc.Vec3[] = [];
 
     protected showBefore(options: any): void {
-        Common.log('弹窗 开启等级宝箱 showBefore()');
+        Common.log('弹窗 开启星星宝箱 showBefore()');
         this.params = Common.clone(options);
 
         DataManager.setString(LangChars.tapToClaim, (chars: string) => {
@@ -165,6 +165,7 @@ export default class OpenBoxXingxing extends PopupBase {
             let prop = this.nodeReward.getChildByName('prop' + index);
             prop.active = true;
             prop.scale = 0;
+            prop.opacity = 255;
             let itemIcon = prop.getChildByName('icon');
             itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[propId];
             let itemLabel = prop.getChildByName('label');
@@ -226,9 +227,9 @@ export default class OpenBoxXingxing extends PopupBase {
     playAniHide(): Promise<void> {
         this.nodeReward.getComponent(cc.Animation).stop();
         this.nodeReward.position = cc.v3();
-        
+        let rewards = this.params.rewards.reward;
         let count = 0;
-        let total = 2;
+        let total = rewards.length;
         return new Promise((res) => {
             let funcCount = () => {
                 count++;
@@ -236,7 +237,7 @@ export default class OpenBoxXingxing extends PopupBase {
                     res();
                 }
             };
-            let rewards = this.params.rewards.reward;
+            
             for (let index = 0, length = rewards.length; index < length; index++) {
                 let prop = this.nodeReward.getChildByName('prop' + index);
                 prop.opacity = 255;

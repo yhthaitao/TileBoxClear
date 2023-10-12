@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "514b82d5-f733-4a04-8d3c-0c0a1be5ae7b",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 94,
+  "height": 48,
+  "platformSettings": {},
+  "subMetas": {
+    "道具数量地": {
+      "ver": "1.0.6",
+      "uuid": "7ce95e95-3a1a-471c-a7b7-a2cabb8ebf22",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "514b82d5-f733-4a04-8d3c-0c0a1be5ae7b",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 94,
+      "height": 48,
+      "rawWidth": 94,
+      "rawHeight": 48,
+      "borderTop": 16,
+      "borderBottom": 16,
+      "borderLeft": 16,
+      "borderRight": 16,
+      "subMetas": {}
+    }
+  }
+}

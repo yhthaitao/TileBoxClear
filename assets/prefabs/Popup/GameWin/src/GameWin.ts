@@ -14,7 +14,7 @@ interface ParamsAniBox {
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class GameWin extends PopupBase {
+export default class GameWin<Options = any> extends PopupBase {
 
     @property(cc.Node) nodeXing: cc.Node = null;
     @property(cc.Node) nodeClock: cc.Node = null;
@@ -79,6 +79,49 @@ export default class GameWin extends PopupBase {
         this.setIsLock(true);
     }
 
+    /**
+     * 展示弹窗
+     * @param options 弹窗选项
+     * @param duration 动画时长
+     */
+    public show(options?: Options) {
+        this.node.scale = 1.2;
+        this.maskDown.setContentSize(cc.winSize);
+        this.maskUp.setContentSize(cc.winSize);
+
+        return new Promise<void>(res => {
+            this.node.active = true;
+            // 开启拦截
+            this.maskUp.active = true;
+            // 储存选项
+            this.options = options;
+            // 展示前
+            this.showBefore(this.options);
+            // 播放背景遮罩动画
+            this.maskDown.active = true;
+            this.maskDown.opacity = 0;
+            cc.tween(this.maskDown).to(0.245, { opacity: 200 }).start();
+            // 播放弹窗主体动画
+            this.content.active = true;
+            this.content.scale = 0.5;
+            this.content.opacity = 0;
+            cc.tween(this.content).parallel(
+                cc.tween().to(0.233, { scale: 1.05 }, { easing: 'cubicOut' })
+                    .to(0.233, { scale: 0.98 }, { easing: 'sineInOut' })
+                    .to(0.233, { scale: 1 }, { easing: 'sineInOut' }),
+                cc.tween().to(0.215, { opacity: 255 }),
+            ).call(() => {
+                // 关闭拦截
+                this.maskUp.active = false;
+                // 弹窗已完全展示
+                this.playAniBoxGood();
+                this.showAfter && this.showAfter();
+                // Done
+                res();
+            }).start();
+        });
+    }
+
     /** 刷新ui */
     resetContent() {
         this.obj.aniBox.isPlay = false;
@@ -132,64 +175,32 @@ export default class GameWin extends PopupBase {
      */
     async playAniBoxGood() {
         if (this.obj.aniBox.isPlay) {
-            let boxData = DataManager.data.boxGood;
-            // 其他数据
-            let total = this.obj.aniBox.total;
-            let boxCount = boxData.count;
-            let boxAdd = boxData.add;
-            let boxAddElse = -1;
-            if (boxCount + boxAdd >= total) {
-                boxAddElse = boxCount + boxAdd - total;
-                boxAdd = boxAdd - boxAddElse;
-            }
-
-            // 数据变更
-            boxData.count += boxData.add;
-            boxData.add = 0;
-            if (boxData.count >= total) {
-                boxData.level += 1;
-                boxData.count -= total;
-                let params = { total: this.obj.aniBox.total, goods: this.obj.aniBox.goods };
-                DataManager.refreshDataAfterUnlockGood(params);
-                console.log(JSON.stringify({ name: '物品宝箱', param: params }, null, 4));
-                kit.Event.emit(CConst.event_notice, '物品宝箱');
-            }
-            DataManager.setData();
-
+            let boxGood = DataManager.data.boxGood;
+            let count = boxGood.count;
+            let reward = DataManager.getRewardBoxGood();
+            let total = reward.total;
+            
             let process = this.nodeBox.getChildByName('process');
             let itemBar = process.getChildByName('bar');
+            itemBar.getComponent(cc.Sprite).fillRange = count / total;
             let itemLabel = process.getChildByName('label');
-            let time = 0.25;
-            // 进度条刷新
-            for (let index = 0; index < boxAdd; index++) {
-                boxCount++;
-                let params: ParamsAniBox = {
-                    objBar: { node: itemBar, time: time, goal: boxCount / total },
-                    objLabel: { node: itemLabel, desc: boxCount + '/' + total },
-                };
-                await this.playAniBoxOne(params);
-            }
+            itemLabel.getComponent(cc.Label).string = count + '/' + total;
 
-            // 进度条再次刷新
-            if (boxAddElse >= 0) {
-                // 开启宝箱
-                await kit.Popup.show(CConst.popup_path_boxGood, {}, { mode: PopupCacheMode.Frequent });
-                // 进度条再次刷新
-                boxCount = 0;
-                total = DataManager.getRewardBoxGood().total;
-                itemBar.width = 0;
-                itemLabel.getComponent(cc.Label).string = 0 + '/' + total;
-                for (let index = 0; index < boxAddElse; index++) {
-                    boxCount++;
-                    let params: ParamsAniBox = {
-                        objBar: { node: itemBar, time: time, goal: boxCount / total },
-                        objLabel: { node: itemLabel, desc: boxCount + '/' + total },
-                    };
-                    await this.playAniBoxOne(params);
-                }
+            if (boxGood.add > 0) {
+                boxGood.count += boxGood.add;
+                boxGood.add = 0;
+                DataManager.setData();
+
+                let time = 0.5;
+                cc.tween(itemBar.getComponent(cc.Sprite)).parallel(
+                    cc.tween().to(time, { fillRange: boxGood.count/total }),
+                    cc.tween().delay(time * 0.5).call(() => {
+                        itemLabel.getComponent(cc.Label).string = boxGood.count + '/' + total;
+                    }),
+                ).start();
             }
         }
-        this.setIsLock(false);
+        
     }
 
     playAniBoxOne(params: ParamsAniBox): Promise<void> {
@@ -211,7 +222,7 @@ export default class GameWin extends PopupBase {
     }
 
     protected showAfter(): void {
-        let total = this.params.xingxing;
+        let total = this.params.disBoxXingxing;
         let funcXing = (index: number = 0) => {
             if (index < total) {
                 let xing = this.arrNodeXingxing[index];
@@ -225,17 +236,18 @@ export default class GameWin extends PopupBase {
                     funcXing(index);
                 }).start();
             }
+            else{
+                this.setIsLock(false);
+            }
         };
         funcXing();
-
-        this.playAniBoxGood();
     }
 
     protected hideBefore(): void {
         this.arrNodeXingxing.forEach((xing, index) => {
             let icon = xing.getChildByName('icon');
             cc.Tween.stopAllByTarget(icon);
-            if (index < this.params.xingxing) {
+            if (index < this.params.disBoxXingxing) {
                 icon.opacity = 255;
                 icon.scale = 1.0;
             }

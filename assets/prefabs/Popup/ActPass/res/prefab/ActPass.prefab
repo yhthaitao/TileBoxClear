@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "GameWin",
+    "_name": "ActPass",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -201,7 +201,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "25oCNSfvdPJ5ZCxyU1EpXQ",
     "sync": false
@@ -285,9 +285,7 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "a0f85a1e-e628-45e1-9d94-d30f8229145f"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,
@@ -308,7 +306,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "fdlmH/TbFMM7WKXNITEprN",
     "sync": false
@@ -408,7 +406,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 472,
-      "height": 517
+      "height": 509
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -459,9 +457,7 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "e01ea8dc-b0c8-44cc-88d1-612027a7ba6a"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,
@@ -482,7 +478,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "51KWD3LglG56OsZrd1W9On",
     "sync": false
@@ -589,7 +585,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "abibc+d6dM06yIS5U1ILty",
     "sync": false
@@ -600,7 +596,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "2c7XFSoh5M85mfrVdgB/O1",
     "sync": false
@@ -685,7 +681,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "2a7xZBMJNAn5AqOZIXj8XG",
     "sync": false
@@ -710,6 +706,28 @@
     "nodeTitle": {
       "__id__": 13
     },
+    "bg": {
+      "__id__": 6
+    },
+    "itemIcon": {
+      "__id__": 10
+    },
+    "bgFrames": [
+      {
+        "__uuid__": "fc933cfb-aa98-490a-a963-828ffa984166"
+      },
+      {
+        "__uuid__": "a2a7e229-40a4-4b02-979b-761bbdf9673c"
+      }
+    ],
+    "roleFrames": [
+      {
+        "__uuid__": "e01ea8dc-b0c8-44cc-88d1-612027a7ba6a"
+      },
+      {
+        "__uuid__": "44df63ec-e1e8-4dc0-8440-ab278bbd97ba"
+      }
+    ],
     "_id": ""
   },
   {
@@ -718,7 +736,7 @@
       "__id__": 1
     },
     "asset": {
-      "__uuid__": "c9c205b5-cb15-4a78-91f7-e05cb3d684a6"
+      "__id__": 0
     },
     "fileId": "",
     "sync": false

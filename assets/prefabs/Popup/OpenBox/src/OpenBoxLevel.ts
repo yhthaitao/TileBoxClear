@@ -160,8 +160,8 @@ export default class OpenBoxLevel extends PopupBase {
         DataManager.playAniDragon(dragon, this.obj.open.armatureName, this.obj.open.animationName);
         // icon
         this.nodeReward.active = true;
+        this.nodeReward.position = cc.v3();
         this.nodeReward.scale = 0;
-        this.nodeReward.y = 0;
         this.setReward();
         cc.tween(this.nodeReward).delay(1.35).call(() => {
             // 粒子

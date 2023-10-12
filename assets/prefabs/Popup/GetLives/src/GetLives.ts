@@ -101,14 +101,20 @@ export default class GetLives extends PopupBase {
     /** 按钮事件 购买体力 */
     async eventBtnRefill() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        if (DataManager.data.numCoin >= 100) {
+        let strength = DataManager.data.strength;
+        if (strength.count >= strength.total) {
+            kit.Event.emit(CConst.event_notice, '体力值已满');
+        }
+        else if (DataManager.data.numCoin >= 100) {
+            DataManager.data.strength.count += 1;
             DataManager.data.numCoin -= 100;
-            DataManager.strengthResume();
             DataManager.setData();
+            kit.Event.emit(CConst.event_addStrength_byCoin);
             await kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_before, { type: this.params.type }, { mode: PopupCacheMode.Frequent });
         }
         else {
+            kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
         }
     };
@@ -118,7 +124,17 @@ export default class GetLives extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         let strength = DataManager.data.strength;
         if (strength.count >= strength.total) {
-
+            let funcA = () => {
+                DataManager.data.strength.count += 1;
+                DataManager.data.boxData.timesLive.count -= 1;
+                DataManager.setData();
+                kit.Event.emit(CConst.event_addStrength_byWatch);
+                kit.Popup.hide();
+            };
+            let funcB = () => {
+                kit.Event.emit(CConst.event_notice, '视频未加载');
+            };
+            DataManager.playVideo(funcA, funcB);
         }
         else {
             kit.Event.emit(CConst.event_notice, '体力值已满');

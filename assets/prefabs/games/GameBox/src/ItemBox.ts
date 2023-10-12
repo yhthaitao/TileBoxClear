@@ -24,7 +24,7 @@ export default class ItemBox extends cc.Component {
 
         let layer = this.node.getChildByName('layer');
         layer.getComponent(cc.Label).string = String(this.param.index);
-        // layer.active = true;
+        layer.active = false;
 
         // 特殊箱子
         if (this.param.isFrame) {

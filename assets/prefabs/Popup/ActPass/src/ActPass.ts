@@ -1,5 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
+import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 
@@ -8,10 +9,20 @@ const { ccclass, property } = cc._decorator;
 export default class ActPass<Options = any> extends PopupBase {
 
     @property(cc.Node) nodeTitle: cc.Node = null;
+    @property(cc.Node) bg: cc.Node = null;
+    @property(cc.Node) itemIcon: cc.Node = null;
+    @property([cc.SpriteFrame]) bgFrames: cc.SpriteFrame[] = [];
+    @property([cc.SpriteFrame]) roleFrames: cc.SpriteFrame[] = [];
 
     protected showBefore(options: any): void {
         Common.log('弹窗 过度 showBefore()');
         this.nodeTitle.active = false;
+        // 特定背景
+        let difficulty = DataManager.getLevelData().difficulty;
+        this.bg.getComponent(cc.Sprite).spriteFrame = this.bgFrames[difficulty ? 1 : 0];
+        // 随机头像
+        let roleId = Math.floor(Math.random()*2);
+        this.itemIcon.getComponent(cc.Sprite).spriteFrame = this.roleFrames[roleId];
         kit.Audio.playEffect(CConst.sound_actPass);
     }
 

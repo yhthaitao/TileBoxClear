@@ -12,6 +12,8 @@ export default class Loading extends cc.Component {
     @property(cc.Node) nodeProcess: cc.Node = null;
     @property(cc.Sprite) spriteProcessBar: cc.Sprite = null;
     @property(cc.Label) labelLoading: cc.Label = null;
+    @property(cc.Node) itemIcon: cc.Node = null;
+    @property([cc.SpriteFrame]) roleFrames: cc.SpriteFrame[] = [];
 
     isStart: boolean = false;
     objTime = { count: 0, total: 0.015, };
@@ -23,8 +25,15 @@ export default class Loading extends cc.Component {
 
         this.isStart = false;
         this.nodeLogo.opacity = 0;
+        this.nodeLogo.y = cc.winSize.height * 0.5 + 100;
+        
         this.nodeProcess.opacity = 0;
+        this.nodeProcess.y = -cc.winSize.height * 0.5 * 0.8;
+
         this.spriteProcessBar.fillRange = 0;
+        // 随机头像
+        let roleId = Math.floor(Math.random()*2);
+        this.itemIcon.getComponent(cc.Sprite).spriteFrame = this.roleFrames[roleId];
     }
 
     initLabel() {
@@ -59,26 +68,24 @@ export default class Loading extends cc.Component {
 
     /** 动画 loading 进入 */
     playAniEnter() {
-        let tDelay = .55;
-        let tMove = .383;
-        let tOpa = .383;
-        let heightMax = cc.winSize.height * 0.5;
-        let y0 = heightMax + 100;
-        let y2 = DataManager.getTitlePosY();
-        let y1 = y2 - 50;
+        let tDelay = 0.55;
+        let tMove1 = 0.383;
+        let tMove2 = 0.320;
+        let tOpa = 0.383;
+
+        let y1 = cc.winSize.height * 0.5 * 0.30;
+        let y2 = cc.winSize.height * 0.5 * 0.35;
         this.nodeLogo.active = true;
-        this.nodeLogo.y = y0;
         let tween = cc.tween;
         tween(this.nodeLogo).delay(tDelay)
             .parallel(
-                tween().to(tMove, { y: y1 }, cc.easeSineOut()),
+                tween().to(tMove1, { y: y1 }, cc.easeSineOut()),
                 tween().to(tOpa, { opacity: 255 })
             )
-            .to(.4, { y: y2 }, cc.easeSineInOut())
+            .to(tMove2, { y: y2 }, cc.easeSineInOut())
             .start();
 
         this.nodeProcess.active = true;
-        this.nodeProcess.y = -cc.winSize.height * 0.5 * 0.6;
         tween(this.nodeProcess).delay(tDelay)
             .to(tOpa, { opacity: 255 }).call(() => {
                 this.isStart = true;

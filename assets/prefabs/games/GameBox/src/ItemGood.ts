@@ -155,13 +155,13 @@ export default class ItemGood extends cc.Component {
         // 时钟
         if (this.param.keyGood == this.idClock) {
             this.propLight.active = true;
-            this.propLight.children.forEach((item)=>{
+            this.propLight.children.forEach((item) => {
                 item.active = item.name == 'clock';
                 if (item.active) {
                     let time = 1;
                     let forever = cc.tween().parallel(
-                        cc.tween().to(time, {scale: 1.1}).to(time, {scale: 1.0}),
-                        cc.tween().to(time, {opacity: 200}).to(time, {opacity: 255}),
+                        cc.tween().to(time, { scale: 1.1 }).to(time, { scale: 1.0 }),
+                        cc.tween().to(time, { opacity: 200 }).to(time, { opacity: 255 }),
                     );
                     cc.tween(item).repeatForever(forever).start();
                 }
@@ -175,13 +175,13 @@ export default class ItemGood extends cc.Component {
         // 磁铁
         else if (this.param.keyGood == this.idMagnet) {
             this.propLight.active = true;
-            this.propLight.children.forEach((item)=>{
+            this.propLight.children.forEach((item) => {
                 item.active = item.name == 'magnet';
                 if (item.active) {
                     let time = 1;
                     let forever = cc.tween().parallel(
-                        cc.tween().to(time, {scale: 1.1}).to(time, {scale: 1.0}),
-                        cc.tween().to(time, {opacity: 200}).to(time, {opacity: 255}),
+                        cc.tween().to(time, { scale: 1.1 }).to(time, { scale: 1.0 }),
+                        cc.tween().to(time, { opacity: 200 }).to(time, { opacity: 255 }),
                     );
                     cc.tween(item).repeatForever(forever).start();
                 }
@@ -199,20 +199,19 @@ export default class ItemGood extends cc.Component {
     };
 
     /** 点击事件 */
-    eventBtn() {
+    eventBtn(event: cc.Event.EventTouch) {
+        let scriptMain = this.getScriptMain();
+        if (!scriptMain) {
+            Common.log(' 异常 找不到脚本 scriptMain ');
+            return;
+        }
+        scriptMain.touchEffectShow(event);
+
         if (this.state > 0) {
             return;
         }
         this.state++;
-
-        let scriptMain = this.getScriptMain();
-        if (scriptMain) {
-            scriptMain.eventTouch(this.node);
-        }
-        else {
-            Common.log(' 异常 找不到脚本 scriptMain ');
-            return;
-        }
+        scriptMain.eventTouch(this.node);
     };
 
     resetParams(param: GoodParam) {

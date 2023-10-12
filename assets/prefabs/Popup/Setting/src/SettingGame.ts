@@ -209,7 +209,6 @@ export default class SettingGame extends PopupBase {
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        DataManager.beforeWins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromSettingGame }, { mode: PopupCacheMode.Frequent });
@@ -226,7 +225,6 @@ export default class SettingGame extends PopupBase {
             // 过度
             await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
             // 进入菜单页
-            DataManager.beforeWins.count = 0;
             DataManager.strengthReduce();
             DataManager.setData();
             kit.Event.emit(CConst.event_enter_menu);

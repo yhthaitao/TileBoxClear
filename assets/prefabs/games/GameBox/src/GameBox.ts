@@ -1,6 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager, { Design, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/DataManager";
+import DataManager, { Design, LevelParam, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
@@ -9,17 +9,6 @@ import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
 import ConfigGood from "../../../../src/config/ConfigGood";
 import ConfigGold from "../../../../src/config/ConfigGold";
-
-/** 关卡参数 */
-export interface LevelParam {
-    difficulty?: number,// 难度（对应不同的过渡动画）
-    isGolden?: boolean,// 是否有金币
-    levelTime?: number,// 关卡时间
-    layer?: number,// 关卡显示层级
-    objW?: { left: number, right: number },// 左右宽度
-    map: any[],// 箱子数据
-    item: any[],// 物品数据
-}
 
 /** box参数 */
 export interface BoxParam {
@@ -76,14 +65,7 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
     @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
     @property({ type: cc.Node, tooltip: '冰冻效果节点' }) effectIce: cc.Node = null;
-
-    /** 关卡数据 */
-    levelParam: LevelParam = null;
-
-    /** 资源路径 */
-    resPath = {
-        levelPath: { bundle: 'prefabs', path: './games/GameBox/res/level/level' },
-    }
+    @property({ type: cc.Node, tooltip: '点击效果节点' }) effectTouch: cc.Node = null;
 
     /** 游戏用数据 */
     dataObj = {
@@ -106,7 +88,6 @@ export default class GameBox extends cc.Component {
     bottomPosArr: cc.Vec3[] = [];// 物品位置（检测区）
     bottomTime = { cur: 0, init: 0, total: 0.2 };// 物品消除时间（检测区）
 
-    defaultDifficulty: number = 1;// 默认难度
     defaultObjW = { "left": 10, "right": 10 };// 默认左右留的宽度
     defaultTime: number = 300;// 默认关卡时间
     defaultLayer: number = 5.5;// 默认显示箱子层数
@@ -186,6 +167,9 @@ export default class GameBox extends cc.Component {
 
         // 调整ui（nodeMain）
         this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
+
+        // 按钮特效
+        this.bg.on(cc.Node.EventType.TOUCH_START, this.touchEffectShow, this, true);
     }
 
     protected start(): void {
@@ -203,11 +187,12 @@ export default class GameBox extends cc.Component {
     }
 
     /** 第一次开始 */
-    async gameStart(isRestart = false) {
+    gameStart(isRestart = false) {
         Common.log('功能：游戏开始');
+        this.uiTopSuipian.opacity = 0;
         NativeCall.logEventOne(ConfigDot.dot_levelStart);
         this.clear();
-        await this.loadData();
+        this.loadBg();
         this.initData();
         this.initBox(isRestart);
         this.initUI();
@@ -216,22 +201,9 @@ export default class GameBox extends cc.Component {
     }
 
     /** 加载关卡数据 */
-    async loadData() {
-        let index = 0;
-        let cfg = this.resPath.levelPath;
-        let path = cfg.path;
-        let lenLevel0 = 100;
-        let lenLevel1 = 174;
-        let level = DataManager.data.boxData.level;
-        if (level <= 100) {
-            path = path + '0';
-            index = level - 1;
-        }
-        else {
-            path = path + '1';
-            index = (level - lenLevel0) % lenLevel1 - 1;
-        }
+    loadBg() {
         // 加载背景
+        let level = DataManager.data.boxData.level;
         let bgId = Math.floor((level - 1) / 5 % 4) + 1;
         let pathBg = CConst.pathGameBg + bgId;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
@@ -241,9 +213,6 @@ export default class GameBox extends cc.Component {
             }
             this.bg.getComponent(cc.Sprite).spriteFrame = assets;
         });
-        // 加载关卡数据
-        let asset: cc.JsonAsset = await kit.Resources.loadRes(cfg.bundle, path, cc.JsonAsset);
-        this.levelParam = asset.json[index];
     }
 
     /** 初始化数据 */
@@ -256,18 +225,19 @@ export default class GameBox extends cc.Component {
             isFinish: false,
         };
 
+        let levelParam = DataManager.getLevelData();
         // 物品计数
         this.goodsCount = 0;
-        this.goodsTotal = this.levelParam.item.length;
-
+        this.goodsTotal = levelParam.item.length;
         // 倒计时开始
-        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
+        this.timeGame.total = levelParam.levelTime || this.defaultTime;
         this.timeGame.cur = this.timeGame.init;
         this.timeGame.count = this.timeGame.total;
     }
 
     /** 重新组合关卡数据 */
     initBox(isRestart = false) {
+        let levelParam = DataManager.getLevelData();
         // 重构物品配置信息
         this.goodsCfg = {};
         ConfigGood.goodsConf.forEach((obj) => { this.goodsCfg[obj.id] = obj; });
@@ -275,12 +245,14 @@ export default class GameBox extends cc.Component {
         let topY = 0;
         let topH = 0;
         let frameY = 0;
-        let topBoxIndex = this.levelParam.map.length - 1;
-        let topGoodIndex = this.levelParam.item.length - 1;
+        let topBoxIndex = levelParam.map.length - 1;
+        let topGoodIndex = levelParam.item.length - 1;
+        let xMin = 0;
+        let xMax = 0;
         // 配置箱子和物品数据
         this.objGame = {};
-        for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
-            const obj = this.levelParam.map[index];
+        for (let index = 0, length = levelParam.map.length; index < length; index++) {
+            let obj = levelParam.map[index];
             let x = Math.floor(Number(obj.x));
             let y = Math.floor(Number(obj.y));
             let w = Math.floor(Number(obj.w));
@@ -289,21 +261,30 @@ export default class GameBox extends cc.Component {
                 topY = y;
                 topH = h;
             }
-            if (this.getBoxIsFrame(h) && y > frameY) {
+            let isFrame = this.getBoxIsFrame(h);
+            if (isFrame && y > frameY) {
                 frameY = y;
             }
+            if (xMin > x) {
+                xMin = x;
+            }
+            if (xMax < x) {
+                xMax = x;
+            }
             let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: this.getBoxIsFrame(h),
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, isMove: false, isFrame: isFrame,
             };
             this.objGame[index] = boxParam;
         }
 
         // 金币逻辑
-        let isGolden = this.levelParam.isGolden ? true : false;
+        let isGolden = levelParam.isGolden ? true : false;
+        this.uiTopSuipian.opacity = isGolden ? 255 : 0;
         let goldY = 0;
+        let goldMin = 6;
+        let goldMax = 8;
         let goldCount = 0;
-        let goldTotal = Math.floor(Math.random() * (8 - 6) + 6);// 有金币的物品数量
-        Common.log('金币碎片 ' + (isGolden ? '存在' : '不存在') + '; 金币总量：', goldTotal);
+        let goldTotal = Math.floor(Math.random() * (goldMax + 1 - goldMin) + goldMin);// 有金币的物品数量
 
         /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
         let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
@@ -330,9 +311,8 @@ export default class GameBox extends cc.Component {
             return objGood[key];
         };
 
-        let goods = this.levelParam.item;
-        for (let index = 0, length = goods.length; index < length; index++) {
-            const obj = goods[index];
+        for (let index = 0, length = levelParam.item.length; index < length; index++) {
+            let obj = levelParam.item[index];
             let keyGood = isRestart ? resetKey(Number(obj.n)) : Number(obj.n);
             let isGold = false;
             let cfg = this.goodsCfg[keyGood];
@@ -341,8 +321,8 @@ export default class GameBox extends cc.Component {
             let h = cfg.h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
-            let x = obj.x - this.levelParam.map[keyBox].x;
-            let y = obj.y - this.levelParam.map[keyBox].y + 15;
+            let x = obj.x - levelParam.map[keyBox].x;
+            let y = obj.y - levelParam.map[keyBox].y + 15;
             if (dataBox.isFrame) {
                 y = 15;
             }
@@ -359,6 +339,15 @@ export default class GameBox extends cc.Component {
                 box: { name: dataBox.name, key: keyBox, x: x, y: y },
             };
             dataBox.goods[index] = goodParam;
+        }
+
+        // 设置箱子居中
+        let xDis = (Math.abs(xMax) - Math.abs(xMin)) * 0.5;
+        for (let key in this.objGame) {
+            if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
+                let boxParam: BoxParam = this.objGame[key];
+                boxParam.x += xDis;
+            }
         }
 
         let isStoreData = false;
@@ -439,7 +428,7 @@ export default class GameBox extends cc.Component {
         arrIdBox = arrIdBox.filter((key) => {
             let obj = this.objGame[key];
             if (frameY > 0) {
-                return !this.getBoxIsFrame(Number(obj.h)) && Number(obj.y) > frameY;
+                return !this.getBoxIsFrame(Number(obj.h)) && Number(obj.y) > frameY && Object.keys(obj.goods).length > 0;
             }
             else {
                 return !this.getBoxIsFrame(Number(obj.h));
@@ -524,14 +513,11 @@ export default class GameBox extends cc.Component {
         this.arrGame[0] = this.arrGame[0].concat(arrBoxFrame);
         // 控制箱子y值
         this.setLeftRight();
-        let disBoxX = (this.mainLeftX + this.mainRightX) * 0.5;
         let disBoxY = this.arrGame[0][0].y;
         for (let index = 0, length = this.arrGame.length; index < length; index++) {
             let arrBoxParam = this.arrGame[index];
             arrBoxParam.forEach((boxParam) => {
-                boxParam.x -= disBoxX;
                 boxParam.y -= disBoxY;
-                this.objGame[boxParam.index].x -= boxParam.x;
             });
         }
         // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
@@ -560,7 +546,7 @@ export default class GameBox extends cc.Component {
         this.setUISuipian();// 设置碎片数量
         this.setUITime();// 设置时间
         this.setIceHide();// 设置时间颜色
-        this.setUIProcess();// 设置进度
+        this.setUIProcess();// 设置游戏进度
         // 设置道具栏
         this.setUIProp(this.uiPropIce, DataManager.data.prop.ice.count);
         this.setUIProp(this.uiPropTip, DataManager.data.prop.tip.count);
@@ -1022,13 +1008,14 @@ export default class GameBox extends cc.Component {
 
     /** 设置真实缩放: 先计算适配宽时，能够显示的层级 */
     setMainScale() {
+        let levelParam = DataManager.getLevelData();
         let boxParam = this.arrGame[0][0];
-        let layer = (this.levelParam.layer || this.defaultLayer);
+        let layer = (levelParam.layer || this.defaultLayer);
         let hBox = boxParam.h * layer;
         let hMain = cc.winSize.height * 0.5 - this.nodeMain.y - this.uiMask.height;
         let scaleByH = hMain / hBox;
 
-        let objW = this.levelParam.objW || this.defaultObjW;
+        let objW = levelParam.objW || this.defaultObjW;
         let width = objW.left + objW.right;
         let widthDesign = cc.winSize.width - width;
         let widthReal = this.mainRightX - this.mainLeftX;
@@ -1041,8 +1028,6 @@ export default class GameBox extends cc.Component {
             this.mainScale = scaleByH;
         }
         this.mainLayer = Math.floor(10 * hMain / (boxParam.h * this.mainScale)) * 0.1;
-        Common.log('缩放设置: level: ', DataManager.data.boxData.level, '; scaleByH: ', scaleByH, '; scaleByW: ', scaleByW,
-            '; mainScale: ', this.mainScale, 'dataLayer: ', layer, '; mainLayer: ', this.mainLayer);
     };
 
     /** 检测特殊箱子 */
@@ -1072,12 +1057,20 @@ export default class GameBox extends cc.Component {
 
         // 使用道具 时钟
         if (scriptGood.param.keyGood == 9001) {
+            if (this.speedBox.isMove || this.speedGood.isMove) {
+                scriptGood.state = 0;
+                return;
+            }
             this.usePropClock(good);
             return;
         }
 
         // 使用道具 磁铁
         if (scriptGood.param.keyGood == 9002) {
+            if (this.speedBox.isMove || this.speedGood.isMove) {
+                scriptGood.state = 0;
+                return;
+            }
             this.usePropMagnet(good);
             return;
         }
@@ -1100,6 +1093,22 @@ export default class GameBox extends cc.Component {
             // 开始移动 箱子
             this.setMoveBox(true);
         }
+    }
+
+    /** 点击事件效果反馈 */
+    touchEffectShow(event: cc.Event.EventTouch) {
+        var pos = event.getLocation();
+        let dragon = this.effectTouch.getChildByName('dragon');
+        let main = this.effectTouch.getChildByName('main');
+        let copy = cc.instantiate(dragon);
+        copy.active = true;
+        copy.position = main.convertToNodeSpaceAR(cc.v3(pos.x, pos.y));
+        copy.parent = main;
+        let animation = copy.getComponent(dragonBones.ArmatureDisplay)
+        animation.once(dragonBones.EventObject.COMPLETE, () => {
+            copy.removeFromParent();
+        })
+        animation.playAnimation('yundong', 1);
     }
 
     /** 刷新操作区 */
@@ -1318,6 +1327,7 @@ export default class GameBox extends cc.Component {
         // 道具逻辑
         let needNum = 3;
         let keyGood = 0;
+        let arrPropElse = [9001, 9002];
         if (this.bottomParamArr.length > 0) {
             for (let index = 0; index < this.bottomParamArr.length; index++) {
                 let arrGoodParam = this.bottomParamArr[index];
@@ -1341,8 +1351,10 @@ export default class GameBox extends cc.Component {
                     for (const key in boxParam.goods) {
                         if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
                             let goodParam: GoodParam = boxParam.goods[key];
-                            keyGood = goodParam.keyGood;
-                            break;
+                            if (arrPropElse.indexOf(goodParam.keyGood) < 0) {
+                                keyGood = goodParam.keyGood;
+                                break;
+                            }
                         }
                     }
                     if (keyGood != 0) {
@@ -1779,20 +1791,20 @@ export default class GameBox extends cc.Component {
             let p1 = Common.getLocalPos(node.parent, node.position, parent);
             let bottomGood = cc.instantiate(node);
             bottomGood.position = p1;
+            bottomGood.getComponent(ItemGood).param = Common.clone(node.getComponent(ItemGood).param);
             bottomGood.parent = parent;
             return bottomGood;
         };
 
         // 删除磁铁
-        let timeMagnet = 0.15;
-        let timeMove = 0.2;
-
+        let timeMagnet = 0.25;
+        let timeMove = 0.25;
         let uiMagnet = this.node.getChildByName('uiMagnet');
         uiMagnet.active = true;
         uiMagnet.x = 0;
         let magnetIcon = uiMagnet.getChildByName('icon');
         magnetIcon.x = -cc.winSize.width * 0.6;
-        magnetIcon.active = false;
+        magnetIcon.active = true;
         cc.tween(magnetIcon).to(timeMagnet, { x: 0 }).start();
         let magnetMain = uiMagnet.getChildByName('main');
         magnetMain.active = true;
@@ -1882,39 +1894,39 @@ export default class GameBox extends cc.Component {
         }
 
         // 磁铁移动
-        let magnetGood = this.removeMidGood(good, magnetMain);
-        magnetGood.zIndex = 0;
-        cc.tween(magnetGood).parallel(
-            cc.tween().to(timeMagnet, { scale: 1.25 }),
-            cc.tween().to(timeMagnet, { position: cc.v3() }),
-        ).start();
+        this.removeMidGood(good);
         // 物品移动
-        let dis = 30;
-        let width = (arrGoods.length - 1) * dis;
-        arrGoods.forEach((good, index: number) => {
+        arrGoods.forEach((good) => {
             good.active = true;
-            good.zIndex = index == 1 ? 1 : 2;
-            let angle = 0;
-            if (index == 0) {
-                angle = 15;
+            let scale = 1.0;
+            let script = good.getComponent(ItemGood);
+            let first = Math.floor(script.param.keyGood * 0.001);
+            if (first == 2) {
+                scale = 0.9;
             }
-            else if (index == 2) {
-                angle = -15;
+            else if (first == 3) {
+                scale = 0.85;
             }
+            else if (first == 4) {
+                scale = 0.8;
+            }
+            let x = Math.random() * 80 - 40;
+            let y = Math.random() * 15 - 15;
+            let angle = Math.random() * 30 - 15;;
             cc.tween(good).parallel(
-                cc.tween().to(timeMove, { position: cc.v3(index * dis - width * 0.5, index == 1 ? 25 : 15) }),
+                cc.tween().to(timeMove, { position: cc.v3(x, y) }),
                 cc.tween().to(timeMove, { angle: angle }),
-                cc.tween().to(timeMove, { scale: 0.85 }),
+                cc.tween().to(timeMove, { scale: scale }),
             ).start();
         });
 
-        magnetMain.active = true;
-        magnetMain.position = cc.v3();
-        cc.tween(magnetMain).delay(0.75)
+        uiMagnet.active = true;
+        uiMagnet.position = cc.v3();
+        cc.tween(uiMagnet).delay(1.0)
             .to(0.1, { x: -cc.winSize.width * 0.1 }, cc.easeSineOut())
-            .to(0.3, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
-                magnetMain.active = false;
-                magnetMain.position = cc.v3();
+            .to(0.35, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
+                uiMagnet.active = false;
+                uiMagnet.position = cc.v3();
                 magnetMain.removeAllChildren();
 
                 // 更新ui
@@ -1946,8 +1958,8 @@ export default class GameBox extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 删除磁铁
-        let timeMagnet = 0.2;
-        let timeMove = 0.2;
+        let timeMagnet = 0.25;
+        let timeMove = 0.25;
         let uiMagnet = this.node.getChildByName('uiMagnet');
         uiMagnet.active = true;
         uiMagnet.x = 0;
@@ -1996,20 +2008,32 @@ export default class GameBox extends cc.Component {
                 arrGoods.push(midGood);
             }
         };
-        for (let index = 1; index < wins; index++) {
+        for (let index = 0; index < wins; index++) {
             moveGroup();
         }
-
+        Common.log('道具 磁铁 连胜 wins: ', wins, '; goods: ', arrGoods.length);
         // 移动物品
         arrGoods.forEach((good) => {
             good.active = true;
+            let scale = 1.0;
+            let script = good.getComponent(ItemGood);
+            let first = Math.floor(script.param.keyGood * 0.001);
+            if (first == 2) {
+                scale = 0.9;
+            }
+            else if (first == 3) {
+                scale = 0.85;
+            }
+            else if (first == 4) {
+                scale = 0.8;
+            }
             let x = Math.random() * 80 - 40;
             let y = Math.random() * 15 - 15;
-            let angle = Math.random() * 30 - 15;;
+            let angle = Math.random() * 30 - 15;
             cc.tween(good).parallel(
                 cc.tween().to(timeMove, { position: cc.v3(x, y) }),
                 cc.tween().to(timeMove, { angle: angle }),
-                cc.tween().to(timeMove, { scale: 0.85 }),
+                cc.tween().to(timeMove, { scale: scale }),
             ).start();
         });
 
@@ -2017,7 +2041,7 @@ export default class GameBox extends cc.Component {
         uiMagnet.position = cc.v3();
         cc.tween(uiMagnet).delay(1.0)
             .to(0.1, { x: -cc.winSize.width * 0.1 }, cc.easeSineOut())
-            .to(0.3, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
+            .to(0.35, { x: cc.winSize.width * 0.6 }, cc.easeSineIn()).call(() => {
                 uiMagnet.active = false;
                 uiMagnet.position = cc.v3();
                 magnetMain.removeAllChildren();
@@ -2025,10 +2049,6 @@ export default class GameBox extends cc.Component {
                 // 更新ui
                 this.isLock = false;
                 this.goodsCount += 3 * wins;
-                if (this.goodsCount >= this.goodsTotal) {
-                    this.goodsCount = this.goodsTotal;
-                    this.playAniGameOver(TypeFinish.win);
-                }
                 this.setUIProcess();
             }).start();
 
@@ -2037,12 +2057,7 @@ export default class GameBox extends cc.Component {
         this.setMoveBox(true);
     }
 
-    removeMidGood(node: cc.Node, parent: cc.Node) {
-        // 复制新节点 添加到 父节点上
-        let p1 = Common.getLocalPos(node.parent, node.position, parent);
-        let midGood = cc.instantiate(node);
-        midGood.position = p1;
-        midGood.parent = parent;
+    removeMidGood(node: cc.Node) {
         // 删除物品节点 并 更新数据
         let goodScript = node.getComponent(ItemGood);
         let goodKey = goodScript.param.index;
@@ -2071,7 +2086,6 @@ export default class GameBox extends cc.Component {
                 break;
             }
         }
-        return midGood;
     };
 
     removeMidParam(sign: { i: number, j: number, key: string }, parent: cc.Node) {
@@ -2089,8 +2103,8 @@ export default class GameBox extends cc.Component {
             let p1 = Common.getLocalPos(goodNode.parent, goodNode.position, parent);
             copyNode = cc.instantiate(goodNode);
             copyNode.position = p1;
+            copyNode.getComponent(ItemGood).param = Common.clone(goodNode.getComponent(ItemGood).param);
             copyNode.parent = parent;
-
             delete boxParamOne.goods[sign.key];
             boxScript.param = Common.clone(boxParamOne);
             DataManager.poolPut(goodNode, this.poolGood);
@@ -2344,13 +2358,13 @@ export default class GameBox extends cc.Component {
                 p1: cc.v2(p1.x, p1.y),
                 p2: cc.v2(p2.x, p1.y),
                 pTo: cc.v2(p2.x, p2.y),
-                time: Common.getMoveTime(p1, p2, 1, 1500),
+                time: Common.getMoveTime(p1, p2, 1, 2000),
                 scale: copy.scale,
             };
-            copy.scale = obj.scale * 0.5;
+            copy.scale = obj.scale * 0.75;
             cc.tween(copy).to(0.25, { position: p1 }, cc.easeSineInOut()).parallel(
                 cc.tween().bezierTo(obj.time, obj.p1, obj.p2, obj.pTo),
-                cc.tween().to(obj.time * 0.75, { scale: obj.scale }),
+                cc.tween().to(obj.time * 0.4, { scale: obj.scale }),
             ).call(() => {
                 copy.removeFromParent(true);
                 this.setUISuipian();
@@ -2440,8 +2454,6 @@ export default class GameBox extends cc.Component {
                     numStrength: 1,
                     numMagnet: DataManager.data.wins.count - DataManager.data.wins.start,
                 };
-                DataManager.strengthReduce();
-                DataManager.setData();
                 kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
                 break;
             default:
@@ -2449,7 +2461,8 @@ export default class GameBox extends cc.Component {
         }
     };
 
-    gameStageWin() {
+    async gameStageWin() {
+        this.setIsLock(true);
         // 打点
         NativeCall.sTsEvent();
 
@@ -2463,16 +2476,29 @@ export default class GameBox extends cc.Component {
         }
         NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
 
+        // 更新数据
+        let params: ParamsWin = {
+            tCount: this.timeGame.count,
+            disBoxGood: 1,
+            disBoxLevel: 1,
+            disBoxSuipian: this.dataObj.numSuipian,
+            disBoxXingxing: this.getXingxingNum(),
+        };
+        DataManager.refreshDataAfterWin(params);
+        DataManager.setData();
+
+        // 物品宝箱判断
+        let config = DataManager.getRewardBoxGood();
+        if (config.goods.length > 0) {
+            let boxGood = DataManager.data.boxGood;
+            if (boxGood.count + boxGood.add >= config.total) {
+                // 开启宝箱
+                await kit.Popup.show(CConst.popup_path_boxGood, {}, { mode: PopupCacheMode.Frequent });
+            }
+        }
+
         // 进入下一关
         let funcNext = () => {
-            let params: ParamsWin = {
-                xingxing: this.getXingxingNum(),
-                level: 1,
-                suipian: this.dataObj.numSuipian,
-                tCount: this.timeGame.count,
-            };
-            DataManager.refreshDataAfterWin(params);
-            DataManager.setData();
             kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
         };
         DataManager.playAdvert(funcNext);

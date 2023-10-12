@@ -17,7 +17,7 @@ export default class OpenBoxLevel extends PopupBase {
     @property([cc.SpriteFrame]) iconTexture: cc.SpriteFrame[] = [];
 
     obj = {
-        prop: { y: 100, scale0: 0.8, scale1: 2.0 },
+        prop: { y: 100, scale0: 1, scale1: 1.50 },
     };
     params: {
         pStart: { x: number, y: number },
@@ -29,7 +29,7 @@ export default class OpenBoxLevel extends PopupBase {
     pFinish: cc.Vec3 = cc.v3();
 
     protected showBefore(options: any): void {
-        Common.log('弹窗 开启等级宝箱 showBefore()');
+        Common.log('弹窗 开启碎片宝箱 showBefore()');
         this.params = Common.clone(options);
 
         DataManager.setString(LangChars.Reward, (chars: string) => {

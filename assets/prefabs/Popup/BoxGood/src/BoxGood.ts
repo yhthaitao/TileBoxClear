@@ -97,7 +97,6 @@ export default class BoxGood<Options = any> extends PopupBase {
     initLayout() {
         // 主题容器高度
         let levelReward = DataManager.data.boxGood.level;
-        levelReward = 1;
         let boxGoods: number[] = ConfigUnlock[levelReward].goods;
         let obj: { width: number, height: number, scale: number } = this.obj.layout[boxGoods.length];
         this.itemLayout.width = obj.width;
@@ -113,7 +112,8 @@ export default class BoxGood<Options = any> extends PopupBase {
             cell.name = 'cell' + index;
             cell.active = true;
             cell.parent = this.itemLayout;
-            this.initCell(cell, objGood[boxGoods[index]].name);
+            let goodParam = objGood[boxGoods[index]];
+            this.initCell(cell, goodParam.name);
         }
     };
 
@@ -139,10 +139,15 @@ export default class BoxGood<Options = any> extends PopupBase {
     eventBtnSure() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
-    }
+        
+        // 更新数据
+        let reward = DataManager.getRewardBoxGood();
+        DataManager.refreshDataAfterUnlockGood(reward);
 
-    eventBtnExit() {
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
+        let boxGood = DataManager.data.boxGood;
+        boxGood.level++;
+        boxGood.count = 0;
+        boxGood.add = 0;
+        DataManager.setData();
     }
 }

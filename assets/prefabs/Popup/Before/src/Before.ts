@@ -42,6 +42,7 @@ export default class Before extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 游戏开始前页面 showBefore()');
         this.params = Common.clone(options);
+        DataManager.initPropState();
         this.resetLabel();
         this.resetContent();
         this.resetProp();
@@ -125,7 +126,7 @@ export default class Before extends PopupBase {
         if (wins > 0) {
             let index = wins - 1;
             // 连胜光罩
-            let light = this.obj.win.light[index]
+            let light = this.obj.win.light[index];
             this.winLight.opacity = 255;
             this.winLight.x = light.x;
             this.winLight.width = light.w;
@@ -133,7 +134,6 @@ export default class Before extends PopupBase {
             let process = this.obj.win.process[index];
             this.winProcess.opacity = 255;
             this.winProcess.getChildByName('bar').width = process.w;
-            console.log('wins: ', wins, '; index: ', index, '; x: ', light.x, '; width: ', process.w);
             // 连胜节点
             this.arrNodeWin[index].opacity = this.obj.win.opaTrue;
         }

@@ -60,7 +60,7 @@ export default class GameFail extends PopupBase {
             this.nodeClock.active = true;
             this.nodeGoods.active = false;
         }
-        else{
+        else {
             this.nodeClock.active = false;
             this.nodeGoods.active = true;
             DataManager.setString(LangChars.over_nospace_gobackgood, (chars: string) => {
@@ -92,8 +92,12 @@ export default class GameFail extends PopupBase {
             await kit.Popup.hide();
             kit.Event.emit(CConst.event_game_revive, this.params.type);
         }
-        else{
-            kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+        else {
+            let params = {
+                mode: PopupCacheMode.Frequent,
+                isSoon: true,
+            };
+            kit.Popup.show(CConst.popup_path_getCoins, {}, params);
         }
     }
 
@@ -101,6 +105,9 @@ export default class GameFail extends PopupBase {
     async eventBtnGiveUp() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
+        
+        DataManager.strengthReduce();
+        DataManager.setData();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameFail }, { mode: PopupCacheMode.Frequent });
     }
 }

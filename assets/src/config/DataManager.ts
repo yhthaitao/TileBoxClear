@@ -47,12 +47,24 @@ export enum TypeBefore {
     fromGameFail = 1 << 3,
 }
 
+/** 关卡参数 */
+export interface LevelParam {
+    difficulty?: number,// 难度（对应不同的过渡动画）
+    isGolden?: boolean,// 是否有金币
+    levelTime?: number,// 关卡时间
+    layer?: number,// 关卡显示层级
+    objW?: { left: number, right: number },// 左右宽度
+    map: any[],// 箱子数据
+    item: any[],// 物品数据
+}
+
 /** 参数枚举（游戏胜利） */
 export interface ParamsWin {
     tCount: number;
-    level: number;
-    suipian: number;
-    xingxing: number;
+    disBoxGood: number;
+    disBoxLevel: number;
+    disBoxSuipian: number;
+    disBoxXingxing: number;
 }
 
 /** 参数枚举（游戏失败） */
@@ -114,6 +126,8 @@ class DataManager {
     isCloudLoad: boolean = false;
     /** 插屏广告开启关卡 */
     adStartLevel: number = 12;
+    /** 关卡数据 */
+    levelData: { data0: LevelParam[], data1: LevelParam[] } = { data0: null, data1: null };
 
     /** 初始数据 */
     data = {
@@ -157,12 +171,12 @@ class DataManager {
             magnet: { count: 3, tInfinite: 0 },// 磁铁
             clock: { count: 3, tInfinite: 0 },// 时钟
         },
-        wins: { 
-            count: 0, start: 1, unlock: 25 
+        wins: {
+            count: 0, start: 1, unlock: 25
         },
         // 宝箱相关参数（碎片宝箱）
         boxSuipian: {
-            level: 1, count: 0, add: 0, timeLunch: 0,
+            level: 1, count: 0, add: 0,
         },
         // 宝箱相关参数（关卡等级宝箱）
         boxLevel: {
@@ -195,9 +209,9 @@ class DataManager {
             levelPass: [],// 已通过的关卡
             // 解锁的物品
             goodUnlock: {
-                1: [1001, 1002, 1003, 1008],
-                2: [2001, 2002, 2003, 2007, 2018, 2017],
-                3: [3001, 3008, 3011, 3012],
+                1: [1001, 1002, 1003, 1007, 1008, 1011],
+                2: [2001, 2002, 2003, 2009, 2017, 2018],
+                3: [3001, 3008, 3009, 3010, 3011, 3012],
                 4: [4001, 4011, 4012, 4013, 4014, 4017],
             },
             goodStore: [],// 所有物品的池子
@@ -223,6 +237,8 @@ class DataManager {
         NativeCall.setRevenue(this.data.advert.revenue);
         // 初始化时间
         this.initDay();
+        /** 初始化关卡数据 */
+        this.initLevelData();
         // 初始化语言
         this.initLanguage();
         // 初始化物品池子
@@ -283,6 +299,32 @@ class DataManager {
         }
     }
 
+    /** 初始化关卡数据 */
+    public async initLevelData() {
+        let path = CConst.pathLevelData;
+        if (!this.levelData.data0) {
+            kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level0', cc.JsonAsset, (e: any, asset: any) => {
+                if (asset) {
+                    this.levelData.data0 = asset.json;
+                }
+                else {
+                    Common.log('加载关卡数据 level0 出错');
+                }
+            });
+
+        }
+        if (!this.levelData.data1) {
+            kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level1', cc.JsonAsset, (e: any, asset: any) => {
+                if (asset) {
+                    this.levelData.data1 = asset.json;
+                }
+                else {
+                    Common.log('加载关卡数据 level1 出错');
+                }
+            });
+        }
+    }
+
     /** 多语言设置 */
     public initLanguage() {
         if (this.data.langCur != LangFile.no) {
@@ -334,7 +376,7 @@ class DataManager {
         // 存储物品
         if (this.data.boxData.goodStore.length == 0) {
             arrGoods.forEach((goodId) => {
-                if (arrGoods.indexOf(goodId) < 0) {
+                if (arrUnlock.indexOf(goodId) < 0) {
                     this.data.boxData.goodStore.push(goodId);
                 }
             });
@@ -509,20 +551,22 @@ class DataManager {
                 this.data.boxData.areasId = 3 + Math.floor((this.data.boxData.level - 41) / 40);
             }
         }
+        // 过关数据变更 物品宝箱
+        if (params.disBoxGood && params.disBoxGood > 0) {
+            this.data.boxGood.add += params.disBoxGood;
+        }
         // 过关数据变更 关卡宝箱
-        if (params.level && params.level > 0) {
-            this.data.boxLevel.add += params.level;
+        if (params.disBoxLevel && params.disBoxLevel > 0) {
+            this.data.boxLevel.add += params.disBoxLevel;
         }
         // 过关数据变更 碎片宝箱
-        if (params.suipian && params.suipian > 0) {
-            this.data.boxSuipian.add += params.suipian;
+        if (params.disBoxSuipian && params.disBoxSuipian > 0) {
+            this.data.boxSuipian.add += params.disBoxSuipian;
         }
         // 过关数据变更 星星宝箱
-        if (params.xingxing && params.xingxing > 0) {
-            this.data.boxXingxing.add += params.xingxing;
+        if (params.disBoxXingxing && params.disBoxXingxing > 0) {
+            this.data.boxXingxing.add += params.disBoxXingxing;
         }
-        // 过关数据变更 物品宝箱
-        this.data.boxGood.add += 1;
 
         // 道具解锁（游戏开始前界面）
         this.data.beforeProp.forEach((obj: { type: TypeProp, state: StateBeforeProp, unlock: number }, index: number) => {
@@ -731,8 +775,8 @@ class DataManager {
      *      否：执行funcN
      * @param funcN 
      */
-    public playAdvert(funcN: Function){
-        let level = this.data.boxData.level; 
+    public playAdvert(funcN: Function) {
+        let level = this.data.boxData.level;
         let isAdvert = this.checkIsPlayAdvert(level);
         if (isAdvert) {
             // 打点 插屏广告请求（过关）
@@ -754,11 +798,11 @@ class DataManager {
             if (isReady) {
                 this.startAdvert(funcA, funcB);
             }
-            else{
+            else {
                 funcB();
             }
         }
-        else{
+        else {
             funcN();
         }
     };
@@ -781,6 +825,28 @@ class DataManager {
         // let levelLast = level - levelRecord;
         Common.log(' 检测 时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
         return timeLast >= 30;
+    };
+
+    /**
+     * 播放视频广告
+     * 1.先检测视频广告
+     * 2.再检测插屏广告
+     * @param funcA 
+     * @param funcB 
+     * @returns 
+     */
+    playVideo(funcA, funcB): void {
+        let isReady = NativeCall.videoCheck();
+        if (isReady) {
+            this.startVideo(funcA, funcB);
+            return;
+        }
+        isReady = NativeCall.advertCheck();
+        if (isReady) {
+            this.startAdvert(funcA, funcB);
+            return;
+        }
+        funcB();
     };
 
     /**
@@ -880,6 +946,20 @@ class DataManager {
             dragon.armatureName = armatureName;
             dragon.playAnimation(animationName, 1);
         });
+    };
+
+    public getLevelData(): LevelParam {
+        let lens = [100, 174];
+        let level = this.data.boxData.level;
+        let index = 0;
+        if (level <= 100) {
+            index = level - 1;
+            return this.levelData.data0[index]
+        }
+        else {
+            index = (level - lens[0]) % lens[1] - 1;
+            return this.levelData.data1[index];
+        }
     };
 
     /** 获取字符串 */
