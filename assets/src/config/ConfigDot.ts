@@ -58,7 +58,7 @@ const ConfigDot = {
     dot_ad_revenue_070: 'ad_revenue_70',
     dot_ad_revenue_100: 'ad_revenue_100',
     dot_ad_revenue_iap: 'iap_revenue',
-    dot_OnApplicationResume: 'OnApplicationResume',//?
+    dot_OnApplicationResume: 'OnApplicationResume',//
     /** 关卡开始 总点 */
     dot_levelStart: 'Stage_start_all',
     /** 关卡通过 总点 */

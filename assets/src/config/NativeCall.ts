@@ -1,7 +1,7 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
-import DataManager, { TypeProp } from "./DataManager";
+import DataManager, { TypeBuy, TypeProp } from "./DataManager";
 import ConfigDot from "./ConfigDot";
 
 /** 原生交互 */
@@ -288,19 +288,12 @@ class NativeCall {
 
     /*************************************************  暂无  *************************************************/
     /** 购买道具 */
-    public buyItem(type: TypeProp){
+    public buyItem(buyCfg: TypeBuy){
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
-        Common.log(' javaToCocos cocos method: buyItem() params: ', type);
-        switch (type) {
-            case TypeProp.ice:
-                this.logEventTwo(ConfigDot.dot_buy_back_click, String(DataManager.data.boxData.level));
-                break;
-            default:
-                break;
-        }
+        Common.log(' cocosToJava cocos method: buyItem() params: ', buyCfg);
         let methodName = "buyItem";
         let methodSignature = "(Ljava/lang/String;)V";
-        jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, type);
+        jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, buyCfg.name);
     }
 
     /** 购买成功 */

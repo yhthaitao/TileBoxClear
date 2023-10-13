@@ -1,6 +1,5 @@
 import CConst from "../../../../src/config/CConst";
 import { kit } from "../../../../src/kit/kit";
-import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 

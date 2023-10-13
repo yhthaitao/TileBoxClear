@@ -88,6 +88,7 @@ export enum TypeProp {
     tMagnetInfinite = 1 << 8,// 无限时间-磁铁
     tClockInfinite = 1 << 9,// 无限时间-时钟
 }
+
 import ConfigBoxLevel from "./ConfigBoxLevel";
 import ConfigBoxSuipian from "./ConfigBoxSuipian";
 import ConfigBoxXingxing from "./ConfigBoxXingxing";
@@ -104,6 +105,14 @@ export interface TypeReward {
 export interface TypeResource {
     bundle: string,
     resPath: string,
+}
+
+/** 购买类型 */
+export interface TypeBuy {
+    name: string;
+    money: string;
+    isLimit: boolean;
+    arrProps: [{ typeProp: TypeProp, count: number}];
 }
 
 /** 数据管理类 */
@@ -143,6 +152,7 @@ class DataManager {
             isCpe: false,// 打点记录 只打一次
             revenue: '0',// 广告收入
         },
+        shopLimit: [],// 购买限制
         day: 0,
         isEvaluate: false,// 是否已经评价
         installtime: new Date().valueOf(),
