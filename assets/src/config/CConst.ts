@@ -47,6 +47,8 @@ const CConst = {
     event_refresh_language: 'event_reset_language',
     /** 进入 菜单 */
     event_enter_menu: 'event_enter_menu',
+    /** 进入 菜单商店 */
+    event_enter_menuShop: 'event_enter_menuShop',
     /** 进入 新手引导 */
     event_enter_newPlayer: 'event_enter_newPlayer',
     /** 进入 游戏 */
@@ -91,6 +93,10 @@ const CConst = {
     event_fail_giveUp: 'event_fail_giveUp',
     /** 提示 */
     event_notice: 'event_notices',
+    /** 购买成功 */
+    event_buy_succe: 'event_buy_succe',
+    /** 购买失败 */
+    event_buy_fail: 'event_buy_fail',
     /*************************************** end **************************************************/
 
 
@@ -125,6 +131,7 @@ const CConst = {
     popup_path_before: './Popup/Before/res/prefab/Before',
     popup_path_getCoins: './Popup/GetCoins/res/prefab/GetCoins',
     popup_path_getLives: './Popup/GetLives/res/prefab/GetLives',
+    popup_path_gameShop: './Popup/GameShop/res/prefab/GameShop',
     popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
     popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',
     popup_path_user_evaluate: './Popup/UserEvaluate/res/prefab/UserEvaluate',

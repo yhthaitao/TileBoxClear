@@ -1288,12 +1288,18 @@ export default class GameBox extends cc.Component {
         // 使用道具-冰冻
         let propNum = DataManager.useProp(TypeProp.ice);
         if (propNum < 0) {
-            kit.Event.emit(CConst.event_notice, '无道具');
-            return;
+            let coin = DataManager.data.numCoin;
+            let need = 50;
+            // 进入购买金币
+            if (coin < need) {
+                kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+                return;
+            }
+            else{
+                DataManager.data.numCoin -= need;
+            }
         }
-        else {
-            DataManager.setData();
-        }
+        DataManager.setData();
 
         // 更新ui
         this.setUIProp(this.uiPropIce, propNum);
@@ -1314,13 +1320,18 @@ export default class GameBox extends cc.Component {
         // 使用道具-提示
         let propNum = DataManager.useProp(TypeProp.tip);
         if (propNum < 0) {
-            kit.Event.emit(CConst.event_notice, '无道具');
-            return;
+            let coin = DataManager.data.numCoin;
+            let need = 50;
+            // 进入购买金币
+            if (coin < need) {
+                kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+                return;
+            }
+            else{
+                DataManager.data.numCoin -= need;
+            }
         }
-        else {
-            DataManager.setData();
-        }
-
+        DataManager.setData();
         // 更新ui
         this.setUIProp(this.uiPropTip, propNum);
 
@@ -1420,12 +1431,18 @@ export default class GameBox extends cc.Component {
         // 使用道具-返回上一步
         let propNum = DataManager.useProp(TypeProp.back);
         if (propNum < 0) {
-            kit.Event.emit(CConst.event_notice, '无道具');
-            return;
+            let coin = DataManager.data.numCoin;
+            let need = 30;
+            // 进入购买金币
+            if (coin < need) {
+                kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+                return;
+            }
+            else{
+                DataManager.data.numCoin -= need;
+            }
         }
-        else {
-            DataManager.setData();
-        }
+        DataManager.setData();
 
         // 更新ui
         this.setUIProp(this.uiPropRack, propNum);
@@ -1616,12 +1633,18 @@ export default class GameBox extends cc.Component {
         // 使用道具-刷新
         let propNum = DataManager.useProp(TypeProp.refresh);
         if (propNum < 0) {
-            kit.Event.emit(CConst.event_notice, '无道具');
-            return;
+            let coin = DataManager.data.numCoin;
+            let need = 20;
+            // 进入购买金币
+            if (coin < need) {
+                kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+                return;
+            }
+            else{
+                DataManager.data.numCoin -= need;
+            }
         }
-        else {
-            DataManager.setData();
-        }
+        DataManager.setData();
 
         // 刷新ui
         this.setUIProp(this.uiPropRefresh, propNum);

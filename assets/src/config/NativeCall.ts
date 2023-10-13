@@ -1,8 +1,9 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
-import DataManager, { TypeBuy, TypeProp } from "./DataManager";
+import ConfigBuyItem, { BuyCfg, BuyKey } from "./ConfigBuyItem";
 import ConfigDot from "./ConfigDot";
+import DataManager, { TypeProp } from "./DataManager";
 
 /** 原生交互 */
 class NativeCall {
@@ -60,7 +61,7 @@ class NativeCall {
         let methodSignature = "()V";
         jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature);
     };
-    
+
     /** 隐藏banner */
     public closeBanner = function () {
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
@@ -175,7 +176,7 @@ class NativeCall {
                 // 打点 插屏播放成功（游戏从后台返回）
                 this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
             };
-            let funcB = (err: any)=>{};
+            let funcB = (err: any) => { };
             DataManager.startAdvert(funcA, funcB);
         }
     }
@@ -266,7 +267,7 @@ class NativeCall {
         let methodSignature = "(F)V";
         jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, parseFloat(revenue));
     }
-    
+
     /** 收入增加 */
     public adRevenueAdd(revenue: string) {
         Common.log(' javaToCocos cocos method: adRevenueAdd() revenue: ', revenue);
@@ -288,7 +289,7 @@ class NativeCall {
 
     /*************************************************  暂无  *************************************************/
     /** 购买道具 */
-    public buyItem(buyCfg: TypeBuy){
+    public buyItem(buyCfg: BuyCfg) {
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: buyItem() params: ', buyCfg);
         let methodName = "buyItem";
@@ -297,22 +298,72 @@ class NativeCall {
     }
 
     /** 购买成功 */
-    public buySucc(type: TypeProp) {
-        Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', type);
-        switch (type) {
-            case TypeProp.ice:
-                this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
-                break;
-            default:
-                break;
+    public buySucc(keyString: string) {
+        Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', keyString);
+        let keyNumber = BuyKey[keyString];
+        let produceCfg: BuyCfg = ConfigBuyItem[keyNumber];
+        // 去除广告
+        if (keyString == 'noads') {
+            DataManager.data.advert.isRemove = true;
+        }
+        else{
+            for (let index = 0, length = produceCfg.props.length; index < length; index++) {
+                let prop = produceCfg.props[index];
+                switch (prop.typeProp) {
+                    case TypeProp.coin:
+                        DataManager.data.numCoin += prop.count;
+                        break;
+                    case TypeProp.ice:
+                        DataManager.data.prop.ice.count += prop.count;
+                        break;
+                    case TypeProp.refresh:
+                        DataManager.data.prop.refresh.count += prop.count;
+                        break;
+                    case TypeProp.back:
+                        DataManager.data.prop.back.count += prop.count;
+                        break;
+                    case TypeProp.tStrengthInfinite:
+                        let time = Math.floor(new Date().getTime() / 1000);
+                        if (DataManager.data.strength.tInfinite < time) {
+                            DataManager.data.strength.tInfinite = time + prop.count * 3600;
+                        }
+                        else {
+                            DataManager.data.strength.tInfinite += prop.count * 3600;
+                        }
+                        break;
+                    case TypeProp.tip:
+                        DataManager.data.prop.tip.count += prop.count;
+                        break;
+                    case TypeProp.clock:
+                        DataManager.data.prop.clock.count += prop.count;
+                        break;
+                    case TypeProp.magnet:
+                        DataManager.data.prop.magnet.count += prop.count;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         DataManager.setData();
+
+        this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
+        // kit.Event.emit(CConst.event_buy_succe, produceCfg);
+        kit.Event.emit(CConst.event_notice, '购买 成功');
     }
 
     /** 购买失败 */
     public buyFail(...params: any[]) {
         // Notifier.emit('BuyFailTips');
         Common.log(' 未实现 javaToCocos cocos method: buyFail() params: ', params);
+        kit.Event.emit(CConst.event_notice, '购买 失败');
+    }
+
+    /** 购买失败 */
+    public buyCancle(...params: any[]) {
+        // Notifier.emit('BuyFailTips');
+        Common.log(' 未实现 javaToCocos cocos method: buyCancle() params: ', params);
+        kit.Event.emit(CConst.event_notice, '购买 取消');
     }
 
     /** 设置更新 */

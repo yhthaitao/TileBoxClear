@@ -2,8 +2,9 @@ import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager from "../../../../src/config/DataManager";
+import DataManager, { StateGame } from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
+import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -60,8 +61,15 @@ export default class GetCoins extends PopupBase {
     };
 
     /** 按钮事件 退出 */
-    eventBtnExit() {
+    async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
+        await kit.Popup.hide();
+        // 进入商城
+        if (DataManager.stateCur == StateGame.game) {
+            kit.Popup.show(CConst.popup_path_gameShop, {}, { mode: PopupCacheMode.Frequent });
+        }
+        else{
+            kit.Event.emit(CConst.event_enter_menuShop);
+        }
     };
 }

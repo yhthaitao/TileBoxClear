@@ -1,4 +1,6 @@
+import CConst from "../../../../src/config/CConst";
 import { Design } from "../../../../src/config/DataManager";
+import { kit } from "../../../../src/kit/kit";
 
 /** 菜单类型 */
 export enum StateMenu {
@@ -63,6 +65,7 @@ export default class MainMenu extends cc.Component {
     widthUp: number = 0;
 
     protected onLoad(): void {
+        this.listernerRegist();
         // 缩放数据
         let winScaleByH = cc.winSize.height / Design.height;
         // 顶部ui
@@ -270,7 +273,28 @@ export default class MainMenu extends cc.Component {
             return;
         }
         this.setIsLock(true);
-
         this.playAniResetMenu(type);
+    };
+
+    /** 事件反馈 进入菜单商店 */
+    eventBack_menuShop(){
+        this.setIsLock(true);
+        if (this.stateMenu != StateMenu.shop) {
+            this.playAniResetMenu(StateMenu.shop);
+        }
+    }
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_enter_menuShop, this.eventBack_menuShop, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
+
+    protected onDestroy(): void {
+        this.listernerIgnore();
     };
 }

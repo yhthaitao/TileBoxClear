@@ -107,14 +107,6 @@ export interface TypeResource {
     resPath: string,
 }
 
-/** 购买类型 */
-export interface TypeBuy {
-    name: string;
-    money: string;
-    isLimit: boolean;
-    arrProps: [{ typeProp: TypeProp, count: number}];
-}
-
 /** 数据管理类 */
 class DataManager {
     private static _instance: DataManager;
@@ -597,32 +589,32 @@ class DataManager {
 
     /** 数据更新（开启宝箱后） */
     public refreshDataAfterUnlockReward(params: TypeReward) {
-        params.reward.forEach((record) => {
-            switch (record.type) {
+        params.reward.forEach((reward) => {
+            switch (reward.type) {
                 case TypeProp.coin:
-                    this.data.numCoin += record.number;
+                    this.data.numCoin += reward.number;
                     break;
                 case TypeProp.ice:
-                    this.data.prop.ice.count += record.number;
+                    this.data.prop.ice.count += reward.number;
                     break;
                 case TypeProp.tip:
-                    this.data.prop.tip.count += record.number;
+                    this.data.prop.tip.count += reward.number;
                     break;
                 case TypeProp.back:
-                    this.data.prop.back.count += record.number;
+                    this.data.prop.back.count += reward.number;
                     break;
                 case TypeProp.refresh:
-                    this.data.prop.refresh.count += record.number;
+                    this.data.prop.refresh.count += reward.number;
                     break;
                 case TypeProp.magnet:
-                    this.data.prop.magnet.count += record.number;
+                    this.data.prop.magnet.count += reward.number;
                     let stateMagnet = this.data.beforeProp[0];
                     if (stateMagnet.state == StateBeforeProp.noProp) {
                         stateMagnet.state = StateBeforeProp.unChoose;
                     }
                     break;
                 case TypeProp.clock:
-                    this.data.prop.clock.count += record.number;
+                    this.data.prop.clock.count += reward.number;
                     let stateClock = this.data.beforeProp[0];
                     if (stateClock.state == StateBeforeProp.noProp) {
                         stateClock.state = StateBeforeProp.unChoose;
@@ -633,28 +625,28 @@ class DataManager {
                 case TypeProp.tStrengthInfinite:
                     // 没有无限时间 or 有无限时间
                     let time = Math.floor(new Date().getTime() / 1000);
-                    if (record.type == TypeProp.tMagnetInfinite) {
+                    if (reward.type == TypeProp.tMagnetInfinite) {
                         if (this.data.prop.magnet.tInfinite < time) {
-                            this.data.prop.magnet.tInfinite = time + record.number;
+                            this.data.prop.magnet.tInfinite = time + reward.number;
                         }
                         else {
-                            this.data.prop.magnet.tInfinite += record.number;
+                            this.data.prop.magnet.tInfinite += reward.number;
                         }
                     }
-                    else if (record.type == TypeProp.tClockInfinite) {
+                    else if (reward.type == TypeProp.tClockInfinite) {
                         if (this.data.prop.clock.tInfinite < time) {
-                            this.data.prop.clock.tInfinite = time + record.number;
+                            this.data.prop.clock.tInfinite = time + reward.number;
                         }
                         else {
-                            this.data.prop.clock.tInfinite += record.number;
+                            this.data.prop.clock.tInfinite += reward.number;
                         }
                     }
-                    else if (record.type == TypeProp.tStrengthInfinite) {
+                    else if (reward.type == TypeProp.tStrengthInfinite) {
                         if (this.data.strength.tInfinite < time) {
-                            this.data.strength.tInfinite = time + record.number;
+                            this.data.strength.tInfinite = time + reward.number;
                         }
                         else {
-                            this.data.strength.tInfinite += record.number;
+                            this.data.strength.tInfinite += reward.number;
                         }
                     }
                     break;
