@@ -2,8 +2,9 @@ import { kit } from "../../../../src/kit/kit";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import DataManager, { TypeBefore, TypeProp } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
+import { TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
 
 /** 动作参数（宝箱相关） */
 interface ParamsAniBox {

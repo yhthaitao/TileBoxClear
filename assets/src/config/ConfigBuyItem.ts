@@ -1,4 +1,4 @@
-import { TypeProp } from "./DataManager";
+import { TypeProp } from "./ConfigCommon";
 
 /** 道具类型 */
 export enum BuyKey {

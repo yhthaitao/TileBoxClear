@@ -1,5 +1,5 @@
 import CConst from "../../../../src/config/CConst";
-import { Design } from "../../../../src/config/DataManager";
+import { Design } from "../../../../src/config/ConfigCommon";
 import { kit } from "../../../../src/kit/kit";
 
 /** 菜单类型 */
@@ -31,6 +31,7 @@ export default class MainMenu extends cc.Component {
     // 中间ui--商店
     @property(cc.Node) midShop: cc.Node = null;
     @property(cc.Node) midShopTop: cc.Node = null;
+    @property(cc.Node) midShopScroll: cc.Node = null;
     // 中间ui--主菜单
     @property(cc.Node) midHome: cc.Node = null;
     @property(cc.Node) midHomeBack: cc.Node = null;
@@ -87,6 +88,7 @@ export default class MainMenu extends cc.Component {
         this.midHomeBottom.y = this.uiBottom.y + this.uiBottom.height * 0.5 + home_dis_bottomToBottom + this.midHomeBottom.height * 0.5;
         // 中间ui-shop
         this.midShopTop.y = this.midHomeTop.y;
+        this.midShopScroll.y = this.midShopTop.y - this.midShopTop.height * 0.5;
         // 中间ui-theme
         this.midThemeTop.y = this.midHomeTop.y;
         this.midThemeMidA.y = this.midThemeTop.y - this.midThemeTop.height * 0.5;

@@ -1,6 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager, { Design, LevelParam, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
@@ -9,6 +9,7 @@ import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
 import ConfigGood from "../../../../src/config/ConfigGood";
 import ConfigGold from "../../../../src/config/ConfigGold";
+import { Design, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
 
 /** box参数 */
 export interface BoxParam {

@@ -1,4 +1,4 @@
-import { TypeProp } from "./DataManager";
+import { TypeProp } from "./ConfigCommon";
 
 /** 配置（碎片宝箱奖励） */
 const ConfigBoxSuipian = {

@@ -1,10 +1,11 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { TypeProp, TypeReward } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigBoxSuipian from "../../../../src/config/ConfigBoxSuipian";
+import { TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass

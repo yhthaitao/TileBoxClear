@@ -308,6 +308,8 @@ export default class GameShop<Options = any> extends PopupBase {
         let produceCfg: Produce = this.produceObj[produceKey];
         let buyCfg: BuyCfg = ConfigBuyItem[produceCfg.keyCoinfg];
         NativeCall.buyItem(buyCfg);
+
+        Common.log('游戏内 商城购买: ', buyCfg);
     };
 
     eventBtnExit() {

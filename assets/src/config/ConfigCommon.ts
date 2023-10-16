@@ -1,146 +1,95 @@
-import { TypeProp } from "./DataManager";
+/** 设计分辨率 */
+export const Design = {
+    width: 720,
+    height: 1560,
+}
+
+/** 游戏状态 */
+export enum StateGame {
+    loading = 1,// 冰冻
+    menu = 1 << 1,// 提示
+    game = 1 << 2,// 返回上一步
+}
+
+/** 资源类型 */
+export enum TypeRes {
+    PNG = "png",// 图片
+    DRAGON = "dragon", // 龙骨
+};
+
+/** 道具状态（游戏开始前的弹窗） */
+export enum StateBeforeProp {
+    lock = 1,// 未解锁
+    noProp = 1 << 1,// 解锁 无道具
+    unChoose = 1 << 2,// 解锁 有道具 未选中
+    choose = 1 << 3,// 解锁 有道具 选中
+};
+
+/** 游戏结束枚举状态 */
+export enum TypeFinish {
+    win = 1,
+    failSpace = 1 << 1,
+    failTime = 1 << 2,
+}
+
+/** 弹窗枚举(游戏前弹窗类型) */
+export enum TypeBefore {
+    fromMenu = 1,
+    fromSettingGame = 1 << 1,
+    fromGameWin = 1 << 2,
+    fromGameFail = 1 << 3,
+}
+
+/** 关卡参数 */
+export interface LevelParam {
+    difficulty?: number,// 难度（对应不同的过渡动画）
+    isGolden?: boolean,// 是否有金币
+    levelTime?: number,// 关卡时间
+    layer?: number,// 关卡显示层级
+    objW?: { left: number, right: number },// 左右宽度
+    map: any[],// 箱子数据
+    item: any[],// 物品数据
+}
+
+/** 参数枚举（游戏胜利） */
+export interface ParamsWin {
+    tCount: number;
+    disBoxGood: number;
+    disBoxLevel: number;
+    disBoxSuipian: number;
+    disBoxXingxing: number;
+}
+
+/** 参数枚举（游戏失败） */
+export interface ParamsFail {
+    type: TypeFinish;
+    numStrength: number;
+    numSuipian: number;
+    numMagnet: number;
+}
 
 /** 道具类型 */
-export enum BuyKey {
-    package1 = 1,
-    package2 = 2,
-    package3 = 3,
-    package4 = 4,
-    package5 = 5,
-    package6 = 6,
-    noads = 7,
-    gold1 = 8,
-    gold2 = 9,
-    gold3 = 10,
-    gold4 = 11,
-    gold5 = 12,
-    gold6 = 13,
+export enum TypeProp {
+    ice = 1,// 冰冻
+    tip = 1 << 1,// 提示
+    back = 1 << 2,// 返回上一步
+    refresh = 1 << 3,// 刷新
+    magnet = 1 << 4,// 磁铁
+    clock = 1 << 5,// 时钟
+    coin = 1 << 6,// 金币
+    tStrengthInfinite = 1 << 7,// 无限时间-体力
+    tMagnetInfinite = 1 << 8,// 无限时间-磁铁
+    tClockInfinite = 1 << 9,// 无限时间-时钟
 }
 
-/** 购买类型 */
-export interface BuyCfg {
-    name: string;
-    money: string;
-    isLimit: boolean;
-    props: [{ typeProp: TypeProp, count: number}];
+/** 数据类型（碎片宝箱奖励） */
+export interface TypeReward {
+    total: number, // 碎片数量
+    reward: { type: TypeProp, number: number }[],// 奖励的类型和数量
 }
 
-/** 配置（购买物品） */
-const ConfigBuyItem = {
-    1: {
-        name: 'package1', money: '4.99', isLimit: true, 
-        props: [
-            { typeProp: TypeProp.coin, count: 750, },
-            { typeProp: TypeProp.refresh, count: 5, },
-            { typeProp: TypeProp.back, count: 3, },
-            { typeProp: TypeProp.tip, count: 1, },
-            { typeProp: TypeProp.ice, count: 1, },
-            { typeProp: TypeProp.magnet, count: 1, },
-            { typeProp: TypeProp.clock, count: 1, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 1, }
-        ]
-    },
-    2: {
-        name: 'package2', money: '8.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 750, },
-            { typeProp: TypeProp.refresh, count: 5, },
-            { typeProp: TypeProp.back, count: 3, },
-            { typeProp: TypeProp.tip, count: 1, },
-            { typeProp: TypeProp.ice, count: 1, },
-            { typeProp: TypeProp.magnet, count: 1, },
-            { typeProp: TypeProp.clock, count: 1, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 1, }
-        ]
-    },
-    3: {
-        name: 'package3', money: '17.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 1950, },
-            { typeProp: TypeProp.refresh, count: 7, },
-            { typeProp: TypeProp.back, count: 5, },
-            { typeProp: TypeProp.tip, count: 3, },
-            { typeProp: TypeProp.ice, count: 3, },
-            { typeProp: TypeProp.magnet, count: 3, },
-            { typeProp: TypeProp.clock, count: 3, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 3, }
-        ]
-    },
-    4: {
-        name: 'package4', money: '39.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 4950, },
-            { typeProp: TypeProp.refresh, count: 11, },
-            { typeProp: TypeProp.back, count: 9, },
-            { typeProp: TypeProp.tip, count: 7, },
-            { typeProp: TypeProp.ice, count: 7, },
-            { typeProp: TypeProp.magnet, count: 7, },
-            { typeProp: TypeProp.clock, count: 7, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 7, }
-        ]
-    },
-    5: {
-        name: 'package5', money: '69.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 9950, },
-            { typeProp: TypeProp.refresh, count: 15, },
-            { typeProp: TypeProp.back, count: 13, },
-            { typeProp: TypeProp.tip, count: 11, },
-            { typeProp: TypeProp.ice, count: 11, },
-            { typeProp: TypeProp.magnet, count: 11, },
-            { typeProp: TypeProp.clock, count: 11, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 11, }
-        ]
-    },
-    6: {
-        name: 'package6', money: '99.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 17500, },
-            { typeProp: TypeProp.refresh, count: 19, },
-            { typeProp: TypeProp.back, count: 17, },
-            { typeProp: TypeProp.tip, count: 15, },
-            { typeProp: TypeProp.ice, count: 5, },
-            { typeProp: TypeProp.magnet, count: 15, },
-            { typeProp: TypeProp.clock, count: 15, },
-            { typeProp: TypeProp.tStrengthInfinite, count: 15, }
-        ]
-    },
-    7: { name: 'noads', money: '5.99', isLimit: true },
-    8: {
-        name: 'gold1', money: '1.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 200, },
-        ]
-    },
-    9: {
-        name: 'gold2', money: '7.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 950, },
-        ]
-    },
-    10: {
-        name: 'gold3', money: '13.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 2000, },
-        ]
-    },
-    11: {
-        name: 'gold4', money: '29.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 5000, },
-        ]
-    },
-    12: {
-        name: 'gold5', money: '54.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 10000, },
-        ]
-    },
-    13: {
-        name: 'gold6', money: '99.99', isLimit: false, 
-        props: [
-            { typeProp: TypeProp.coin, count: 20000, },
-        ]
-    },
-};
-export default ConfigBuyItem;
+/** 数据类型（资源） */
+export interface TypeResource {
+    bundle: string,
+    resPath: string,
+}

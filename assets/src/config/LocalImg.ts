@@ -1,6 +1,7 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
-import DataManager, { TypeRes } from "./DataManager";
+import { TypeRes } from "./ConfigCommon";
+import DataManager from "./DataManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass

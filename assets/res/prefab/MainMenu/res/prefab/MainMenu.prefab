@@ -15191,10 +15191,10 @@
   {
     "__type__": "cc.ClickEvent",
     "target": {
-      "__id__": 7
+      "__id__": 401
     },
     "component": "",
-    "_componentId": "4f7e9/YMjpLK4Fs27KIovw7",
+    "_componentId": "65c9cTbfuVDb6QVR0cKj6wP",
     "handler": "eventAreasScrollview",
     "customEventData": ""
   },
@@ -17106,10 +17106,10 @@
   {
     "__type__": "cc.ClickEvent",
     "target": {
-      "__id__": 7
+      "__id__": 401
     },
     "component": "",
-    "_componentId": "4f7e9/YMjpLK4Fs27KIovw7",
+    "_componentId": "65c9cTbfuVDb6QVR0cKj6wP",
     "handler": "eventCommodityScrollview",
     "customEventData": ""
   },
@@ -23938,6 +23938,9 @@
     },
     "midShopTop": {
       "__id__": 13
+    },
+    "midShopScroll": {
+      "__id__": 18
     },
     "midHome": {
       "__id__": 185

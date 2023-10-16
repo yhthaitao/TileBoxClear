@@ -1,10 +1,11 @@
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import CConst from "../../../../src/config/CConst";
-import DataManager, { TypeFinish, ParamsFail, TypeBefore } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode, PopupShowResult } from "../../../../src/kit/manager/popupManager/PopupManager";
+import { ParamsFail, TypeBefore, TypeFinish } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass

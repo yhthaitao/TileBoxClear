@@ -2,7 +2,7 @@ import { kit } from "../../../../src/kit/kit";
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
-import DataManager, { TypeProp } from "../../../../src/config/DataManager";
+import DataManager from "../../../../src/config/DataManager";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
 
@@ -174,6 +174,7 @@ export default class MainMenuMidTheme extends cc.Component {
         let produceCfg: Produce = this.produceObj[produceKey];
         let buyCfg: BuyCfg = ConfigBuyItem[produceCfg.keyCoinfg];
         NativeCall.buyItem(buyCfg);
+        Common.log('菜单内 商城购买: ', buyCfg);
     };
 
     /** 事件 滑动 */

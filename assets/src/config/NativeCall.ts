@@ -2,8 +2,9 @@ import { kit } from "../kit/kit";
 import CConst from "./CConst";
 import Common from "./Common";
 import ConfigBuyItem, { BuyCfg, BuyKey } from "./ConfigBuyItem";
+import { TypeProp } from "./ConfigCommon";
 import ConfigDot from "./ConfigDot";
-import DataManager, { TypeProp } from "./DataManager";
+import DataManager from "./DataManager";
 
 /** 原生交互 */
 class NativeCall {

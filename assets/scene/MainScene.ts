@@ -1,11 +1,12 @@
 import Common from "../src/config/Common";
 import CConst from "../src/config/CConst";
 import { kit } from "./../src/kit/kit";
-import DataManager, { StateGame } from "../src/config/DataManager";
+import DataManager from "../src/config/DataManager";
 import ConfigDot from "../src/config/ConfigDot";
 import NativeCall from "../src/config/NativeCall";
 import Loading from "../res/prefab/Loading/src/Loading";
 import { LangChars } from "../src/config/ConfigLang";
+import { StateGame } from "../src/config/ConfigCommon";
 
 /** 资源路径（层、弹窗预制体） */
 export const ResPath = {
