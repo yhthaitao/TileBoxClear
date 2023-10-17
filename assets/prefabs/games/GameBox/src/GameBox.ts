@@ -1148,13 +1148,18 @@ export default class GameBox extends cc.Component {
         let dragon = itemExp.getComponent(dragonBones.ArmatureDisplay)
         dragon.playAnimation('yundong', 0);
         let pGoal = Common.getLocalPos(this.uiProcess.parent, this.uiProcess.position, main);
-        let time = Common.getMoveTime(point, pGoal, 1, 2000);
         let obj = {
             p1: cc.v2(point.x, point.y),
-            p2: cc.v2(),
+            p2: cc.v2(pGoal.x, (point.y + pGoal.y) * 0.5),
             pTo: cc.v2(pGoal.x, pGoal.y),
         };
-        cc.tween(itemExp).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(()=>{
+        let time1 = Common.getMoveTime(cc.v3(obj.p1.x, obj.p1.y), cc.v3(obj.p2.x, obj.p2.y), 1, 1500);
+        let time2 = Common.getMoveTime(cc.v3(obj.p2.x, obj.p2.y), cc.v3(obj.pTo.x, obj.pTo.y), 1, 1500);
+        let tDelay = main.childrenCount * 0.05;
+        itemExp.opacity = 0;
+        cc.tween(itemExp).delay(tDelay).call(() => {
+            itemExp.opacity = 255;
+        }).bezierTo(time1 + time2, obj.p1, obj.p2, obj.pTo).call(() => {
             DataManager.poolPut(itemExp, this.objPool.effectExp);
         }).start();
     }
@@ -1983,6 +1988,7 @@ export default class GameBox extends cc.Component {
         // 磁铁移动
         this.removeMidGood(good);
         // 物品移动
+        let effectExpMain = this.effectExp.getChildByName('main');
         arrGoods.forEach((good) => {
             good.active = true;
             let scale = 1.0;
@@ -2004,7 +2010,10 @@ export default class GameBox extends cc.Component {
                 cc.tween().to(timeMove, { position: cc.v3(x, y) }),
                 cc.tween().to(timeMove, { angle: angle }),
                 cc.tween().to(timeMove, { scale: scale }),
-            ).start();
+            ).delay(0.55).call(() => {
+                let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
+                this.effectExpShow(point);
+            }).start();
         });
 
         uiMagnet.active = true;
@@ -2100,6 +2109,7 @@ export default class GameBox extends cc.Component {
         }
         Common.log('道具 磁铁 连胜 wins: ', wins, '; goods: ', arrGoods.length);
         // 移动物品
+        let effectExpMain = this.effectExp.getChildByName('main');
         arrGoods.forEach((good) => {
             good.active = true;
             let scale = 1.0;
@@ -2121,7 +2131,10 @@ export default class GameBox extends cc.Component {
                 cc.tween().to(timeMove, { position: cc.v3(x, y) }),
                 cc.tween().to(timeMove, { angle: angle }),
                 cc.tween().to(timeMove, { scale: scale }),
-            ).start();
+            ).delay(0.55).call(() => {
+                let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
+                this.effectExpShow(point);
+            }).start();
         });
 
         uiMagnet.active = true;
