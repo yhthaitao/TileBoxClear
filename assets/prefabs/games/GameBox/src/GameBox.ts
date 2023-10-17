@@ -190,6 +190,12 @@ export default class GameBox extends cc.Component {
     /** 第一次开始 */
     gameStart(isRestart = false) {
         Common.log('功能：游戏开始');
+        // 从 101 关以后，都走重新开始游戏；
+        let level = DataManager.data.boxData.level;
+        if (level > 100) {
+            isRestart = true;
+        }
+        // 游戏初始 碎片ui不显示
         this.uiTopSuipian.opacity = 0;
         NativeCall.logEventOne(ConfigDot.dot_levelStart);
         this.clear();
@@ -214,6 +220,14 @@ export default class GameBox extends cc.Component {
             }
             this.bg.getComponent(cc.Sprite).spriteFrame = assets;
         });
+        // 困难标签
+        let levelParam = DataManager.getLevelData();
+        if (levelParam.difficulty) {
+            this.uiTopLevel.getChildByName('nodeSign').active = true;
+        }
+        else{
+            this.uiTopLevel.getChildByName('nodeSign').active = false;
+        }
     }
 
     /** 初始化数据 */

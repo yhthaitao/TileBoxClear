@@ -163,6 +163,12 @@ export default class OpenBoxLevel extends PopupBase {
         this.nodeProp.scale = this.obj.prop.scale0;
         let itemIcon = this.nodeProp.getChildByName('icon');
         itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[index];
+        let number = reward.number;
+        if (reward.type == TypeProp.tStrengthInfinite) {
+            number = Math.floor(reward.number / 60);
+        }
+        let propLabel = this.nodeProp.getChildByName('label');
+        propLabel.getComponent(cc.Label).string = '+' + number;
     };
 
     playAniHide(): Promise<void> {

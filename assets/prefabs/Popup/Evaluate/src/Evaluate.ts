@@ -4,22 +4,31 @@ import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
 import NativeCall from "../../../../src/config/NativeCall";
 import DataManager from "../../../../src/config/DataManager";
+import { LangChars } from "../../../../src/config/ConfigLang";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class UserEvaluate extends PopupBase {
+export default class Evaluate extends PopupBase {
 
     @property(cc.Node) nodeXing: cc.Node = null;
     @property(cc.Node) labelTitle: cc.Node = null;
+    @property(cc.Node) labelDesc: cc.Node = null;
+    @property(cc.Node) labelOk: cc.Node = null;
 
     xingNum: number = 0;
     xingMax: number = 5;
 
     protected showBefore(options: any): void {
         Common.log('弹窗 评价页面 showBefore()');
-        // DataManager.setString(LangChars.REVIEW, (chars: string)=>{
-        //     this.labelTitle.getComponent(cc.Label).string = chars;
-        // });
+        DataManager.setString(LangChars.evaluate_title, (chars: string)=>{
+            this.labelTitle.getComponent(cc.Label).string = chars;
+        });
+        DataManager.setString(LangChars.evaluate_desc, (chars: string)=>{
+            this.labelDesc.getComponent(cc.Label).string = chars;
+        });
+        DataManager.setString(LangChars.evaluate_ok, (chars: string)=>{
+            this.labelOk.getComponent(cc.Label).string = chars;
+        });
         this.refreshXingxing();
     }
 

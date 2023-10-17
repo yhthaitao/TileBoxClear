@@ -164,7 +164,10 @@ export const LangChars = {
     achieve_9: "achieve_9",
     achieve_10: "achieve_10",
     achieve_11: "achieve_11",
-    achieve_12: "achieve_12"
+    achieve_12: "achieve_12",
+    evaluate_title: "evaluate_title",
+    evaluate_desc: "evaluate_desc",
+    evaluate_ok: "evaluate_ok"
 };
 
 /** 本地化 图片 名字 */

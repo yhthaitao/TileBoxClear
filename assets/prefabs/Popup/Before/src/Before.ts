@@ -5,13 +5,15 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin, StateBeforeProp, TypeBefore } from "../../../../src/config/ConfigCommon";
+import { ParamsWin, StateBeforeProp, TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class Before extends PopupBase {
 
     @property(cc.Node) nodeTitle: cc.Node = null;
+    @property(cc.Node) nodeBg: cc.Node = null;
+    @property(cc.Node) nodeHard: cc.Node = null;
     @property(cc.Node) nodeWin: cc.Node = null;
     @property(cc.Node) winLight: cc.Node = null;
     @property(cc.Node) winProcess: cc.Node = null;
@@ -33,6 +35,10 @@ export default class Before extends PopupBase {
             unlock: { win: { y: 140 }, chose: { y: 5 }, prop: { y: -100 }, play: { y: -230 }, },
             lock: { win: { y: 130 }, chose: { y: 150 }, prop: { y: 0 }, play: { y: -180 }, },
         },
+        color: {
+            easy: cc.color(38, 138, 94),
+            hard: cc.color(135, 51, 171),
+        },
     };
 
     params: {
@@ -50,9 +56,22 @@ export default class Before extends PopupBase {
     }
 
     resetLabel() {
+        // 困难标签
+        let levelParam = DataManager.getLevelData();
+        console.log('difficulty: ', levelParam.difficulty);
+        if (levelParam.difficulty) {
+            this.nodeBg.active = false;
+            this.nodeHard.active = true;
+        }
+        else{
+            this.nodeBg.active = true;
+            this.nodeHard.active = false;
+        }
         // 标题
         let labelTitle = this.nodeTitle.getChildByName('label');
         labelTitle.opacity = 0;
+        let colorTitle = levelParam.difficulty ? this.obj.color.hard : this.obj.color.easy;
+        labelTitle.getComponent(cc.LabelOutline).color = colorTitle;
         DataManager.setString(LangChars.gameBefore_level, (chars: string) => {
             let _string = chars + '  ' + DataManager.data.boxData.level;
             labelTitle.getComponent(cc.Label).string = _string;
@@ -151,17 +170,20 @@ export default class Before extends PopupBase {
             let backLock = prop.getChildByName('backLock');
             let signAdd = prop.getChildByName('add');
             let button = prop.getChildByName('button');
-            let labelNum = prop.getChildByName('label');
+            let label = prop.getChildByName('label');
             let right = prop.getChildByName('right');
-            labelNum.getComponent(cc.Label).string = String(arrProp[index].count);
+            let tInfinite = prop.getChildByName('tInfinite');
+            label.getComponent(cc.Label).string = String(arrProp[index].count);
             backY.active = false;
             backN.active = false;
             backLock.active = false;
             signAdd.active = false;
-            labelNum.active = false;
+            label.active = false;
             button.active = false;
             right.active = false;
-            let objState = DataManager.data.beforeProp[index];
+            tInfinite.active = false;
+            let objState = arrProp[index];
+            // 道具状态
             switch (objState.state) {
                 case StateBeforeProp.lock:// 未解锁
                     backLock.active = true;
@@ -173,14 +195,31 @@ export default class Before extends PopupBase {
                     break;
                 case StateBeforeProp.unChoose:// 解锁 有道具 未选中
                     backN.active = true;
-                    labelNum.active = true;
+                    label.active = true;
                     button.active = true;
                     break;
                 case StateBeforeProp.choose:// 解锁 有道具 选中
                     backY.active = true;
-                    labelNum.active = false;
+                    label.active = false;
                     button.active = true;
                     right.active = true;
+                    break;
+                case StateBeforeProp.infinite:
+                    backY.active = true;
+                    label.active = false;
+                    button.active = false;
+                    right.active = false;
+                    tInfinite.active = true;
+                    if (index == 0) {
+                        this.updateMagnet();
+                        this.unschedule(this.updateMagnet);
+                        this.schedule(this.updateMagnet, 1.0);
+                    }
+                    else {
+                        this.updateClock();
+                        this.unschedule(this.updateClock);
+                        this.schedule(this.updateClock, 1.0);
+                    }
                     break;
                 default:
                     break;
@@ -188,8 +227,56 @@ export default class Before extends PopupBase {
         }
     }
 
+    /** 刷新-磁铁 */
+    updateMagnet() {
+        let tCur = Math.floor(new Date().getTime() / 1000);
+        let tCount = DataManager.data.prop.magnet.tInfinite;
+        if (tCount > tCur) {
+            let prop = this.arrNodeProp[0];
+            let tInfinite = prop.getChildByName('tInfinite');
+            this.refreshProp(tInfinite, tCount - tCur);
+        }
+        else {
+            this.unschedule(this.updateMagnet);
+            DataManager.initPropState();
+            DataManager.setData();
+            this.resetProp();
+        }
+    };
+
+    /** 刷新-时钟 */
+    updateClock() {
+        let tCur = Math.floor(new Date().getTime() / 1000);
+        let tCount = DataManager.data.prop.clock.tInfinite;
+        if (tCount > tCur) {
+            let prop = this.arrNodeProp[1];
+            let tInfinite = prop.getChildByName('tInfinite');
+            this.refreshProp(tInfinite, tCount - tCur);
+        }
+        else {
+            this.unschedule(this.updateClock);
+            DataManager.initPropState();
+            DataManager.setData();
+            this.resetProp();
+        }
+    };
+
+    refreshProp(tInfinite: cc.Node, count: number) {
+        if (count >= 0) {
+            tInfinite.active = true;
+            let tLabel = tInfinite.getChildByName('label');
+            let m = Math.floor(count / 60);
+            let s = Math.floor(count % 60);
+            let mm = m < 10 ? '0' + m : '' + m;
+            let ss = s < 10 ? '0' + s : '' + s;
+            tLabel.getComponent(cc.Label).string = mm + ':' + ss;
+        }
+    };
+
     /** 按钮事件 游戏开始 */
     async eventBtnSure() {
+        this.unschedule(this.updateMagnet);
+        this.unschedule(this.updateClock);
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         switch (this.params.type) {
@@ -232,6 +319,8 @@ export default class Before extends PopupBase {
 
     /** 按钮事件 退出 */
     async eventBtnExit() {
+        this.unschedule(this.updateMagnet);
+        this.unschedule(this.updateClock);
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         switch (this.params.type) {
@@ -259,7 +348,9 @@ export default class Before extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         let index = Number(custom);
-        let objState = DataManager.data.beforeProp[index];
+        let prop = DataManager.data.prop;
+        let arrProp = [prop.magnet, prop.clock];
+        let objState = arrProp[index];
         if (!objState) {
             return;
         }

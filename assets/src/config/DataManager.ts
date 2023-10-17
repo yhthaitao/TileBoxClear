@@ -33,6 +33,8 @@ class DataManager {
     adStartLevel: number = 12;
     /** 关卡数据 */
     levelData: { data0: LevelParam[], data1: LevelParam[] } = { data0: null, data1: null };
+    /** 广告回来延迟时间（秒） */
+    interval: number = 0.02;
 
     /** 初始数据 */
     data = {
@@ -54,11 +56,6 @@ class DataManager {
         installtime: new Date().valueOf(),
         numCoin: 100,// 金币数量
         numReplay: 1,// 可以重玩的次数，限30关之前
-        // 游戏开始前界面状态
-        beforeProp: [
-            { type: TypeProp.magnet, state: StateBeforeProp.lock, unlock: 12 },
-            { type: TypeProp.clock, state: StateBeforeProp.lock, unlock: 15 },
-        ],
         // 体力参数
         strength: {
             count: 5,// 当前体力值
@@ -70,19 +67,19 @@ class DataManager {
         },
         // 道具参数
         prop: {
-            ice: { count: 3 },// 冰冻
-            tip: { count: 3 },// 提示
-            back: { count: 3 },// 返回上一步
-            refresh: { count: 3 },// 刷新
-            magnet: { count: 3, tInfinite: 0 },// 磁铁
-            clock: { count: 3, tInfinite: 0 },// 时钟
+            ice: { type: TypeProp.ice, count: 3 },// 冰冻
+            tip: { type: TypeProp.tip, count: 3 },// 提示
+            back: { type: TypeProp.back, count: 3 },// 返回上一步
+            refresh: { type: TypeProp.refresh, count: 3 },// 刷新
+            magnet: { type: TypeProp.magnet, count: 3, tInfinite: 0, state: StateBeforeProp.lock, unlock: 12 },// 磁铁
+            clock: { type: TypeProp.clock, count: 3, tInfinite: 0, state: StateBeforeProp.lock, unlock: 15 },// 时钟
         },
         wins: {
             count: 0, start: 1, unlock: 25
         },
         // 宝箱相关参数（碎片宝箱）
         boxSuipian: {
-            level: 1, count: 0, add: 0,
+            level: 1, count: 0, add: 0, startLevel: 19,
         },
         // 宝箱相关参数（关卡等级宝箱）
         boxLevel: {
@@ -192,7 +189,7 @@ class DataManager {
     /** 初始化时间 */
     public initDay() {
         let resume = () => {
-            this.data.boxSuipian.level = 0;
+            this.data.boxSuipian.level = 1;
             this.data.boxSuipian.count = 0;
             this.data.boxSuipian.add = 0;
             this.data.boxData.timesCoin.count = this.data.boxData.timesCoin.total;
@@ -292,7 +289,7 @@ class DataManager {
     public initPropState() {
         let time = Math.floor(new Date().getTime() / 1000);
         let level = this.data.boxData.level;
-        let beforeProp = this.data.beforeProp;
+        let beforeProp = [this.data.prop.magnet, this.data.prop.clock];
         beforeProp.forEach((obj) => {
             if (level > obj.unlock) {
                 // 状态：锁定 转 无道具
@@ -303,13 +300,16 @@ class DataManager {
                 if (obj.type == TypeProp.magnet) {
                     // 无限 状态：转 锁定
                     if (this.data.prop.magnet.tInfinite - time > 0) {
-                        obj.state = StateBeforeProp.choose;
+                        obj.state = StateBeforeProp.infinite;
                     }
                     else {
                         // 有道具 
                         if (this.data.prop.magnet.count > 0) {
                             // 状态：无道具 转 未选择
                             if (obj.state == StateBeforeProp.noProp) {
+                                obj.state = StateBeforeProp.unChoose;
+                            }
+                            else if (obj.state == StateBeforeProp.infinite) {
                                 obj.state = StateBeforeProp.unChoose;
                             }
                         }
@@ -322,13 +322,16 @@ class DataManager {
                 if (obj.type == TypeProp.clock) {
                     // 无限 状态：转 锁定
                     if (this.data.prop.clock.tInfinite - time > 0) {
-                        obj.state = StateBeforeProp.choose;
+                        obj.state = StateBeforeProp.infinite;
                     }
                     else {
                         // 有道具 
                         if (this.data.prop.clock.count > 0) {
                             // 状态：无道具 转 未选择
                             if (obj.state == StateBeforeProp.noProp) {
+                                obj.state = StateBeforeProp.unChoose;
+                            }
+                            else if (obj.state == StateBeforeProp.infinite) {
                                 obj.state = StateBeforeProp.unChoose;
                             }
                         }
@@ -383,7 +386,6 @@ class DataManager {
     /** 使用道具 */
     public useProp(type: TypeProp) {
         let propNum = -1;
-        let time = Math.floor(new Date().getTime() / 1000);
         switch (type) {
             case TypeProp.ice:
                 if (this.data.prop.ice.count > 0) {
@@ -411,28 +413,24 @@ class DataManager {
                 break;
             case TypeProp.magnet:
                 // 磁铁选中
-                let stateMagnet = this.data.beforeProp[0];
-                if (stateMagnet.state == StateBeforeProp.choose) {
-                    if (this.data.prop.magnet.tInfinite - time > 0) {
-                        propNum = this.data.prop.magnet.count;
-                    }
-                    else {
-                        this.data.prop.magnet.count -= 1;
-                        propNum = this.data.prop.magnet.count;
-                    }
+                let stateMagnet = this.data.prop.magnet;
+                if (stateMagnet.state == StateBeforeProp.infinite) {
+                    propNum = this.data.prop.magnet.count;
+                }
+                else if (stateMagnet.state == StateBeforeProp.choose) {
+                    this.data.prop.magnet.count -= 1;
+                    propNum = this.data.prop.magnet.count;
                 }
                 break;
             case TypeProp.clock:
                 // 时钟选中
-                let stateClock = this.data.beforeProp[1];
-                if (stateClock.state == StateBeforeProp.choose) {
-                    if (this.data.prop.clock.tInfinite - time > 0) {
-                        propNum = this.data.prop.clock.count;
-                    }
-                    else {
-                        this.data.prop.clock.count -= 1;
-                        propNum = this.data.prop.clock.count;
-                    }
+                let stateClock = this.data.prop.clock;
+                if (stateClock.state == StateBeforeProp.infinite) {
+                    propNum = this.data.prop.clock.count;
+                }
+                else if (stateClock.state == StateBeforeProp.choose) {
+                    this.data.prop.clock.count -= 1;
+                    propNum = this.data.prop.clock.count;
                 }
                 break;
             default:
@@ -475,14 +473,15 @@ class DataManager {
         }
 
         // 道具解锁（游戏开始前界面）
-        this.data.beforeProp.forEach((obj: { type: TypeProp, state: StateBeforeProp, unlock: number }, index: number) => {
-            if (obj.state == StateBeforeProp.lock) {
-                if (this.data.boxData.level >= obj.unlock) {
-                    obj.state = StateBeforeProp.unChoose;
+        let beforeProp = [this.data.prop.magnet, this.data.prop.clock];
+        beforeProp.forEach((prop) => {
+            if (prop.state == StateBeforeProp.lock) {
+                if (this.data.boxData.level >= prop.unlock) {
+                    prop.state = StateBeforeProp.unChoose;
                 }
             }
             // 连胜奖励在25关之后开启
-            if (this.data.boxData.level > 25 && obj.type == TypeProp.magnet && obj.state != StateBeforeProp.lock) {
+            if (this.data.boxData.level > 25 && prop.type == TypeProp.magnet && prop.state != StateBeforeProp.lock) {
                 let wins = this.data.wins.count - this.data.wins.start;
                 if (wins < 3) {
                     this.data.wins.count++;
@@ -512,14 +511,14 @@ class DataManager {
                     break;
                 case TypeProp.magnet:
                     this.data.prop.magnet.count += reward.number;
-                    let stateMagnet = this.data.beforeProp[0];
+                    let stateMagnet = this.data.prop.magnet;
                     if (stateMagnet.state == StateBeforeProp.noProp) {
                         stateMagnet.state = StateBeforeProp.unChoose;
                     }
                     break;
                 case TypeProp.clock:
                     this.data.prop.clock.count += reward.number;
-                    let stateClock = this.data.beforeProp[0];
+                    let stateClock = this.data.prop.clock;
                     if (stateClock.state == StateBeforeProp.noProp) {
                         stateClock.state = StateBeforeProp.unChoose;
                     }
@@ -763,7 +762,13 @@ class DataManager {
      */
     public startVideo(funcA: Function, funcB: Function): void {
         NativeCall.closeBanner();
-        this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, funcA, funcB));
+        this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, async () => {
+            // 延迟一会儿
+            await new Promise((_res) => {
+                cc.Canvas.instance.scheduleOnce(_res, this.interval);
+            });
+            funcA();
+        }, funcB));
     };
 
     /**
@@ -774,7 +779,13 @@ class DataManager {
      */
     public startAdvert(funcA: Function, funcB: Function): void {
         NativeCall.closeBanner();
-        this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, funcA, funcB));
+        this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, async () => {
+            // 延迟一会儿
+            await new Promise((_res) => {
+                cc.Canvas.instance.scheduleOnce(_res, this.interval);
+            });
+            funcA();
+        }, funcB));
     }
 
     /** 播放动画 */

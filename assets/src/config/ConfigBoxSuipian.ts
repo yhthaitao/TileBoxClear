@@ -26,7 +26,7 @@ const ConfigBoxSuipian = {
             { type: TypeProp.coin, number: 80 } 
         ] 
     },
-    5: { 
+    5: {
         total: 20, 
         reward: [ 
             { type: TypeProp.tip, number: 2 } 

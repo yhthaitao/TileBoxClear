@@ -27,12 +27,7 @@ export default class MainMenuTop extends cc.Component {
         this.init();
     }
 
-    protected onDisable(): void {
-        this.unscheduleAllCallbacks();
-    }
-
     init() {
-        this.initStrength();
         this.refreshStrength();
         this.refreshCoin();
     };
@@ -44,120 +39,155 @@ export default class MainMenuTop extends cc.Component {
         }
         this.objTime.count = this.objTime.init;
 
-        // 无限体力逻辑
-        let tInfinite = DataManager.data.strength.tInfinite - Math.floor(new Date().getTime() / 1000);
+        let strength = DataManager.data.strength;
+        let timeCur = Math.floor(new Date().getTime() / 1000);
+        /********************************************* 体力-无限 **********************************************/
+        let tInfinite = strength.tInfinite - timeCur;
         if (tInfinite > 0) {
             if (!this.iconStrengthMax.active) {
                 this.iconStrengthMax.active = true;
             }
-        }
-        else{
-            if (this.iconStrengthMax.active) {
-                this.iconStrengthMax.active = false;
+            if (this.labelStrengthMax.active) {
+                this.labelStrengthMax.active = false;
             }
+            if (!this.labelStrengthTime.active) {
+                this.labelStrengthTime.active = false;
+            }
+            this.refreshTimeInfinite(tInfinite);// 刷新无限体力时间
+            return;
         }
+        if (this.iconStrengthMax.active) {
+            this.iconStrengthMax.active = false;
+        }
+        /********************************************* 体力-非无限-满 **********************************************/
+        let entough = strength.count >= strength.total;
+        if (entough) {
+            if (!this.labelStrengthMax.active) {
+                this.labelStrengthMax.active = true;
+            }
+            if (this.labelStrengthTime.active) {
+                this.labelStrengthTime.active = false;
+            }
+            if (strength.tCount != 0) {
+                strength.tCount = 0;
+                DataManager.setData();
+            }
+            return;
+        }
+        /********************************************* 体力-非无限-不满 **********************************************/
+        let isUpdate = false;
+        if (this.labelStrengthMax.active) {
+            this.labelStrengthMax.active = false;
+        }
+        if (!this.labelStrengthTime.active) {
+            this.labelStrengthTime.active = true;
+        }
+        if (strength.tCount <= 0) {
+            strength.tCount = timeCur;
+            isUpdate = true;
+        }
+        let disTime = timeCur - strength.tCount;
+        let disStrength = Math.floor(disTime / strength.tTotal);
+        if (disStrength > 0) {
+            strength.count += disStrength;
+            if (strength.count > strength.tTotal) {
+                strength.count = strength.tTotal;
+            }
+            isUpdate = true;
+        }
+        if (isUpdate) {
+            DataManager.setData();
+        }
+        let countTime = Math.floor(disTime % strength.tTotal);
+        let elseTime = strength.tTotal - countTime;
+        this.refreshTimeStrength(elseTime);
     }
-
-    /**
-     * 初始化体力相关：　
-     * 检测体力值是否满值？
-     *      满值：重置时间计数为0；
-     *      未满：检测时间参数是否赋值？
-     *          已赋值：计算已经过去了多久　并　检测是否积累了体力？
-     *              已积累体力：更新体力值，检测体力值是否已满？
-     *                  已满：重置时间计数为0；
-     *                  未满：重置时间计数为更新体力值后的时间；
-     *          未赋值：赋值时间参数；
-     */
-    initStrength() {
-        let count = DataManager.data.strength.count;
-        if (count < DataManager.data.strength.total) {
-            let timeCur = Math.floor(new Date().getTime() / 1000);
-            if (DataManager.data.strength.tCount > 0) {
-                let timeDis = timeCur - DataManager.data.strength.tCount;
-                if (timeDis >= timeDis / DataManager.data.strength.tTotal) {
-                    let strengthDis = Math.floor(timeDis / DataManager.data.strength.tTotal);
-                    DataManager.data.strength.count += strengthDis;
-                    if (DataManager.data.strength.count < DataManager.data.strength.total) {
-                        DataManager.data.strength.tCount += strengthDis * DataManager.data.strength.tTotal;
-                    }
-                    else {
-                        DataManager.data.strength.count = DataManager.data.strength.total;
-                        DataManager.data.strength.tCount = 0;
-                    }
-                }
-            }
-            else {
-                DataManager.data.strength.tCount = timeCur;
-            }
-        }
-        else {
-            DataManager.data.strength.tCount = 0;
-        }
-        DataManager.setData();// 更新数据
-    };
 
     /** 刷新体力 */
     refreshStrength() {
-        let data = DataManager.data.strength;
-        this.labelStrengthNum.getComponent(cc.Label).string = '' + data.count;
-        if (data.count >= data.total) {
-            this.labelStrengthTime.active = false;
-            this.labelStrengthMax.active = true;
-        }
-        else {
-            this.labelStrengthMax.active = false;
-            this.labelStrengthTime.active = true;
-            this.updateStrength();
-            this.schedule(this.updateStrength, 1.0);
-        }
-        // 无限体力
-        let time = Math.floor(new Date().getTime() / 1000);
-        this.iconStrengthMax.active = data.tInfinite > time;
-    };
-
-    /** 时间-更新 */
-    updateStrength() {
-        let count = 0;
+        let strength = DataManager.data.strength;
         let timeCur = Math.floor(new Date().getTime() / 1000);
-        let timeDis = timeCur - DataManager.data.strength.tCount;
-        if (timeDis < DataManager.data.strength.tTotal) {
-            count = DataManager.data.strength.tTotal - timeDis;
-            this.refreshTime(count);
-        }
-        else {
-            // 更新体力
-            DataManager.data.strength.tCount += DataManager.data.strength.tTotal;
-            DataManager.data.strength.count++;
-            if (DataManager.data.strength.count >= DataManager.data.strength.total) {
-                DataManager.data.strength.count = DataManager.data.strength.total;
+        /********************************************* 体力-无限 **********************************************/
+        let tInfinite = strength.tInfinite - timeCur;
+        if (tInfinite > 0) {
+            if (!this.iconStrengthMax.active) {
+                this.iconStrengthMax.active = true;
             }
-            DataManager.setData();// 更新数据
-
-            // 更新ui
-            this.labelStrengthNum.getComponent(cc.Label).string = '' + DataManager.data.strength.count;
-            timeDis = timeCur - DataManager.data.strength.tCount;
-            timeDis = timeDis % DataManager.data.strength.tTotal;
-            count = DataManager.data.strength.tTotal - timeDis;
-            this.refreshTime(count);
-
-            // 计时结束
-            if (DataManager.data.strength.count >= DataManager.data.strength.total) {
+            if (this.labelStrengthMax.active) {
+                this.labelStrengthMax.active = false;
+            }
+            if (!this.labelStrengthTime.active) {
                 this.labelStrengthTime.active = false;
-                this.labelStrengthMax.active = true;
-                this.unschedule(this.updateStrength);
             }
+            this.refreshTimeInfinite(tInfinite);// 刷新无限体力时间
+            return;
         }
+        if (this.iconStrengthMax.active) {
+            this.iconStrengthMax.active = false;
+        }
+        /********************************************* 体力-非无限-满 **********************************************/
+        let entough = strength.count >= strength.total;
+        if (entough) {
+            if (!this.labelStrengthMax.active) {
+                this.labelStrengthMax.active = true;
+            }
+            if (this.labelStrengthTime.active) {
+                this.labelStrengthTime.active = false;
+            }
+            if (strength.tCount != 0) {
+                strength.tCount = 0;
+                DataManager.setData();
+            }
+            return;
+        }
+        /********************************************* 体力-非无限-不满 **********************************************/
+        let isUpdate = false;
+        if (this.labelStrengthMax.active) {
+            this.labelStrengthMax.active = false;
+        }
+        if (!this.labelStrengthTime.active) {
+            this.labelStrengthTime.active = true;
+        }
+        if (strength.tCount <= 0) {
+            strength.tCount = timeCur;
+            isUpdate = true;
+        }
+        let disTime = timeCur - strength.tCount;
+        let disStrength = Math.floor(disTime / strength.tTotal);
+        if (disStrength > 0) {
+            strength.count += disStrength;
+            if (strength.count > strength.tTotal) {
+                strength.count = strength.tTotal;
+            }
+            isUpdate = true;
+        }
+        if (isUpdate) {
+            DataManager.setData();
+        }
+        let countTime = Math.floor(disTime % strength.tTotal);
+        let elseTime = strength.tTotal - countTime;
+        this.refreshTimeStrength(elseTime);
     };
 
     /** 时间-设置 */
-    refreshTime(count: number) {
+    refreshTimeStrength(count: number) {
         let m = Math.floor(count / 60);
         let s = Math.floor(count % 60);
-        let strL = m < 10 ? '0' + m : '' + m;
-        let strR = s < 10 ? '0' + s : '' + s;
-        let strM = ':';
-        this.labelStrengthTime.getComponent(cc.Label).string = strL + strM + strR;
+        let mm = m < 10 ? '0' + m : '' + m;
+        let ss = s < 10 ? '0' + s : '' + s;
+        this.labelStrengthTime.getComponent(cc.Label).string = mm + ':' + ss;
+    };
+
+    /** 无限时间-设置 */
+    refreshTimeInfinite(count: number) {
+        let h = Math.floor(count / 3600);
+        let countElse = count % 3600;
+        let m = Math.floor(countElse / 60);
+        let s = Math.floor(countElse % 60);
+        let hh = h < 10 ? '0' + h : '' + h;
+        let mm = m < 10 ? '0' + m : '' + m;
+        let ss = s < 10 ? '0' + s : '' + s;
+        this.labelStrengthTime.getComponent(cc.Label).string = hh + ':' + mm + ':' + ss;
     };
 
     /** 刷新金币 */
@@ -166,7 +196,7 @@ export default class MainMenuTop extends cc.Component {
         this.labelCoinNum.getComponent(cc.Label).string = '' + numCoin;
     };
 
-    playAniStrength(){
+    playAniStrength() {
         let data = DataManager.data.strength;
         let time = Math.floor(new Date().getTime() / 1000);
         this.iconStrengthMax.active = data.tInfinite > time;
@@ -191,7 +221,7 @@ export default class MainMenuTop extends cc.Component {
             let randomY = Math.floor(Math.random() * 50 - 50);
             let pMid = cc.v2(pStart.x + randomX, pStart.y + randomY);
             let bezier1 = { p1: cc.v2(pStart.x, pStart.y), p2: cc.v2(pMid.x, pStart.y), pTo: cc.v2(pMid.x, pMid.y), time: Math.random() * 0.2 + 0.1, };
-            let bezier2 = { p1: cc.v2(pMid.x, pMid.y), p2: cc.v2(pFinish.x, pMid.y), pTo: cc.v2(pFinish.x, pFinish.y)};
+            let bezier2 = { p1: cc.v2(pMid.x, pMid.y), p2: cc.v2(pFinish.x, pMid.y), pTo: cc.v2(pFinish.x, pFinish.y) };
             let time2 = Common.getMoveTime(cc.v3(bezier2.p1.x, bezier2.p1.y), cc.v3(bezier2.pTo.x, bezier2.pTo.y), 1, 1500);
             cc.tween(coin)
                 .delay(Math.random() * 0.5)
@@ -213,31 +243,29 @@ export default class MainMenuTop extends cc.Component {
     };
 
     /** 加体力（花费金币） */
-    eventBackAddStrengthByCoin(){
-        this.unschedule(this.updateStrength);
+    eventBackAddStrengthByCoin() {
         this.refreshStrength();
         this.refreshCoin();
     }
 
     /** 加体力（看视频） */
-    eventBackAddStrengthByWatch(){
-        this.unschedule(this.updateStrength);
+    eventBackAddStrengthByWatch() {
         this.refreshStrength();
     }
 
     /** 加金币（看视频） */
-    eventBackAddCoinByWatch(){
+    eventBackAddCoinByWatch() {
         this.refreshCoin();
     }
 
     /** 按钮事件 加体力 */
-    eventBtnAddStrength(){
+    eventBtnAddStrength() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_getLives, {}, { mode: PopupCacheMode.Frequent });
     }
 
     /** 按钮事件 加金币 */
-    eventBtnAddCoin(){
+    eventBtnAddCoin() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
     }

@@ -5,6 +5,7 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
+import GameFail from "../../../../prefabs/Popup/GameFail/src/GameFail";
 
 /** 动作参数（宝箱相关） */
 interface ParamsAniBox {
@@ -25,7 +26,8 @@ export default class MainMenuMidHome extends cc.Component {
     @property({ type: cc.Node, tooltip: '主菜单-顶部-碎片时间' }) home_top_time: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-奖励道具' }) home_top_prop: cc.Node = null;
     @property({ type: [cc.SpriteFrame], tooltip: '主菜单-顶部-奖励道具' }) arr_home_top_prop: cc.SpriteFrame[] = [];
-    @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_start: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_button: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_btnSign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱' }) home_left_boxXing: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱图标' }) home_left_boxXing_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
@@ -117,6 +119,20 @@ export default class MainMenuMidHome extends cc.Component {
             this.home_bg.opacity = 0;
             cc.tween(this.home_bg).to(0.5, { opacity: 255 }).start();
         });
+        // 标签
+        let easy = this.home_bottom_button.getChildByName('easy');
+        let hard = this.home_bottom_button.getChildByName('hard');
+        let levelParam = DataManager.getLevelData();
+        if (levelParam.difficulty) {
+            easy.active = false;
+            hard.active = true;
+            this.home_bottom_btnSign.active = true;
+        }
+        else{
+            easy.active = true;
+            hard.active = false;
+            this.home_bottom_btnSign.active = false;
+        }
     };
 
     /** 刷新-碎片进度 */
@@ -146,9 +162,12 @@ export default class MainMenuMidHome extends cc.Component {
         }
         let propIcon = this.home_top_prop.getChildByName('icon');
         propIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
-        let num = reward.type == TypeProp.tStrengthInfinite ? Math.floor(reward.number / 60) : reward.number;
+        let number = reward.number;
+        if (reward.type == TypeProp.tStrengthInfinite) {
+            number = Math.floor(reward.number / 60);
+        }
         let propLabel = this.home_top_prop.getChildByName('label');
-        propLabel.getComponent(cc.Label).string = '+' + num;
+        propLabel.getComponent(cc.Label).string = '+' + number;
 
         this.refreshBoxSuipianTime();
     };
@@ -216,8 +235,8 @@ export default class MainMenuMidHome extends cc.Component {
                 let pStart = Common.getLocalPos(this.home_top_prop.parent, this.home_top_prop.position, this.node);
                 let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
-                let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
-                pButton.y += this.home_bottom_start.height;
+                let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
+                pButton.y += this.home_bottom_button.height;
                 let param = {
                     pStart: { x: pStart.x, y: pStart.y },
                     pStrength: { x: pStrength.x, y: pStrength.y },
@@ -357,8 +376,8 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
-                let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
-                pButton.y += this.home_bottom_start.height;
+                let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
+                pButton.y += this.home_bottom_button.height;
                 let param = { pCoin: { x: pCoin.x, y: pCoin.y }, pProp: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxXingxing, param, { mode: PopupCacheMode.Frequent });
                 // 进度条再次刷新
@@ -439,8 +458,8 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
-                let pButton = Common.getLocalPos(this.home_bottom_start.parent, this.home_bottom_start.position, this.node);
-                pButton.y += this.home_bottom_start.height;
+                let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
+                pButton.y += this.home_bottom_button.height;
                 let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
 
@@ -475,7 +494,7 @@ export default class MainMenuMidHome extends cc.Component {
     };
 
     playAniScaleBtnstart() {
-        this.home_bottom_start.getComponent(cc.Animation).play();
+        this.home_bottom_button.getComponent(cc.Animation).play();
     };
 
     playAniScaleSuipian() {
@@ -546,7 +565,6 @@ export default class MainMenuMidHome extends cc.Component {
         kit.Popup.show(CConst.popup_path_boxXingxing, {}, { mode: PopupCacheMode.Frequent });
     };
 
-
     /** 按钮事件 等级宝箱 */
     eventBtnHomeBoxLevel() {
         kit.Audio.playEffect(CConst.sound_clickUI);
@@ -603,7 +621,7 @@ export default class MainMenuMidHome extends cc.Component {
     refreshHomeLabelBottom() {
         DataManager.setString(LangChars.Level, (chars: string) => {
             let level = DataManager.data.boxData.level;
-            let itemLabel = this.home_bottom_start.getChildByName('label');
+            let itemLabel = this.home_bottom_button.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars + '  ' + level;
         });
     };

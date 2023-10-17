@@ -1,5 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import { Design } from "../../../../src/config/ConfigCommon";
+import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 
 /** 菜单类型 */
@@ -82,9 +83,20 @@ export default class MainMenu extends cc.Component {
         let home_dis_bottomToBottom = 100 * winScaleByH;
         this.midHome.x = 0;
         this.midHomeBack.y = cc.winSize.height * 0.5;
-        this.midHomeTop.y = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop - this.midHomeTop.height * 0.5;
-        this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
-        this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
+        // 隐藏home顶部ui
+        let level = DataManager.data.boxData.level;
+        this.midHomeTop.active = level >= DataManager.data.boxSuipian.startLevel;
+        if (this.midHomeTop.active) {
+            let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
+            this.midHomeTop.y = startY - this.midHomeTop.height * 0.5;
+            this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
+            this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
+        }
+        else{
+            let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
+            this.midHomeLeft.y = startY - home_dis_topToLeft;
+            this.midHomeRight.y = startY - home_dis_topToRight;
+        }
         this.midHomeBottom.y = this.uiBottom.y + this.uiBottom.height * 0.5 + home_dis_bottomToBottom + this.midHomeBottom.height * 0.5;
         // 中间ui-shop
         this.midShopTop.y = this.midHomeTop.y;
@@ -145,13 +157,13 @@ export default class MainMenu extends cc.Component {
     };
 
     /** 重置菜单项 */
-    resetMenu(isMove: boolean){
+    resetMenu(isMove: boolean) {
         if (isMove) {
-            this.arrMidMenu.forEach((item)=>{ item.opacity = 255 });
+            this.arrMidMenu.forEach((item) => { item.opacity = 255 });
         }
-        else{
-            this.arrMidMenu.forEach((item, index)=>{ 
-                item.opacity = this.stateMenu == index ? 255 : 0 
+        else {
+            this.arrMidMenu.forEach((item, index) => {
+                item.opacity = this.stateMenu == index ? 255 : 0
             });
         }
     };
@@ -279,7 +291,7 @@ export default class MainMenu extends cc.Component {
     };
 
     /** 事件反馈 进入菜单商店 */
-    eventBack_menuShop(){
+    eventBack_menuShop() {
         this.setIsLock(true);
         if (this.stateMenu != StateMenu.shop) {
             this.playAniResetMenu(StateMenu.shop);

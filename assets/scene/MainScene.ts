@@ -40,7 +40,7 @@ export default class MainScene extends cc.Component {
     /** 节点-弹窗父节点 */
     nodePopup: cc.Node = null;
     /** 是否加载完成 */
-    objComplete = { loading: false, data: false, ui: false }; 
+    objComplete = { loading: false, data: false, ui: false };
 
     protected onLoad(): void {
         Common.log('页面 主菜单 onLoad()');

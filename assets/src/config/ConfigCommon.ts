@@ -23,6 +23,7 @@ export enum StateBeforeProp {
     noProp = 1 << 1,// 解锁 无道具
     unChoose = 1 << 2,// 解锁 有道具 未选中
     choose = 1 << 3,// 解锁 有道具 选中
+    infinite = 1 << 4,// 道具无限
 };
 
 /** 游戏结束枚举状态 */
