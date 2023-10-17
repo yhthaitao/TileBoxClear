@@ -61,15 +61,16 @@ export default class GameBox extends cc.Component {
     @property({ type: cc.Node, tooltip: 'ui-道具' }) uiProp: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-冰冻' }) uiPropIce: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-提示' }) uiPropTip: cc.Node = null;
-    @property({ type: cc.Node, tooltip: 'ui-道具-回退' }) uiPropRack: cc.Node = null;
+    @property({ type: cc.Node, tooltip: 'ui-道具-回退' }) uiPropBack: cc.Node = null;
     @property({ type: cc.Node, tooltip: 'ui-道具-刷新' }) uiPropRefresh: cc.Node = null;
     @property({ type: cc.Prefab, tooltip: '预制体：箱子' }) preBox: cc.Prefab = null;
     @property({ type: cc.Prefab, tooltip: '预制体：物品' }) preGood: cc.Prefab = null;
     @property({ type: cc.Node, tooltip: '冰冻效果节点' }) effectIce: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '点击效果节点' }) effectExp: cc.Node = null;
     @property({ type: cc.Node, tooltip: '点击效果节点' }) effectTouch: cc.Node = null;
 
     /** 游戏用数据 */
-    dataObj = {
+    objData = {
         numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false
     };
     heightObj = {};
@@ -111,8 +112,13 @@ export default class GameBox extends cc.Component {
 
     baseTime: number = 1;// 1单位时间
     baseDis: number = 2000;// 单位时间移动距离
-    poolBox: cc.NodePool = null;// 箱子缓存
-    poolGood: cc.NodePool = null;// 物品缓存
+    // 缓存
+    objPool = {
+        box: { pool: new cc.NodePool(), max: 100 },
+        good: { pool: new cc.NodePool(), max: 100 },
+        effectExp: { pool: new cc.NodePool(), max: 10 },
+        effectTouch: { pool: new cc.NodePool(), max: 10 },
+    };
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -170,13 +176,10 @@ export default class GameBox extends cc.Component {
         this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
 
         // 按钮特效
-        this.bg.on(cc.Node.EventType.TOUCH_START, this.touchEffectShow, this, true);
+        this.bg.on(cc.Node.EventType.TOUCH_START, this.effectTouchShow, this, true);
     }
 
     protected start(): void {
-        this.poolBox = new cc.NodePool();
-        this.poolGood = new cc.NodePool();
-
         // 初始ui
         this.nodeMain.opacity = 0;
         this.maskTop.setContentSize(cc.winSize);
@@ -225,7 +228,7 @@ export default class GameBox extends cc.Component {
         if (levelParam.difficulty) {
             this.uiTopLevel.getChildByName('nodeSign').active = true;
         }
-        else{
+        else {
             this.uiTopLevel.getChildByName('nodeSign').active = false;
         }
     }
@@ -233,7 +236,7 @@ export default class GameBox extends cc.Component {
     /** 初始化数据 */
     initData() {
         /** 游戏用数据 */
-        this.dataObj = {
+        this.objData = {
             numSuipian: 0,
             stepCount: 0,
             passTime: new Date().getTime(),
@@ -563,10 +566,10 @@ export default class GameBox extends cc.Component {
         this.setIceHide();// 设置时间颜色
         this.setUIProcess();// 设置游戏进度
         // 设置道具栏
-        this.setUIProp(this.uiPropIce, DataManager.data.prop.ice.count);
-        this.setUIProp(this.uiPropTip, DataManager.data.prop.tip.count);
-        this.setUIProp(this.uiPropRack, DataManager.data.prop.back.count);
-        this.setUIProp(this.uiPropRefresh, DataManager.data.prop.refresh.count);
+        this.setUIProp(TypeProp.ice);
+        this.setUIProp(TypeProp.tip);
+        this.setUIProp(TypeProp.back);
+        this.setUIProp(TypeProp.refresh);
     }
 
     /** 初始化游戏关卡 */
@@ -619,7 +622,7 @@ export default class GameBox extends cc.Component {
     /** 设置碎片数量 */
     setUISuipian() {
         let label = this.uiTopSuipian.getChildByName('label');
-        label.getComponent(cc.Label).string = 'x' + this.dataObj.numSuipian;
+        label.getComponent(cc.Label).string = 'x' + this.objData.numSuipian;
     }
 
     /** 设置时间 */
@@ -650,18 +653,42 @@ export default class GameBox extends cc.Component {
     }
 
     /** 设置道具栏 */
-    setUIProp(prop: cc.Node, propCount: number) {
+    setUIProp(type: TypeProp) {
+        let prop: cc.Node = null;
+        let count: number = 0;
+        switch (type) {
+            case TypeProp.ice:
+                prop = this.uiPropIce;
+                count = DataManager.data.prop.ice.count;
+                break;
+            case TypeProp.tip:
+                prop = this.uiPropTip;
+                count = DataManager.data.prop.tip.count;
+                break;
+            case TypeProp.back:
+                prop = this.uiPropBack;
+                count = DataManager.data.prop.back.count;
+                break;
+            case TypeProp.refresh:
+                prop = this.uiPropRefresh;
+                count = DataManager.data.prop.refresh.count;
+                break;
+            default:
+                break;
+        }
         let nodeY = prop.getChildByName('nodeY');
         let nodeN = prop.getChildByName('nodeN');
-        if (propCount > 0) {
-            nodeY.active = true;
-            nodeN.active = false;
-            let itemLabel = nodeY.getChildByName('label');
-            itemLabel.getComponent(cc.Label).string = '' + propCount;
-        }
-        else {
-            nodeY.active = false;
-            nodeN.active = true;
+        if (nodeY && nodeY) {
+            if (count > 0) {
+                nodeY.active = true;
+                nodeN.active = false;
+                let itemLabel = nodeY.getChildByName('label');
+                itemLabel.getComponent(cc.Label).string = '' + count;
+            }
+            else {
+                nodeY.active = false;
+                nodeN.active = true;
+            }
         }
     };
 
@@ -1110,20 +1137,42 @@ export default class GameBox extends cc.Component {
         }
     }
 
+    /** 经验事件效果反馈 */
+    effectExpShow(point: cc.Vec3) {
+        let main = this.effectExp.getChildByName('main');
+        let itemDragon = this.effectExp.getChildByName('dragon');
+        let itemExp = DataManager.poolGet(itemDragon, this.objPool.effectExp);
+        itemExp.parent = main;
+        itemExp.active = true;
+        itemExp.position = point;
+        let dragon = itemExp.getComponent(dragonBones.ArmatureDisplay)
+        dragon.playAnimation('yundong', 0);
+        let pGoal = Common.getLocalPos(this.uiProcess.parent, this.uiProcess.position, main);
+        let time = Common.getMoveTime(point, pGoal, 1, 2000);
+        let obj = {
+            p1: cc.v2(point.x, point.y),
+            p2: cc.v2(),
+            pTo: cc.v2(pGoal.x, pGoal.y),
+        };
+        cc.tween(itemExp).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(()=>{
+            DataManager.poolPut(itemExp, this.objPool.effectExp);
+        }).start();
+    }
+
     /** 点击事件效果反馈 */
-    touchEffectShow(event: cc.Event.EventTouch) {
+    effectTouchShow(event: cc.Event.EventTouch) {
         var pos = event.getLocation();
-        let dragon = this.effectTouch.getChildByName('dragon');
         let main = this.effectTouch.getChildByName('main');
-        let copy = cc.instantiate(dragon);
-        copy.active = true;
-        copy.position = main.convertToNodeSpaceAR(cc.v3(pos.x, pos.y));
-        copy.parent = main;
-        let animation = copy.getComponent(dragonBones.ArmatureDisplay)
-        animation.once(dragonBones.EventObject.COMPLETE, () => {
-            copy.removeFromParent();
+        let itemDragon = this.effectTouch.getChildByName('dragon');
+        let itemTouch = DataManager.poolGet(itemDragon, this.objPool.effectTouch);
+        itemTouch.parent = main;
+        itemTouch.active = true;
+        itemTouch.position = main.convertToNodeSpaceAR(cc.v3(pos.x, pos.y));
+        let dragon = itemTouch.getComponent(dragonBones.ArmatureDisplay)
+        dragon.once(dragonBones.EventObject.COMPLETE, () => {
+            DataManager.poolPut(itemTouch, this.objPool.effectTouch);
         })
-        animation.playAnimation('yundong', 1);
+        dragon.playAnimation('yundong', 1);
     }
 
     /** 刷新操作区 */
@@ -1172,7 +1221,7 @@ export default class GameBox extends cc.Component {
                 else {
                     if (Object.keys(boxParam.goods).length < 1) {
                         arrBoxParam.splice(j, 1);
-                        DataManager.poolPut(box, this.poolBox);
+                        DataManager.poolPut(box, this.objPool.box);
                         isRemoveBox = true;
                     }
                     if (isDelete) {
@@ -1239,7 +1288,7 @@ export default class GameBox extends cc.Component {
         for (let index = 0, length = arrParam.length; index < length; index++) {
             let param = arrParam[index];
             let good = this.uiBottomMain.getChildByName(param.name);
-            DataManager.poolPut(good, this.poolGood);
+            DataManager.poolPut(good, this.objPool.good);
         }
         this.bottomParamArr.splice(arrIndex, 1);
         this.goodsCount += arrParam.length;
@@ -1269,13 +1318,13 @@ export default class GameBox extends cc.Component {
             let boxMain = box.getComponent(ItemBox).nodeMain;
             for (let j = boxMain.childrenCount - 1; j >= 0; j--) {
                 let good = boxMain.children[j];
-                DataManager.poolPut(good, this.poolGood);
+                DataManager.poolPut(good, this.objPool.good);
             }
-            DataManager.poolPut(box, this.poolBox);
+            DataManager.poolPut(box, this.objPool.box);
         }
         for (let index = this.uiBottomMain.childrenCount - 1; index >= 0; index--) {
             let good = this.uiBottomMain.children[index];
-            DataManager.poolPut(good, this.poolGood);
+            DataManager.poolPut(good, this.objPool.good);
         }
         this.timeProp.iceCount = 0;
         this.setIceHide();
@@ -1310,14 +1359,14 @@ export default class GameBox extends cc.Component {
                 kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
                 return;
             }
-            else{
+            else {
                 DataManager.data.numCoin -= need;
             }
         }
         DataManager.setData();
 
         // 更新ui
-        this.setUIProp(this.uiPropIce, propNum);
+        this.setUIProp(TypeProp.ice);
         this.setIceShow();
 
         // 道具逻辑
@@ -1342,13 +1391,13 @@ export default class GameBox extends cc.Component {
                 kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
                 return;
             }
-            else{
+            else {
                 DataManager.data.numCoin -= need;
             }
         }
         DataManager.setData();
         // 更新ui
-        this.setUIProp(this.uiPropTip, propNum);
+        this.setUIProp(TypeProp.tip);
 
         // 道具逻辑
         let needNum = 3;
@@ -1453,14 +1502,14 @@ export default class GameBox extends cc.Component {
                 kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
                 return;
             }
-            else{
+            else {
                 DataManager.data.numCoin -= need;
             }
         }
         DataManager.setData();
 
         // 更新ui
-        this.setUIProp(this.uiPropRack, propNum);
+        this.setUIProp(TypeProp.back);
 
         // 道具逻辑
         this.isLock = true;
@@ -1655,14 +1704,14 @@ export default class GameBox extends cc.Component {
                 kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
                 return;
             }
-            else{
+            else {
                 DataManager.data.numCoin -= need;
             }
         }
         DataManager.setData();
 
         // 刷新ui
-        this.setUIProp(this.uiPropRefresh, propNum);
+        this.setUIProp(TypeProp.refresh);
 
         // 道具逻辑
         this.isLock = true;
@@ -1792,7 +1841,7 @@ export default class GameBox extends cc.Component {
                     boxParam.goods = boxScript.param.goods;
                     if (Object.keys(boxParam.goods).length < 1) {
                         arrBoxParam.splice(j, 1);
-                        DataManager.poolPut(box, this.poolBox);
+                        DataManager.poolPut(box, this.objPool.box);
                     }
                     break;
                 }
@@ -1806,7 +1855,7 @@ export default class GameBox extends cc.Component {
 
         // ui移动
         cc.tween(good).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(() => {
-            DataManager.poolPut(good, this.poolGood);
+            DataManager.poolPut(good, this.objPool.good);
             cc.tween(this.uiTopTime).to(0.1, { scale: 1.1 }).call(() => {
                 // 道具逻辑
                 this.timeGame.count += this.timeProp.addTotal;
@@ -1860,7 +1909,7 @@ export default class GameBox extends cc.Component {
                 let goodParam = arrParam[index];
                 let good = this.uiBottomMain.getChildByName(goodParam.name);
                 let bottomGood = removeBottomGood(good, magnetMain);
-                DataManager.poolPut(good, this.poolGood);
+                DataManager.poolPut(good, this.objPool.good);
                 arrGoods.push(bottomGood);
             }
             let enough = false;
@@ -2115,7 +2164,7 @@ export default class GameBox extends cc.Component {
                     boxParam.goods = boxScript.param.goods;
                     if (Object.keys(boxParam.goods).length < 1) {
                         arrBoxParam.splice(j, 1);
-                        DataManager.poolPut(box, this.poolBox);
+                        DataManager.poolPut(box, this.objPool.box);
                     }
                     break;
                 }
@@ -2145,7 +2194,7 @@ export default class GameBox extends cc.Component {
             copyNode.parent = parent;
             delete boxParamOne.goods[sign.key];
             boxScript.param = Common.clone(boxParamOne);
-            DataManager.poolPut(goodNode, this.poolGood);
+            DataManager.poolPut(goodNode, this.objPool.good);
             // 特殊箱子 重新排布
             if (boxScript.param.isFrame) {
                 boxScript.sortGood();
@@ -2153,7 +2202,7 @@ export default class GameBox extends cc.Component {
             else {
                 if (Object.keys(boxParamOne.goods).length < 1) {
                     boxParamArr.splice(sign.j, 1);
-                    DataManager.poolPut(boxNode, this.poolBox);
+                    DataManager.poolPut(boxNode, this.objPool.box);
                 }
             }
         }
@@ -2379,7 +2428,7 @@ export default class GameBox extends cc.Component {
     playAniSuipian(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         if (scriptGood.param.gold.isGold) {
-            this.dataObj.numSuipian++;
+            this.objData.numSuipian++;
             DataManager.setData();
 
             // 碎片开始移动
@@ -2456,12 +2505,15 @@ export default class GameBox extends cc.Component {
         // 4 剩余物品复制 并 移动
         let count = 0;
         let total = 2;
+        let effectExpMain = this.effectExp.getChildByName('main');
         for (let index = 0, length = arrGoodParam.length; index < length; index++) {
+            let param = arrGoodParam[index];
+            let good = this.uiBottomMain.getChildByName(param.name);
+            let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
+            this.effectExpShow(point);
             if (index == 1) {
                 continue;
             }
-            let param = arrGoodParam[index];
-            let good = this.uiBottomMain.getChildByName(param.name);
             good.active = false;
             let goodElse = cc.instantiate(good);
             goodElse.parent = main;
@@ -2479,7 +2531,7 @@ export default class GameBox extends cc.Component {
     /** 播放动画（游戏结束） */
     playAniGameOver(type: TypeFinish) {
         this.isLock = true;
-        this.dataObj.isFinish = true;
+        this.objData.isFinish = true;
         switch (type) {
             case TypeFinish.win:
                 this.gameStageWin();
@@ -2488,7 +2540,7 @@ export default class GameBox extends cc.Component {
             case TypeFinish.failTime:
                 let params: ParamsFail = {
                     type: type,
-                    numSuipian: this.dataObj.numSuipian,
+                    numSuipian: this.objData.numSuipian,
                     numStrength: 1,
                     numMagnet: DataManager.data.wins.count - DataManager.data.wins.start,
                 };
@@ -2509,8 +2561,8 @@ export default class GameBox extends cc.Component {
         NativeCall.logEventOne(ConfigDot.dot_levelPass);
         let dot = ConfigDot['dot_pass_level_' + stageLevel];
         if (dot) {
-            let passTime = Math.floor((new Date().getTime() - this.dataObj.passTime) / 1000); //通关时间
-            NativeCall.logEventFore(dot, String(stageLevel), String(passTime), String(this.dataObj.stepCount));
+            let passTime = Math.floor((new Date().getTime() - this.objData.passTime) / 1000); //通关时间
+            NativeCall.logEventFore(dot, String(stageLevel), String(passTime), String(this.objData.stepCount));
         }
         NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
 
@@ -2519,7 +2571,7 @@ export default class GameBox extends cc.Component {
             tCount: this.timeGame.count,
             disBoxGood: 1,
             disBoxLevel: 1,
-            disBoxSuipian: this.dataObj.numSuipian,
+            disBoxSuipian: this.objData.numSuipian,
             disBoxXingxing: this.getXingxingNum(),
         };
         DataManager.refreshDataAfterWin(params);
@@ -2544,20 +2596,15 @@ export default class GameBox extends cc.Component {
 
     /** 添加 箱子 */
     addBox(param: BoxParam): cc.Node {
-        let node = this.getBox();
+        let node = DataManager.poolGet(this.preBox, this.objPool.box);
         node.parent = this.nodeMain;
         node.getComponent(ItemBox).init(param);
         return node;
     };
 
-    /** 获取 箱子 */
-    getBox(): cc.Node {
-        return this.poolBox.size() > 0 ? this.poolBox.get() : cc.instantiate(this.preBox);
-    }
-
     /** 添加 物品 */
     addGood(box: cc.Node, param: GoodParam): cc.Node {
-        let node = this.getGood();
+        let node = DataManager.poolGet(this.preGood, this.objPool.good);
         node.parent = box.getComponent(ItemBox).nodeMain;
         node.getComponent(ItemGood).init(param);
         return node;
@@ -2574,11 +2621,6 @@ export default class GameBox extends cc.Component {
             }
         }
     };
-
-    /** 获取 物品 */
-    getGood(): cc.Node {
-        return this.poolGood.size() > 0 ? this.poolGood.get() : cc.instantiate(this.preGood);;
-    }
 
     /** 检测新手引导状态 */
     checkNewPlayerState() {
@@ -2655,8 +2697,15 @@ export default class GameBox extends cc.Component {
             default:
                 break;
         }
-        this.dataObj.isFinish = false;
+        this.objData.isFinish = false;
         this.setIsLock(false);
+    };
+
+    eventBackRefreshProp() {
+        this.setUIProp(TypeProp.ice);
+        this.setUIProp(TypeProp.tip);
+        this.setUIProp(TypeProp.back);
+        this.setUIProp(TypeProp.refresh);
     };
 
     /** 监听-注册 */
@@ -2665,6 +2714,7 @@ export default class GameBox extends cc.Component {
         kit.Event.on(CConst.event_game_restart, this.gameStart.bind(this, true), this);
         kit.Event.on(CConst.event_game_resume, this.gameResume, this);
         kit.Event.on(CConst.event_game_revive, this.gameRevive, this);
+        kit.Event.on(CConst.event_refresh_prop, this.eventBackRefreshProp, this);
     }
 
     /** 监听-取消 */

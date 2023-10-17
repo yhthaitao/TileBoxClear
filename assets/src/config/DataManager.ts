@@ -819,13 +819,18 @@ class DataManager {
         return this.data.advert.s2sCount;
     };
 
-    /** 缓冲池处理 */
-    public poolPut(node: cc.Node, pool: cc.NodePool) {
-        if (pool.size() <= 100) {
-            pool.put(node);
+    /** 缓冲池 放入 */
+    public poolPut(node: cc.Node, objPool: { pool: cc.NodePool, max: number }) {
+        if (objPool.pool.size() <= objPool.max) {
+            objPool.pool.put(node);
         } else {
             node.destroy();
         }
+    };
+
+    /** 缓冲池 取出 */
+    public poolGet(node: any, objPool: { pool: cc.NodePool, max: number }): cc.Node{
+        return objPool.pool.size() > 0 ? objPool.pool.get() : cc.instantiate(node);
     };
 
     /** titleY */
@@ -871,7 +876,7 @@ class DataManager {
         let index = 0;
         if (level <= 100) {
             index = level - 1;
-            return this.levelData.data0[index]
+            return this.levelData.data0[index];
         }
         else {
             index = (level - lens[0]) % lens[1] - 1;

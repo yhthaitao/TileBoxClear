@@ -3,6 +3,7 @@ import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
+import ConfigBuyItem from "../../../../src/config/ConfigBuyItem";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -24,10 +25,10 @@ export default class MainMenuTop extends cc.Component {
     }
 
     protected onEnable(): void {
-        this.init();
+        this.refreshUI();
     }
 
-    init() {
+    refreshUI() {
         this.refreshStrength();
         this.refreshCoin();
     };
@@ -242,22 +243,6 @@ export default class MainMenuTop extends cc.Component {
         }
     };
 
-    /** 加体力（花费金币） */
-    eventBackAddStrengthByCoin() {
-        this.refreshStrength();
-        this.refreshCoin();
-    }
-
-    /** 加体力（看视频） */
-    eventBackAddStrengthByWatch() {
-        this.refreshStrength();
-    }
-
-    /** 加金币（看视频） */
-    eventBackAddCoinByWatch() {
-        this.refreshCoin();
-    }
-
     /** 按钮事件 加体力 */
     eventBtnAddStrength() {
         kit.Audio.playEffect(CConst.sound_clickUI);
@@ -280,9 +265,9 @@ export default class MainMenuTop extends cc.Component {
     listernerRegist(): void {
         kit.Event.on(CConst.event_scale_strength, this.playAniStrength, this);
         kit.Event.on(CConst.event_scale_coin, this.playAniCoin, this);
-        kit.Event.on(CConst.event_addStrength_byCoin, this.eventBackAddStrengthByCoin, this);
-        kit.Event.on(CConst.event_addStrength_byWatch, this.eventBackAddStrengthByWatch, this);
-        kit.Event.on(CConst.event_addCoin_byWatch, this.eventBackAddCoinByWatch, this);
+        kit.Event.on(CConst.event_refresh_top, this.refreshUI, this);
+        kit.Event.on(CConst.event_refresh_strength, this.refreshStrength, this);
+        kit.Event.on(CConst.event_refresh_coin, this.refreshCoin, this);
     }
 
     /** 监听-取消 */

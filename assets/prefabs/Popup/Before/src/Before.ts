@@ -58,7 +58,6 @@ export default class Before extends PopupBase {
     resetLabel() {
         // 困难标签
         let levelParam = DataManager.getLevelData();
-        console.log('difficulty: ', levelParam.difficulty);
         if (levelParam.difficulty) {
             this.nodeBg.active = false;
             this.nodeHard.active = true;

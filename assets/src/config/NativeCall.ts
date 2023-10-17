@@ -1,4 +1,5 @@
 import { kit } from "../kit/kit";
+import { PopupCacheMode } from "../kit/manager/popupManager/PopupManager";
 import CConst from "./CConst";
 import Common from "./Common";
 import ConfigBuyItem, { BuyCfg, BuyKey } from "./ConfigBuyItem";
@@ -301,56 +302,10 @@ class NativeCall {
     /** 购买成功 */
     public buySucc(keyString: string) {
         Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', keyString);
+        this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
         let keyNumber = BuyKey[keyString];
         let produceCfg: BuyCfg = ConfigBuyItem[keyNumber];
-        // 去除广告
-        if (keyString == 'noads') {
-            DataManager.data.advert.isRemove = true;
-        }
-        else{
-            for (let index = 0, length = produceCfg.props.length; index < length; index++) {
-                let prop = produceCfg.props[index];
-                switch (prop.typeProp) {
-                    case TypeProp.coin:
-                        DataManager.data.numCoin += prop.count;
-                        break;
-                    case TypeProp.ice:
-                        DataManager.data.prop.ice.count += prop.count;
-                        break;
-                    case TypeProp.refresh:
-                        DataManager.data.prop.refresh.count += prop.count;
-                        break;
-                    case TypeProp.back:
-                        DataManager.data.prop.back.count += prop.count;
-                        break;
-                    case TypeProp.tStrengthInfinite:
-                        let time = Math.floor(new Date().getTime() / 1000);
-                        if (DataManager.data.strength.tInfinite < time) {
-                            DataManager.data.strength.tInfinite = time + prop.count * 3600;
-                        }
-                        else {
-                            DataManager.data.strength.tInfinite += prop.count * 3600;
-                        }
-                        break;
-                    case TypeProp.tip:
-                        DataManager.data.prop.tip.count += prop.count;
-                        break;
-                    case TypeProp.clock:
-                        DataManager.data.prop.clock.count += prop.count;
-                        break;
-                    case TypeProp.magnet:
-                        DataManager.data.prop.magnet.count += prop.count;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        DataManager.setData();
-
-        this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
-        // kit.Event.emit(CConst.event_buy_succe, produceCfg);
-        kit.Event.emit(CConst.event_notice, '购买 成功');
+        kit.Popup.show(CConst.popup_path_bank, produceCfg, { mode: PopupCacheMode.Frequent });
     }
 
     /** 购买失败 */

@@ -110,7 +110,7 @@ export default class GetLives extends PopupBase {
             DataManager.data.strength.count += 1;
             DataManager.data.numCoin -= 100;
             DataManager.setData();
-            kit.Event.emit(CConst.event_addStrength_byCoin);
+            kit.Event.emit(CConst.event_refresh_top);
             await kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_before, { type: this.params.type }, { mode: PopupCacheMode.Frequent });
         }
@@ -129,7 +129,7 @@ export default class GetLives extends PopupBase {
                 DataManager.data.strength.count += 1;
                 DataManager.data.boxData.timesLive.count -= 1;
                 DataManager.setData();
-                kit.Event.emit(CConst.event_addStrength_byWatch);
+                kit.Event.emit(CConst.event_refresh_strength);
                 kit.Popup.hide();
             };
             let funcB = () => {

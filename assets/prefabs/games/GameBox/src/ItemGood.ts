@@ -205,7 +205,7 @@ export default class ItemGood extends cc.Component {
             Common.log(' 异常 找不到脚本 scriptMain ');
             return;
         }
-        scriptMain.touchEffectShow(event);
+        scriptMain.effectTouchShow(event);
 
         if (this.state > 0) {
             return;

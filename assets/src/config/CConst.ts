@@ -67,12 +67,14 @@ const CConst = {
     event_menu_updateSuipianReward: 'event_menu_updateSuipianReward',
     /** 主页 刷新 */
     event_menu_updateTheme: 'event_menu_updateTheme',
-    /** 加体力（花费金币） */
-    event_addStrength_byCoin: 'event_addStrength_byCoin',
-    /** 加体力（看视频） */
-    event_addStrength_byWatch: 'event_addStrength_byWatch',
-    /** 加体力（看视频） */
-    event_addCoin_byWatch: 'event_addCoin_byWatch',
+    /** 刷新顶部ui */
+    event_refresh_top: 'event_refresh_top',
+    /** 刷新体力 */
+    event_refresh_strength: 'event_refresh_strength',
+    /** 刷新金币 */
+    event_refresh_coin: 'event_refresh_coin',
+    /** 刷新道具 */
+    event_refresh_prop: 'event_refresh_prop',
     /** game start */
     event_game_start: 'event_game_start',
     /** game pause */
@@ -124,6 +126,7 @@ const CConst = {
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
     popup_path_boxGood: './Popup/BoxGood/res/prefab/BoxGood',
     popup_path_openBoxLevel: './Popup/OpenBox/res/prefab/OpenBoxLevel',
+    popup_path_openBoxShop: './Popup/OpenBox/res/prefab/OpenBoxShop',
     popup_path_openBoxSuipian: './Popup/OpenBox/res/prefab/OpenBoxSuipian',
     popup_path_openBoxXingxing: './Popup/OpenBox/res/prefab/OpenBoxXingxing',
     popup_path_daily: './Popup/Daily/res/prefab/Daily',

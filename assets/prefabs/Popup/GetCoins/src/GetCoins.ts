@@ -52,7 +52,7 @@ export default class GetCoins extends PopupBase {
             DataManager.data.numCoin += 60;
             DataManager.data.boxData.timesCoin.count -= 1;
             DataManager.setData();
-            kit.Event.emit(CConst.event_addCoin_byWatch);
+            kit.Event.emit(CConst.event_refresh_coin);
             kit.Popup.hide();
         };
         let funcB = () => {
