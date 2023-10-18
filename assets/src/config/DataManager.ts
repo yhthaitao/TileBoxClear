@@ -10,6 +10,7 @@ import ConfigBoxXingxing from "./ConfigBoxXingxing";
 import ConfigGood from "./ConfigGood";
 import ConfigUnlock from "./ConfigUnlock";
 import { LevelParam, ParamsWin, StateBeforeProp, TypeProp, TypeReward } from "./ConfigCommon";
+import ConfigAchieve from "./ConfigAchieve";
 
 /** 数据管理类 */
 class DataManager {
@@ -61,7 +62,7 @@ class DataManager {
             count: 5,// 当前体力值
             total: 5,// 最大体力值
             tCount: 0, // 恢复体力计时
-            tTotal: 60,// 900秒恢复1体力
+            tTotal: 300,// 900秒恢复1体力
             buyCoin: 100,// 100金币购买1体力
             tInfinite: 0,// 无限时间
         },
@@ -97,16 +98,25 @@ class DataManager {
             cur: 1, new: 1,
         },
         // 12个成就
-        boxAchieve: [
-            false, false, false, false,
-            false, false, false, false,
-            false, false, false, false,
+        dataAchieve: [
+            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false }, 
+            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
+            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
+            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
         ],
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
             timesCoin: { count: 20, total: 20 },
             timesLive: { count: 20, total: 20 },
+            point: { 
+                theme: false, commodity: false,
+                achieves: [ 
+                    false, false, false, false,
+                    false, false, false, false,
+                    false, false, false, false,
+                ]
+            },
             newTip: {
                 cur: 0,
                 max: 3,
@@ -119,7 +129,6 @@ class DataManager {
                 3: [3001, 3008, 3009, 3010, 3011, 3012],
                 4: [4001, 4011, 4012, 4013, 4014, 4017],
             },
-            goodStore: [],// 所有物品的池子
         },
     };
 
@@ -267,24 +276,9 @@ class DataManager {
 
     /** 物品初始化 */
     public initGoodStore() {
-        // 所有物品
-        let arrGoods = [];
-        ConfigGood.goodsConf.forEach((obj) => { arrGoods.push(obj.id); });
-        // 解锁物品
-        let goodUnlock = this.data.boxData.goodUnlock;
-        let arrUnlock = [].concat(goodUnlock[1], goodUnlock[2], goodUnlock[3], goodUnlock[4]);
-        // 物品全部解锁
-        if (arrUnlock.length >= arrGoods.length) {
-            this.data.boxData.goodStore = [];
-            return;
-        }
-        // 存储物品
-        if (this.data.boxData.goodStore.length == 0) {
-            arrGoods.forEach((goodId) => {
-                if (arrUnlock.indexOf(goodId) < 0) {
-                    this.data.boxData.goodStore.push(goodId);
-                }
-            });
+        let arrGoodsUnlock = this.getArrGoodsUnlock();
+        for (let index = 0, length = arrGoodsUnlock.length; index < length; index++) {
+            this.unlockGoodInAchieve(arrGoodsUnlock[index]);
         }
     }
 
@@ -567,20 +561,80 @@ class DataManager {
     /** 数据更新（解锁物品后） */
     public refreshDataAfterUnlockGood(params: { total: number, goods: number[] }) {
         params.goods.forEach((goodId) => {
-            // 从未解锁物品池子内删除
-            let index = this.data.boxData.goodStore.indexOf(goodId);
-            if (index >= 0) {
-                this.data.boxData.goodStore.splice(index, 1);
-            }
-            else {
-                Common.log('error 解锁物品异常 goodId: ', goodId);
-            }
-            // 添加到已解锁物品池子
-            let first = Math.floor(goodId * 0.001);
-            if (this.data.boxData.goodUnlock[first]) {
-                this.data.boxData.goodUnlock[first].push(goodId);
+            this.unlockGood(goodId);
+            this.unlockGoodInAchieve(goodId);
+        });
+    }
+
+    /** 解锁物品 */
+    public unlockGood(goodId: number){
+        // 添加到已解锁物品池子
+        let first = Math.floor(goodId * 0.001);
+        if (this.data.boxData.goodUnlock[first]) {
+            this.data.boxData.goodUnlock[first].push(goodId);
+        }
+    };
+
+    /** 解锁成就内的物品 */
+    public unlockGoodInAchieve(goodId: number){
+        ConfigAchieve.forEach((obj, index)=>{
+            if (obj.goods.indexOf(goodId) >= 0) {
+                if (this.data.dataAchieve[index].goods.indexOf(goodId) < 0) {
+                    // 解锁物品
+                    this.data.dataAchieve[index].goods.push(goodId);
+                    // 成就完成 显示 红色point
+                    if (this.data.dataAchieve[index].goods.length >= obj.goods.length) {
+                        this.data.boxData.point.theme = true;
+                        this.data.boxData.point.commodity = true;
+                        this.data.boxData.point.achieves.forEach((value, key)=>{
+                            if (key == index) {
+                                value = true;
+                            }
+                        });
+                    }
+                }
             }
         });
+    };
+
+    /** 所有物品 */
+    public getArrAllGoods(){
+        let allGoods = [];
+        ConfigGood.goodsConf.forEach((obj) => { allGoods.push(obj.id); });
+        return allGoods;
+    }
+
+    /** 所有物品 */
+    public getObjAllGoods(){
+        let goodsCfg = {};
+        ConfigGood.goodsConf.forEach((obj) => { goodsCfg[obj.id] = obj; });
+        return goodsCfg;
+    };
+
+    /** 所有已解锁物品 */
+    public getArrGoodsUnlock(){
+        let arrGoodsUnlock = [];
+        let objUnlock = this.data.boxData.goodUnlock;
+        for (const key in objUnlock) {
+            if (Object.prototype.hasOwnProperty.call(objUnlock, key)) {
+                arrGoodsUnlock = arrGoodsUnlock.concat(objUnlock[key]);
+            }
+        }
+        return arrGoodsUnlock;
+    }
+
+    /** 所有未解锁物品 */
+    public getArrGoodLock(){
+        let arrGoodsLock = [];
+        let allGoods = this.getArrAllGoods();
+        let arrGoodsUnlock = this.getArrGoodsUnlock();
+        for (let index = 0, length = allGoods.length; index < length; index++) {
+            let goodId = allGoods[index];
+            if (arrGoodsUnlock.indexOf(goodId) < 0 && arrGoodsLock.indexOf(goodId) < 0) {
+                arrGoodsLock.push(goodId);
+            }
+        }
+        return arrGoodsLock;
     }
 
     /** 获取奖励参数（等级宝箱） */
@@ -640,18 +694,19 @@ class DataManager {
             return ConfigUnlock[index];
         }
         let config = { total: 10, goods: [] };
-        let boxData = this.data.boxData.goodStore;
-        if (boxData.length > 3) {
-            let random = Math.floor(Math.random() * boxData.length);
-            config.goods.concat(boxData.splice(random, 1));
-            random = Math.floor(Math.random() * boxData.length);
-            config.goods.concat(boxData.splice(random, 1));
-            random = Math.floor(Math.random() * boxData.length);
-            config.goods.concat(boxData.splice(random, 1));
+        // 随机获取3个未解锁物品
+        let arrGoodsLock = this.getArrGoodLock();
+        if (arrGoodsLock.length > 3) {
+            let random = Math.floor(Math.random() * arrGoodsLock.length);
+            config.goods.concat(arrGoodsLock.splice(random, 1));
+            random = Math.floor(Math.random() * arrGoodsLock.length);
+            config.goods.concat(arrGoodsLock.splice(random, 1));
+            random = Math.floor(Math.random() * arrGoodsLock.length);
+            config.goods.concat(arrGoodsLock.splice(random, 1));
         }
-        else if (boxData.length > 0) {
-            config.goods = Common.clone(boxData);
-            boxData = [];
+        // 剩余未解锁物品
+        else if (arrGoodsLock.length > 0) {
+            config.goods = Common.clone(arrGoodsLock);
         }
         return config;
     }

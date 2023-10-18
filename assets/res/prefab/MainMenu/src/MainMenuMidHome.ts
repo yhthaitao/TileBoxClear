@@ -106,7 +106,7 @@ export default class MainMenuMidHome extends cc.Component {
         await this.resetBoxSuipianProcess();
         await this.resetBoxXingxingProcess();
         await this.resetBoxLevelProcess();
-        this.checkAreas();
+        await this.resetBoxAreas();
     };
 
     resetBg() {
@@ -269,7 +269,6 @@ export default class MainMenuMidHome extends cc.Component {
         }
 
         this.obj.ani.boxSuipian = true;
-        this.setIsLock(true);
     };
 
     /** 刷新-碎片-时间 */
@@ -402,7 +401,6 @@ export default class MainMenuMidHome extends cc.Component {
         }
 
         this.obj.ani.boxXingxing = true;
-        this.setIsLock(true);
     };
 
     resetBoxLevel() {
@@ -485,7 +483,6 @@ export default class MainMenuMidHome extends cc.Component {
         }
 
         this.obj.ani.boxLevel = true;
-        this.setIsLock(true);
     };
 
     /** 刷新日历 */
@@ -498,11 +495,12 @@ export default class MainMenuMidHome extends cc.Component {
         this.refreshHomeLabelRight();
     };
 
-    checkAreas() {
+    async resetBoxAreas() {
         let boxAreas = DataManager.data.boxAreas;
         if (boxAreas.new > boxAreas.cur) {
-            kit.Popup.show(CConst.popup_path_openBoxAreas, {}, { mode: PopupCacheMode.Frequent });
+            await kit.Popup.show(CConst.popup_path_openBoxAreas, {}, { mode: PopupCacheMode.Frequent });
         }
+        this.setIsLock(true);
     }
 
     playAniScaleBtnstart() {

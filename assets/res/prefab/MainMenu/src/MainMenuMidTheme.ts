@@ -176,35 +176,8 @@ export default class MainMenuMidTheme extends cc.Component {
         let layout = this.theme_mid_commodity_content.getComponent(cc.Layout);
         let hElse = layout.paddingTop + layout.spacingY * (lenHeight - 1) + layout.paddingBottom;
         this.theme_mid_commodity_content.height = item.height * lenHeight + hElse;
-        // 所有物品
-        let objGoods = {};
-        ConfigGood.goodsConf.forEach((obj) => { objGoods[obj.id] = obj; });
-        // 组合物品
-        let arrGoods = [];
-        let goodUnlock = DataManager.data.boxData.goodUnlock;
-        for (const key in goodUnlock) {
-            if (Object.prototype.hasOwnProperty.call(goodUnlock, key)) {
-                const element = goodUnlock[key];
-                arrGoods = arrGoods.concat(element);
-            }
-        }
-        // 组合成就
-        let arrAchieve = [
-            [], [], [], [],
-            [], [], [], [],
-            [], [], [], []
-        ];
-        arrGoods.forEach((goodId: number) => {
-            ConfigAchieve.forEach((achieve, index) => {
-                // 成就内包含该物品
-                if (achieve.goods.indexOf(goodId) >= 0) {
-                    if (arrAchieve[index]) {
-                        arrAchieve[index].push(goodId);
-                    }
-                }
-            });
-        });
 
+        let objAllGoods = DataManager.getObjAllGoods();
         // 配置主题内容
         for (let index = 0; index < length; index++) {
             let name = 'cell' + index;
@@ -215,16 +188,18 @@ export default class MainMenuMidTheme extends cc.Component {
             }
             cell.active = true;
             cell.parent = this.theme_mid_commodity_content;
-            this.initCommodityCell(index, arrAchieve[index], objGoods, cell);
+            this.initCommodityCell(index, objAllGoods, cell);
         }
+        this.resetPointAchieve();
         this.refreshCommodityItem();
         this.refreshCommodityLabel();
     };
 
     /** 初始化 theme commodity cell */
-    initCommodityCell(index: number, arrGoods: number[], objGoods: any, cell: cc.Node) {
+    initCommodityCell(index: number, objAllGoods: any, cell: cc.Node) {
         let colorId = 0;
-        let objAchieve = ConfigAchieve[index];
+        let achieveCur = DataManager.data.dataAchieve[index];
+        let achieveCfg = ConfigAchieve[index];
         let nodeIcon = cell.getChildByName('nodeIcon');
         let lock = cell.getChildByName('lock');
         let process = cell.getChildByName('process');
@@ -234,29 +209,30 @@ export default class MainMenuMidTheme extends cc.Component {
         process.active = false;
         reward.active = false;
         right.active = false;
-        let lenArr = arrGoods.length;
-        let lenObj = objAchieve.goods.length;
+
+        let lenCur = achieveCur.goods.length;
+        let lenCfg = achieveCfg.goods.length;
         // 解锁物品为 全部
-        if (lenArr >= lenObj) {
+        if (lenCur >= lenCfg) {
             nodeIcon.active = true;
             cell.zIndex = 0;
             colorId = index % 8 + 1;
             // 奖品是否领取
-            let isGet = DataManager.data.boxAchieve[index];
-            if (isGet) {
+            if (achieveCur.isGet) {
                 right.active = true;
             }
             else {
                 reward.active = true;
+                reward.getChildByName('button').active = true;
                 process.active = true;
                 let bar = process.getChildByName('bar');
                 bar.getComponent(cc.Sprite).fillRange = 1;
                 let label = process.getChildByName('label');
-                label.getComponent(cc.Label).string = '' + lenArr + '/' + lenObj;
+                label.getComponent(cc.Label).string = '' + lenCur + '/' + lenCfg;
             }
         }
         // 解锁物品为 0
-        else if (lenArr <= 0) {
+        else if (lenCur <= 0) {
             nodeIcon.active = false;
             cell.zIndex = 1;
             colorId = 0;
@@ -268,11 +244,12 @@ export default class MainMenuMidTheme extends cc.Component {
             cell.zIndex = 0;
             colorId = index % 8 + 1;
             reward.active = true;
+            reward.getChildByName('button').active = false;
             process.active = true;
             let bar = process.getChildByName('bar');
-            bar.getComponent(cc.Sprite).fillRange = lenArr / lenObj;
+            bar.getComponent(cc.Sprite).fillRange = lenCur / lenCfg;
             let label = process.getChildByName('label');
-            label.getComponent(cc.Label).string = '' + lenArr + '/' + lenObj;
+            label.getComponent(cc.Label).string = '' + lenCur + '/' + lenCfg;
         }
         // back
         let pathBack = CConst.pathAchieve + 'color_' + colorId;
@@ -286,7 +263,7 @@ export default class MainMenuMidTheme extends cc.Component {
         });
         // icon
         if (nodeIcon.active) {
-            let pathIcon = CConst.pathGameGood + objGoods[objAchieve.icon].name;
+            let pathIcon = CConst.pathGameGood + objAllGoods[achieveCfg.icon].name;
             kit.Resources.loadRes(CConst.bundleCommon, pathIcon, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
                 if (err) {
                     Common.log(' 资源加载异常 initCommodityCell icon: ', pathIcon);
@@ -305,7 +282,7 @@ export default class MainMenuMidTheme extends cc.Component {
 
         // 保存数据(用于点击成就按钮)
         let keyTitle = 'achieve_' + (index + 1);
-        let params = { keyTitle: keyTitle, arrGoods: arrGoods, objAchieve: objAchieve };
+        let params = { keyTitle: keyTitle, achieveCur: achieveCur, achieveCfg: achieveCfg };
         this.objTheme.commodity[index] = params;
     };
 
@@ -332,7 +309,26 @@ export default class MainMenuMidTheme extends cc.Component {
             this.theme_mid_areas.active = false;
             this.theme_mid_commodity.active = true;
         }
+        this.resetPointCommodity();
         this.refreshThemeLabelTop();
+    };
+
+    resetPointCommodity(){
+        let btnCommodity = this.theme_top.getChildByName('btnCommodity');
+        let point = btnCommodity.getChildByName('point');
+        if (point) {
+            point.active = DataManager.data.boxData.point.commodity;
+        }
+    };
+
+    resetPointAchieve(){
+        this.theme_mid_commodity_content.children.forEach((cell) => {
+            let index = Number(cell.name.substring(4));
+            let point = cell.getChildByName('point');
+            if (point) {
+                point.active = DataManager.data.boxData.point.achieves[index];
+            }
+        });
     };
 
     /** 按钮事件 进入 主题 */
@@ -351,6 +347,10 @@ export default class MainMenuMidTheme extends cc.Component {
         }
         this.stateTheme = StateTheme.commodity;
         this.resetThemeButton();
+
+        DataManager.data.boxData.point.commodity = false;
+        DataManager.setData();
+        this.resetPointCommodity();
     };
 
     /** 重置主题按钮 */
@@ -389,6 +389,7 @@ export default class MainMenuMidTheme extends cc.Component {
         boxAreas.cur = chose;
         boxAreas.new = boxAreas.cur;
         DataManager.setData();
+
         kit.Event.emit(CConst.event_refresh_areas);
     };
 
@@ -437,8 +438,32 @@ export default class MainMenuMidTheme extends cc.Component {
     /** 按钮事件 选择 成就 */
     eventCommodityBtn(event: cc.Event.EventTouch) {
         let index = Number(event.target.name.substring(4));
+
+        DataManager.data.boxData.point.achieves[index] = false;
+        DataManager.setData();
+        this.resetPointAchieve();
+
         let params = Common.clone(this.objTheme.commodity[index]);
         kit.Popup.show(CConst.popup_path_achieve, params, { mode: PopupCacheMode.Frequent });
+    };
+
+    /** 按钮事件 成就 奖励*/
+    eventCommodityReward(event: cc.Event.EventTouch) {
+        let reward = event.target.parent;
+        reward.active = false;
+        let item = reward.parent;
+        let process = item.getChildByName('process');
+        process.active = false;
+        let right = item.getChildByName('right');
+        right.active = true;
+
+        let index = Number(item.name.substring(4));
+        DataManager.data.numCoin += 50;
+        DataManager.data.dataAchieve[index].isGet = true;
+        DataManager.setData();
+
+        let point = Common.getLocalPos(item, reward.position, this.node);
+        kit.Event.emit(CConst.event_scale_coin, point.x, point.y);
     };
 
     /** 事件 滑动 成就 */
@@ -484,10 +509,17 @@ export default class MainMenuMidTheme extends cc.Component {
         });
     };
 
+    /** 更新point提示 */
+    eventBackRefreshPoint() {
+        this.resetPointCommodity();
+        this.resetPointAchieve();
+    };
+
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
         kit.Event.on(CConst.event_refresh_areas, this.eventBackRefreshAreas, this);
+        kit.Event.on(CConst.event_refresh_point, this.eventBackRefreshPoint, this);
     }
 
     /** 监听-取消 */

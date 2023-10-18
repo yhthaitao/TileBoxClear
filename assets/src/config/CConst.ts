@@ -75,6 +75,8 @@ const CConst = {
     event_refresh_coin: 'event_refresh_coin',
     /** 刷新道具 */
     event_refresh_prop: 'event_refresh_prop',
+    /** 刷新红色point */
+    event_refresh_point: 'event_refresh_point',
     /** game start */
     event_game_start: 'event_game_start',
     /** game pause */

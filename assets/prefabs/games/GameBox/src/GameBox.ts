@@ -461,7 +461,7 @@ export default class GameBox extends cc.Component {
             Common.log('道具 磁铁 使用');
             isStoreData = true;
             for (let index = 0; index < 3; index++) {
-                let boxId = Math.floor(Math.random() * (arrIdBox.length - 1));
+                let boxId =  Math.floor(Math.random() * (arrIdBox.length - 1));
                 let boxKey = arrIdBox.splice(boxId, 1)[0];
                 addGoodParam(boxKey, 9002);
             }
@@ -1855,8 +1855,6 @@ export default class GameBox extends cc.Component {
                 break;
             }
         }
-        // 开始移动 箱子
-        this.setMoveBox(true);
 
         // ui移动
         cc.tween(good).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(() => {
@@ -1867,6 +1865,10 @@ export default class GameBox extends cc.Component {
                 this.setUITime();
             }).to(0.15, { scale: 1.0 }).start();
         }).start();
+
+        this.setMoveGood(true);
+        this.setGoldPosui();
+        this.setMoveBox(true);
     }
 
     /** 使用道具-磁铁 */

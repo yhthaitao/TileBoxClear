@@ -48,6 +48,10 @@ export default class GetCoins extends PopupBase {
     /** 按钮事件 免费获取 */
     eventBtnFree() {
         kit.Audio.playEffect(CConst.sound_clickUI);
+        if (DataManager.data.boxData.timesCoin.count <= 0) {
+            kit.Event.emit(CConst.event_notice, '今日次数已用完');
+            return;
+        }
         let funcA = () => {
             DataManager.data.numCoin += 60;
             DataManager.data.boxData.timesCoin.count -= 1;
@@ -58,7 +62,7 @@ export default class GetCoins extends PopupBase {
         let funcB = () => {
             kit.Event.emit(CConst.event_notice, '视频未加载');
         };
-        DataManager.playVideo(funcA, funcA);
+        DataManager.playVideo(funcA, funcB);
     };
 
     /** 按钮事件 退出 */

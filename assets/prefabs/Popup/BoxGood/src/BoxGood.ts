@@ -149,5 +149,7 @@ export default class BoxGood<Options = any> extends PopupBase {
         boxGood.count = 0;
         boxGood.add = 0;
         DataManager.setData();
+        
+        kit.Event.emit(CConst.event_refresh_point);
     }
 }

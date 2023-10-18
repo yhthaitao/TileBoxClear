@@ -154,6 +154,7 @@ export default class MainMenu extends cc.Component {
                 menu.x = menuX;
             }
         }
+        this.resetPointTheme();
     };
 
     /** 重置菜单项 */
@@ -272,6 +273,11 @@ export default class MainMenu extends cc.Component {
         funcMove();
     };
 
+    resetPointTheme(){
+        let point = this.bottomTheme.getChildByName('point');
+        point.active = DataManager.data.boxData.point.theme;
+    };
+
     /** 设置锁定 */
     setIsLock(isLock) {
         this.isLock = isLock;
@@ -286,21 +292,32 @@ export default class MainMenu extends cc.Component {
         if (this.isLock) {
             return;
         }
+        
+        DataManager.data.boxData.point.theme = false;
+        DataManager.setData();
+        this.resetPointTheme();
+
         this.setIsLock(true);
         this.playAniResetMenu(type);
     };
 
     /** 事件反馈 进入菜单商店 */
-    eventBack_menuShop() {
-        this.setIsLock(true);
+    eventBackMenuShop() {
         if (this.stateMenu != StateMenu.shop) {
+            this.setIsLock(true);
             this.playAniResetMenu(StateMenu.shop);
         }
     }
 
+    /** 更新point提示 */
+    eventBackRefreshPoint() {
+        this.resetPointTheme();
+    };
+
     /** 监听-注册 */
     listernerRegist(): void {
-        kit.Event.on(CConst.event_enter_menuShop, this.eventBack_menuShop, this);
+        kit.Event.on(CConst.event_enter_menuShop, this.eventBackMenuShop, this);
+        kit.Event.on(CConst.event_refresh_point, this.eventBackRefreshPoint, this);
     }
 
     /** 监听-取消 */

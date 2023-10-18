@@ -48,13 +48,20 @@ export default class MainMenuTop extends cc.Component {
             if (!this.iconStrengthMax.active) {
                 this.iconStrengthMax.active = true;
             }
+            if (this.labelStrengthNum.active) {
+                this.labelStrengthNum.active = false;
+            }
             if (this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = false;
             }
             if (!this.labelStrengthTime.active) {
                 this.labelStrengthTime.active = false;
             }
-            this.refreshTimeInfinite(tInfinite);// 刷新无限体力时间
+            this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
+            if (strength.tCount != 0) {
+                strength.tCount = 0;
+                DataManager.setData();
+            }
             return;
         }
         if (this.iconStrengthMax.active) {
@@ -63,6 +70,9 @@ export default class MainMenuTop extends cc.Component {
         /********************************************* 体力-非无限-满 **********************************************/
         let entough = strength.count >= strength.total;
         if (entough) {
+            if (!this.labelStrengthNum.active) {
+                this.labelStrengthNum.active = true;
+            }
             if (!this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = true;
             }
@@ -91,17 +101,21 @@ export default class MainMenuTop extends cc.Component {
         let disStrength = Math.floor(disTime / strength.tTotal);
         if (disStrength > 0) {
             strength.count += disStrength;
-            if (strength.count > strength.tTotal) {
-                strength.count = strength.tTotal;
+            if (strength.count > strength.total) {
+                strength.count = strength.total;
             }
+            strength.tCount = 0;
             isUpdate = true;
         }
         if (isUpdate) {
             DataManager.setData();
+            this.refreshStrengthNum();
         }
-        let countTime = Math.floor(disTime % strength.tTotal);
-        let elseTime = strength.tTotal - countTime;
-        this.refreshTimeStrength(elseTime);
+        let elseTime = strength.tTotal - Math.floor(disTime % strength.tTotal);
+        this.refreshStrengthTime(elseTime);
+        if (isUpdate) {
+            Common.log('update 体力不满 count: ', strength.count, '; elseTime: ', elseTime);
+        }
     }
 
     /** 刷新体力 */
@@ -111,8 +125,12 @@ export default class MainMenuTop extends cc.Component {
         /********************************************* 体力-无限 **********************************************/
         let tInfinite = strength.tInfinite - timeCur;
         if (tInfinite > 0) {
+            Common.log('refreshStrength 无限体力 tInfinite: ', tInfinite);
             if (!this.iconStrengthMax.active) {
                 this.iconStrengthMax.active = true;
+            }
+            if (this.labelStrengthNum.active) {
+                this.labelStrengthNum.active = false;
             }
             if (this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = false;
@@ -120,7 +138,11 @@ export default class MainMenuTop extends cc.Component {
             if (!this.labelStrengthTime.active) {
                 this.labelStrengthTime.active = false;
             }
-            this.refreshTimeInfinite(tInfinite);// 刷新无限体力时间
+            this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
+            if (strength.tCount != 0) {
+                strength.tCount = 0;
+                DataManager.setData();
+            }
             return;
         }
         if (this.iconStrengthMax.active) {
@@ -129,6 +151,10 @@ export default class MainMenuTop extends cc.Component {
         /********************************************* 体力-非无限-满 **********************************************/
         let entough = strength.count >= strength.total;
         if (entough) {
+            Common.log('refreshStrength 体力满值 count: ', strength.count);
+            if (!this.labelStrengthNum.active) {
+                this.labelStrengthNum.active = true;
+            }
             if (!this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = true;
             }
@@ -157,21 +183,29 @@ export default class MainMenuTop extends cc.Component {
         let disStrength = Math.floor(disTime / strength.tTotal);
         if (disStrength > 0) {
             strength.count += disStrength;
-            if (strength.count > strength.tTotal) {
-                strength.count = strength.tTotal;
+            if (strength.count > strength.total) {
+                strength.count = strength.total;
             }
+            strength.tCount = 0;
             isUpdate = true;
         }
         if (isUpdate) {
             DataManager.setData();
         }
-        let countTime = Math.floor(disTime % strength.tTotal);
-        let elseTime = strength.tTotal - countTime;
-        this.refreshTimeStrength(elseTime);
+        this.refreshStrengthNum();
+        let elseTime = strength.tTotal - Math.floor(disTime % strength.tTotal);
+        this.refreshStrengthTime(elseTime);
+        Common.log('refreshStrength 体力不满 count: ', strength.count, '; elseTime: ', elseTime);
     };
 
-    /** 时间-设置 */
-    refreshTimeStrength(count: number) {
+    /** 刷新体力 */
+    refreshStrengthNum() {
+        let count = DataManager.data.strength.count;
+        this.labelStrengthNum.getComponent(cc.Label).string = '' + count;
+    };
+
+    /** 刷新体力时间 */
+    refreshStrengthTime(count: number) {
         let m = Math.floor(count / 60);
         let s = Math.floor(count % 60);
         let mm = m < 10 ? '0' + m : '' + m;
@@ -179,8 +213,8 @@ export default class MainMenuTop extends cc.Component {
         this.labelStrengthTime.getComponent(cc.Label).string = mm + ':' + ss;
     };
 
-    /** 无限时间-设置 */
-    refreshTimeInfinite(count: number) {
+    /** 刷新体力无限 */
+    refreshStrengthInfinite(count: number) {
         let h = Math.floor(count / 3600);
         let countElse = count % 3600;
         let m = Math.floor(countElse / 60);
@@ -258,6 +292,7 @@ export default class MainMenuTop extends cc.Component {
     /** 按钮事件 设置 */
     eventBtnSet() {
         kit.Audio.playEffect(CConst.sound_clickUI);
+        kit.Popup.show(CConst.popup_path_settingHome, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 监听-注册 */

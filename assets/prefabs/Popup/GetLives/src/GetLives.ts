@@ -123,23 +123,25 @@ export default class GetLives extends PopupBase {
     /** 按钮事件 免费获取体力 */
     eventBtnFree() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        let strength = DataManager.data.strength;
-        if (strength.count >= strength.total) {
-            let funcA = () => {
-                DataManager.data.strength.count += 1;
-                DataManager.data.boxData.timesLive.count -= 1;
-                DataManager.setData();
-                kit.Event.emit(CConst.event_refresh_strength);
-                kit.Popup.hide();
-            };
-            let funcB = () => {
-                kit.Event.emit(CConst.event_notice, '视频未加载');
-            };
-            DataManager.playVideo(funcA, funcB);
+        if (DataManager.data.boxData.timesLive.count <= 0) {
+            kit.Event.emit(CConst.event_notice, '今日次数已用完');
+            return;
         }
-        else {
+        if (DataManager.data.strength.count >= DataManager.data.strength.total) {
             kit.Event.emit(CConst.event_notice, '体力值已满');
+            return;
         }
+        let funcA = () => {
+            DataManager.data.strength.count += 1;
+            DataManager.data.boxData.timesLive.count -= 1;
+            DataManager.setData();
+            kit.Event.emit(CConst.event_refresh_strength);
+            kit.Popup.hide();
+        };
+        let funcB = () => {
+            kit.Event.emit(CConst.event_notice, '视频未加载');
+        };
+        DataManager.playVideo(funcA, funcB);
     };
 
     /** 按钮事件 退出 */

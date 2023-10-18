@@ -17,12 +17,15 @@ export default class Achieve<Options = any> extends PopupBase {
 
     params: {
         keyTitle: string,
-        arrGoods: number[],
-        objAchieve: {
+        achieveCur: {
+            goods: number[],
+            isGet: boolean,
+        },
+        achieveCfg: {
             goods: number[],
             icon: number,
             length: number,
-            coin: number
+            coin: number,
         }
     } = null;
 
@@ -38,18 +41,18 @@ export default class Achieve<Options = any> extends PopupBase {
     /** 初始化 layout */
     initLayout() {
         // 进度
-        let lenArr = this.params.arrGoods.length;
-        let lenObj = this.params.objAchieve.goods.length;
+        let lenCur = this.params.achieveCur.goods.length;
+        let lenCfg = this.params.achieveCfg.goods.length;
         let bar = this.itemProcess.getChildByName('bar');
-        bar.getComponent(cc.Sprite).fillRange = lenArr / lenObj;
+        bar.getComponent(cc.Sprite).fillRange = lenCur / lenCfg;
         let label = this.itemProcess.getChildByName('label');
-        label.getComponent(cc.Label).string = '' + lenArr + '/' + lenObj;
+        label.getComponent(cc.Label).string = '' + lenCur + '/' + lenCfg;
         // 所有物品
         let allGoods = {};
         ConfigGood.goodsConf.forEach((obj) => { allGoods[obj.id] = obj; });
         // 配置主题内容
         this.itemLayout.removeAllChildren();
-        let goods = this.params.objAchieve.goods;
+        let goods = this.params.achieveCfg.goods;
         for (let index = 0, length = goods.length; index < length; index++) {
             let cell = cc.instantiate(this.itemCell);
             cell.name = 'cell' + index;
@@ -66,7 +69,7 @@ export default class Achieve<Options = any> extends PopupBase {
         icon.active = false;
         lock.active = false;
 
-        let isLock = this.params.arrGoods.indexOf(goodId) < 0;
+        let isLock = this.params.achieveCur.goods.indexOf(goodId) < 0;
         if (isLock) {
             lock.active = true;
         }
