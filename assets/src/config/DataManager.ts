@@ -957,7 +957,7 @@ class DataManager {
             return this.levelData.data0[index];
         }
         else {
-            index = (level - lens[0]) % lens[1] - 1;
+            index = (level - lens[0]) % lens[1];
             return this.levelData.data1[index];
         }
     };

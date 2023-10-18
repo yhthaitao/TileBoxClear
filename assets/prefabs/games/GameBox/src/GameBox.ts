@@ -257,8 +257,7 @@ export default class GameBox extends cc.Component {
     initBox(isRestart = false) {
         let levelParam = DataManager.getLevelData();
         // 重构物品配置信息
-        this.goodsCfg = {};
-        ConfigGood.goodsConf.forEach((obj) => { this.goodsCfg[obj.id] = obj; });
+        this.goodsCfg = DataManager.getObjAllGoods();
         // 用于磁铁和时钟功能
         let topY = 0;
         let topH = 0;
@@ -364,7 +363,7 @@ export default class GameBox extends cc.Component {
         for (let key in this.objGame) {
             if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
                 let boxParam: BoxParam = this.objGame[key];
-                boxParam.x += xDis;
+                boxParam.x -= xDis;
             }
         }
 

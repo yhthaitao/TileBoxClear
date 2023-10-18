@@ -103,8 +103,7 @@ export default class BoxGood<Options = any> extends PopupBase {
         this.itemLayout.height = obj.height;
         this.itemLayout.scale = obj.scale;
         // 物品配置
-        let objGood = {};
-        ConfigGood.goodsConf.forEach((obj) => { objGood[obj.id] = obj; });
+        let objAllGoods = DataManager.getObjAllGoods();
         // 配置主题内容
         this.itemLayout.removeAllChildren();
         for (let index = 0, length = boxGoods.length; index < length; index++) {
@@ -112,7 +111,7 @@ export default class BoxGood<Options = any> extends PopupBase {
             cell.name = 'cell' + index;
             cell.active = true;
             cell.parent = this.itemLayout;
-            let goodParam = objGood[boxGoods[index]];
+            let goodParam = objAllGoods[boxGoods[index]];
             this.initCell(cell, goodParam.name);
         }
     };

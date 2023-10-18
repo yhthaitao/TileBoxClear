@@ -48,8 +48,7 @@ export default class Achieve<Options = any> extends PopupBase {
         let label = this.itemProcess.getChildByName('label');
         label.getComponent(cc.Label).string = '' + lenCur + '/' + lenCfg;
         // 所有物品
-        let allGoods = {};
-        ConfigGood.goodsConf.forEach((obj) => { allGoods[obj.id] = obj; });
+        let objAllGoods = DataManager.getObjAllGoods();
         // 配置主题内容
         this.itemLayout.removeAllChildren();
         let goods = this.params.achieveCfg.goods;
@@ -58,7 +57,7 @@ export default class Achieve<Options = any> extends PopupBase {
             cell.name = 'cell' + index;
             cell.active = true;
             cell.parent = this.itemLayout;
-            this.initCell(goods[index], allGoods, cell);
+            this.initCell(goods[index], objAllGoods, cell);
         }
     };
 
