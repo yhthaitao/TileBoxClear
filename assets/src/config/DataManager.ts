@@ -93,6 +93,9 @@ class DataManager {
         boxGood: {
             level: 1, count: 0, add: 0, max: 12
         },
+        boxAreas: {
+            cur: 1, new: 1,
+        },
         // 12个成就
         boxAchieve: [
             false, false, false, false,
@@ -102,7 +105,6 @@ class DataManager {
         // 关卡数据 基础
         boxData: {
             level: 1,// 当前关卡====添加粒子效果 后面的
-            areasId: 1,// 当前主题
             timesCoin: { count: 20, total: 20 },
             timesLive: { count: 20, total: 20 },
             newTip: {
@@ -445,14 +447,17 @@ class DataManager {
         this.data.boxData.level++;
         // 主题变化
         if (this.data.boxData.level == 21) {
-            this.data.boxData.areasId = 2;
+            this.data.boxAreas.new = 2;
         }
         else if (this.data.boxData.level == 41) {
-            this.data.boxData.areasId = 3;
+            this.data.boxAreas.new = 3;
         }
         else if (this.data.boxData.level > 41) {
             if ((this.data.boxData.level - 41) % 40 == 0) {
-                this.data.boxData.areasId = 3 + Math.floor((this.data.boxData.level - 41) / 40);
+                this.data.boxAreas.new = 3 + Math.floor((this.data.boxData.level - 41) / 40);
+            }
+            if (this.data.boxAreas.new > 15) {
+                this.data.boxAreas.new = 15;
             }
         }
         // 过关数据变更 物品宝箱
@@ -651,6 +656,24 @@ class DataManager {
         return config;
     }
 
+    /** 获取主题关卡范围 */
+    getLevelAreas(index: number): { start: number, finish: number } {
+        let start = 1;
+        let finish = 1;
+        let length = 1;
+        if (index < 2) {
+            length = 20;
+            start = index * length + 1;
+            finish = start + length - 1;
+        }
+        else {
+            length = 40;
+            start = (index - 1) * length + 1;
+            finish = start + length - 1;
+        }
+        return { start: start, finish: finish };
+    }
+
     /**
      * 存储数据
      * @param isSaveCloud 是否存储到云端
@@ -829,7 +852,7 @@ class DataManager {
     };
 
     /** 缓冲池 取出 */
-    public poolGet(node: any, objPool: { pool: cc.NodePool, max: number }): cc.Node{
+    public poolGet(node: any, objPool: { pool: cc.NodePool, max: number }): cc.Node {
         return objPool.pool.size() > 0 ? objPool.pool.get() : cc.instantiate(node);
     };
 

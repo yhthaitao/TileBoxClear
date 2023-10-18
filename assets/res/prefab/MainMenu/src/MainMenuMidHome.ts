@@ -94,6 +94,7 @@ export default class MainMenuMidHome extends cc.Component {
     /** 初始化主页面 */
     async initHome() {
         this.resetBg();
+        this.resetHard();
         this.resetLevelStage();
         this.resetBoxSuipian();
         this.resetBoxXingxing();
@@ -105,10 +106,11 @@ export default class MainMenuMidHome extends cc.Component {
         await this.resetBoxSuipianProcess();
         await this.resetBoxXingxingProcess();
         await this.resetBoxLevelProcess();
+        this.checkAreas();
     };
 
     resetBg() {
-        let pathBg = CConst.pathThemeBg + DataManager.data.boxData.areasId;
+        let pathBg = CConst.pathThemeBg + DataManager.data.boxAreas.cur;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
                 Common.log(' 资源加载异常 bg: ', pathBg);
@@ -119,6 +121,9 @@ export default class MainMenuMidHome extends cc.Component {
             this.home_bg.opacity = 0;
             cc.tween(this.home_bg).to(0.5, { opacity: 255 }).start();
         });
+    };
+
+    resetHard() {
         // 标签
         let easy = this.home_bottom_button.getChildByName('easy');
         let hard = this.home_bottom_button.getChildByName('hard');
@@ -128,7 +133,7 @@ export default class MainMenuMidHome extends cc.Component {
             hard.active = true;
             this.home_bottom_btnSign.active = true;
         }
-        else{
+        else {
             easy.active = true;
             hard.active = false;
             this.home_bottom_btnSign.active = false;
@@ -493,6 +498,13 @@ export default class MainMenuMidHome extends cc.Component {
         this.refreshHomeLabelRight();
     };
 
+    checkAreas() {
+        let boxAreas = DataManager.data.boxAreas;
+        if (boxAreas.new > boxAreas.cur) {
+            kit.Popup.show(CConst.popup_path_openBoxAreas, {}, { mode: PopupCacheMode.Frequent });
+        }
+    }
+
     playAniScaleBtnstart() {
         this.home_bottom_button.getComponent(cc.Animation).play();
     };
@@ -593,12 +605,12 @@ export default class MainMenuMidHome extends cc.Component {
 
     /** 监听-注册 */
     listernerRegist(): void {
+        kit.Event.on(CConst.event_refresh_areas, this.resetBg, this);
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
         kit.Event.on(CConst.event_scale_prop, this.playAniScaleBtnstart, this);
         kit.Event.on(CConst.event_scale_suipian, this.playAniScaleSuipian, this);
         kit.Event.on(CConst.event_scale_xingxingBox, this.playAniScaleXingxing, this);
         kit.Event.on(CConst.event_menu_updateSuipianReward, this.playAniReviveSuipianReward, this);
-        kit.Event.on(CConst.event_menu_updateTheme, this.resetBg, this);
     }
 
     /** 监听-取消 */

@@ -63,6 +63,12 @@ export default class GameWin<Options = any> extends PopupBase {
             || _data.boxXingxing.count + _data.boxXingxing.add >= DataManager.getRewardBoxXinging().total) {
             this.isNext = false;
         }
+        if (this.isNext) {
+            if (_data.boxAreas.new > _data.boxAreas.cur) {
+                this.isNext = false;
+            }
+        }
+
         DataManager.setString(this.isNext ? LangChars.win_next : LangChars.CONTINUE, (chars: string) => {
             this.itemLabelNext.getComponent(cc.Label).string = chars;
         });

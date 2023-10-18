@@ -138,6 +138,7 @@ export const LangChars = {
     logon_reward_day_5: "logon_reward_day_5",
     logon_reward_day_6: "logon_reward_day_6",
     logon_reward_day_7: "logon_reward_day_7",
+    AreasUnlocked: "AreasUnlocked",
     areas_1:"areas_1",
     areas_2:"areas_2",
     areas_3:"areas_3",

@@ -65,8 +65,8 @@ const CConst = {
     event_scale_xingxingBox: 'event_scale_xingxingBox',
     /** 主页 刷新 */
     event_menu_updateSuipianReward: 'event_menu_updateSuipianReward',
-    /** 主页 刷新 */
-    event_menu_updateTheme: 'event_menu_updateTheme',
+    /** 刷新bg */
+    event_refresh_areas: 'event_refresh_areas',
     /** 刷新顶部ui */
     event_refresh_top: 'event_refresh_top',
     /** 刷新体力 */
@@ -125,6 +125,7 @@ const CConst = {
     popup_path_boxXingxing: './Popup/BoxXingxing/res/prefab/BoxXingxing',
     popup_path_boxLevel: './Popup/BoxLevel/res/prefab/BoxLevel',
     popup_path_boxGood: './Popup/BoxGood/res/prefab/BoxGood',
+    popup_path_openBoxAreas: './Popup/OpenBox/res/prefab/OpenBoxAreas',
     popup_path_openBoxLevel: './Popup/OpenBox/res/prefab/OpenBoxLevel',
     popup_path_openBoxShop: './Popup/OpenBox/res/prefab/OpenBoxShop',
     popup_path_openBoxSuipian: './Popup/OpenBox/res/prefab/OpenBoxSuipian',

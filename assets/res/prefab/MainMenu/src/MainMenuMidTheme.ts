@@ -105,11 +105,13 @@ export default class MainMenuMidTheme extends cc.Component {
     initAreasCell(index: number, cell: cc.Node) {
         let objAreas = this.objTheme.areas;
         let level = DataManager.data.boxData.level;
-        let areasId = DataManager.data.boxData.areasId;
         let choseId = index + 1;
         let back = cell.getChildByName('back');
+        let back2 = back.getChildByName('back2');
         let pathBack = '';
+        let pathBack2 = '';
         back.active = false;
+        back2.active = false;
         let icon = cell.getChildByName('icon');
         let pathIcon = '';
         icon.active = false;
@@ -117,19 +119,21 @@ export default class MainMenuMidTheme extends cc.Component {
         let labelLevel = cell.getChildByName('labelLevel');
         let right = cell.getChildByName('right');
         let lock = cell.getChildByName('lock');
-        let levelAreas = this.getLevelAreas(index);
+        let levelAreas = DataManager.getLevelAreas(index);
         if (level > levelAreas.start - 1) {
             pathBack = CConst.pathThemeUnLock + 'back';
+            pathBack2 = CConst.pathThemeUnLock + 'back2';
             pathIcon = CConst.pathThemeUnLock + (index + 1);
             labelTitle.color = objAreas.title.color.light;
             labelTitle.getComponent(cc.LabelOutline).width = 2;
             labelLevel.color = objAreas.level.color.light;
-            right.active = choseId == areasId;
+            right.active = choseId == DataManager.data.boxAreas.cur;
             lock.active = false;
             cell.getComponent(cc.Button).interactable = true;
         }
         else {
             pathBack = CConst.pathThemeLock + 'back';
+            pathBack2 = CConst.pathThemeLock + 'back2';
             pathIcon = CConst.pathThemeLock + (index + 1);
             labelTitle.color = objAreas.title.color.dark;
             labelTitle.getComponent(cc.LabelOutline).width = 0;
@@ -146,9 +150,17 @@ export default class MainMenuMidTheme extends cc.Component {
             back.active = true;
             back.getComponent(cc.Sprite).spriteFrame = assets;
         });
+        kit.Resources.loadRes(CConst.bundleCommon, pathBack2, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
+            if (err) {
+                Common.log(' 资源加载异常 back2: ', pathBack2);
+                return;
+            }
+            back2.active = true;
+            back2.getComponent(cc.Sprite).spriteFrame = assets;
+        });
         kit.Resources.loadRes(CConst.bundleCommon, pathIcon, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
-                Common.log(' 资源加载异常 icon: ', pathBack);
+                Common.log(' 资源加载异常 icon: ', pathIcon);
                 return;
             }
             icon.active = true;
@@ -367,44 +379,17 @@ export default class MainMenuMidTheme extends cc.Component {
         }
     };
 
-    /** 获取主题关卡范围 */
-    getLevelAreas(index: number): { start: number, finish: number } {
-        let start = 1;
-        let finish = 1;
-        let length = 1;
-        if (index < 2) {
-            length = 20;
-            start = index * length + 1;
-            finish = start + length - 1;
-        }
-        else {
-            length = 40;
-            start = (index - 1) * length + 1;
-            finish = start + length - 1;
-        }
-        return { start: start, finish: finish };
-    }
-
     /** 按钮事件 选择 主题 */
     eventAreasBtn(event: cc.Event.EventTouch) {
-        let areasId = DataManager.data.boxData.areasId;
-        let chodsId = Number(event.target.name.substring(4)) + 1;
-        if (chodsId == areasId) {
+        let boxAreas = DataManager.data.boxAreas;
+        let chose = Number(event.target.name.substring(4)) + 1;
+        if (chose == boxAreas.cur) {
             return;
         }
-        DataManager.data.boxData.areasId = chodsId;
+        boxAreas.cur = chose;
+        boxAreas.new = boxAreas.cur;
         DataManager.setData();
-        kit.Event.emit(CConst.event_menu_updateTheme);
-
-        // 更新主题
-        this.theme_mid_areas_content.children.forEach((cell) => {
-            let id = Number(cell.name.substring(4)) + 1;
-            let right = cell.getChildByName('right');
-            right.active = id == DataManager.data.boxData.areasId;
-            if (right.active) {
-
-            }
-        });
+        kit.Event.emit(CConst.event_refresh_areas);
     };
 
     /** 事件 滑动 主题 */
@@ -490,9 +475,19 @@ export default class MainMenuMidTheme extends cc.Component {
         this.refreshLanguage();
     };
 
+    /** 更新主题 */
+    eventBackRefreshAreas() {
+        this.theme_mid_areas_content.children.forEach((cell) => {
+            let id = Number(cell.name.substring(4)) + 1;
+            let right = cell.getChildByName('right');
+            right.active = id == DataManager.data.boxAreas.cur;
+        });
+    };
+
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+        kit.Event.on(CConst.event_refresh_areas, this.eventBackRefreshAreas, this);
     }
 
     /** 监听-取消 */
@@ -536,7 +531,7 @@ export default class MainMenuMidTheme extends cc.Component {
                     labelTitle.getComponent(cc.Label).string = chars;
                 }
             });
-            let levelAreas = this.getLevelAreas(index);
+            let levelAreas = DataManager.getLevelAreas(index);
             DataManager.setString(LangChars.Level, (chars: string) => {
                 let labelLevel = cell.getChildByName('labelLevel');
                 labelLevel.getComponent(cc.Label).string = chars + '  ' + levelAreas.start + '-' + levelAreas.finish;
