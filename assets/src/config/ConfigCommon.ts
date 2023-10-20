@@ -4,6 +4,11 @@ export const Design = {
     height: 1560,
 }
 
+/** 购买磁铁需要的金币 */
+export const coinsBuyClock = 180;
+/** 购买时钟需要的金币 */
+export const coinsBuyMagnet = 180;
+
 /** 游戏状态 */
 export enum StateGame {
     loading = 1,// 冰冻

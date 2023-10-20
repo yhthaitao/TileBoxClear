@@ -107,6 +107,7 @@ export default class GameFail extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
         
+        DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameFail }, { mode: PopupCacheMode.Frequent });

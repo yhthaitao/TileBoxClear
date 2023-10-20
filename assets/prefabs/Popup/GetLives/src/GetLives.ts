@@ -112,7 +112,6 @@ export default class GetLives extends PopupBase {
             DataManager.setData();
             kit.Event.emit(CConst.event_refresh_top);
             await kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_before, { type: this.params.type }, { mode: PopupCacheMode.Frequent });
         }
         else {
             kit.Popup.hide();

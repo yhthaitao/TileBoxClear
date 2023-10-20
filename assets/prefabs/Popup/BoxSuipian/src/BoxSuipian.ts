@@ -197,15 +197,12 @@ export default class BoxSuipian<Options = any> extends PopupBase {
             rewardPropIcon.position = cc.v3();
             rewardPropIcon.scale = 1.0;
         }
-        let number = 0;
+        let str = '' + raward.number;
         if (raward.type == TypeProp.tStrengthInfinite) {
-            number = Math.floor(raward.number / 60)
-        }
-        else {
-            number = raward.number;
+            str = '' + Math.floor(raward.number / 60) + 'm';
         }
         let rewardPropLabel = rewardProp.getChildByName('label');
-        rewardPropLabel.getComponent(cc.Label).string = '' + number;
+        rewardPropLabel.getComponent(cc.Label).string = str;
     };
 
     /**

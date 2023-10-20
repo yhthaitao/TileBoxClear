@@ -20,8 +20,9 @@ export default class SettingGame extends PopupBase {
 
     @property(cc.Node) nodeQuit: cc.Node = null;
     @property(cc.Node) nodeQuitTitle: cc.Node = null;
-    @property(cc.Node) nodeQuitMid: cc.Node = null;
+    @property(cc.Node) nodeQuitDesc: cc.Node = null;
     @property(cc.Node) nodeQuitButton: cc.Node = null;
+    @property([cc.Node]) arrQuitProp: cc.Node[] = [];
 
     obj = {
         setting: {
@@ -29,6 +30,11 @@ export default class SettingGame extends PopupBase {
             right: { w: 183 },
             piece: { left: -54, right: 54 },
         },
+        quit: {
+            prop: {
+                arrX: [-75, 75]
+            },
+        }
     };
     isLock: boolean = false;
 
@@ -201,6 +207,25 @@ export default class SettingGame extends PopupBase {
     setQuitUI() {
         this.nodePause.active = false;
         this.nodeQuit.active = true;
+        let wins = DataManager.data.wins.count - DataManager.data.wins.start;
+        if (wins < 1) {
+            this.arrQuitProp.forEach((prop, index) => {
+                prop.active = index == 0;
+                if (prop.active) {
+                    prop.x = 0;
+                }
+            });
+        }
+        else {
+            this.arrQuitProp.forEach((prop, index) => {
+                prop.active = true;
+                prop.x = this.obj.quit.prop.arrX[index];
+                if (index == 1) {
+                    let label = prop.getChildByName('label');
+                    label.getComponent(cc.Label).string = '' + wins;
+                }
+            });
+        }
     };
 
     /** 按钮事件 重新开始 */
@@ -210,6 +235,7 @@ export default class SettingGame extends PopupBase {
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
+        DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromSettingGame }, { mode: PopupCacheMode.Frequent });
@@ -226,6 +252,7 @@ export default class SettingGame extends PopupBase {
             // 过度
             await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
             // 进入菜单页
+            DataManager.data.wins.count = 0;
             DataManager.strengthReduce();
             DataManager.setData();
             kit.Event.emit(CConst.event_enter_menu);
@@ -277,9 +304,8 @@ export default class SettingGame extends PopupBase {
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 描述
-        let itemDesc = this.nodeQuitMid.getChildByName('nodeLabel');
         DataManager.setString(LangChars.exit_desc, (chars: string) => {
-            let itemLabel = itemDesc.getChildByName('label');
+            let itemLabel = this.nodeQuitDesc.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
         // 按钮

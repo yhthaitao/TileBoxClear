@@ -77,8 +77,8 @@ const CConst = {
     event_refresh_prop: 'event_refresh_prop',
     /** 刷新红色point */
     event_refresh_point: 'event_refresh_point',
-    /** game start */
-    event_game_start: 'event_game_start',
+    /** game next */
+    event_game_next: 'event_game_next',
     /** game pause */
     event_game_pause: 'event_game_pause',
     /** game resume */
@@ -87,6 +87,8 @@ const CConst = {
     event_game_revive: 'event_game_revive',
     /** game restart */
     event_game_restart: 'event_game_restart',
+    /** actpass hide */
+    event_actpass_hide: 'event_actpass_hide',
     /** 进入 胜利 */
     event_enter_win: 'event_enter_win',
     /** 游戏胜利后 进入菜单 */
@@ -137,6 +139,7 @@ const CConst = {
     popup_path_before: './Popup/Before/res/prefab/Before',
     popup_path_getCoins: './Popup/GetCoins/res/prefab/GetCoins',
     popup_path_getLives: './Popup/GetLives/res/prefab/GetLives',
+    popup_path_getProps: './Popup/GetProps/res/prefab/GetProps',
     popup_path_gameShop: './Popup/GameShop/res/prefab/GameShop',
     popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
     popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',

@@ -49,7 +49,17 @@ export default class Before extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 游戏开始前页面 showBefore()');
         this.params = Common.clone(options);
+        // 初始化道具状态
         DataManager.initPropState();
+        // 道具默认未选中
+        let beforeProp = [DataManager.data.prop.magnet, DataManager.data.prop.clock];
+        beforeProp.forEach((obj) => {
+            if (obj.state == StateBeforeProp.choose) {
+                obj.state = StateBeforeProp.unChoose;
+            }
+        });
+        DataManager.setData();
+
         this.resetLabel();
         this.resetContent();
         this.resetProp();
@@ -62,7 +72,7 @@ export default class Before extends PopupBase {
             this.nodeBg.active = false;
             this.nodeHard.active = true;
         }
-        else{
+        else {
             this.nodeBg.active = true;
             this.nodeHard.active = false;
         }
@@ -282,8 +292,11 @@ export default class Before extends PopupBase {
             case TypeBefore.fromMenu:
                 if (DataManager.data.strength.count > 0) {
                     let funcNext = async () => {
-                        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                        kit.Event.emit(CConst.event_enter_game);
+                        cc.tween(this.node).call(() => {
+                            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                        }).delay(0.5).call(() => {
+                            kit.Event.emit(CConst.event_enter_game);
+                        }).start();
                     };
                     DataManager.playAdvert(funcNext);
                 }
@@ -295,11 +308,11 @@ export default class Before extends PopupBase {
             case TypeBefore.fromGameFail:// 游戏失败
                 if (DataManager.data.strength.count > 0) {
                     let funcNext = async () => {
-                        // 重新开始游戏 中断连胜
-                        DataManager.data.wins.count = 0;
-                        DataManager.setData();
-                        await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                        kit.Event.emit(CConst.event_game_restart);
+                        cc.tween(this.node).call(() => {
+                            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                        }).delay(0.5).call(() => {
+                            kit.Event.emit(CConst.event_game_restart);
+                        }).start();
                     };
                     DataManager.playAdvert(funcNext);
                 }
@@ -308,8 +321,11 @@ export default class Before extends PopupBase {
                 }
                 break;
             case TypeBefore.fromGameWin:// 游戏胜利后
-                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                kit.Event.emit(CConst.event_game_start);
+                cc.tween(this.node).call(() => {
+                    kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
+                }).delay(0.5).call(() => {
+                    kit.Event.emit(CConst.event_game_next);
+                }).start();
                 break;
             default:
                 break;
@@ -326,9 +342,6 @@ export default class Before extends PopupBase {
             case TypeBefore.fromSettingGame:// 游戏中途设置 进入重新开始界面 点击退出
             case TypeBefore.fromGameFail:// 游戏失败 进入重新开始界面 点击退出
                 let funcNext = async () => {
-                    // 游戏失败 中断连胜
-                    DataManager.data.wins.count = 0;
-                    DataManager.setData();
                     await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
                     kit.Event.emit(CConst.event_enter_menu);
                 };
@@ -370,5 +383,21 @@ export default class Before extends PopupBase {
                 break;
         }
         DataManager.setData();
+    }
+
+    /** 按钮事件 添加选择 */
+    eventBtnPropAdd(event: cc.Event.EventTouch, custom: string) {
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        let index = Number(custom);
+        let prop = DataManager.data.prop;
+        let arrProp = [prop.magnet, prop.clock];
+        let objState = arrProp[index];
+        if (!objState) {
+            return;
+        }
+
+        kit.Popup.hide();
+        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type}, { mode: PopupCacheMode.Frequent });
     }
 }

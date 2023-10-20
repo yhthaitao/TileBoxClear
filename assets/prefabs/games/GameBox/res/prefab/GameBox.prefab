@@ -5054,7 +5054,7 @@
       }
     ],
     "_armatureName": "Armature",
-    "_animationName": "yundong",
+    "_animationName": "",
     "_preCacheMode": 0,
     "_cacheMode": 0,
     "playTimes": 0,
@@ -5073,7 +5073,7 @@
       "__uuid__": "62a92600-ba7f-44c5-b90f-293b8b2fd320"
     },
     "_N$_defaultArmatureIndex": 0,
-    "_N$_animationIndex": 1,
+    "_N$_animationIndex": 0,
     "_N$_defaultCacheMode": 0,
     "_N$timeScale": 1,
     "_N$debugBones": false,

@@ -33,14 +33,16 @@ export default class GameShop<Options = any> extends PopupBase {
         2: { type: 0, frameId: 0, keyCoinfg: 2, keyString: 'ShopElfGiftBox', },
         3: { type: 0, frameId: 1, keyCoinfg: 3, keyString: 'ShopPrincessTreasure', },
         4: { type: 0, frameId: 2, keyCoinfg: 4, keyString: 'ShopShiningBundle', },
-        5: { type: 0, frameId: 3, keyCoinfg: 5, keyString: 'ShopMikoGiftPack', },
-        6: { type: 0, frameId: 4, keyCoinfg: 6, keyString: 'ShopQueenTreasure', },
+        5: { type: 0, frameId: 2, keyCoinfg: 5, keyString: 'ShopMikoGiftPack', },
+        6: { type: 0, frameId: 3, keyCoinfg: 6, keyString: 'ShopQueenTreasure', },
+
         7: { type: 1, frameId: 0, keyCoinfg: 7, keyString: 'RemoveAds', },
+        
         8: { type: 1, frameId: 1, keyCoinfg: 8, },
         9: { type: 1, frameId: 1, keyCoinfg: 9, },
         10: { type: 1, frameId: 2, keyCoinfg: 10, },
-        11: { type: 1, frameId: 3, keyCoinfg: 11, },
-        12: { type: 1, frameId: 4, keyCoinfg: 12, },
+        11: { type: 1, frameId: 2, keyCoinfg: 11, },
+        12: { type: 1, frameId: 3, keyCoinfg: 12, },
         13: { type: 1, frameId: 4, keyCoinfg: 13, },
     };
 
@@ -137,6 +139,7 @@ export default class GameShop<Options = any> extends PopupBase {
         // 节点高度
         this.scroll.height = cc.winSize.height * 0.5 + this.scroll.y;
         // 配置内容
+        this.scrollContent.removeAllChildren();
         for (let index = 0; index < length; index++) {
             let produceId = index + 1;
             let produceCfg: Produce = this.produceObj[produceId];
@@ -167,8 +170,8 @@ export default class GameShop<Options = any> extends PopupBase {
             let isLimit1 = DataManager.data.shopLimit.indexOf(buyCfg.name) < 0;
             produceItem.getChildByName('limit').active = isLimit0 && isLimit1;
             // icon
-            let cellIcon = produceItem.getChildByName('icon');
-            cellIcon.getComponent(cc.Sprite).spriteFrame = this.iconFrames0[produceCfg.frameId];
+            let icon = produceItem.getChildByName('icon');
+            icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames0[produceCfg.frameId];
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {
@@ -206,8 +209,8 @@ export default class GameShop<Options = any> extends PopupBase {
             produceItem.name = itemName;
             produceItem.parent = this.scrollContent;
             // icon
-            let cellIcon = cell.getChildByName('icon');
-            cellIcon.getComponent(cc.Sprite).spriteFrame = this.iconFrames1[produceCfg.frameId];
+            let icon = produceItem.getChildByName('icon');
+            icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames1[produceCfg.frameId];
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {

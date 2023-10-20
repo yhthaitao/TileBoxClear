@@ -119,10 +119,6 @@ export default class OpenBoxLevel extends PopupBase {
             this.node.active = false;
             // 弹窗已完全隐藏（动画完毕）
             this.hideAfter && this.hideAfter(suspended);
-            // 延迟一会儿
-            await new Promise((_res) => {
-                cc.Canvas.instance.scheduleOnce(_res, 0.75);
-            });
             // 弹窗完成回调
             this.finishCallback && this.finishCallback(suspended);
             // Done

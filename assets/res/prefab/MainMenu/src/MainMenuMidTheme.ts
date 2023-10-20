@@ -86,6 +86,7 @@ export default class MainMenuMidTheme extends cc.Component {
         let hElse = layout.paddingTop + layout.spacingY * (length - 1) + layout.paddingBottom;
         this.theme_mid_areas_content.height = item.height * length + hElse;
         // 配置主题内容
+        this.theme_mid_areas_content.removeAllChildren();
         for (let index = 0; index < length; index++) {
             let name = 'cell' + index;
             let cell = this.theme_mid_areas_content.getChildByName(name);
@@ -97,7 +98,6 @@ export default class MainMenuMidTheme extends cc.Component {
             cell.parent = this.theme_mid_areas_content;
             this.initAreasCell(index, cell);
         }
-        this.refreshAreasItem();
         this.refreshAreasLabel();
     };
 
@@ -179,6 +179,7 @@ export default class MainMenuMidTheme extends cc.Component {
 
         let objAllGoods = DataManager.getObjAllGoods();
         // 配置主题内容
+        this.theme_mid_commodity_content.removeAllChildren();
         for (let index = 0; index < length; index++) {
             let name = 'cell' + index;
             let cell = this.theme_mid_commodity_content.getChildByName(name);
@@ -191,7 +192,6 @@ export default class MainMenuMidTheme extends cc.Component {
             this.initCommodityCell(index, objAllGoods, cell);
         }
         this.resetPointAchieve();
-        this.refreshCommodityItem();
         this.refreshCommodityLabel();
     };
 
@@ -324,7 +324,8 @@ export default class MainMenuMidTheme extends cc.Component {
     resetPointAchieve(){
         this.theme_mid_commodity_content.children.forEach((cell) => {
             let index = Number(cell.name.substring(4));
-            let point = cell.getChildByName('point');
+            let reward = cell.getChildByName('reward');
+            let point = reward.getChildByName('point');
             if (point) {
                 point.active = DataManager.data.boxData.point.achieves[index];
             }
@@ -415,26 +416,6 @@ export default class MainMenuMidTheme extends cc.Component {
         }
     };
 
-    /** 事件 刷新 主题 */
-    refreshAreasItem() {
-        this.theme_mid_areas_content.children.forEach((item) => {
-            let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-            let topY = itemY + item.height * 0.5;
-            let bottomY = itemY - item.height * 0.5;
-            // 选项底部 超出 屏幕顶
-            if (bottomY > cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            // 选项顶部 超出 屏幕底
-            else if (topY < -cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            else {
-                item.opacity = 255;
-            }
-        });
-    };
-
     /** 按钮事件 选择 成就 */
     eventCommodityBtn(event: cc.Event.EventTouch) {
         let index = Number(event.target.name.substring(4));
@@ -469,29 +450,25 @@ export default class MainMenuMidTheme extends cc.Component {
     /** 事件 滑动 成就 */
     eventCommodityScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
         if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.refreshCommodityItem();
+            this.theme_mid_commodity_content.children.forEach((item) => {
+                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
+                let topY = itemY + item.height * 0.5;
+                let bottomY = itemY - item.height * 0.5;
+                // 选项底部 超出 屏幕顶
+                if (bottomY > cc.winSize.height * 0.5) {
+                    item.opacity = 0;
+                }
+                // 选项顶部 超出 屏幕底
+                else if (topY < -cc.winSize.height * 0.5) {
+                    item.opacity = 0;
+                }
+                else {
+                    item.opacity = 255;
+                }
+            });
         }
     };
 
-    /** 刷新 成就 */
-    refreshCommodityItem() {
-        this.theme_mid_commodity_content.children.forEach((item) => {
-            let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-            let topY = itemY + item.height * 0.5;
-            let bottomY = itemY - item.height * 0.5;
-            // 选项底部 超出 屏幕顶
-            if (bottomY > cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            // 选项顶部 超出 屏幕底
-            else if (topY < -cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            else {
-                item.opacity = 255;
-            }
-        });
-    };
     /************************************************************************************************************************/
     /*********************************************************  事件  *******************************************************/
     /************************************************************************************************************************/

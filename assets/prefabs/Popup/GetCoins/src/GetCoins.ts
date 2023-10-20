@@ -19,7 +19,7 @@ export default class GetCoins extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 获取体力 showBefore()');
         // 标题
-        DataManager.setString(LangChars.addLife_title, (chars: string) => {
+        DataManager.setString(LangChars.addCoin_title, (chars: string) => {
             let itemLabel = this.nodeTitle.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
@@ -56,7 +56,7 @@ export default class GetCoins extends PopupBase {
             DataManager.data.numCoin += 60;
             DataManager.data.boxData.timesCoin.count -= 1;
             DataManager.setData();
-            kit.Event.emit(CConst.event_refresh_coin);
+            kit.Event.emit(CConst.event_scale_coin, 0, 0);
             kit.Popup.hide();
         };
         let funcB = () => {

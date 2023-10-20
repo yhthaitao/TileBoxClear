@@ -124,10 +124,6 @@ export default class OpenBoxLevel extends PopupBase {
             this.node.active = false;
             // 弹窗已完全隐藏（动画完毕）
             this.hideAfter && this.hideAfter(suspended);
-            // 延迟一会儿
-            await new Promise((_res) => {
-                cc.Canvas.instance.scheduleOnce(_res, 0.75);
-            });
             // 弹窗完成回调
             this.finishCallback && this.finishCallback(suspended);
             // Done
@@ -163,12 +159,12 @@ export default class OpenBoxLevel extends PopupBase {
         this.nodeProp.scale = this.obj.prop.scale0;
         let itemIcon = this.nodeProp.getChildByName('icon');
         itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[index];
-        let number = reward.number;
+        let str = '+' + reward.number;
         if (reward.type == TypeProp.tStrengthInfinite) {
-            number = Math.floor(reward.number / 60);
+            str = '+' + Math.floor(reward.number / 60) + 'm';
         }
         let propLabel = this.nodeProp.getChildByName('label');
-        propLabel.getComponent(cc.Label).string = '+' + number;
+        propLabel.getComponent(cc.Label).string = str;
     };
 
     playAniHide(): Promise<void> {

@@ -55,7 +55,7 @@ export default class MainMenuTop extends cc.Component {
                 this.labelStrengthMax.active = false;
             }
             if (!this.labelStrengthTime.active) {
-                this.labelStrengthTime.active = false;
+                this.labelStrengthTime.active = true;
             }
             this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
             if (strength.tCount != 0) {
@@ -136,7 +136,7 @@ export default class MainMenuTop extends cc.Component {
                 this.labelStrengthMax.active = false;
             }
             if (!this.labelStrengthTime.active) {
-                this.labelStrengthTime.active = false;
+                this.labelStrengthTime.active = true;
             }
             this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
             if (strength.tCount != 0) {
@@ -165,6 +165,7 @@ export default class MainMenuTop extends cc.Component {
                 strength.tCount = 0;
                 DataManager.setData();
             }
+            this.refreshStrengthNum();
             return;
         }
         /********************************************* 体力-非无限-不满 **********************************************/

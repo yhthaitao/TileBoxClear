@@ -104,8 +104,17 @@ export default class MainMenuMidHome extends cc.Component {
         this.resetBank();
 
         await this.resetBoxSuipianProcess();
+        await new Promise((_res) => {
+            cc.Canvas.instance.scheduleOnce(_res, 0.75);
+        });
         await this.resetBoxXingxingProcess();
+        await new Promise((_res) => {
+            cc.Canvas.instance.scheduleOnce(_res, 0.75);
+        });
         await this.resetBoxLevelProcess();
+        await new Promise((_res) => {
+            cc.Canvas.instance.scheduleOnce(_res, 0.75);
+        });
         await this.resetBoxAreas();
     };
 
@@ -165,14 +174,17 @@ export default class MainMenuMidHome extends cc.Component {
         else if (index > types.length - 1) {
             index = types.length - 1;
         }
-        let propIcon = this.home_top_prop.getChildByName('icon');
-        propIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
-        let number = reward.number;
+
+        let itemIcon = this.home_top_prop.getChildByName('icon');
+        itemIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
+        itemIcon.scale = Math.min(this.home_top_prop.width / itemIcon.width, this.home_top_prop.height / itemIcon.height);
+
+        let str = '+' + reward.number;
         if (reward.type == TypeProp.tStrengthInfinite) {
-            number = Math.floor(reward.number / 60);
+            str = '+' + Math.floor(reward.number / 60) + 'm';
         }
         let propLabel = this.home_top_prop.getChildByName('label');
-        propLabel.getComponent(cc.Label).string = '+' + number;
+        propLabel.getComponent(cc.Label).string = str;
 
         this.refreshBoxSuipianTime();
     };
@@ -432,16 +444,6 @@ export default class MainMenuMidHome extends cc.Component {
                 boxAdd = boxAdd - boxAddElse;
             }
 
-            // 数据变更
-            boxData.count += boxData.add;
-            boxData.add = 0;
-            if (boxData.count >= total) {
-                boxData.count -= total;
-                boxData.level += 1;
-                DataManager.refreshDataAfterUnlockReward(boxReward);
-            }
-            DataManager.setData();
-
             // 进度条
             let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
             itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
@@ -465,6 +467,16 @@ export default class MainMenuMidHome extends cc.Component {
                 pButton.y += this.home_bottom_button.height;
                 let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
+
+                // 数据变更
+                boxData.count += boxData.add;
+                boxData.add = 0;
+                if (boxData.count >= total) {
+                    boxData.count -= total;
+                    boxData.level += 1;
+                    DataManager.refreshDataAfterUnlockReward(boxReward);
+                }
+                DataManager.setData();
 
                 // 进度条再次刷新
                 boxCount = 0;
@@ -534,12 +546,17 @@ export default class MainMenuMidHome extends cc.Component {
         else if (index > types.length - 1) {
             index = types.length - 1;
         }
+
         let itemIcon = this.home_top_prop.getChildByName('icon');
         itemIcon.getComponent(cc.Sprite).spriteFrame = this.arr_home_top_prop[index];
+        itemIcon.scale = Math.min(this.home_top_prop.width / itemIcon.width, this.home_top_prop.height / itemIcon.height);
 
+        let str = '+' + reward.number;
+        if (reward.type == TypeProp.tStrengthInfinite) {
+            str = '+' + Math.floor(reward.number / 60) + 'm';
+        }
         let itemLabel = this.home_top_prop.getChildByName('label');
-        let num = reward.type == TypeProp.tStrengthInfinite ? Math.floor(reward.number / 60) : reward.number;
-        itemLabel.getComponent(cc.Label).string = '+' + num;
+        itemLabel.getComponent(cc.Label).string = str;
 
         let p1 = Common.getLocalPos(this.node, cc.v3(x, y), this.home_top_prop.parent);
         let p2 = this.home_top_prop.position;

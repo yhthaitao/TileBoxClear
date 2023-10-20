@@ -78,25 +78,12 @@ export default class MainMenu extends cc.Component {
         this.midShop.x = -cc.winSize.width;
         this.midTheme.x = cc.winSize.width;
         let home_dis_topToTop = 20 * winScaleByH;
-        let home_dis_topToLeft = 15 * winScaleByH;
-        let home_dis_topToRight = 15 * winScaleByH;
         let home_dis_bottomToBottom = 100 * winScaleByH;
         this.midHome.x = 0;
         this.midHomeBack.y = cc.winSize.height * 0.5;
         // 隐藏home顶部ui
-        let level = DataManager.data.boxData.level;
-        this.midHomeTop.active = level >= DataManager.data.boxSuipian.startLevel;
-        if (this.midHomeTop.active) {
-            let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
-            this.midHomeTop.y = startY - this.midHomeTop.height * 0.5;
-            this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
-            this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
-        }
-        else{
-            let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
-            this.midHomeLeft.y = startY - home_dis_topToLeft;
-            this.midHomeRight.y = startY - home_dis_topToRight;
-        }
+        let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
+        this.midHomeTop.y = startY - this.midHomeTop.height * 0.5;
         this.midHomeBottom.y = this.uiBottom.y + this.uiBottom.height * 0.5 + home_dis_bottomToBottom + this.midHomeBottom.height * 0.5;
         // 中间ui-shop
         this.midShopTop.y = this.midHomeTop.y;
@@ -114,6 +101,22 @@ export default class MainMenu extends cc.Component {
 
     protected onEnable(): void {
         this.initMenu();
+
+        // 缩放数据
+        let winScaleByH = cc.winSize.height / Design.height;
+        let home_dis_topToTop = 20 * winScaleByH;
+        let home_dis_topToLeft = 15 * winScaleByH;
+        let home_dis_topToRight = 15 * winScaleByH;
+        let startY = this.uiTop.y - this.uiTop.height * 0.5 - home_dis_topToTop;
+        this.midHomeTop.active = DataManager.data.boxData.level > DataManager.data.boxSuipian.startLevel;
+        if (this.midHomeTop.active) {
+            this.midHomeLeft.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToLeft;
+            this.midHomeRight.y = this.midHomeTop.y - this.midHomeTop.height * 0.5 - home_dis_topToRight;
+        }
+        else{
+            this.midHomeLeft.y = startY - home_dis_topToLeft;
+            this.midHomeRight.y = startY - home_dis_topToRight;
+        }
     }
 
     initMenu() {

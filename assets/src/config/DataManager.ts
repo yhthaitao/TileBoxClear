@@ -583,14 +583,11 @@ class DataManager {
                     // 解锁物品
                     this.data.dataAchieve[index].goods.push(goodId);
                     // 成就完成 显示 红色point
+                    console.log('dataAchieve: ', this.data.dataAchieve[index].goods.length, '; config: ', obj.goods.length);
                     if (this.data.dataAchieve[index].goods.length >= obj.goods.length) {
                         this.data.boxData.point.theme = true;
                         this.data.boxData.point.commodity = true;
-                        this.data.boxData.point.achieves.forEach((value, key)=>{
-                            if (key == index) {
-                                value = true;
-                            }
-                        });
+                        this.data.boxData.point.achieves[index] = true;
                     }
                 }
             }
