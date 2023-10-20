@@ -52,12 +52,12 @@ export default class ActPass<Options = any> extends PopupBase {
             this.content.scale = 0.5;
             this.content.opacity = 0;
             cc.tween(this.content).parallel(
-                cc.tween().to(0.233, { scale: 1.05 }, { easing: 'cubicOut' }).call(() => {
+                cc.tween().to(this.popupShowTime.scale0, { scale: 1.05 }, { easing: 'cubicOut' }).call(() => {
                     this.nodeTitle.active = true;
                     this.nodeTitle.opacity = 0;
                     cc.tween(this.nodeTitle).to(0.25, {opacity: 255}).start();
-                }).to(0.233, { scale: 0.98 }, { easing: 'sineInOut' }).to(0.233, { scale: 1 }, { easing: 'sineInOut' }),
-                cc.tween().to(0.215, { opacity: 255 }),
+                }).to(this.popupShowTime.scale1, { scale: 0.98 }, { easing: 'sineInOut' }).to(this.popupShowTime.scale2, { scale: 1 }, { easing: 'sineInOut' }),
+                cc.tween().to(this.popupShowTime.opacity, { opacity: 255 }),
             ).call(() => {
                 // 关闭拦截
                 this.maskUp.active = false;

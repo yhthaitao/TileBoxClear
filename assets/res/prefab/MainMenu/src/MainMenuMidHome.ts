@@ -104,17 +104,8 @@ export default class MainMenuMidHome extends cc.Component {
         this.resetBank();
 
         await this.resetBoxSuipianProcess();
-        await new Promise((_res) => {
-            cc.Canvas.instance.scheduleOnce(_res, 0.75);
-        });
         await this.resetBoxXingxingProcess();
-        await new Promise((_res) => {
-            cc.Canvas.instance.scheduleOnce(_res, 0.75);
-        });
         await this.resetBoxLevelProcess();
-        await new Promise((_res) => {
-            cc.Canvas.instance.scheduleOnce(_res, 0.75);
-        });
         await this.resetBoxAreas();
     };
 
@@ -277,6 +268,10 @@ export default class MainMenuMidHome extends cc.Component {
                     };
                     await this.playAniBox(params);
                 }
+
+                await new Promise((_res) => {
+                    cc.Canvas.instance.scheduleOnce(_res, 0.75);
+                });
             }
         }
 
@@ -409,6 +404,10 @@ export default class MainMenuMidHome extends cc.Component {
                     };
                     await this.playAniBox(params);
                 }
+
+                await new Promise((_res) => {
+                    cc.Canvas.instance.scheduleOnce(_res, 0.75);
+                });
             }
         }
 
@@ -491,6 +490,10 @@ export default class MainMenuMidHome extends cc.Component {
                     };
                     await this.playAniBox(params);
                 }
+
+                await new Promise((_res) => {
+                    cc.Canvas.instance.scheduleOnce(_res, 0.75);
+                });
             }
         }
 

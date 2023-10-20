@@ -94,11 +94,14 @@ export default class GameFail extends PopupBase {
             kit.Event.emit(CConst.event_game_revive, this.params.type);
         }
         else {
-            let params = {
-                mode: PopupCacheMode.Frequent,
+            let option = { 
+                isGoShop: false, 
+            };
+            let params = { 
+                mode: PopupCacheMode.Frequent, 
                 isSoon: true,
             };
-            kit.Popup.show(CConst.popup_path_getCoins, {}, params);
+            kit.Popup.show(CConst.popup_path_getCoins, option, params);
         }
     }
 

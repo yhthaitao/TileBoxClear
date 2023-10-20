@@ -162,5 +162,11 @@
     "achieve_12": "Easter Eggs",
     "evaluate_title": "RATE US",
     "evaluate_desc": "Please rate us",
-    "evaluate_ok": "OK"
+    "evaluate_ok": "OK",
+    "boxSort_3": "There is a prop unloocked!HINTS can help you eliminate a group of goods directly!",
+    "boxSort_5": "UNDO props! Click it to withdraw the last item of your choice!",
+    "boxSort_7": "REFRESH props can rearrange all goods!",
+    "boxSort_9": "FREEZE props can freeze time for 15 seconds!",
+    "boxSort_12": "Each MANGNET you collect can eliminate a group of goods!",
+    "boxSort_15": "Each STOPWATCH you collect can add 10 seconds to the challenge time!"
 }

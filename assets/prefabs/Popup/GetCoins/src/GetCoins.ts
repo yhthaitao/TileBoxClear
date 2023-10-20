@@ -16,6 +16,8 @@ export default class GetCoins extends PopupBase {
     @property(cc.Node) nodeDesc: cc.Node = null;
     @property(cc.Node) btnFree: cc.Node = null;
 
+    options: { isGoShop: boolean } = null;
+
     protected showBefore(options: any): void {
         Common.log('弹窗 获取体力 showBefore()');
         // 标题
@@ -69,12 +71,14 @@ export default class GetCoins extends PopupBase {
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        // 进入商城
-        if (DataManager.stateCur == StateGame.game) {
-            kit.Popup.show(CConst.popup_path_gameShop, {}, { mode: PopupCacheMode.Frequent });
-        }
-        else{
-            kit.Event.emit(CConst.event_enter_menuShop);
+        if (this.options.isGoShop) {
+            // 进入商城
+            if (DataManager.stateCur == StateGame.game) {
+                kit.Popup.show(CConst.popup_path_gameShop, {}, { mode: PopupCacheMode.Frequent });
+            }
+            else {
+                kit.Event.emit(CConst.event_enter_menuShop);
+            }
         }
     };
 }

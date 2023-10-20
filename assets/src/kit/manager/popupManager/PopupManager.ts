@@ -209,10 +209,10 @@ export default class PopupManager {
         let request: PopupRequest = null;
         if (this._suspended.length > 0) {
             // 挂起队列
-            request = this._suspended.shift();
+            request = this._suspended.pop();
         } else {
             // 等待队列
-            request = this._queue.shift();
+            request = this._queue.pop();
         }
         // 解除锁定
         this.locked = false;

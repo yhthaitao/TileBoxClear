@@ -48,9 +48,6 @@ export default class MainMenuTop extends cc.Component {
             if (!this.iconStrengthMax.active) {
                 this.iconStrengthMax.active = true;
             }
-            if (this.labelStrengthNum.active) {
-                this.labelStrengthNum.active = false;
-            }
             if (this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = false;
             }
@@ -64,14 +61,11 @@ export default class MainMenuTop extends cc.Component {
             }
             return;
         }
-        if (this.iconStrengthMax.active) {
-            this.iconStrengthMax.active = false;
-        }
         /********************************************* 体力-非无限-满 **********************************************/
         let entough = strength.count >= strength.total;
         if (entough) {
-            if (!this.labelStrengthNum.active) {
-                this.labelStrengthNum.active = true;
+            if (this.iconStrengthMax.active) {
+                this.iconStrengthMax.active = false;
             }
             if (!this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = true;
@@ -87,6 +81,9 @@ export default class MainMenuTop extends cc.Component {
         }
         /********************************************* 体力-非无限-不满 **********************************************/
         let isUpdate = false;
+        if (this.iconStrengthMax.active) {
+            this.iconStrengthMax.active = false;
+        }
         if (this.labelStrengthMax.active) {
             this.labelStrengthMax.active = false;
         }
@@ -129,9 +126,6 @@ export default class MainMenuTop extends cc.Component {
             if (!this.iconStrengthMax.active) {
                 this.iconStrengthMax.active = true;
             }
-            if (this.labelStrengthNum.active) {
-                this.labelStrengthNum.active = false;
-            }
             if (this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = false;
             }
@@ -145,15 +139,12 @@ export default class MainMenuTop extends cc.Component {
             }
             return;
         }
-        if (this.iconStrengthMax.active) {
-            this.iconStrengthMax.active = false;
-        }
         /********************************************* 体力-非无限-满 **********************************************/
         let entough = strength.count >= strength.total;
         if (entough) {
             Common.log('refreshStrength 体力满值 count: ', strength.count);
-            if (!this.labelStrengthNum.active) {
-                this.labelStrengthNum.active = true;
+            if (this.iconStrengthMax.active) {
+                this.iconStrengthMax.active = false;
             }
             if (!this.labelStrengthMax.active) {
                 this.labelStrengthMax.active = true;
@@ -170,6 +161,9 @@ export default class MainMenuTop extends cc.Component {
         }
         /********************************************* 体力-非无限-不满 **********************************************/
         let isUpdate = false;
+        if (this.iconStrengthMax.active) {
+            this.iconStrengthMax.active = false;
+        }
         if (this.labelStrengthMax.active) {
             this.labelStrengthMax.active = false;
         }
@@ -287,7 +281,13 @@ export default class MainMenuTop extends cc.Component {
     /** 按钮事件 加金币 */
     eventBtnAddCoin() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+        let option = { 
+            isGoShop: true 
+        };
+        let params = { 
+            mode: PopupCacheMode.Frequent, 
+        };
+        kit.Popup.show(CConst.popup_path_getCoins, option, params);
     }
 
     /** 按钮事件 设置 */

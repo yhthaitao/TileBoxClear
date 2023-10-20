@@ -1,5 +1,3 @@
-import Common from "../../../config/Common";
-
 const { ccclass, property } = cc._decorator;
 
 /** 弹窗基类 */
@@ -14,6 +12,13 @@ export default class PopupBase<Options = any> extends cc.Component {
 
     @property({ type: cc.Node, tooltip: CC_DEV && '背景遮罩（上层）' })
     public maskUp: cc.Node = null;
+
+    popupShowTime = {
+        scale0: 0.15,
+        scale1: 0.15,
+        scale2: 0.15,
+        opacity: 0.13,
+    };
 
     /** 弹窗选项 */
     protected options: Options = null;
@@ -49,10 +54,10 @@ export default class PopupBase<Options = any> extends cc.Component {
             this.content.scale = 0.5;
             this.content.opacity = 0;
             cc.tween(this.content).parallel(
-                cc.tween().to(0.233, { scale: 1.05 }, { easing: 'cubicOut' })
-                    .to(0.233, { scale: 0.98 }, { easing: 'sineInOut' })
-                    .to(0.233, { scale: 1 }, { easing: 'sineInOut' }),
-                cc.tween().to(0.215, { opacity: 255 }),
+                cc.tween().to(this.popupShowTime.scale0, { scale: 1.05 }, { easing: 'cubicOut' })
+                    .to(this.popupShowTime.scale1, { scale: 0.98 }, { easing: 'sineInOut' })
+                    .to(this.popupShowTime.scale2, { scale: 1 }, { easing: 'sineInOut' }),
+                cc.tween().to(this.popupShowTime.opacity, { opacity: 255 }),
             ).call(() => {
                 // 关闭拦截
                 this.maskUp.active = false;

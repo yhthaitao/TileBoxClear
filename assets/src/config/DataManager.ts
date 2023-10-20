@@ -62,18 +62,18 @@ class DataManager {
             count: 5,// 当前体力值
             total: 5,// 最大体力值
             tCount: 0, // 恢复体力计时
-            tTotal: 300,// 900秒恢复1体力
+            tTotal: 900,// 900秒恢复1体力
             buyCoin: 100,// 100金币购买1体力
             tInfinite: 0,// 无限时间
         },
         // 道具参数
         prop: {
-            ice: { type: TypeProp.ice, count: 3 },// 冰冻
-            tip: { type: TypeProp.tip, count: 3 },// 提示
-            back: { type: TypeProp.back, count: 3 },// 返回上一步
-            refresh: { type: TypeProp.refresh, count: 3 },// 刷新
-            magnet: { type: TypeProp.magnet, count: 3, tInfinite: 0, state: StateBeforeProp.lock, unlock: 12 },// 磁铁
-            clock: { type: TypeProp.clock, count: 3, tInfinite: 0, state: StateBeforeProp.lock, unlock: 15 },// 时钟
+            ice: { type: TypeProp.ice, count: 3, unlock: 9, isGuide: true },// 冰冻
+            tip: { type: TypeProp.tip, count: 3, unlock: 3, isGuide: true },// 提示
+            back: { type: TypeProp.back, count: 3, unlock: 5, isGuide: true },// 返回上一步
+            refresh: { type: TypeProp.refresh, count: 3, unlock: 7, isGuide: true },// 刷新
+            magnet: { type: TypeProp.magnet, count: 3, unlock: 12, isGuide: true, tInfinite: 0, state: StateBeforeProp.lock },// 磁铁
+            clock: { type: TypeProp.clock, count: 3, unlock: 15, isGuide: true, tInfinite: 0, state: StateBeforeProp.lock },// 时钟
         },
         wins: {
             count: 0, start: 1, unlock: 25
@@ -215,7 +215,7 @@ class DataManager {
 
     /** 初始化关卡数据 */
     public async initLevelData() {
-        let path = CConst.pathLevelData;
+        let path = CConst.pathLevel;
         if (!this.levelData.data0) {
             kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level0', cc.JsonAsset, (e: any, asset: any) => {
                 if (asset) {
@@ -287,7 +287,7 @@ class DataManager {
         let level = this.data.boxData.level;
         let beforeProp = [this.data.prop.magnet, this.data.prop.clock];
         beforeProp.forEach((obj) => {
-            if (level > obj.unlock) {
+            if (level >= obj.unlock) {
                 // 状态：锁定 转 无道具
                 if (obj.state == StateBeforeProp.lock) {
                     obj.state = StateBeforeProp.noProp;
@@ -724,6 +724,26 @@ class DataManager {
             finish = start + length - 1;
         }
         return { start: start, finish: finish };
+    }
+
+    /** 检测新手引导状态-游戏 */
+    checkNewPlayerGame() {
+        if (this.data.prop.tip.isGuide && this.data.boxData.level == 3
+            || this.data.prop.back.isGuide && this.data.boxData.level == 5
+            || this.data.prop.refresh.isGuide && this.data.boxData.level == 7
+            || this.data.prop.ice.isGuide && this.data.boxData.level == 9) {
+            return true;
+        }
+        return false;
+    }
+
+    /** 检测新手引导状态-游戏前 */
+    checkNewPlayerBefore() {
+        if (this.data.prop.magnet.isGuide && this.data.boxData.level == 12
+            || this.data.prop.clock.isGuide && this.data.boxData.level == 15) {
+            return true;
+        }
+        return false;
     }
 
     /**

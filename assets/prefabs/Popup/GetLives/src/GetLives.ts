@@ -115,7 +115,13 @@ export default class GetLives extends PopupBase {
         }
         else {
             kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+            let option = { 
+                isGoShop: false 
+            };
+            let params = { 
+                mode: PopupCacheMode.Frequent, 
+            };
+            kit.Popup.show(CConst.popup_path_getCoins, option, params);
         }
     };
 

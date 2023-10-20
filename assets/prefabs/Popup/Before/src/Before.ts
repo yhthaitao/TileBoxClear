@@ -47,6 +47,7 @@ export default class Before extends PopupBase {
     };
 
     protected showBefore(options: any): void {
+        this.listernerRegist();
         Common.log('弹窗 游戏开始前页面 showBefore()');
         this.params = Common.clone(options);
         // 初始化道具状态
@@ -63,6 +64,18 @@ export default class Before extends PopupBase {
         this.resetLabel();
         this.resetContent();
         this.resetProp();
+    }
+
+    protected showAfter(): void {
+        // 新手引导
+        let isGuide = DataManager.checkNewPlayerBefore();
+        if (isGuide) {
+            kit.Event.emit(CConst.event_guide_before);
+        }
+    }
+
+    protected hideAfter(suspended: boolean): void {
+        this.listernerIgnore();
     }
 
     resetLabel() {
@@ -356,7 +369,7 @@ export default class Before extends PopupBase {
     }
 
     /** 按钮事件 道具选择 */
-    eventBtnPropChose(event: cc.Event.EventTouch, custom: string) {
+    eventBtnPropChose(event: any, custom: string) {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         let index = Number(custom);
@@ -397,7 +410,26 @@ export default class Before extends PopupBase {
             return;
         }
 
-        kit.Popup.hide();
-        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type}, { mode: PopupCacheMode.Frequent });
+        let params = {
+            isSoon: true,
+            mode: PopupCacheMode.Frequent,
+        };
+        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type}, params);
     }
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        // 引导
+        kit.Event.on(CConst.event_guide_12, ()=>{
+            this.eventBtnPropChose({}, '0');
+        }, this);
+        kit.Event.on(CConst.event_guide_15, ()=>{
+            this.eventBtnPropChose({}, '1');
+        }, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
 }

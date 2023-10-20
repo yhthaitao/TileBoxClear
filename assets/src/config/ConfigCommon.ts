@@ -8,6 +8,13 @@ export const Design = {
 export const coinsBuyClock = 180;
 /** 购买时钟需要的金币 */
 export const coinsBuyMagnet = 180;
+/** 弹窗显示动画时间 */
+export const popupShowTime = {
+    scale0: 0.15,
+    scale1: 0.15,
+    scale2: 0.15,
+    opacity: 0.13,
+};
 
 /** 游戏状态 */
 export enum StateGame {

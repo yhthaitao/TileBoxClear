@@ -34,6 +34,8 @@ export default class GetProps extends PopupBase {
                 let itemLabel = this.nodeDesc.getChildByName('label');
                 itemLabel.getComponent(cc.Label).string = chars;
             });
+            let icon = this.nodeProp.getChildByName('icon');
+            icon.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[0];
         };
         let funcClock = () => {
             // 标题
@@ -46,6 +48,8 @@ export default class GetProps extends PopupBase {
                 let itemLabel = this.nodeDesc.getChildByName('label');
                 itemLabel.getComponent(cc.Label).string = chars;
             });
+            let icon = this.nodeProp.getChildByName('icon');
+            icon.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[1];
         };
 
         switch (this.options.prop) {
@@ -76,8 +80,14 @@ export default class GetProps extends PopupBase {
         }
         if (DataManager.data.numCoin < coins) {
             kit.Event.emit(CConst.event_notice, '金币不足');
-            kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_getCoins, {}, { mode: PopupCacheMode.Frequent });
+            let option = { 
+                isGoShop: false 
+            };
+            let params = { 
+                mode: PopupCacheMode.Frequent, 
+                isSoon: true,
+            };
+            kit.Popup.show(CConst.popup_path_getCoins, option, params);
             return;
         }
 
@@ -103,12 +113,5 @@ export default class GetProps extends PopupBase {
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        // 进入商城
-        if (DataManager.stateCur == StateGame.game) {
-            kit.Popup.show(CConst.popup_path_gameShop, {}, { mode: PopupCacheMode.Frequent });
-        }
-        else {
-            kit.Event.emit(CConst.event_enter_menuShop);
-        }
     };
 }

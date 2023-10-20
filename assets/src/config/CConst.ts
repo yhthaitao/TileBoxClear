@@ -19,7 +19,10 @@ const CConst = {
     pathGameGold: './game/gold/',
 
     bundlePrefabs: 'prefabs',
-    pathLevelData: './games/GameBox/res/level/',
+    pathGame: './games/GameBox/res/prefab/GameBox',
+    pathLevel: './games/GameBox/res/level/',
+    pathGuideGame: 'components/UserGuide/res/prefab/GuideGame',
+    pathGuideBefore: 'components/UserGuide/res/prefab/GuideBefore',
     /*************************************** end **************************************************/
 
 
@@ -29,12 +32,12 @@ const CConst = {
     zIndex_menu: 1,
     zIndex_game: 2,
     zIndex_gameWin: 997,
-    zIndex_newPlayer: 998,
     zIndex_loading: 999,
     zIndex_mask: 1000,
     zIndex_video: 1001,
     zIndex_popup: 1002,
     zIndex_noVideo: 1003,
+    zIndex_newPlayer: 1004,
     /*************************************** end **************************************************/
 
 
@@ -49,8 +52,7 @@ const CConst = {
     event_enter_menu: 'event_enter_menu',
     /** 进入 菜单商店 */
     event_enter_menuShop: 'event_enter_menuShop',
-    /** 进入 新手引导 */
-    event_enter_newPlayer: 'event_enter_newPlayer',
+    
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
     /** 主页 刷新 */
@@ -77,6 +79,16 @@ const CConst = {
     event_refresh_prop: 'event_refresh_prop',
     /** 刷新红色point */
     event_refresh_point: 'event_refresh_point',
+    /** 进入 新手引导 */
+    event_guide_game: 'event_guide_game',
+    event_guide_before: 'event_guide_before',
+    /** 刷新 引导 点击 */
+    event_guide_3: 'event_guide_3',
+    event_guide_5: 'event_guide_5',
+    event_guide_7: 'event_guide_7',
+    event_guide_9: 'event_guide_9',
+    event_guide_12: 'event_guide_12',
+    event_guide_15: 'event_guide_15',
     /** game next */
     event_game_next: 'event_game_next',
     /** game pause */
@@ -89,8 +101,6 @@ const CConst = {
     event_game_restart: 'event_game_restart',
     /** actpass hide */
     event_actpass_hide: 'event_actpass_hide',
-    /** 进入 胜利 */
-    event_enter_win: 'event_enter_win',
     /** 游戏胜利后 进入菜单 */
     event_win_enterMenu: 'event_win_enterMenu',
     /** 游戏失败后 继续 */

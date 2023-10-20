@@ -172,7 +172,13 @@ export const LangChars = {
     achieve_12: "achieve_12",
     evaluate_title: "evaluate_title",
     evaluate_desc: "evaluate_desc",
-    evaluate_ok: "evaluate_ok"
+    evaluate_ok: "evaluate_ok",
+    boxSort_3: "boxSort_3",
+    boxSort_5: "boxSort_5",
+    boxSort_7: "boxSort_7",
+    boxSort_9: "boxSort_9",
+    boxSort_12: "boxSort_12",
+    boxSort_15: "boxSort_15"
 };
 
 /** 本地化 图片 名字 */

@@ -8,15 +8,6 @@ import Loading from "../res/prefab/Loading/src/Loading";
 import { LangChars } from "../src/config/ConfigLang";
 import { StateGame } from "../src/config/ConfigCommon";
 
-/** 资源路径（层、弹窗预制体） */
-export const ResPath = {
-    // 公用
-    preGameWin: { bundle: 'prefabs', path: './components/GameWin/res/prefab/GameWin' },
-    preNewPlayer: { bundle: 'prefabs', path: './components/NewPlayer/res/prefab/NewPlayer' },
-    // 游戏
-    preGameBox: { bundle: 'prefabs', path: './games/GameBox/res/prefab/GameBox' },
-}
-
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainScene extends cc.Component {
@@ -110,9 +101,9 @@ export default class MainScene extends cc.Component {
 
     /** 加载公用资源 */
     async loadComponents() {
-        await kit.Resources.loadRes(ResPath.preGameWin.bundle, ResPath.preGameWin.path, cc.Prefab);
-        await kit.Resources.loadRes(ResPath.preNewPlayer.bundle, ResPath.preNewPlayer.path, cc.Prefab);
-        await kit.Resources.loadRes(ResPath.preGameBox.bundle, ResPath.preGameBox.path, cc.Prefab);
+        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGame, cc.Prefab);
+        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideGame, cc.Prefab);
+        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideBefore, cc.Prefab);
 
         NativeCall.logEventOne(ConfigDot.dot_resource_load_success);
     }
@@ -123,7 +114,7 @@ export default class MainScene extends cc.Component {
             return;
         }
         let script = this.nodeLoading.getComponent(Loading);
-        script.playAniLeave(()=>{
+        script.playAniLeave(() => {
             let boxData = DataManager.data.boxData;
             let isNewPlayer = boxData.newTip.cur < boxData.newTip.max;
             isNewPlayer = false;
@@ -184,8 +175,7 @@ export default class MainScene extends cc.Component {
                     script.gameStart();
                 }
                 else {
-                    let cfg = ResPath.preGameBox;
-                    let pre: cc.Prefab = await kit.Resources.loadRes(cfg.bundle, cfg.path, cc.Prefab);
+                    let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGame, cc.Prefab);
                     this.nodeGame = cc.instantiate(pre);
                     this.nodeGame.setContentSize(cc.winSize);
                     this.nodeGame.position = cc.v3();
@@ -205,7 +195,7 @@ export default class MainScene extends cc.Component {
     };
 
     /** 更新语言 */
-    eventBack_refreshLanguage(){
+    eventBack_refreshLanguage() {
         this.refreshLanguage();
     };
 
@@ -220,32 +210,19 @@ export default class MainScene extends cc.Component {
     }
 
     /** 事件回调：进入新手引导 */
-    async eventBack_enterNewPlayer(type: string) {
-        let cfg = ResPath.preNewPlayer;
-        let pre: cc.Prefab = await kit.Resources.loadRes(cfg.bundle, cfg.path, cc.Prefab);
-        let nodeNewPLayer = cc.instantiate(pre);
-        nodeNewPLayer.zIndex = CConst.zIndex_newPlayer;
-        nodeNewPLayer.parent = this.node;
-        let script = nodeNewPLayer.getComponent('NewPlayer');
-        switch (type) {
-            case CConst.newPlayer_guide_sort_1:
-            case CConst.newPlayer_guide_sort_2:
-            case CConst.newPlayer_guide_sort_3:
-                script.show(type);
-                break;
-            default:
-                nodeNewPLayer.removeFromParent();
-                break;
-        }
+    async eventBack_guide_game() {
+        let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideGame, cc.Prefab);
+        let guide = cc.instantiate(pre);
+        guide.zIndex = CConst.zIndex_newPlayer;
+        guide.parent = this.node;
     };
 
-    /** 事件回调：进入胜利界面 */
-    async eventBack_enterWin() {
-        let cfg = ResPath.preGameWin;
-        let pre: cc.Prefab = await kit.Resources.loadRes(cfg.bundle, cfg.path, cc.Prefab);
-        let nodeGameWin = cc.instantiate(pre);
-        nodeGameWin.zIndex = CConst.zIndex_gameWin;
-        nodeGameWin.parent = this.node;
+    /** 事件回调：进入新手引导 */
+    async eventBack_guide_before() {
+        let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideBefore, cc.Prefab);
+        let guide = cc.instantiate(pre);
+        guide.zIndex = CConst.zIndex_newPlayer;
+        guide.parent = this.node;
     };
 
     /** 事件回调：提示 */
@@ -266,9 +243,9 @@ export default class MainScene extends cc.Component {
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
         kit.Event.on(CConst.event_enter_menu, this.eventBack_enterMenu, this);
         kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
-        kit.Event.on(CConst.event_enter_win, this.eventBack_enterWin, this);
         kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
-        kit.Event.on(CConst.event_enter_newPlayer, this.eventBack_enterNewPlayer, this);
+        kit.Event.on(CConst.event_guide_game, this.eventBack_guide_game, this);
+        kit.Event.on(CConst.event_guide_before, this.eventBack_guide_before, this);
     }
 
     /** 监听-取消 */
@@ -280,12 +257,12 @@ export default class MainScene extends cc.Component {
         this.listernerIgnore();
     };
 
-    refreshLanguage(){
+    refreshLanguage() {
         this.refreshLabel_noVideo();
     };
 
-    refreshLabel_noVideo(){
-        DataManager.setString(LangChars.adsNo, (chars: string)=>{
+    refreshLabel_noVideo() {
+        DataManager.setString(LangChars.adsNo, (chars: string) => {
             this.noVideoTip.getComponent(cc.Label).string = chars;
         });
     };
