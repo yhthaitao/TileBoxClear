@@ -178,7 +178,16 @@ export const LangChars = {
     boxSort_7: "boxSort_7",
     boxSort_9: "boxSort_9",
     boxSort_12: "boxSort_12",
-    boxSort_15: "boxSort_15"
+    boxSort_15: "boxSort_15",
+    notice_canotBeUse: "notice_canotBeUse",
+    notice_noTimesToday: "notice_noTimesToday",
+    notice_adLoading: "notice_adLoading",
+    notice_strengthFull: "notice_strengthFull",
+    notice_noMoreGold: "notice_noMoreGold",
+    notice_buySuccess: "notice_buySuccess",
+    notice_buyFail: "notice_buyFail",
+    notice_buyCancal: "notice_buyCancal",
+    notice_noNetwork: "notice_noNetwork"	
 };
 
 /** 本地化 图片 名字 */

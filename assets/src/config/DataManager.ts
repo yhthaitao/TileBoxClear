@@ -36,6 +36,12 @@ class DataManager {
     levelData: { data0: LevelParam[], data1: LevelParam[] } = { data0: null, data1: null };
     /** 广告回来延迟时间（秒） */
     interval: number = 0.02;
+    /** 切出去的时间戳 */
+    backGameAdsTime = 0;
+    /** 切出去时候，成功播放广告的关卡数，同一关只播放一次 */
+    backGameAdsLevel = 0;
+    /** 记录播放间隔时间 */
+    backGameNoAdsTime = 30;
 
     /** 初始数据 */
     data = {
@@ -99,27 +105,24 @@ class DataManager {
         },
         // 12个成就
         dataAchieve: [
-            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false }, 
+            { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
             { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
             { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
             { goods: [], isGet: false }, { goods: [], isGet: false }, { goods: [], isGet: false },
         ],
         // 关卡数据 基础
         boxData: {
+            first: true,
             level: 1,// 当前关卡====添加粒子效果 后面的
             timesCoin: { count: 20, total: 20 },
             timesLive: { count: 20, total: 20 },
-            point: { 
+            point: {
                 theme: false, commodity: false,
-                achieves: [ 
+                achieves: [
                     false, false, false, false,
                     false, false, false, false,
                     false, false, false, false,
                 ]
-            },
-            newTip: {
-                cur: 0,
-                max: 3,
             },
             levelPass: [],// 已通过的关卡
             // 解锁的物品
@@ -217,7 +220,7 @@ class DataManager {
     public async initLevelData() {
         let path = CConst.pathLevel;
         if (!this.levelData.data0) {
-            kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level0', cc.JsonAsset, (e: any, asset: any) => {
+            await kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level0', cc.JsonAsset, (e: any, asset: any) => {
                 if (asset) {
                     this.levelData.data0 = asset.json;
                 }
@@ -228,7 +231,7 @@ class DataManager {
 
         }
         if (!this.levelData.data1) {
-            kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level1', cc.JsonAsset, (e: any, asset: any) => {
+            await kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level1', cc.JsonAsset, (e: any, asset: any) => {
                 if (asset) {
                     this.levelData.data1 = asset.json;
                 }
@@ -283,7 +286,7 @@ class DataManager {
     }
 
     public initPropState() {
-        let time = Math.floor(new Date().getTime() / 1000);
+        let time = Math.floor(new Date().getTime() * 0.001);
         let level = this.data.boxData.level;
         let beforeProp = [this.data.prop.magnet, this.data.prop.clock];
         beforeProp.forEach((obj) => {
@@ -342,7 +345,7 @@ class DataManager {
 
     /** 初始化无限时间 */
     public initTimeInfinite() {
-        let time = Math.floor(new Date().getTime() / 1000);
+        let time = Math.floor(new Date().getTime() * 0.001);
         if (this.data.strength.tInfinite <= 0) {
             this.data.strength.tInfinite = time;
         }
@@ -362,10 +365,14 @@ class DataManager {
 
     /** 消耗体力 */
     public strengthReduce() {
+        let time = Math.floor(new Date().getTime() * 0.001);
         if (this.data.strength.count >= this.data.strength.total) {
-            this.data.strength.tCount = Math.floor(new Date().getTime() / 1000);
+            this.data.strength.tCount = time;
         }
-        this.data.strength.count--;
+        // 非无限体力状态
+        if (this.data.strength.tInfinite <= time && this.data.strength.count > 0) {
+            this.data.strength.count--;
+        }
         Common.log('消耗体力 剩余strength: ', this.data.strength.count);
     }
 
@@ -526,7 +533,7 @@ class DataManager {
                 case TypeProp.tClockInfinite:
                 case TypeProp.tStrengthInfinite:
                     // 没有无限时间 or 有无限时间
-                    let time = Math.floor(new Date().getTime() / 1000);
+                    let time = Math.floor(new Date().getTime() * 0.001);
                     if (reward.type == TypeProp.tMagnetInfinite) {
                         if (this.data.prop.magnet.tInfinite < time) {
                             this.data.prop.magnet.tInfinite = time + reward.number;
@@ -567,7 +574,7 @@ class DataManager {
     }
 
     /** 解锁物品 */
-    public unlockGood(goodId: number){
+    public unlockGood(goodId: number) {
         // 添加到已解锁物品池子
         let first = Math.floor(goodId * 0.001);
         if (this.data.boxData.goodUnlock[first]) {
@@ -576,14 +583,13 @@ class DataManager {
     };
 
     /** 解锁成就内的物品 */
-    public unlockGoodInAchieve(goodId: number){
-        ConfigAchieve.forEach((obj, index)=>{
+    public unlockGoodInAchieve(goodId: number) {
+        ConfigAchieve.forEach((obj, index) => {
             if (obj.goods.indexOf(goodId) >= 0) {
                 if (this.data.dataAchieve[index].goods.indexOf(goodId) < 0) {
                     // 解锁物品
                     this.data.dataAchieve[index].goods.push(goodId);
                     // 成就完成 显示 红色point
-                    console.log('dataAchieve: ', this.data.dataAchieve[index].goods.length, '; config: ', obj.goods.length);
                     if (this.data.dataAchieve[index].goods.length >= obj.goods.length) {
                         this.data.boxData.point.theme = true;
                         this.data.boxData.point.commodity = true;
@@ -595,21 +601,21 @@ class DataManager {
     };
 
     /** 所有物品 */
-    public getArrAllGoods(){
+    public getArrAllGoods() {
         let allGoods = [];
         ConfigGood.goodsConf.forEach((obj) => { allGoods.push(obj.id); });
         return allGoods;
     }
 
     /** 所有物品 */
-    public getObjAllGoods(){
+    public getObjAllGoods() {
         let goodsCfg = {};
         ConfigGood.goodsConf.forEach((obj) => { goodsCfg[obj.id] = obj; });
         return goodsCfg;
     };
 
     /** 所有已解锁物品 */
-    public getArrGoodsUnlock(){
+    public getArrGoodsUnlock() {
         let arrGoodsUnlock = [];
         let objUnlock = this.data.boxData.goodUnlock;
         for (const key in objUnlock) {
@@ -621,7 +627,7 @@ class DataManager {
     }
 
     /** 所有未解锁物品 */
-    public getArrGoodLock(){
+    public getArrGoodLock() {
         let arrGoodsLock = [];
         let allGoods = this.getArrAllGoods();
         let arrGoodsUnlock = this.getArrGoodsUnlock();
@@ -785,10 +791,6 @@ class DataManager {
                 // 打点 插屏播放完成
                 NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(level));
                 funcN();
-                // 广告计时
-                this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
-                this.data.advert.record.level = level;
-                this.setData();
             };
             let funcB = () => {
                 funcN();
@@ -813,18 +815,29 @@ class DataManager {
      * @returns 
      */
     public checkIsPlayAdvert(level: number) {
-        Common.log(' 插屏广告检测 cocos checkIsPlayAds()  levelNow: ', level, '; adStartLevel: ', this.adStartLevel);
+        // 去广告
+        if (this.data.advert.isRemove) {
+            Common.log('checkIsPlayAdvert() 插屏广告检测  已去广告');
+            return false;
+        }
+        // 关卡不足
         if (level <= this.adStartLevel) {
+            Common.log('checkIsPlayAdvert() 插屏广告检测  关卡不够');
             return false;
         }
 
+        // 时间不足
         let timeNow = Math.floor(new Date().getTime() * 0.001);
         let timeRecord = this.data.advert.record.time;
         let timeLast = timeNow - timeRecord;
+        if (timeLast < 30) {
+            Common.log('checkIsPlayAdvert() 插屏广告检测  时间不足 timeLast: ', timeLast);
+            return false;
+        }
         // let levelRecord = this.data.advert.record.level;
         // let levelLast = level - levelRecord;
-        Common.log(' 检测 时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
-        return timeLast >= 30;
+        Common.log('checkIsPlayAdvert() 插屏广告检测  时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
+        return true;
     };
 
     /**
@@ -856,7 +869,6 @@ class DataManager {
      * @returns
      */
     public startVideo(funcA: Function, funcB: Function): void {
-        NativeCall.closeBanner();
         this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, async () => {
             // 延迟一会儿
             await new Promise((_res) => {
@@ -873,7 +885,6 @@ class DataManager {
      * @returns 
      */
     public startAdvert(funcA: Function, funcB: Function): void {
-        NativeCall.closeBanner();
         this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, async () => {
             // 延迟一会儿
             await new Promise((_res) => {
@@ -886,7 +897,7 @@ class DataManager {
     /** 播放动画 */
     public adAnimPlay(callback: Function = null) {
         this.nodeVideo.active = true;
-        let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay)
+        let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay);
         animation.once(dragonBones.EventObject.COMPLETE, () => {
             this.nodeVideo.active = false;
             if (typeof callback == "function" && cc.isValid(callback)) callback();
@@ -896,7 +907,12 @@ class DataManager {
 
     /** 更新广告计数 */
     public updateAdCount() {
+        //  更新广告计数
         this.data.advert.count++;
+        // 更新广告计时
+        this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
+        this.data.advert.record.level = this.data.boxData.level;
+
         let dot = ConfigDot['dot_ad_revenue_track_flag_' + this.data.advert.count];
         dot && NativeCall.logEventOne(dot);
         // 过完35关、看广告次数达到50次打点，只记一次；
@@ -904,6 +920,7 @@ class DataManager {
             this.data.advert.isCpe = true;
             NativeCall.logEventOne(ConfigDot.dot_applovin_cpe);
         }
+
         this.setData(false);
     };
 
@@ -962,6 +979,15 @@ class DataManager {
             });
             dragon.armatureName = armatureName;
             dragon.playAnimation(animationName, 1);
+        });
+    };
+
+    public refreshScrollview(scrollviewContent: cc.Node){
+        scrollviewContent.children.forEach((item) => {
+            let y = item.parent.convertToWorldSpaceAR(item.position).y;
+            let yTop = y + item.height * 0.5;
+            let yBottom = y -item.height * 0.5;
+            item.opacity = yBottom > cc.winSize.height || yTop < 0 ? 0 : 255;
         });
     };
 

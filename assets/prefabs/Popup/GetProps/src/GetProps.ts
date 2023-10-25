@@ -79,26 +79,19 @@ export default class GetProps extends PopupBase {
                 break;
         }
         if (DataManager.data.numCoin < coins) {
-            kit.Event.emit(CConst.event_notice, '金币不足');
-            let option = { 
-                isGoShop: false 
-            };
-            let params = { 
-                mode: PopupCacheMode.Frequent, 
-                isSoon: true,
-            };
-            kit.Popup.show(CConst.popup_path_getCoins, option, params);
+            kit.Event.emit(CConst.event_notice, LangChars.notice_noMoreGold);
+            kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true, });
             return;
         }
 
         switch (this.options.prop) {
             case TypeProp.magnet:
                 DataManager.data.prop.magnet.count += 3;
-                kit.Event.emit(CConst.event_notice, '购买 磁铁 成功');
+                kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);
                 break;
             case TypeProp.clock:
                 DataManager.data.prop.clock.count += 3;
-                kit.Event.emit(CConst.event_notice, '购买 时钟 成功');
+                kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);
                 break;
             default:
                 break;

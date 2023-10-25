@@ -88,11 +88,15 @@ export default class EventManager {
     public static removeByTarget(target: any) {
         // 普通事件
         this.events.forEach((subscription: Subscription[], name: string)=>{
-            console.log('移除前 事件名：', name, "; 事件数组：", subscription);
-            subscription.filter((sub)=>{
-                return sub.target != target;
+            subscription = subscription.filter((sub)=>{
+                return sub.target !== target;
             });
-            console.log('移除后 事件名：', name, "; 事件数组：", subscription);
+            if (subscription.length == 0) {
+                this.events.delete(name);
+            }
+            else{
+                this.events.set(name, subscription);
+            }
         })
     }
 

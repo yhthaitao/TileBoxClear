@@ -95,7 +95,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
 
     /** 时间-更新 */
     async updateSuipianTime() {
-        let tElseSuipian = Common.getTimeDayFinish() - Math.floor(new Date().getTime() / 1000);
+        let tElseSuipian = Common.getTimeDayFinish() - Math.floor(new Date().getTime() * 0.001);
         let h = Math.floor(tElseSuipian / 3600);
         let mElse = tElseSuipian % 3600;
         let m = Math.floor(mElse / 60);
@@ -230,23 +230,14 @@ export default class BoxSuipian<Options = any> extends PopupBase {
     }
 
     eventScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
-        if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.nodeListContent.children.forEach((item) => {
-                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-                let topY = itemY + item.height * 0.5;
-                let bottomY = itemY - item.height * 0.5;
-                // 选项底部 超出 屏幕顶
-                if (bottomY > cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                // 选项顶部 超出 屏幕底
-                else if (topY < -cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                else {
-                    item.opacity = 255;
-                }
-            });
+        switch (eventType) {
+            case cc.ScrollView.EventType.SCROLL_BEGAN:
+            case cc.ScrollView.EventType.SCROLLING:
+            case cc.ScrollView.EventType.SCROLL_ENDED:
+                DataManager.refreshScrollview(scrollview.content);
+                break;
+            default:
+                break;
         }
     };
 

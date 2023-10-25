@@ -5,7 +5,6 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigAchieve from "../../../../src/config/ConfigAchieve";
-import ConfigGood from "../../../../src/config/ConfigGood";
 
 /** 主题类型 */
 export enum StateTheme {
@@ -57,6 +56,7 @@ export default class MainMenuMidTheme extends cc.Component {
     }
 
     protected onEnable(): void {
+        console.log('MainMenuMidTheme onEnable()');
         this.init();
     }
 
@@ -173,6 +173,9 @@ export default class MainMenuMidTheme extends cc.Component {
         let length = 12;
         let lenHeight = 6;
         let item = this.theme_mid_commodity.getChildByName('item');
+
+        this.theme_mid_commodity.height = cc.winSize.height * 0.5 + this.theme_mid_commodity.y;
+
         let layout = this.theme_mid_commodity_content.getComponent(cc.Layout);
         let hElse = layout.paddingTop + layout.spacingY * (lenHeight - 1) + layout.paddingBottom;
         this.theme_mid_commodity_content.height = item.height * lenHeight + hElse;
@@ -313,7 +316,7 @@ export default class MainMenuMidTheme extends cc.Component {
         this.refreshThemeLabelTop();
     };
 
-    resetPointCommodity(){
+    resetPointCommodity() {
         let btnCommodity = this.theme_top.getChildByName('btnCommodity');
         let point = btnCommodity.getChildByName('point');
         if (point) {
@@ -321,7 +324,7 @@ export default class MainMenuMidTheme extends cc.Component {
         }
     };
 
-    resetPointAchieve(){
+    resetPointAchieve() {
         this.theme_mid_commodity_content.children.forEach((cell) => {
             let index = Number(cell.name.substring(4));
             let reward = cell.getChildByName('reward');
@@ -373,10 +376,12 @@ export default class MainMenuMidTheme extends cc.Component {
         if (isAreas) {
             this.theme_mid_areas.active = true;
             this.theme_mid_commodity.active = false;
+            this.initAreasList();
         }
         else {
             this.theme_mid_areas.active = false;
             this.theme_mid_commodity.active = true;
+            this.initCommodityList();
         }
     };
 
@@ -396,23 +401,14 @@ export default class MainMenuMidTheme extends cc.Component {
 
     /** 事件 滑动 主题 */
     eventAreasScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
-        if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.theme_mid_areas_content.children.forEach((item) => {
-                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-                let topY = itemY + item.height * 0.5;
-                let bottomY = itemY - item.height * 0.5;
-                // 选项底部 超出 屏幕顶
-                if (bottomY > cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                // 选项顶部 超出 屏幕底
-                else if (topY < -cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                else {
-                    item.opacity = 255;
-                }
-            });
+        switch (eventType) {
+            case cc.ScrollView.EventType.SCROLL_BEGAN:
+            case cc.ScrollView.EventType.SCROLLING:
+            case cc.ScrollView.EventType.SCROLL_ENDED:
+                DataManager.refreshScrollview(scrollview.content);
+                break;
+            default:
+                break;
         }
     };
 
@@ -449,23 +445,14 @@ export default class MainMenuMidTheme extends cc.Component {
 
     /** 事件 滑动 成就 */
     eventCommodityScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
-        if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.theme_mid_commodity_content.children.forEach((item) => {
-                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-                let topY = itemY + item.height * 0.5;
-                let bottomY = itemY - item.height * 0.5;
-                // 选项底部 超出 屏幕顶
-                if (bottomY > cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                // 选项顶部 超出 屏幕底
-                else if (topY < -cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                else {
-                    item.opacity = 255;
-                }
-            });
+        switch (eventType) {
+            case cc.ScrollView.EventType.SCROLL_BEGAN:
+            case cc.ScrollView.EventType.SCROLLING:
+            case cc.ScrollView.EventType.SCROLL_ENDED:
+                DataManager.refreshScrollview(scrollview.content);
+                break;
+            default:
+                break;
         }
     };
 

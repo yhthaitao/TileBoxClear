@@ -25,6 +25,7 @@ export default class MainMenuTop extends cc.Component {
     }
 
     protected onEnable(): void {
+        console.log('MainMenuTop onEnable()');
         this.refreshUI();
     }
 
@@ -41,7 +42,7 @@ export default class MainMenuTop extends cc.Component {
         this.objTime.count = this.objTime.init;
 
         let strength = DataManager.data.strength;
-        let timeCur = Math.floor(new Date().getTime() / 1000);
+        let timeCur = Math.floor(new Date().getTime() * 0.001);
         /********************************************* 体力-无限 **********************************************/
         let tInfinite = strength.tInfinite - timeCur;
         if (tInfinite > 0) {
@@ -55,10 +56,6 @@ export default class MainMenuTop extends cc.Component {
                 this.labelStrengthTime.active = true;
             }
             this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
-            if (strength.tCount != 0) {
-                strength.tCount = 0;
-                DataManager.setData();
-            }
             return;
         }
         /********************************************* 体力-非无限-满 **********************************************/
@@ -118,7 +115,7 @@ export default class MainMenuTop extends cc.Component {
     /** 刷新体力 */
     refreshStrength() {
         let strength = DataManager.data.strength;
-        let timeCur = Math.floor(new Date().getTime() / 1000);
+        let timeCur = Math.floor(new Date().getTime() * 0.001);
         /********************************************* 体力-无限 **********************************************/
         let tInfinite = strength.tInfinite - timeCur;
         if (tInfinite > 0) {
@@ -133,10 +130,6 @@ export default class MainMenuTop extends cc.Component {
                 this.labelStrengthTime.active = true;
             }
             this.refreshStrengthInfinite(tInfinite);// 刷新无限体力时间
-            if (strength.tCount != 0) {
-                strength.tCount = 0;
-                DataManager.setData();
-            }
             return;
         }
         /********************************************* 体力-非无限-满 **********************************************/
@@ -228,9 +221,10 @@ export default class MainMenuTop extends cc.Component {
 
     playAniStrength() {
         let data = DataManager.data.strength;
-        let time = Math.floor(new Date().getTime() / 1000);
-        this.iconStrengthMax.active = data.tInfinite > time;
-        this.iconStrengthMax.getComponent(cc.Animation).play();
+        let time = Math.floor(new Date().getTime() * 0.001);
+        let disT = data.tInfinite - time;
+        this.iconStrengthMax.active = disT > 0;
+        this.refreshStrength();
     };
 
     playAniCoin(x: number, y: number) {
@@ -281,13 +275,7 @@ export default class MainMenuTop extends cc.Component {
     /** 按钮事件 加金币 */
     eventBtnAddCoin() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        let option = { 
-            isGoShop: true 
-        };
-        let params = { 
-            mode: PopupCacheMode.Frequent, 
-        };
-        kit.Popup.show(CConst.popup_path_getCoins, option, params);
+        kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent});
     }
 
     /** 按钮事件 设置 */

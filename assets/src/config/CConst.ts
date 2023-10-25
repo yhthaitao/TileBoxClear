@@ -44,17 +44,38 @@ const CConst = {
     /*****************************************************************************************/
     /*************************************** 事件 ****************************************/
     /*****************************************************************************************/
-    /** loading完成 */
-    event_complete_loading: 'event_complete_loading',
+    
     /** 进入 刷新语言 */
     event_refresh_language: 'event_reset_language',
+
+    /** 进入 菜单 */
+    event_enter_loading: 'event_enter_loading',
+    /** loading完成 */
+    event_loading_complete: 'event_loading_complete',
+
     /** 进入 菜单 */
     event_enter_menu: 'event_enter_menu',
+    /** 菜单 动画开始 */
+    event_menu_start: 'event_menu_start',
+
     /** 进入 菜单商店 */
     event_enter_menuShop: 'event_enter_menuShop',
     
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
+    /** game load */
+    event_game_load: 'event_game_load',
+    /** game reload */
+    event_game_reload: 'event_game_reload',
+    /** game start */
+    event_game_start: 'event_game_start',
+    /** game pause */
+    event_game_pause: 'event_game_pause',
+    /** game resume */
+    event_game_resume: 'event_game_resume',
+    /** game revive */
+    event_game_revive: 'event_game_revive',
+
     /** 主页 刷新 */
     event_scale_strength: 'event_scale_strength',
     /** 主页 刷新 */
@@ -79,6 +100,8 @@ const CConst = {
     event_refresh_prop: 'event_refresh_prop',
     /** 刷新红色point */
     event_refresh_point: 'event_refresh_point',
+    /** 刷新红色shop */
+    event_refresh_shop: 'event_refresh_shop',
     /** 进入 新手引导 */
     event_guide_game: 'event_guide_game',
     event_guide_before: 'event_guide_before',
@@ -89,24 +112,7 @@ const CConst = {
     event_guide_9: 'event_guide_9',
     event_guide_12: 'event_guide_12',
     event_guide_15: 'event_guide_15',
-    /** game next */
-    event_game_next: 'event_game_next',
-    /** game pause */
-    event_game_pause: 'event_game_pause',
-    /** game resume */
-    event_game_resume: 'event_game_resume',
-    /** game revive */
-    event_game_revive: 'event_game_revive',
-    /** game restart */
-    event_game_restart: 'event_game_restart',
-    /** actpass hide */
-    event_actpass_hide: 'event_actpass_hide',
-    /** 游戏胜利后 进入菜单 */
-    event_win_enterMenu: 'event_win_enterMenu',
-    /** 游戏失败后 继续 */
-    event_fail_playOn: 'event_fail_playOn',
-    /** 游戏失败后 放弃 */
-    event_fail_giveUp: 'event_fail_giveUp',
+    
     /** 提示 */
     event_notice: 'event_notices',
     /** 购买成功 */
@@ -153,7 +159,7 @@ const CConst = {
     popup_path_gameShop: './Popup/GameShop/res/prefab/GameShop',
     popup_path_gameWin: './Popup/GameWin/res/prefab/GameWin',
     popup_path_gameFail: './Popup/GameFail/res/prefab/GameFail',
-    popup_path_user_evaluate: './Popup/UserEvaluate/res/prefab/UserEvaluate',
+    popup_path_evaluate: './Popup/Evaluate/res/prefab/Evaluate',
     /*************************************** end **************************************************/
 
 

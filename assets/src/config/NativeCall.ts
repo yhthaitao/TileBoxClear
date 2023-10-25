@@ -3,8 +3,8 @@ import { PopupCacheMode } from "../kit/manager/popupManager/PopupManager";
 import CConst from "./CConst";
 import Common from "./Common";
 import ConfigBuyItem, { BuyCfg, BuyKey } from "./ConfigBuyItem";
-import { TypeProp } from "./ConfigCommon";
 import ConfigDot from "./ConfigDot";
+import { LangChars } from "./ConfigLang";
 import DataManager from "./DataManager";
 
 /** 原生交互 */
@@ -67,9 +67,6 @@ class NativeCall {
     /** 隐藏banner */
     public closeBanner = function () {
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
-        if (!DataManager.checkBanner()) {
-            return;
-        }
         Common.log(' cocosToJava cocos method: closeBanner() 隐藏banner ');
         let methodName = "closeBanner";
         let methodSignature = "()V";
@@ -135,6 +132,10 @@ class NativeCall {
 
     /** 插屏广告 检测 */
     public advertCheck(): boolean {
+        if(DataManager.data.advert.isRemove){
+            return false;
+        }
+        
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return false;
         let methodName = "interAdReady";
         let methodSignature = "()Z";
@@ -172,8 +173,46 @@ class NativeCall {
         Common.log(' javaToCocos cocos method: adsTimeTrue() ');
         // 打点 插屏广告请求（游戏从后台返回）
         this.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
+
+        // 去广告
+        if (DataManager.data.advert.isRemove) {
+            Common.log('adsTimeTrue() 已去广告');
+            return;
+        }
+        // 用户首日 不播
+        let adsDays = ((new Date().valueOf() - DataManager.data.installtime) * 0.001);
+        if (adsDays <= 86400) {
+            Common.log('adsTimeTrue() 用户首日 不播 adsDays: ', adsDays);
+            return
+        }
+
+        // 关卡等级小于13 不播
+        if (DataManager.data.boxData.level <= DataManager.adStartLevel) {
+            Common.log('adsTimeTrue() 关卡等级小于13 不播 boxDataLevel: ', DataManager.data.boxData.level);
+            return;
+        }
+
+        // 同一关不会出现2次
+        if (DataManager.backGameAdsLevel == DataManager.data.boxData.level) {
+            Common.log('adsTimeTrue() 同一关 不播 backGameAdsLevel: ', DataManager.backGameAdsLevel);
+            return;
+        }
+
+        let timeNow = Math.floor(new Date().getTime() * 0.001);//当前时间戳
+        let timeDis = timeNow - DataManager.backGameAdsTime;
+        if (timeDis < DataManager.backGameNoAdsTime) {
+            Common.log('adsTimeTrue() 时间不够 不播 timeDis: ', timeDis, '; timeNeed: ', DataManager.backGameNoAdsTime);
+            return;
+        }
+
         let isReady = this.advertCheck();
         if (isReady) {
+            //成功播放，才记录一下这次播放的关卡，下一次不播放。
+            DataManager.backGameAdsLevel = DataManager.data.boxData.level;
+            // 第一次是30s  第二次是1分钟  第三次是6分钟
+            if (DataManager.backGameNoAdsTime == 30) DataManager.backGameNoAdsTime = 60;
+            else if (DataManager.backGameNoAdsTime == 60) DataManager.backGameNoAdsTime = 600;
+
             let funcA = () => {
                 // 打点 插屏播放成功（游戏从后台返回）
                 this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
@@ -188,15 +227,20 @@ class NativeCall {
         this.funcAdvertFail && this.funcAdvertFail();
     }
 
+    public outGameSaveTime() {
+        Common.log(' javaToCocos cocos method: outGameSaveTime() ');
+        DataManager.backGameAdsTime = Math.floor(new Date().getTime() * 0.001);//切出去后，记录一下当前时间戳
+    }
+
     /** 无视频 */
     public NoVideo() {
         Common.log(' javaToCocos cocos method: NoVideo() 无视频 ');
-        kit.Event.emit(CConst.event_notice, 'noVideo');
+        kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
     }
 
     public NoNetwork() {
         Common.log(' javaToCocos cocos method: NoNetwork() 无网络 ');
-        kit.Event.emit(CConst.event_notice, 'NoNetwork');
+        kit.Event.emit(CConst.event_notice, LangChars.notice_noNetwork);
     }
 
     /** 打点 回传计数 */
@@ -305,21 +349,21 @@ class NativeCall {
         this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
         let keyNumber = BuyKey[keyString];
         let produceCfg: BuyCfg = ConfigBuyItem[keyNumber];
-        kit.Popup.show(CConst.popup_path_bank, produceCfg, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_openBoxShop, produceCfg, { mode: PopupCacheMode.Frequent, isSoon: true });
     }
 
     /** 购买失败 */
     public buyFail(...params: any[]) {
         // Notifier.emit('BuyFailTips');
         Common.log(' 未实现 javaToCocos cocos method: buyFail() params: ', params);
-        kit.Event.emit(CConst.event_notice, '购买 失败');
+        kit.Event.emit(CConst.event_notice, LangChars.notice_buyFail);
     }
 
     /** 购买失败 */
     public buyCancle(...params: any[]) {
         // Notifier.emit('BuyFailTips');
         Common.log(' 未实现 javaToCocos cocos method: buyCancle() params: ', params);
-        kit.Event.emit(CConst.event_notice, '购买 取消');
+        kit.Event.emit(CConst.event_notice, LangChars.notice_buyCancal);
     }
 
     /** 设置更新 */

@@ -16,7 +16,7 @@ interface Produce {
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class MainMenuMidTheme extends cc.Component {
+export default class MainMenuMidShop extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '滑动区域-根节点' }) scroll: cc.Node = null;
     @property({ type: cc.Node, tooltip: '滑动区域-content' }) scrollContent: cc.Node = null;
@@ -34,7 +34,7 @@ export default class MainMenuMidTheme extends cc.Component {
         6: { type: 0, frameId: 3, keyCoinfg: 6, keyString: 'ShopQueenTreasure', },
 
         7: { type: 1, frameId: 0, keyCoinfg: 7, keyString: 'RemoveAds', },
-        
+
         8: { type: 1, frameId: 1, keyCoinfg: 8, },
         9: { type: 1, frameId: 1, keyCoinfg: 9, },
         10: { type: 1, frameId: 2, keyCoinfg: 10, },
@@ -48,6 +48,7 @@ export default class MainMenuMidTheme extends cc.Component {
     }
 
     protected onEnable(): void {
+        console.log('MainMenuMidShop onEnable()');
         this.init();
     }
 
@@ -78,12 +79,11 @@ export default class MainMenuMidTheme extends cc.Component {
                 if (produceCfg.type == 0) {
                     this.initCell0(produceCfg, this.gifts[produceCfg.type]);
                 }
-                else{
+                else {
                     this.initCell1(produceCfg, this.gifts[produceCfg.type]);
                 }
             }
         }
-        this.refreshItem();
         this.refreshLabel();
     };
 
@@ -94,15 +94,19 @@ export default class MainMenuMidTheme extends cc.Component {
         if (!produceItem) {
             produceItem = cc.instantiate(cell);
             produceItem.active = true;
+            produceItem.opacity = 255;
             produceItem.name = itemName;
             produceItem.parent = this.scrollContent;
             // limit
-            let isLimit0 = buyCfg.isLimit;
-            let isLimit1 = DataManager.data.shopLimit.indexOf(buyCfg.name) < 0;
-            produceItem.getChildByName('limit').active = isLimit0 && isLimit1;
+            let isLimit = buyCfg.isLimit;
+            produceItem.getChildByName('limit').active = isLimit;
             // icon
             let icon = produceItem.getChildByName('icon');
             icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames0[produceCfg.frameId];
+            // isShow;
+            if (isLimit && DataManager.data.shopLimit.indexOf(buyCfg.name) >= 0) {
+                produceItem.active = false;
+            }
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {
@@ -116,17 +120,13 @@ export default class MainMenuMidTheme extends cc.Component {
                     }
                 }
             }
-            else{
+            else {
                 nodeProp.active = false;
             }
             // button
             let button = produceItem.getChildByName('button');
             let labelBtn = button.getChildByName('label');
             labelBtn.getComponent(cc.Label).string = buyCfg.money;
-        }
-        // isShow;
-        if (buyCfg.isLimit && DataManager.data.shopLimit.indexOf(buyCfg.name) >= 0) {
-            produceItem.active = false;
         }
     }
 
@@ -137,15 +137,19 @@ export default class MainMenuMidTheme extends cc.Component {
         if (!produceItem) {
             produceItem = cc.instantiate(cell);
             produceItem.active = true;
+            produceItem.opacity = 255;
             produceItem.name = itemName;
             produceItem.parent = this.scrollContent;
             // icon
             let icon = produceItem.getChildByName('icon');
             icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames1[produceCfg.frameId];
+            // isShow;
+            if (buyCfg.isLimit && DataManager.data.advert.isRemove) {
+                produceItem.active = false;
+            }
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {
-                console.log('produceCfg: ', produceCfg, '; itemName: ', itemName, '; count: ', buyCfg.props[0].count);
                 nodeProp.active = true;
                 for (let index = 0, length = buyCfg.props.length; index < length; index++) {
                     let propOne = nodeProp.getChildByName('prop' + index);
@@ -156,17 +160,13 @@ export default class MainMenuMidTheme extends cc.Component {
                     }
                 }
             }
-            else{
+            else {
                 nodeProp.active = false;
             }
             // button
             let button = produceItem.getChildByName('button');
             let labelBtn = button.getChildByName('label');
             labelBtn.getComponent(cc.Label).string = buyCfg.money;
-        }
-        // isShow;
-        if (buyCfg.isLimit && DataManager.data.advert.isRemove) {
-            produceItem.active = false;
         }
     }
 
@@ -183,68 +183,20 @@ export default class MainMenuMidTheme extends cc.Component {
 
     /** 事件 滑动 */
     eventScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
-        if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.scrollContent.children.forEach((item) => {
-                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-                let topY = itemY + item.height * 0.5;
-                let bottomY = itemY - item.height * 0.5;
-                // 选项底部 超出 屏幕顶
-                if (bottomY > cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                // 选项顶部 超出 屏幕底
-                else if (topY < -cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                else {
-                    item.opacity = 255;
-                }
-            });
+        switch (eventType) {
+            case cc.ScrollView.EventType.SCROLL_BEGAN:
+            case cc.ScrollView.EventType.SCROLLING:
+            case cc.ScrollView.EventType.SCROLL_ENDED:
+                DataManager.refreshScrollview(scrollview.content);
+                break;
+            default:
+                break;
         }
-    };
-
-    /** 事件 刷新 */
-    refreshItem() {
-        this.scrollContent.children.forEach((item) => {
-            let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-            let topY = itemY + item.height * 0.5;
-            let bottomY = itemY - item.height * 0.5;
-            // 选项底部 超出 屏幕顶
-            if (bottomY > cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            // 选项顶部 超出 屏幕底
-            else if (topY < -cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            else {
-                item.opacity = 255;
-            }
-        });
     };
 
     /************************************************************************************************************************/
     /*********************************************************  事件  *******************************************************/
     /************************************************************************************************************************/
-    /** 更新语言 */
-    eventBack_refreshLanguage() {
-        this.refreshLanguage();
-    };
-
-    /** 监听-注册 */
-    listernerRegist(): void {
-        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
-    }
-
-    /** 监听-取消 */
-    listernerIgnore(): void {
-        kit.Event.removeByTarget(this);
-    };
-
-    protected onDestroy(): void {
-        this.listernerIgnore();
-    };
-
     /** 更新语言 */
     refreshLanguage() {
         this.refreshLabel();
@@ -271,6 +223,32 @@ export default class MainMenuMidTheme extends cc.Component {
                 }
             }
         }
+    };
+
+    event_refresh_shop(buyCfg: BuyCfg) {
+        if (buyCfg.isLimit) {
+            this.initShop();
+        }
+    }
+
+    /** 更新语言 */
+    eventBack_refreshLanguage() {
+        this.refreshLanguage();
+    };
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_refresh_shop, this.event_refresh_shop, this);
+        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
+
+    protected onDestroy(): void {
+        this.listernerIgnore();
     };
 }
 

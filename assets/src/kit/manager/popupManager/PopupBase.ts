@@ -93,10 +93,10 @@ export default class PopupBase<Options = any> extends cc.Component {
                 this.maskUp.active = false;
                 // 关闭节点
                 this.node.active = false;
-                // 弹窗已完全隐藏（动画完毕）
-                this.hideAfter && this.hideAfter(suspended);
                 // 弹窗完成回调
                 this.finishCallback && this.finishCallback(suspended);
+                // 弹窗已完全隐藏（动画完毕）
+                this.hideAfter && this.hideAfter(suspended);
                 // Done
                 res();
             }).start();

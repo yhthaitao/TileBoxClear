@@ -7,9 +7,9 @@ import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
-import ConfigGood from "../../../../src/config/ConfigGood";
 import ConfigGold from "../../../../src/config/ConfigGold";
 import { Design, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
+import { LangChars } from "../../../../src/config/ConfigLang";
 
 /** box参数 */
 export interface BoxParam {
@@ -83,7 +83,7 @@ export default class GameBox extends cc.Component {
     arrGameCopy: BoxParam[][] = [];// 箱子数据（用于 返回上一步 确认箱子位置）
     isLock: boolean = false;// 游戏是否锁定
     timeGame = { cur: 0, init: 0, count: 0, total: 1200 };// 游戏时间
-    timeProp = { iceCount: 0, iceTotal: 12, addTotal: 10 };// 道具时间
+    timeProp = { iceCount: 0, iceTotal: 15, addTotal: 10 };// 道具时间
 
     bottomParamArr: GoodParam[][] = [];// 物品数据（检测区）
     bottomMax: number = 7;// 物品最大数量（检测区）
@@ -98,7 +98,6 @@ export default class GameBox extends cc.Component {
     mainLayer: number = 5;// 箱子父节点实际显示的层数
     mainLeftX: number = 0;// 箱子最左边
     mainRightX: number = 0;// 箱子最后边
-    winScaleByH: number = 1;// 屏幕缩放比例（根据高度判断）
     processDisH: number = 8;// 进度条透明部分高度
     // 底部物品缩放比例 61  86  116  134
     goodScaleBottom = {
@@ -136,37 +135,37 @@ export default class GameBox extends cc.Component {
         this.listernerRegist();
 
         // 缩放数据
-        this.winScaleByH = cc.winSize.height / Design.height;
-        let disBackToProp = 60 * this.winScaleByH;
-        let disTopToProcess = 63 * this.winScaleByH;
-        let disPropToBottom = 60 * this.winScaleByH;
-        let disBottomToMain = 150 * this.winScaleByH;
+        let winScaleByH = cc.winSize.height / Design.height;
+        let disBackToProp = 60 * winScaleByH;
+        let disTopToProcess = 63 * winScaleByH;
+        let disPropToBottom = 60 * winScaleByH;
+        let disBottomToMain = 150 * winScaleByH;
 
         // 调整ui（uiTop）
-        this.uiTop.height *= this.winScaleByH;
-        this.uiTop.children.forEach((item) => { item.scale = this.winScaleByH; });
+        this.uiTop.height *= winScaleByH;
+        this.uiTop.children.forEach((item) => { item.scale = winScaleByH; });
         this.uiTop.y = cc.winSize.height * 0.5 - this.uiTop.height * 0.5;
 
         // 调整ui（uiProcess）
-        this.uiProcess.height *= this.winScaleByH;
+        this.uiProcess.height *= winScaleByH;
         this.uiProcess.children.forEach((item) => {
             if (item.name == 'bar') {
-                item.height *= this.winScaleByH;
+                item.height *= winScaleByH;
             }
             else {
-                item.scale = this.winScaleByH;
+                item.scale = winScaleByH;
             }
         });
         this.uiProcess.y = this.uiTop.y - disTopToProcess;
-        this.processDisH *= this.winScaleByH;
+        this.processDisH *= winScaleByH;
 
         // 调整ui（uiMask）
         this.uiMask.height = cc.winSize.height * 0.5 - this.uiProcess.y + this.uiProcess.height * 0.5 - this.processDisH;
         this.uiMask.y = cc.winSize.height * 0.5;
 
         // 调整ui（uiProp）
-        this.uiProp.height *= this.winScaleByH;
-        this.uiProp.children.forEach((item) => { item.scale = this.winScaleByH; });
+        this.uiProp.height *= winScaleByH;
+        this.uiProp.children.forEach((item) => { item.scale = winScaleByH; });
         this.uiProp.y = -cc.winSize.height * 0.5 + this.uiProp.height * 0.5 + disBackToProp;
 
         // 调整ui（uiBottom）
@@ -179,7 +178,7 @@ export default class GameBox extends cc.Component {
         this.bg.on(cc.Node.EventType.TOUCH_START, this.effectTouchShow, this, true);
     }
 
-    protected start(): void {
+    protected onEnable(): void {
         // 初始ui
         this.nodeMain.opacity = 0;
         this.maskTop.setContentSize(cc.winSize);
@@ -187,12 +186,12 @@ export default class GameBox extends cc.Component {
         this.maskBottom.setContentSize(cc.winSize);
         this.maskBottom.active = false;
 
-        this.gameStart();
+        this.gameLoad();
     }
 
     /** 第一次开始 */
-    gameStart(isRestart = false) {
-        Common.log('功能：游戏开始');
+    gameLoad(isRestart = false) {
+        Common.log('功能：游戏开始 isRestart: ', isRestart ? 'true' : 'false');
         this.setIsLock(true);
         // 从 101 关以后，都走重新开始游戏；
         let level = DataManager.data.boxData.level;
@@ -208,6 +207,7 @@ export default class GameBox extends cc.Component {
         this.initBox(isRestart);
         this.initUI();
         this.initLevel();
+        NativeCall.showBanner();
     }
 
     /** 加载关卡数据 */
@@ -244,6 +244,11 @@ export default class GameBox extends cc.Component {
         };
 
         let levelParam = DataManager.getLevelData();
+        // 屏幕系数
+        this.mainScale = 1;// 箱子父节点缩放比例
+        this.mainLayer = 5;// 箱子父节点实际显示的层数
+        this.mainLeftX = 0;// 箱子最左边
+        this.mainRightX = 0;// 箱子最后边
         // 物品计数
         this.goodsCount = 0;
         this.goodsTotal = levelParam.item.length;
@@ -588,24 +593,6 @@ export default class GameBox extends cc.Component {
             });
         });
         NativeCall.logEventOne(ConfigDot.dot_loadok_to_all);
-        cc.tween(this.node).delay(1.0).call(() => {
-            this.playAniShow(true, () => {
-                // 新手引导
-                let isGuide = DataManager.checkNewPlayerGame();
-                if (isGuide) {
-                    if (DataManager.data.boxData.level == 5) {
-                        this.removeGoodToBottom();
-                    }
-                    this.gamePause();
-                    kit.Event.emit(CConst.event_guide_game);
-                }
-                else {
-                    this.gameResume();
-                }
-                this.checkEvaluate();
-                this.usePropWins();
-            });
-        }).start();
     }
 
     /** 设置关卡等级 */
@@ -662,7 +649,7 @@ export default class GameBox extends cc.Component {
                 nodeN.active = false;
                 return;
             }
-            
+
             button.active = true;
             locked.active = false;
             nodeY.active = true;
@@ -1072,17 +1059,6 @@ export default class GameBox extends cc.Component {
         return h < 100;
     };
 
-    /** 检测 用户评价 */
-    checkEvaluate() {
-        // let _data = DataManager.data;
-        // if (_data.isEvaluate) {
-        //     return;
-        // }
-        // if (_data.boxData.level == 6 || _data.boxData.level == 26) {
-        //     kit.Popup.show(CConst.popup_path_user_evaluate, {}, { mode: PopupCacheMode.Frequent });
-        // }
-    }
-
     /** 点击事件 */
     eventTouch(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
@@ -1138,6 +1114,7 @@ export default class GameBox extends cc.Component {
         let itemDragon = this.effectExp.getChildByName('dragon');
         let itemExp = DataManager.poolGet(itemDragon, this.objPool.effectExp);
         itemExp.parent = main;
+        itemExp.scale = 0.6;
         itemExp.active = true;
         itemExp.position = point;
         let dragon = itemExp.getComponent(dragonBones.ArmatureDisplay)
@@ -1358,13 +1335,7 @@ export default class GameBox extends cc.Component {
             let need = 50;
             // 进入购买金币
             if (coin < need) {
-                let option = {
-                    isGoShop: true
-                };
-                let params = {
-                    mode: PopupCacheMode.Frequent,
-                };
-                kit.Popup.show(CConst.popup_path_getCoins, option, params);
+                kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: true }, { mode: PopupCacheMode.Frequent, });
                 return;
             }
             else {
@@ -1396,13 +1367,7 @@ export default class GameBox extends cc.Component {
             let need = 50;
             // 进入购买金币
             if (coin < need) {
-                let option = {
-                    isGoShop: true
-                };
-                let params = {
-                    mode: PopupCacheMode.Frequent,
-                };
-                kit.Popup.show(CConst.popup_path_getCoins, option, params);
+                kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: true }, { mode: PopupCacheMode.Frequent, });
                 return;
             }
             else {
@@ -1428,7 +1393,7 @@ export default class GameBox extends cc.Component {
             }
             // 物品标识为0，提示失败；
             if (keyGood == 0) {
-                kit.Event.emit(CConst.event_notice, "Can't be used now");
+                kit.Event.emit(CConst.event_notice, LangChars.notice_canotBeUse);
                 return;
             }
         }
@@ -1502,7 +1467,7 @@ export default class GameBox extends cc.Component {
         let numGoodArr = this.bottomParamArr.length;
         // 没有物品
         if (numGoodArr <= 0) {
-            kit.Event.emit(CConst.event_notice, "Can't be used now");
+            kit.Event.emit(CConst.event_notice, LangChars.notice_canotBeUse);
             return;
         }
 
@@ -1513,13 +1478,7 @@ export default class GameBox extends cc.Component {
             let need = 30;
             // 进入购买金币
             if (coin < need) {
-                let option = {
-                    isGoShop: true
-                };
-                let params = {
-                    mode: PopupCacheMode.Frequent,
-                };
-                kit.Popup.show(CConst.popup_path_getCoins, option, params);
+                kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: true }, { mode: PopupCacheMode.Frequent, });
                 return;
             }
             else {
@@ -1721,13 +1680,7 @@ export default class GameBox extends cc.Component {
             let need = 20;
             // 进入购买金币
             if (coin < need) {
-                let option = {
-                    isGoShop: true
-                };
-                let params = {
-                    mode: PopupCacheMode.Frequent,
-                };
-                kit.Popup.show(CConst.popup_path_getCoins, option, params);
+                kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: true }, { mode: PopupCacheMode.Frequent, });
                 return;
             }
             else {
@@ -1811,32 +1764,32 @@ export default class GameBox extends cc.Component {
 
     /** 按钮事件 上一关 */
     eventBtnLevelBack() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        DataManager.data.boxData.level--;
-        DataManager.setData();
+        // if (this.speedBox.isMove || this.speedGood.isMove) {
+        //     return;
+        // }
+        // DataManager.data.boxData.level--;
+        // DataManager.setData();
 
-        cc.tween(this.node).call(() => {
-            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-        }).delay(0.5).call(() => {
-            kit.Event.emit(CConst.event_game_next);
-        }).start();
+        // let obj = {
+        //     eventStart: CConst.event_game_load,
+        //     eventFinish: CConst.event_game_start,
+        // }
+        // kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
     }
 
     /** 按钮事件 下一关 */
     eventBtnLevelNext() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        DataManager.data.boxData.level++;
-        DataManager.setData();
+        // if (this.speedBox.isMove || this.speedGood.isMove) {
+        //     return;
+        // }
+        // DataManager.data.boxData.level++;
+        // DataManager.setData();
 
-        cc.tween(this.node).call(() => {
-            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-        }).delay(0.5).call(() => {
-            kit.Event.emit(CConst.event_game_next);
-        }).start();
+        // let obj = {
+        //     eventStart: CConst.event_game_load,
+        //     eventFinish: CConst.event_game_start,
+        // }
+        // kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
     }
 
     /** 使用道具-时钟 */
@@ -2084,7 +2037,6 @@ export default class GameBox extends cc.Component {
             return;
         }
         let wins = DataManager.data.wins.count - DataManager.data.wins.start;
-        console.log('使用 连胜道具 wins: ', wins);
         if (wins < 1) {
             return;
         }
@@ -2618,7 +2570,7 @@ export default class GameBox extends cc.Component {
         NativeCall.logEventOne(ConfigDot.dot_levelPass);
         let dot = ConfigDot['dot_pass_level_' + stageLevel];
         if (dot) {
-            let passTime = Math.floor((new Date().getTime() - this.objData.passTime) / 1000); //通关时间
+            let passTime = Math.floor((new Date().getTime() - this.objData.passTime) * 0.001); //通关时间
             NativeCall.logEventFore(dot, String(stageLevel), String(passTime), String(this.objData.stepCount));
         }
         NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
@@ -2644,11 +2596,7 @@ export default class GameBox extends cc.Component {
             }
         }
 
-        // 进入下一关
-        let funcNext = () => {
-            kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
-        };
-        DataManager.playAdvert(funcNext);
+        kit.Popup.show(CConst.popup_path_gameWin, params, { mode: PopupCacheMode.Frequent });
     };
 
     /** 添加 箱子 */
@@ -2732,6 +2680,24 @@ export default class GameBox extends cc.Component {
         good.active = true;
     };
 
+    /** 游戏开始 */
+    gameStart() {
+        this.playAniShow(true, () => {
+            // 新手引导
+            if (DataManager.checkNewPlayerGame()) {
+                if (DataManager.data.boxData.level == 5) {
+                    this.removeGoodToBottom();
+                }
+                this.gamePause();
+                kit.Event.emit(CConst.event_guide_game);
+            }
+            else {
+                this.gameResume();
+            }
+            this.usePropWins();
+        });
+    };
+
     /** 暂停 */
     gamePause() {
         Common.log('功能：游戏暂停');
@@ -2763,10 +2729,6 @@ export default class GameBox extends cc.Component {
         this.setIsLock(false);
     };
 
-    gameRestart() {
-        this.gameStart(true);
-    };
-
     eventBackRefreshProp() {
         this.setUIProp(TypeProp.ice);
         this.setUIProp(TypeProp.tip);
@@ -2776,8 +2738,9 @@ export default class GameBox extends cc.Component {
 
     /** 监听-注册 */
     listernerRegist(): void {
-        kit.Event.on(CConst.event_game_next, this.gameStart, this);
-        kit.Event.on(CConst.event_game_restart, this.gameRestart, this);
+        kit.Event.on(CConst.event_game_load, this.gameLoad.bind(this, false), this);
+        kit.Event.on(CConst.event_game_reload, this.gameLoad.bind(this, true), this);
+        kit.Event.on(CConst.event_game_start, this.gameStart, this);
         kit.Event.on(CConst.event_game_resume, this.gameResume, this);
         kit.Event.on(CConst.event_game_revive, this.gameRevive, this);
         kit.Event.on(CConst.event_refresh_prop, this.eventBackRefreshProp, this);

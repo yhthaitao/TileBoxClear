@@ -12,7 +12,7 @@
   "height": 5,
   "platformSettings": {},
   "subMetas": {
-    "line": {
+    "lineUp": {
       "ver": "1.0.6",
       "uuid": "aa376ea9-ed7a-43f2-922d-04dd36fdad2e",
       "importer": "sprite-frame",

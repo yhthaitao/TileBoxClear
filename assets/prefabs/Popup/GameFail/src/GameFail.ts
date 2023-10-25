@@ -86,33 +86,26 @@ export default class GameFail extends PopupBase {
     /** 复活 */
     async eventBtnPlayOn() {
         kit.Audio.playEffect(CConst.sound_clickUI);
+        if (DataManager.data.numCoin < 60) {
+            kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true, });
+            return;
+        }
         // 60个金币 复活
-        if (DataManager.data.numCoin >= 60) {
-            DataManager.data.numCoin -= 60;
-            DataManager.setData();
-            await kit.Popup.hide();
-            kit.Event.emit(CConst.event_game_revive, this.params.type);
-        }
-        else {
-            let option = { 
-                isGoShop: false, 
-            };
-            let params = { 
-                mode: PopupCacheMode.Frequent, 
-                isSoon: true,
-            };
-            kit.Popup.show(CConst.popup_path_getCoins, option, params);
-        }
+        DataManager.data.numCoin -= 60;
+        DataManager.setData();
+        await kit.Popup.hide();
+        kit.Event.emit(CConst.event_game_revive, this.params.type);
     }
 
     /** 放弃 */
     async eventBtnGiveUp() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         await kit.Popup.hide();
-        
+
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
+        
         kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameFail }, { mode: PopupCacheMode.Frequent });
     }
 }

@@ -83,7 +83,7 @@ export default class GetLives extends PopupBase {
         itemLabel.getComponent(cc.Label).string = '' + count;
 
         if (count < DataManager.data.strength.total) {
-            let timeCur = Math.floor(new Date().getTime() / 1000);
+            let timeCur = Math.floor(new Date().getTime() * 0.001);
             let timeDis = timeCur - DataManager.data.strength.tCount;
             timeDis = timeDis % DataManager.data.strength.tTotal;
             let tCount = DataManager.data.strength.tTotal - timeDis;
@@ -100,40 +100,34 @@ export default class GetLives extends PopupBase {
     };
 
     /** 按钮事件 购买体力 */
-    async eventBtnRefill() {
+    eventBtnRefill() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         let strength = DataManager.data.strength;
         if (strength.count >= strength.total) {
-            kit.Event.emit(CConst.event_notice, '体力值已满');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_strengthFull);
+            return;
         }
-        else if (DataManager.data.numCoin >= 100) {
-            DataManager.data.strength.count += 1;
-            DataManager.data.numCoin -= 100;
-            DataManager.setData();
-            kit.Event.emit(CConst.event_refresh_top);
-            await kit.Popup.hide();
+        if (DataManager.data.numCoin < 100) {
+            kit.Event.emit(CConst.event_notice, LangChars.notice_noMoreGold);
+            kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true});
+            return;
         }
-        else {
-            kit.Popup.hide();
-            let option = { 
-                isGoShop: false 
-            };
-            let params = { 
-                mode: PopupCacheMode.Frequent, 
-            };
-            kit.Popup.show(CConst.popup_path_getCoins, option, params);
-        }
+        DataManager.data.strength.count += 1;
+        DataManager.data.numCoin -= 100;
+        DataManager.setData();
+        kit.Popup.hide();
+        kit.Event.emit(CConst.event_refresh_top);
     };
 
     /** 按钮事件 免费获取体力 */
     eventBtnFree() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         if (DataManager.data.boxData.timesLive.count <= 0) {
-            kit.Event.emit(CConst.event_notice, '今日次数已用完');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_noTimesToday);
             return;
         }
         if (DataManager.data.strength.count >= DataManager.data.strength.total) {
-            kit.Event.emit(CConst.event_notice, '体力值已满');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_strengthFull);
             return;
         }
         let funcA = () => {
@@ -144,22 +138,23 @@ export default class GetLives extends PopupBase {
             kit.Popup.hide();
         };
         let funcB = () => {
-            kit.Event.emit(CConst.event_notice, '视频未加载');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
         DataManager.playVideo(funcA, funcB);
     };
 
     /** 按钮事件 退出 */
-    async eventBtnExit() {
+    eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
         switch (this.params.type) {
             case TypeBefore.fromSettingGame:// 游戏中途设置
-                kit.Event.emit(CConst.event_game_resume);
-                break;
             case TypeBefore.fromGameFail:// 游戏失败
-                await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                kit.Event.emit(CConst.event_enter_menu);
+                let obj = {
+                    eventStart: CConst.event_enter_menu,
+                    eventFinish: CConst.event_menu_start,
+                }
+                kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
                 break;
             default:
                 break;

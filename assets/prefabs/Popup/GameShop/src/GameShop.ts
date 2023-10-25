@@ -37,7 +37,7 @@ export default class GameShop<Options = any> extends PopupBase {
         6: { type: 0, frameId: 3, keyCoinfg: 6, keyString: 'ShopQueenTreasure', },
 
         7: { type: 1, frameId: 0, keyCoinfg: 7, keyString: 'RemoveAds', },
-        
+
         8: { type: 1, frameId: 1, keyCoinfg: 8, },
         9: { type: 1, frameId: 1, keyCoinfg: 9, },
         10: { type: 1, frameId: 2, keyCoinfg: 10, },
@@ -53,6 +53,7 @@ export default class GameShop<Options = any> extends PopupBase {
 
     protected showBefore(options: any): void {
         Common.log('弹窗 游戏商店页面 showBefore()');
+        this.listernerRegist();
         // 金币数
         let coin = DataManager.data.numCoin;
         this.labelCoin.getComponent(cc.Label).string = '' + coin;
@@ -68,7 +69,7 @@ export default class GameShop<Options = any> extends PopupBase {
     public show(options?: Options) {
         this.maskDown.setContentSize(cc.winSize);
         this.maskUp.setContentSize(cc.winSize);
-        
+
         return new Promise<void>(async res => {
             this.node.active = true;
             // 开启拦截
@@ -108,7 +109,7 @@ export default class GameShop<Options = any> extends PopupBase {
             // 关闭前
             this.hideBefore();
             // 播放背景遮罩动画
-            cc.tween(this.maskDown).to(0.233, { opacity: 0 }, ).start();
+            cc.tween(this.maskDown).to(0.233, { opacity: 0 },).start();
             // 播放弹窗主体动画
             cc.tween(this.content).to(0.233, { opacity: 0 }).call(() => {
                 // 关闭拦截
@@ -123,6 +124,10 @@ export default class GameShop<Options = any> extends PopupBase {
                 res();
             }).start();
         });
+    }
+
+    protected hideAfter(suspended: boolean): void {
+        this.listernerIgnore();
     }
 
     /************************************************************************************************************************/
@@ -147,12 +152,11 @@ export default class GameShop<Options = any> extends PopupBase {
                 if (produceCfg.type == 0) {
                     this.initCell0(produceCfg, this.gifts[produceCfg.type]);
                 }
-                else{
+                else {
                     this.initCell1(produceCfg, this.gifts[produceCfg.type]);
                 }
             }
         }
-        this.refreshItem();
         this.refreshLabel();
     };
 
@@ -163,15 +167,19 @@ export default class GameShop<Options = any> extends PopupBase {
         if (!produceItem) {
             produceItem = cc.instantiate(cell);
             produceItem.active = true;
+            produceItem.opacity = 255;
             produceItem.name = itemName;
             produceItem.parent = this.scrollContent;
             // limit
-            let isLimit0 = buyCfg.isLimit;
-            let isLimit1 = DataManager.data.shopLimit.indexOf(buyCfg.name) < 0;
-            produceItem.getChildByName('limit').active = isLimit0 && isLimit1;
+            let isLimit = buyCfg.isLimit;
+            produceItem.getChildByName('limit').active = isLimit;
             // icon
             let icon = produceItem.getChildByName('icon');
             icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames0[produceCfg.frameId];
+            // isShow;
+            if (isLimit && DataManager.data.shopLimit.indexOf(buyCfg.name) >= 0) {
+                produceItem.active = false;
+            }
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {
@@ -185,17 +193,13 @@ export default class GameShop<Options = any> extends PopupBase {
                     }
                 }
             }
-            else{
+            else {
                 nodeProp.active = false;
             }
             // button
             let button = produceItem.getChildByName('button');
             let labelBtn = button.getChildByName('label');
             labelBtn.getComponent(cc.Label).string = buyCfg.money;
-        }
-        // isShow;
-        if (buyCfg.isLimit && DataManager.data.shopLimit.indexOf(buyCfg.name) >= 0) {
-            produceItem.active = false;
         }
     }
 
@@ -206,11 +210,16 @@ export default class GameShop<Options = any> extends PopupBase {
         if (!produceItem) {
             produceItem = cc.instantiate(cell);
             produceItem.active = true;
+            produceItem.opacity = 255;
             produceItem.name = itemName;
             produceItem.parent = this.scrollContent;
             // icon
             let icon = produceItem.getChildByName('icon');
             icon.getComponent(cc.Sprite).spriteFrame = this.iconFrames1[produceCfg.frameId];
+            // isShow;
+            if (buyCfg.isLimit && DataManager.data.advert.isRemove) {
+                produceItem.active = false;
+            }
             // prop
             let nodeProp = produceItem.getChildByName('prop');
             if (buyCfg.props) {
@@ -224,7 +233,7 @@ export default class GameShop<Options = any> extends PopupBase {
                     }
                 }
             }
-            else{
+            else {
                 nodeProp.active = false;
             }
             // button
@@ -232,52 +241,19 @@ export default class GameShop<Options = any> extends PopupBase {
             let labelBtn = button.getChildByName('label');
             labelBtn.getComponent(cc.Label).string = buyCfg.money;
         }
-        // isShow;
-        if (buyCfg.isLimit && DataManager.data.advert.isRemove) {
-            produceItem.active = false;
-        }
     }
 
     /** 事件 滑动 */
     eventScrollview(scrollview: cc.ScrollView, eventType: cc.ScrollView.EventType, customEventData: string) {
-        if (eventType == cc.ScrollView.EventType.SCROLLING) {
-            this.scrollContent.children.forEach((item) => {
-                let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-                let topY = itemY + item.height * 0.5;
-                let bottomY = itemY - item.height * 0.5;
-                // 选项底部 超出 屏幕顶
-                if (bottomY > cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                // 选项顶部 超出 屏幕底
-                else if (topY < -cc.winSize.height * 0.5) {
-                    item.opacity = 0;
-                }
-                else {
-                    item.opacity = 255;
-                }
-            });
+        switch (eventType) {
+            case cc.ScrollView.EventType.SCROLL_BEGAN:
+            case cc.ScrollView.EventType.SCROLLING:
+            case cc.ScrollView.EventType.SCROLL_ENDED:
+                DataManager.refreshScrollview(scrollview.content);
+                break;
+            default:
+                break;
         }
-    };
-
-    /** 事件 刷新 */
-    refreshItem() {
-        this.scrollContent.children.forEach((item) => {
-            let itemY = Common.getLocalPos(item.parent, item.position, this.node).y;
-            let topY = itemY + item.height * 0.5;
-            let bottomY = itemY - item.height * 0.5;
-            // 选项底部 超出 屏幕顶
-            if (bottomY > cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            // 选项顶部 超出 屏幕底
-            else if (topY < -cc.winSize.height * 0.5) {
-                item.opacity = 0;
-            }
-            else {
-                item.opacity = 255;
-            }
-        });
     };
 
     /** label shop */
@@ -311,12 +287,26 @@ export default class GameShop<Options = any> extends PopupBase {
         let produceCfg: Produce = this.produceObj[produceKey];
         let buyCfg: BuyCfg = ConfigBuyItem[produceCfg.keyCoinfg];
         NativeCall.buyItem(buyCfg);
-
-        Common.log('游戏内 商城购买: ', buyCfg);
     };
 
     eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
     }
+
+    eventBack_refreshShop(buyCfg: BuyCfg) {
+        if (buyCfg.isLimit) {
+            this.initShop();
+        }
+    }
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_refresh_shop, this.eventBack_refreshShop, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
 }

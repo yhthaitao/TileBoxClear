@@ -50,8 +50,8 @@
     "boxLevel_desc": "Complete more levels to open chests!",
     "boxXingxing_title": "STARS CHEST",
     "boxXingxing_desc": "We need to collect more stars to open the chests!",
-    "boxGood_title": "New Pack Opened!",
-    "boxGood_button": "Claim",
+    "boxGood_title": "New Pack Opened",
+    "boxGood_button": "Get",
     "tapToClaim": "Tap to claim",
     "tapToContinue": "Tap to continue",
     "goldCollection": "Gold Collection",
@@ -134,7 +134,7 @@
     "logon_reward_day_7": "Day7",
     "AreasUnlocked": "Areas unlocked!",
     "areas_1":"Sketch",
-    "areas_2":"Beach",
+    "areas_2":"Halloween",
     "areas_3":"The Underwater world",
     "areas_4":"On a Journey",
     "areas_5":"Successful downhill",
@@ -168,5 +168,15 @@
     "boxSort_7": "REFRESH props can rearrange all goods!",
     "boxSort_9": "FREEZE props can freeze time for 15 seconds!",
     "boxSort_12": "Each MANGNET you collect can eliminate a group of goods!",
-    "boxSort_15": "Each STOPWATCH you collect can add 10 seconds to the challenge time!"
+    "boxSort_15": "Each STOPWATCH you collect can add 10 seconds to the challenge time!",
+    
+    "notice_canotBeUse": "Can't be used now",
+    "notice_noTimesToday": "It cannot be used again today",
+    "notice_adLoading": "Ad loading...",
+    "notice_strengthFull": "Full of energy",
+    "notice_noMoreGold": "No more gold",
+    "notice_buySuccess": "Purchase successful",
+    "notice_buyFail": "Purchase failed",
+    "notice_buyCancal": "Purchase canceled",
+    "notice_noNetwork": "No network available"											
 }

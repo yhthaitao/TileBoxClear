@@ -248,14 +248,17 @@ export default class SettingGame extends PopupBase {
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
         let funcNext = async () => {
-            await kit.Popup.hide();// 关闭
-            // 过度
-            await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
             // 进入菜单页
             DataManager.data.wins.count = 0;
             DataManager.strengthReduce();
             DataManager.setData();
-            kit.Event.emit(CConst.event_enter_menu);
+
+            kit.Popup.hide();
+            let obj = {
+                eventStart: CConst.event_enter_menu,
+                eventFinish: CConst.event_menu_start,
+            }
+            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
         };
         DataManager.playAdvert(funcNext);
     };

@@ -62,7 +62,7 @@ export default class Loading extends cc.Component {
         });
         if (this.spriteProcessBar.fillRange >= 1) {
             this.isStart = false;
-            kit.Event.emit(CConst.event_complete_loading);
+            kit.Event.emit(CConst.event_loading_complete);
         }
     }
 

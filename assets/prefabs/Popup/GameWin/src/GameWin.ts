@@ -262,27 +262,30 @@ export default class GameWin<Options = any> extends PopupBase {
     }
 
     /** 按钮事件 确定 */
-    async eventBtnNext() {
+    eventBtnNext() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
+        kit.Popup.hide();
         if (this.isNext) {
             // next 游戏开始前页面
             kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameWin }, { mode: PopupCacheMode.Frequent });
         }
         else {
-            await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
-            kit.Event.emit(CConst.event_enter_menu);
+            let obj = {
+                eventStart: CConst.event_enter_menu,
+                eventFinish: CConst.event_menu_start,
+            }
+            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
         }
     }
 
     /** 按钮事件 退出 */
     async eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        let funcNext = async () => {
-            await kit.Popup.hide();
-            await kit.Popup.show(CConst.popup_path_actPass, this.params, { mode: PopupCacheMode.Frequent });
-            kit.Event.emit(CConst.event_enter_menu);
-        };
-        DataManager.playAdvert(funcNext);
+        kit.Popup.hide();
+        let obj = {
+            eventStart: CConst.event_enter_menu,
+            eventFinish: CConst.event_menu_start,
+        }
+        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
     }
 }

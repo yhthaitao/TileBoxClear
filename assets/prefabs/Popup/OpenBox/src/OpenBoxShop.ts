@@ -2,7 +2,7 @@ import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
-import { TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
+import { TypeProp } from "../../../../src/config/ConfigCommon";
 import { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import CConst from "../../../../src/config/CConst";
 
@@ -25,6 +25,8 @@ export default class OpenBoxShop extends PopupBase {
             scale: { bottom: 0.25, mid: 1.0 },
             opacity: { bottom: 0, mid: 255, top: 0 },
         },
+        isAddCoin: false, 
+        isAddProp: false,
     };
     produceCfg: BuyCfg = null;
     nodeReward: cc.Node = null;
@@ -38,33 +40,37 @@ export default class OpenBoxShop extends PopupBase {
 
     initData() {
         // 去除广告
-        let isAddCoin = false;
-        let isAddProp = false;
         if (this.produceCfg.name == 'noads') {
             DataManager.data.advert.isRemove = true;
         }
         else {
+            if (this.produceCfg.isLimit) {
+                let idx = DataManager.data.shopLimit.indexOf(this.produceCfg.name);
+                if (idx < 0) {
+                    DataManager.data.shopLimit.push(this.produceCfg.name);
+                }
+            }
             for (let index = 0, length = this.produceCfg.props.length; index < length; index++) {
                 let prop = this.produceCfg.props[index];
                 switch (prop.typeProp) {
                     case TypeProp.coin:
-                        isAddCoin = true;
+                        this.obj.isAddCoin = true;
                         DataManager.data.numCoin += prop.count;
                         break;
                     case TypeProp.ice:
-                        isAddProp = true;
+                        this.obj.isAddProp = true;
                         DataManager.data.prop.ice.count += prop.count;
                         break;
                     case TypeProp.refresh:
-                        isAddProp = true;
+                        this.obj.isAddProp = true;
                         DataManager.data.prop.refresh.count += prop.count;
                         break;
                     case TypeProp.back:
-                        isAddProp = true;
+                        this.obj.isAddProp = true;
                         DataManager.data.prop.back.count += prop.count;
                         break;
                     case TypeProp.tStrengthInfinite:
-                        let time = Math.floor(new Date().getTime() / 1000);
+                        let time = Math.floor(new Date().getTime() * 0.001);
                         if (DataManager.data.strength.tInfinite < time) {
                             DataManager.data.strength.tInfinite = time + prop.count * 3600;
                         }
@@ -73,7 +79,7 @@ export default class OpenBoxShop extends PopupBase {
                         }
                         break;
                     case TypeProp.tip:
-                        isAddProp = true;
+                        this.obj.isAddProp = true;
                         DataManager.data.prop.tip.count += prop.count;
                         break;
                     case TypeProp.clock:
@@ -88,12 +94,6 @@ export default class OpenBoxShop extends PopupBase {
             }
         }
         DataManager.setData();
-        if (isAddCoin) {
-            kit.Event.emit(CConst.event_refresh_coin);
-        }
-        if (isAddProp) {
-            kit.Event.emit(CConst.event_refresh_prop);
-        }
     };
 
     initUI() {
@@ -150,6 +150,13 @@ export default class OpenBoxShop extends PopupBase {
                 cc.tween().to(0.5, { y: this.obj.icon.y.top }),
                 cc.tween().to(0.5, { opacity: this.obj.icon.opacity.top }),
             ).call(() => {
+                if (this.obj.isAddCoin) {
+                    kit.Event.emit(CConst.event_refresh_coin);
+                }
+                if (this.obj.isAddProp) {
+                    kit.Event.emit(CConst.event_refresh_prop);
+                }
+                kit.Event.emit(CConst.event_refresh_shop, this.produceCfg);
                 // 弹窗已完全展示
                 this.showAfter && this.showAfter();
                 // Done

@@ -51,7 +51,7 @@ export default class GetCoins extends PopupBase {
     eventBtnFree() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         if (DataManager.data.boxData.timesCoin.count <= 0) {
-            kit.Event.emit(CConst.event_notice, '今日次数已用完');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_noTimesToday);
             return;
         }
         let funcA = () => {
@@ -62,7 +62,7 @@ export default class GetCoins extends PopupBase {
             kit.Popup.hide();
         };
         let funcB = () => {
-            kit.Event.emit(CConst.event_notice, '视频未加载');
+            kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
         DataManager.playVideo(funcA, funcB);
     };

@@ -104,7 +104,6 @@ export default class OpenBoxLevel extends PopupBase {
             this.nodeBox.active = false;
             this.nodeClaim.active = false;
             this.nodeContinue.active = false;
-
             // 开启拦截
             this.maskUp.active = true;
             // 关闭前

@@ -5,7 +5,6 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
-import GameFail from "../../../../prefabs/Popup/GameFail/src/GameFail";
 
 /** 动作参数（宝箱相关） */
 interface ParamsAniBox {
@@ -46,6 +45,7 @@ export default class MainMenuMidHome extends cc.Component {
     }
 
     protected onEnable(): void {
+        console.log('MainMenuMidHome onEnable()');
         this.init();
     }
 
@@ -59,40 +59,11 @@ export default class MainMenuMidHome extends cc.Component {
         this.initHome();
     };
 
-    setIsLock(isLock): void {
-        if (isLock) {
-            if (this.obj.ani.boxLevel && this.obj.ani.boxSuipian && this.obj.ani.boxXingxing) {
-                this.menu_mask_bottom.active = false;
-                Common.log('功能：菜单界面 解除锁屏');
-            }
-        }
-        else {
-            this.obj.ani.boxLevel = false;
-            this.obj.ani.boxSuipian = false;
-            this.obj.ani.boxXingxing = false;
-            this.menu_mask_bottom.active = true;
-            Common.log('功能：菜单界面 锁屏');
-        }
-    };
-
-    playAniBox(params: ParamsAniBox): Promise<void> {
-        return new Promise(res => {
-            cc.tween(params.objBar.node.getComponent(cc.Sprite)).parallel(
-                cc.tween().to(params.objBar.time, { fillRange: params.objBar.goal }),
-                cc.tween().delay(params.objBar.time * 0.5).call(() => {
-                    params.objLabel.node.getComponent(cc.Label).string = params.objLabel.desc;
-                }),
-            ).call(() => {
-                res();
-            }).start();
-        });
-    };
-
     /************************************************************************************************************************/
     /*********************************************************  home  *******************************************************/
     /************************************************************************************************************************/
     /** 初始化主页面 */
-    async initHome() {
+    initHome() {
         this.resetBg();
         this.resetHard();
         this.resetLevelStage();
@@ -102,7 +73,9 @@ export default class MainMenuMidHome extends cc.Component {
 
         this.resetCalendar();
         this.resetBank();
+    };
 
+    async homeStart() {
         await this.resetBoxSuipianProcess();
         await this.resetBoxXingxingProcess();
         await this.resetBoxLevelProcess();
@@ -280,7 +253,7 @@ export default class MainMenuMidHome extends cc.Component {
 
     /** 刷新-碎片-时间 */
     refreshBoxSuipianTime() {
-        let timeCur = Math.floor(new Date().getTime() / 1000);
+        let timeCur = Math.floor(new Date().getTime() * 0.001);
         this.tElseSuipian = Common.getTimeDayFinish() - timeCur;
         this.tElseSuipianUpdate();
         this.schedule(this.tElseSuipianUpdate, 1.0);
@@ -443,6 +416,20 @@ export default class MainMenuMidHome extends cc.Component {
                 boxAdd = boxAdd - boxAddElse;
             }
 
+            // 数据变更
+            let isBoxLevelFirst = false;
+            boxData.count += boxData.add;
+            boxData.add = 0;
+            if (boxData.count >= total) {
+                boxData.count -= total;
+                if (boxData.level == 1) {
+                    isBoxLevelFirst = true;
+                }
+                boxData.level += 1;
+                DataManager.refreshDataAfterUnlockReward(boxReward);
+            }
+            DataManager.setData();
+
             // 进度条
             let itemBar = this.home_right_boxLevel_process.getChildByName('bar');
             itemBar.getComponent(cc.Sprite).fillRange = boxCount / total;
@@ -467,16 +454,6 @@ export default class MainMenuMidHome extends cc.Component {
                 let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pButton.x, y: pButton.y }, rewards: boxReward };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
 
-                // 数据变更
-                boxData.count += boxData.add;
-                boxData.add = 0;
-                if (boxData.count >= total) {
-                    boxData.count -= total;
-                    boxData.level += 1;
-                    DataManager.refreshDataAfterUnlockReward(boxReward);
-                }
-                DataManager.setData();
-
                 // 进度条再次刷新
                 boxCount = 0;
                 total = DataManager.getRewardBoxLevel().total;
@@ -494,6 +471,10 @@ export default class MainMenuMidHome extends cc.Component {
                 await new Promise((_res) => {
                     cc.Canvas.instance.scheduleOnce(_res, 0.75);
                 });
+
+                if (isBoxLevelFirst && !DataManager.data.isEvaluate) {
+                    await kit.Popup.show(CConst.popup_path_evaluate);
+                }
             }
         }
 
@@ -517,6 +498,35 @@ export default class MainMenuMidHome extends cc.Component {
         }
         this.setIsLock(true);
     }
+
+    setIsLock(isLock): void {
+        if (isLock) {
+            if (this.obj.ani.boxLevel && this.obj.ani.boxSuipian && this.obj.ani.boxXingxing) {
+                this.menu_mask_bottom.active = false;
+                Common.log('功能：菜单界面 解除锁屏');
+            }
+        }
+        else {
+            this.obj.ani.boxLevel = false;
+            this.obj.ani.boxSuipian = false;
+            this.obj.ani.boxXingxing = false;
+            this.menu_mask_bottom.active = true;
+            Common.log('功能：菜单界面 锁屏');
+        }
+    };
+
+    playAniBox(params: ParamsAniBox): Promise<void> {
+        return new Promise(res => {
+            cc.tween(params.objBar.node.getComponent(cc.Sprite)).parallel(
+                cc.tween().to(params.objBar.time, { fillRange: params.objBar.goal }),
+                cc.tween().delay(params.objBar.time * 0.5).call(() => {
+                    params.objLabel.node.getComponent(cc.Label).string = params.objLabel.desc;
+                }),
+            ).call(() => {
+                res();
+            }).start();
+        });
+    };
 
     playAniScaleBtnstart() {
         this.home_bottom_button.getComponent(cc.Animation).play();
@@ -623,6 +633,7 @@ export default class MainMenuMidHome extends cc.Component {
 
     /** 监听-注册 */
     listernerRegist(): void {
+        kit.Event.on(CConst.event_menu_start, this.homeStart, this);
         kit.Event.on(CConst.event_refresh_areas, this.resetBg, this);
         kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
         kit.Event.on(CConst.event_scale_prop, this.playAniScaleBtnstart, this);

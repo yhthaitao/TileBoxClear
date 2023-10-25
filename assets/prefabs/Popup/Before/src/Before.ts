@@ -251,7 +251,7 @@ export default class Before extends PopupBase {
 
     /** 刷新-磁铁 */
     updateMagnet() {
-        let tCur = Math.floor(new Date().getTime() / 1000);
+        let tCur = Math.floor(new Date().getTime() * 0.001);
         let tCount = DataManager.data.prop.magnet.tInfinite;
         if (tCount > tCur) {
             let prop = this.arrNodeProp[0];
@@ -268,7 +268,7 @@ export default class Before extends PopupBase {
 
     /** 刷新-时钟 */
     updateClock() {
-        let tCur = Math.floor(new Date().getTime() / 1000);
+        let tCur = Math.floor(new Date().getTime() * 0.001);
         let tCount = DataManager.data.prop.clock.tInfinite;
         if (tCount > tCur) {
             let prop = this.arrNodeProp[1];
@@ -294,79 +294,6 @@ export default class Before extends PopupBase {
             tLabel.getComponent(cc.Label).string = mm + ':' + ss;
         }
     };
-
-    /** 按钮事件 游戏开始 */
-    async eventBtnSure() {
-        this.unschedule(this.updateMagnet);
-        this.unschedule(this.updateClock);
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
-        switch (this.params.type) {
-            case TypeBefore.fromMenu:
-                if (DataManager.data.strength.count > 0) {
-                    let funcNext = async () => {
-                        cc.tween(this.node).call(() => {
-                            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                        }).delay(0.5).call(() => {
-                            kit.Event.emit(CConst.event_enter_game);
-                        }).start();
-                    };
-                    DataManager.playAdvert(funcNext);
-                }
-                else {
-                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
-                }
-                break;
-            case TypeBefore.fromSettingGame:// 游戏中途设置
-            case TypeBefore.fromGameFail:// 游戏失败
-                if (DataManager.data.strength.count > 0) {
-                    let funcNext = async () => {
-                        cc.tween(this.node).call(() => {
-                            kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                        }).delay(0.5).call(() => {
-                            kit.Event.emit(CConst.event_game_restart);
-                        }).start();
-                    };
-                    DataManager.playAdvert(funcNext);
-                }
-                else {
-                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
-                }
-                break;
-            case TypeBefore.fromGameWin:// 游戏胜利后
-                cc.tween(this.node).call(() => {
-                    kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                }).delay(0.5).call(() => {
-                    kit.Event.emit(CConst.event_game_next);
-                }).start();
-                break;
-            default:
-                break;
-        }
-    }
-
-    /** 按钮事件 退出 */
-    async eventBtnExit() {
-        this.unschedule(this.updateMagnet);
-        this.unschedule(this.updateClock);
-        kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
-        switch (this.params.type) {
-            case TypeBefore.fromSettingGame:// 游戏中途设置 进入重新开始界面 点击退出
-            case TypeBefore.fromGameFail:// 游戏失败 进入重新开始界面 点击退出
-                let funcNext = async () => {
-                    await kit.Popup.show(CConst.popup_path_actPass, {}, { mode: PopupCacheMode.Frequent });
-                    kit.Event.emit(CConst.event_enter_menu);
-                };
-                DataManager.playAdvert(funcNext);
-                break;
-            case TypeBefore.fromGameWin:// 胜利界面 进入菜单页（恢复消除的体力）
-                kit.Event.emit(CConst.event_enter_menu);
-                break;
-            default:
-                break;
-        }
-    }
 
     /** 按钮事件 道具选择 */
     eventBtnPropChose(event: any, custom: string) {
@@ -414,18 +341,93 @@ export default class Before extends PopupBase {
             isSoon: true,
             mode: PopupCacheMode.Frequent,
         };
-        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type}, params);
+        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type }, params);
+    }
+
+    /** 按钮事件 游戏开始 */
+    async eventBtnSure() {
+        this.unschedule(this.updateMagnet);
+        this.unschedule(this.updateClock);
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        let time = Math.floor(new Date().getTime() * 0.001);
+
+        await kit.Popup.hide();
+        switch (this.params.type) {
+            case TypeBefore.fromMenu:
+                if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
+                    let funcNext = () => {
+                        let obj = {
+                            eventStart: CConst.event_enter_game,
+                            eventFinish: CConst.event_game_start,
+                        }
+                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                    };
+                    DataManager.playAdvert(funcNext);
+                }
+                else {
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
+                }
+                break;
+            case TypeBefore.fromSettingGame:// 游戏中途设置
+            case TypeBefore.fromGameFail:// 游戏失败
+                if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
+                    let funcNext = () => {
+                        let obj = {
+                            eventStart: CConst.event_game_reload,
+                            eventFinish: CConst.event_game_start,
+                        }
+                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                    };
+                    DataManager.playAdvert(funcNext);
+                }
+                else {
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
+                }
+                break;
+            case TypeBefore.fromGameWin:// 游戏胜利后
+                let funcNext = () => {
+                    let obj = {
+                        eventStart: CConst.event_game_load,
+                        eventFinish: CConst.event_game_start,
+                    }
+                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                };
+                DataManager.playAdvert(funcNext);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** 按钮事件 退出 */
+    eventBtnExit() {
+        this.unschedule(this.updateMagnet);
+        this.unschedule(this.updateClock);
+        kit.Audio.playEffect(CConst.sound_clickUI);
+
+        let funcNext = () => {
+            let obj = {
+                eventStart: CConst.event_enter_menu,
+                eventFinish: CConst.event_menu_start,
+            }
+            kit.Popup.hide();
+            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+        };
+
+        if (this.params.type != TypeBefore.fromMenu) {
+            funcNext();
+        }
+        else {
+            DataManager.playAdvert(funcNext);
+        }
     }
 
     /** 监听-注册 */
     listernerRegist(): void {
         // 引导
-        kit.Event.on(CConst.event_guide_12, ()=>{
-            this.eventBtnPropChose({}, '0');
-        }, this);
-        kit.Event.on(CConst.event_guide_15, ()=>{
-            this.eventBtnPropChose({}, '1');
-        }, this);
+        kit.Event.on(CConst.event_guide_12, this.eventBtnPropChose.bind(this, {}, '0'), this);
+        kit.Event.on(CConst.event_guide_15, this.eventBtnPropChose.bind(this, {}, '1'), this);
     }
 
     /** 监听-取消 */

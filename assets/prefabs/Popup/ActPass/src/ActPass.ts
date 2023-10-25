@@ -14,7 +14,13 @@ export default class ActPass<Options = any> extends PopupBase {
     @property([cc.SpriteFrame]) bgFrames: cc.SpriteFrame[] = [];
     @property([cc.SpriteFrame]) roleFrames: cc.SpriteFrame[] = [];
 
+    obj: {
+        eventStart: string,
+        eventFinish: string,
+    } = null;
+
     protected showBefore(options: any): void {
+        this.obj = Common.clone(options);
         Common.log('弹窗 过度 showBefore()');
         this.nodeTitle.active = false;
         // 特定背景
@@ -24,6 +30,15 @@ export default class ActPass<Options = any> extends PopupBase {
         let roleId = Math.floor(Math.random()*2);
         this.itemIcon.getComponent(cc.Sprite).spriteFrame = this.roleFrames[roleId];
         kit.Audio.playEffect(CConst.sound_actPass);
+    }
+
+    protected showAfter(): void {
+        kit.Event.emit(this.obj.eventStart);
+        this.scheduleOnce(() => { kit.Popup.hide(); }, 0.5);
+    }
+
+    protected hideAfter(suspended: boolean): void {
+        kit.Event.emit(this.obj.eventFinish);
     }
 
     /**
@@ -67,9 +82,5 @@ export default class ActPass<Options = any> extends PopupBase {
                 res();
             }).start();
         });
-    }
-
-    protected showAfter(): void {
-        this.scheduleOnce(() => { kit.Popup.hide(); }, 0.5);
     }
 }

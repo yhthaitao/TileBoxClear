@@ -45,24 +45,18 @@ export default class MainScene extends cc.Component {
     }
 
     async init() {
-        this.initLoading();
+        kit.Event.emit(CConst.event_enter_loading);
         this.initData();
         this.initUI();
         // 应用内评价（启动游戏时调用）
         let funcEvaluate = () => {
-            let _data = DataManager.data;
-            if (_data.isEvaluate) {
+            if (DataManager.data.isEvaluate) {
                 return;
             }
             NativeCall.evaluateFirst();
         };
         funcEvaluate();
     }
-
-    /** 加载界面 初始化 */
-    initLoading(): void {
-        this.setGameState(StateGame.loading);
-    };
 
     /** 初始化 数据*/
     async initData() {
@@ -114,17 +108,24 @@ export default class MainScene extends cc.Component {
             return;
         }
         let script = this.nodeLoading.getComponent(Loading);
-        script.playAniLeave(() => {
-            let boxData = DataManager.data.boxData;
-            let isNewPlayer = boxData.newTip.cur < boxData.newTip.max;
-            isNewPlayer = false;
-            if (isNewPlayer) {
-                this.setGameState(StateGame.game);
-            }
-            else {
-                this.setGameState(StateGame.menu);
-            }
-        });
+        let boxData = DataManager.data.boxData;
+        if (boxData.first) {
+            boxData.first = false;
+            DataManager.setData();
+            
+            kit.Event.emit(CConst.event_enter_game);
+            script.playAniLeave(() => {
+                this.nodeLoading.active = false;
+                kit.Event.emit(CConst.event_game_start);
+            });
+        }
+        else {
+            kit.Event.emit(CConst.event_enter_menu);
+            script.playAniLeave(() => {
+                this.nodeLoading.active = false;
+                kit.Event.emit(CConst.event_menu_start);
+            });
+        }
     }
 
     /** 更新游戏状态 */
@@ -137,7 +138,7 @@ export default class MainScene extends cc.Component {
         // 上一个游戏状态
         switch (DataManager.stateLast) {
             case StateGame.loading:
-                this.nodeLoading.active = false;
+                // this.nodeLoading.active = false;
                 break;
             case StateGame.menu:
                 this.NodeMenu.active = false;
@@ -154,8 +155,9 @@ export default class MainScene extends cc.Component {
         switch (DataManager.stateCur) {
             case StateGame.loading:
                 this.nodeLoading = cc.instantiate(this.preLoading);
-                this.nodeLoading.zIndex = CConst.zIndex_loading;
                 this.nodeLoading.parent = this.node;
+                this.nodeLoading.zIndex = CConst.zIndex_loading;
+                this.nodeLoading.active = true;
                 break;
             case StateGame.menu:
                 if (this.NodeMenu) {
@@ -163,24 +165,23 @@ export default class MainScene extends cc.Component {
                 }
                 else {
                     this.NodeMenu = cc.instantiate(this.preMainMenu);
+                    this.NodeMenu.parent = this.node;
                     this.NodeMenu.zIndex = CConst.zIndex_menu;
                     this.NodeMenu.active = true;
-                    this.NodeMenu.parent = this.node;
                 }
                 break;
             case StateGame.game:
                 if (this.nodeGame) {
                     this.nodeGame.active = true;
-                    let script = this.nodeGame.getComponent('GameBox');
-                    script.gameStart();
                 }
                 else {
                     let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGame, cc.Prefab);
                     this.nodeGame = cc.instantiate(pre);
+                    this.nodeGame.parent = this.node;
                     this.nodeGame.setContentSize(cc.winSize);
                     this.nodeGame.position = cc.v3();
                     this.nodeGame.zIndex = CConst.zIndex_game;
-                    this.nodeGame.parent = this.node;
+                    this.nodeGame.active = true;
                 }
                 break;
             default:
@@ -197,6 +198,10 @@ export default class MainScene extends cc.Component {
     /** 更新语言 */
     eventBack_refreshLanguage() {
         this.refreshLanguage();
+    };
+
+    eventBack_enterLoading() {
+        this.setGameState(StateGame.loading);
     };
 
     /** 事件回调：进入菜单 */
@@ -226,9 +231,12 @@ export default class MainScene extends cc.Component {
     };
 
     /** 事件回调：提示 */
-    eventBack_notice(msg: string): void {
+    eventBack_notice(key: string): void {
+        DataManager.setString(LangChars[key], (chars: string) => {
+            this.noVideoTip.getComponent(cc.Label).string = chars;
+        });
+
         this.noVideoTip.opacity = 255;
-        this.noVideoTip.getComponent(cc.Label).string = msg;
         let anim = this.noVideoTip.getComponent(cc.Animation);
         anim.stop();
         anim.once(cc.Animation.EventType.FINISHED, () => {
@@ -239,13 +247,14 @@ export default class MainScene extends cc.Component {
 
     /** 监听-注册 */
     listernerRegist(): void {
-        kit.Event.on(CConst.event_complete_loading, this.eventBack_loadingComplete, this);
-        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+        kit.Event.on(CConst.event_enter_loading, this.eventBack_enterLoading, this);
+        kit.Event.on(CConst.event_loading_complete, this.eventBack_loadingComplete, this);
         kit.Event.on(CConst.event_enter_menu, this.eventBack_enterMenu, this);
         kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
-        kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
         kit.Event.on(CConst.event_guide_game, this.eventBack_guide_game, this);
         kit.Event.on(CConst.event_guide_before, this.eventBack_guide_before, this);
+        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
+        kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
     }
 
     /** 监听-取消 */

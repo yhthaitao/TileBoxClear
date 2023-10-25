@@ -50,8 +50,8 @@
     "boxLevel_desc": "さらにレベルをクリアして宝箱を開けましょう!",
     "boxXingxing_title": "スターチェスト",
     "boxXingxing_desc": "宝箱を開けるには、もっとスターを集める必要があります!",
-    "boxGood_title": "新しいパッケージがオープンしました!",
-    "boxGood_button": "と主張",
+    "boxGood_title": "新しいパックがオープンしました",
+    "boxGood_button": "得る",
     "tapToClaim": "クリックして開きます",
     "tapToContinue": "タップして続行します",
     "goldCollection": "ゴールドコレクション",
@@ -134,7 +134,7 @@
     "logon_reward_day_7": "7日目",
     "AreasUnlocked": "ロックされていない領域!",
     "areas_1":"スケッチ",
-    "areas_2":"ビーチ",
+    "areas_2":"ハロウィン",
     "areas_3":"水中世界",
     "areas_4":"旅行中",
     "areas_5":"ダウンヒル成功",
@@ -168,5 +168,15 @@
     "boxSort_7": "リフレッシュアイテムはすべての商品を並べ替えることができます!",
     "boxSort_9": "凍らせた道具は15秒間凍らせることができる!",
     "boxSort_12": "あなたが集めたMANGNETごとに1組の商品を削除することができます!",
-    "boxSort_15": "あなたが集めたSTOPWACHごとに挑戦時間を10秒増やすことができます!"
+    "boxSort_15": "あなたが集めたSTOPWACHごとに挑戦時間を10秒増やすことができます!",
+    
+    "notice_canotBeUse": "現在は使用できません",
+    "notice_noTimesToday": "今日はまた使えない",
+    "notice_adLoading": "広告を読み込んでいます...",
+    "notice_strengthFull": "エネルギーに満ちた",
+    "notice_noMoreGold": "もう金は要らない",
+    "notice_buySuccess": "購入に成功しました",
+    "notice_buyFail": "購入に失敗しました",
+    "notice_buyCancal": "支払いがキャンセルされました",
+    "notice_noNetwork": "利用可能なネットワークがありません"
 }

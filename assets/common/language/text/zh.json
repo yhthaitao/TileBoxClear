@@ -50,8 +50,8 @@
     "boxLevel_desc": "完成更多關卡即可打開寶箱！",
     "boxXingxing_title": "星星寶箱",
     "boxXingxing_desc": "我們需要收集更多的星星來打開寶箱！",
-    "boxGood_title": "已打開新包!",
-    "boxGood_button": "宣稱",
+    "boxGood_title": "新禮包已開啟",
+    "boxGood_button": "獲得",
     "tapToClaim": "點擊領取",
     "tapToContinue": "點擊繼續",
     "goldCollection": "黃金藏品",
@@ -134,7 +134,7 @@
     "logon_reward_day_7": "第7天",
     "AreasUnlocked": "未鎖定區域!",
     "areas_1":"写生",
-    "areas_2":"海滩",
+    "areas_2":"萬聖節",
     "areas_3":"海底世界",
     "areas_4":"旅途",
     "areas_5":"速降成功",
@@ -168,5 +168,15 @@
     "boxSort_7": "重繪道具可以重新排列所有商品!",
     "boxSort_9": "凍結道具可以凍結15秒!",
     "boxSort_12": "你收集的每個MANGNET都可以消除一組商品!",
-    "boxSort_15": "你收集的每個STOPWACH可以為挑戰時間新增10秒!"
+    "boxSort_15": "你收集的每個STOPWACH可以為挑戰時間新增10秒!",
+    
+    "notice_canotBeUse": "現在無法使用",
+    "notice_noTimesToday": "沒有更多的次數了",
+    "notice_adLoading": "廣告加載中...",
+    "notice_strengthFull": "充滿活力",
+    "notice_noMoreGold": "金幣不足",
+    "notice_buySuccess": "購買成功",
+    "notice_buyFail": "購買失敗",
+    "notice_buyCancal": "付款已取消",
+    "notice_noNetwork": "無可用網路"
 }
