@@ -201,6 +201,7 @@ export default class GameBox extends cc.Component {
         // 游戏初始 碎片ui不显示
         this.uiTopSuipian.opacity = 0;
         NativeCall.logEventOne(ConfigDot.dot_levelStart);
+        NativeCall.logEventOne(ConfigDot.dot_levelStart_one);
         this.clear();
         this.loadBg();
         this.initData();
@@ -592,7 +593,6 @@ export default class GameBox extends cc.Component {
                 }
             });
         });
-        NativeCall.logEventOne(ConfigDot.dot_loadok_to_all);
     }
 
     /** 设置关卡等级 */
@@ -1340,6 +1340,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_ice, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1372,6 +1373,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_tip, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1483,6 +1485,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_back, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1685,6 +1688,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_refresh, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();

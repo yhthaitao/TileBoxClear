@@ -6,6 +6,8 @@ import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { TypeBefore } from "../../../../src/config/ConfigCommon";
+import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -253,11 +255,13 @@ export default class SettingGame extends PopupBase {
             DataManager.strengthReduce();
             DataManager.setData();
 
-            kit.Popup.hide();
+            // 打点 插屏播放成功（从游戏中返回首页）
+            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(DataManager.data.boxData.level));
             let obj = {
                 eventStart: CConst.event_enter_menu,
                 eventFinish: CConst.event_menu_start,
             }
+            kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
         };
         DataManager.playAdvert(funcNext);

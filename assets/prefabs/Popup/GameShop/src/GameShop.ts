@@ -6,6 +6,7 @@ import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 /** 商店产品 */
 interface Produce {
@@ -53,6 +54,8 @@ export default class GameShop<Options = any> extends PopupBase {
 
     protected showBefore(options: any): void {
         Common.log('弹窗 游戏商店页面 showBefore()');
+        NativeCall.logEventTwo(ConfigDot.dot_store_show, String(DataManager.data.boxData.level));
+
         this.listernerRegist();
         // 金币数
         let coin = DataManager.data.numCoin;

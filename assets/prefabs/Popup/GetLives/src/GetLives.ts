@@ -6,6 +6,8 @@ import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { ParamsWin, TypeBefore } from "../../../../src/config/ConfigCommon";
+import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -25,6 +27,8 @@ export default class GetLives extends PopupBase {
 
     protected showBefore(options: any): void {
         Common.log('弹窗 获取体力 showBefore()');
+        NativeCall.logEventTwo(ConfigDot.dot_ads_video_getLife_show, String(DataManager.data.boxData.level));
+
         this.params = Common.clone(options);
         // 标题
         DataManager.setString(LangChars.addLife_title, (chars: string) => {
@@ -109,7 +113,7 @@ export default class GetLives extends PopupBase {
         }
         if (DataManager.data.numCoin < 100) {
             kit.Event.emit(CConst.event_notice, LangChars.notice_noMoreGold);
-            kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true});
+            kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true });
             return;
         }
         DataManager.data.strength.count += 1;
@@ -131,6 +135,7 @@ export default class GetLives extends PopupBase {
             return;
         }
         let funcA = () => {
+            NativeCall.logEventTwo(ConfigDot.dot_ads_video_getLife_succe, String(DataManager.data.boxData.level));
             DataManager.data.strength.count += 1;
             DataManager.data.boxData.timesLive.count -= 1;
             DataManager.setData();
@@ -146,17 +151,23 @@ export default class GetLives extends PopupBase {
     /** 按钮事件 退出 */
     eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
         switch (this.params.type) {
             case TypeBefore.fromSettingGame:// 游戏中途设置
             case TypeBefore.fromGameFail:// 游戏失败
-                let obj = {
-                    eventStart: CConst.event_enter_menu,
-                    eventFinish: CConst.event_menu_start,
-                }
-                kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                let funcNext = () => {
+                    // 打点 插屏播放成功（从游戏中返回首页）
+                    NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(DataManager.data.boxData.level));
+                    let obj = {
+                        eventStart: CConst.event_enter_menu,
+                        eventFinish: CConst.event_menu_start,
+                    }
+                    kit.Popup.hide();
+                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                };
+                DataManager.playAdvert(funcNext);
                 break;
             default:
+                kit.Popup.hide();
                 break;
         }
     };

@@ -132,10 +132,10 @@ class NativeCall {
 
     /** 插屏广告 检测 */
     public advertCheck(): boolean {
-        if(DataManager.data.advert.isRemove){
+        if (DataManager.data.advert.isRemove) {
             return false;
         }
-        
+
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return false;
         let methodName = "interAdReady";
         let methodSignature = "()Z";
@@ -171,9 +171,6 @@ class NativeCall {
     /** 游戏从后台返回的调用 */
     public adsTimeTrue() {
         Common.log(' javaToCocos cocos method: adsTimeTrue() ');
-        // 打点 插屏广告请求（游戏从后台返回）
-        this.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
-
         // 去广告
         if (DataManager.data.advert.isRemove) {
             Common.log('adsTimeTrue() 已去广告');
@@ -346,10 +343,53 @@ class NativeCall {
     /** 购买成功 */
     public buySucc(keyString: string) {
         Common.log(' 未实现 javaToCocos cocos method: buySucc() params: ', keyString);
-        this.logEventTwo(ConfigDot.dot_buy_back_succe, String(DataManager.data.boxData.level));
         let keyNumber = BuyKey[keyString];
         let produceCfg: BuyCfg = ConfigBuyItem[keyNumber];
         kit.Popup.show(CConst.popup_path_openBoxShop, produceCfg, { mode: PopupCacheMode.Frequent, isSoon: true });
+        // 购买成功打点
+        switch (keyNumber) {
+            case BuyKey.package1:
+                this.logEventTwo(ConfigDot.dot_package_005, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.package2:
+                this.logEventTwo(ConfigDot.dot_package_009, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.package3:
+                this.logEventTwo(ConfigDot.dot_package_018, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.package4:
+                this.logEventTwo(ConfigDot.dot_package_040, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.package5:
+                this.logEventTwo(ConfigDot.dot_package_070, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.package6:
+                this.logEventTwo(ConfigDot.dot_package_100, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.noads:
+                this.logEventTwo(ConfigDot.dot_buy_succ_noads, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold1:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_0199, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold2:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_0799, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold3:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_1399, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold4:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_2999, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold5:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_5499, String(DataManager.data.boxData.level));
+                break;
+            case BuyKey.gold6:
+                this.logEventTwo(ConfigDot.dot_buy_succ_coin_9999, String(DataManager.data.boxData.level));
+                break;
+            default:
+                break;
+        }
     }
 
     /** 购买失败 */

@@ -6,6 +6,8 @@ import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { StateGame, TypeProp, coinsBuyMagnet, coinsBuyClock } from "../../../../src/config/ConfigCommon";
+import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -86,10 +88,12 @@ export default class GetProps extends PopupBase {
 
         switch (this.options.prop) {
             case TypeProp.magnet:
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_magnet, String(DataManager.data.boxData.level));
                 DataManager.data.prop.magnet.count += 3;
                 kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);
                 break;
             case TypeProp.clock:
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_clock, String(DataManager.data.boxData.level));
                 DataManager.data.prop.clock.count += 3;
                 kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);
                 break;

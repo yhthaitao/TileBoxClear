@@ -6,6 +6,8 @@ import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { StateGame } from "../../../../src/config/ConfigCommon";
+import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -20,6 +22,8 @@ export default class GetCoins extends PopupBase {
 
     protected showBefore(options: any): void {
         Common.log('弹窗 获取体力 showBefore()');
+        NativeCall.logEventTwo(ConfigDot.dot_ads_video_getGold_show, String(DataManager.data.boxData.level));
+        
         // 标题
         DataManager.setString(LangChars.addCoin_title, (chars: string) => {
             let itemLabel = this.nodeTitle.getChildByName('label');
@@ -55,6 +59,8 @@ export default class GetCoins extends PopupBase {
             return;
         }
         let funcA = () => {
+            NativeCall.logEventTwo(ConfigDot.dot_ads_video_getGold_succe, String(DataManager.data.boxData.level));
+
             DataManager.data.numCoin += 60;
             DataManager.data.boxData.timesCoin.count -= 1;
             DataManager.setData();

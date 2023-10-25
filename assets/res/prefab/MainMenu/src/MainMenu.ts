@@ -1,6 +1,8 @@
 import CConst from "../../../../src/config/CConst";
 import { Design } from "../../../../src/config/ConfigCommon";
+import ConfigDot from "../../../../src/config/ConfigDot";
 import DataManager from "../../../../src/config/DataManager";
+import NativeCall from "../../../../src/config/NativeCall";
 import { kit } from "../../../../src/kit/kit";
 
 /** 菜单类型 */
@@ -168,7 +170,7 @@ export default class MainMenu extends cc.Component {
         }
         else {
             this.arrMidMenu.forEach((item, index) => {
-                item.opacity = this.stateMenu == index ? 255 : 0
+                item.opacity = this.stateMenu == index ? 255 : 0;
             });
         }
     };
@@ -199,6 +201,10 @@ export default class MainMenu extends cc.Component {
                 this.setIsLock(false);
                 // 显示当前菜单
                 this.resetMenu(false);
+                // 进入商店
+                if (this.stateMenu == StateMenu.shop) {
+                    NativeCall.logEventTwo(ConfigDot.dot_store_show, String(DataManager.data.boxData.level));
+                }
                 return;
             }
             let cur = this.stateMenu;

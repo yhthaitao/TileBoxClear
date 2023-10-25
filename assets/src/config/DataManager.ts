@@ -785,11 +785,7 @@ class DataManager {
         let level = this.data.boxData.level;
         let isAdvert = this.checkIsPlayAdvert(level);
         if (isAdvert) {
-            // 打点 插屏广告请求（过关）
-            NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_nextlevel", "Interstital");
             let funcA = () => {
-                // 打点 插屏播放完成
-                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_win, String(level));
                 funcN();
             };
             let funcB = () => {
@@ -856,7 +852,11 @@ class DataManager {
         }
         isReady = NativeCall.advertCheck();
         if (isReady) {
-            this.startAdvert(funcA, funcB);
+            this.startAdvert(()=>{
+                // 打点 插屏播放成功（无视频、播放插屏成功）
+                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
+                funcA();
+            }, funcB);
             return;
         }
         funcB();
@@ -885,6 +885,8 @@ class DataManager {
      * @returns 
      */
     public startAdvert(funcA: Function, funcB: Function): void {
+        // 打点 插屏广告请求（游戏从后台返回）
+        NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
         this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, async () => {
             // 延迟一会儿
             await new Promise((_res) => {

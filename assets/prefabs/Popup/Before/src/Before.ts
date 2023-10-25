@@ -6,6 +6,8 @@ import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { ParamsWin, StateBeforeProp, TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
+import ConfigDot from "../../../../src/config/ConfigDot";
+import NativeCall from "../../../../src/config/NativeCall";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -357,6 +359,8 @@ export default class Before extends PopupBase {
             case TypeBefore.fromMenu:
                 if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
                     let funcNext = () => {
+                        // 打点 插屏播放成功（下关开始的插屏）
+                        NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_next, String(DataManager.data.boxData.level));
                         let obj = {
                             eventStart: CConst.event_enter_game,
                             eventFinish: CConst.event_game_start,
@@ -372,7 +376,12 @@ export default class Before extends PopupBase {
             case TypeBefore.fromSettingGame:// 游戏中途设置
             case TypeBefore.fromGameFail:// 游戏失败
                 if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
+                    if (this.params.type == TypeBefore.fromGameFail) {
+                        NativeCall.logEventTwo(ConfigDot.dot_gameover_restart, String(DataManager.data.boxData.level));
+                    }
                     let funcNext = () => {
+                        // 打点 插屏播放成功（下关开始的插屏）
+                        NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_rePlay, String(DataManager.data.boxData.level));
                         let obj = {
                             eventStart: CConst.event_game_reload,
                             eventFinish: CConst.event_game_start,
@@ -387,6 +396,8 @@ export default class Before extends PopupBase {
                 break;
             case TypeBefore.fromGameWin:// 游戏胜利后
                 let funcNext = () => {
+                    // 打点 插屏播放成功（下关开始的插屏）
+                    NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_next, String(DataManager.data.boxData.level));
                     let obj = {
                         eventStart: CConst.event_game_load,
                         eventFinish: CConst.event_game_start,
@@ -407,6 +418,8 @@ export default class Before extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         let funcNext = () => {
+            // 打点 插屏播放成功（从游戏中返回首页）
+            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(DataManager.data.boxData.level));
             let obj = {
                 eventStart: CConst.event_enter_menu,
                 eventFinish: CConst.event_menu_start,

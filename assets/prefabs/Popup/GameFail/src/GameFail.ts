@@ -6,6 +6,8 @@ import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode, PopupShowResult } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { ParamsFail, TypeBefore, TypeFinish } from "../../../../src/config/ConfigCommon";
+import NativeCall from "../../../../src/config/NativeCall";
+import ConfigDot from "../../../../src/config/ConfigDot";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -60,6 +62,7 @@ export default class GameFail extends PopupBase {
             keyTitle = LangChars.over_timeout_title;
             this.nodeClock.active = true;
             this.nodeGoods.active = false;
+            NativeCall.logEventTwo(ConfigDot.dot_gameover_outOFTime, String(DataManager.data.boxData.level));
         }
         else {
             this.nodeClock.active = false;
@@ -68,6 +71,7 @@ export default class GameFail extends PopupBase {
                 let itemLabel = this.nodeGoods.getChildByName('label');
                 itemLabel.getComponent(cc.Label).string = chars;
             });
+            NativeCall.logEventTwo(ConfigDot.dot_gameover_outOfMove, String(DataManager.data.boxData.level));
         }
         DataManager.setString(keyTitle, (chars: string) => {
             this.itemLabelTitle.getComponent(cc.Label).string = chars;
@@ -89,6 +93,13 @@ export default class GameFail extends PopupBase {
         if (DataManager.data.numCoin < 60) {
             kit.Popup.show(CConst.popup_path_getCoins, { isGoShop: false }, { mode: PopupCacheMode.Frequent, isSoon: true, });
             return;
+        }
+        // 复活打点
+        if (this.params.type == TypeFinish.failTime) {
+            NativeCall.logEventTwo(ConfigDot.dot_buy_succ_fuhuo_noTime, String(DataManager.data.boxData.level));
+        }
+        else{
+            NativeCall.logEventTwo(ConfigDot.dot_buy_succ_fuhuo_noSpace, String(DataManager.data.boxData.level));
         }
         // 60个金币 复活
         DataManager.data.numCoin -= 60;
