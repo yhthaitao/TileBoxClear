@@ -414,12 +414,13 @@ export default class Before extends PopupBase {
             kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
         };
-
-        if (this.params.type != TypeBefore.fromMenu) {
-            funcNext();
-        }
-        else {
-            DataManager.playAdvert(funcNext);
+        switch (this.params.type) {
+            case TypeBefore.fromMenu:
+                kit.Popup.hide();
+                break;
+            default:
+                DataManager.playAdvert(funcNext);
+                break;
         }
     }
 
