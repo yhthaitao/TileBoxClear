@@ -54,6 +54,7 @@ class NativeCall {
 
     /** 显示banner */
     public showBanner() {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         if (!DataManager.checkBanner()) {
             return;
@@ -66,6 +67,7 @@ class NativeCall {
 
     /** 隐藏banner */
     public closeBanner = function () {
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: closeBanner() 隐藏banner ');
         let methodName = "closeBanner";
