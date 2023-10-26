@@ -139,12 +139,24 @@ class DataManager {
     public async initData(nodeAni: cc.Node) {
         let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
-            let data = Common.clone(_data);
-            for (const key in data) {
-                if (Object.prototype.hasOwnProperty.call(data, key)) {
-                    this.data[key] = data[key];
+            let funcCopy = (objA: any, objB: any) => {
+                if (typeof objA != typeof objB) {
+                    return;
                 }
-            }
+                if (objB instanceof Object) {
+                    for (const key in objB) {
+                        let haveA = Object.prototype.hasOwnProperty.call(objA, key);
+                        let haveB = Object.prototype.hasOwnProperty.call(objB, key);
+                        if (haveA && haveB) {
+                            funcCopy(objA[key], objB[key]);
+                        }
+                    }
+                }
+                else {
+                    objA = objB;
+                }
+            };
+            funcCopy(this.data, Common.clone(_data));
         }
         else {
             cc.sys.localStorage.setItem(CConst.localDataKey, JSON.stringify(this.data));
@@ -852,7 +864,7 @@ class DataManager {
         }
         isReady = NativeCall.advertCheck();
         if (isReady) {
-            this.startAdvert(()=>{
+            this.startAdvert(() => {
                 // 打点 插屏播放成功（无视频、播放插屏成功）
                 NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
                 funcA();
@@ -984,11 +996,11 @@ class DataManager {
         });
     };
 
-    public refreshScrollview(scrollviewContent: cc.Node){
+    public refreshScrollview(scrollviewContent: cc.Node) {
         scrollviewContent.children.forEach((item) => {
             let y = item.parent.convertToWorldSpaceAR(item.position).y;
             let yTop = y + item.height * 0.5;
-            let yBottom = y -item.height * 0.5;
+            let yBottom = y - item.height * 0.5;
             item.opacity = yBottom > cc.winSize.height || yTop < 0 ? 0 : 255;
         });
     };
