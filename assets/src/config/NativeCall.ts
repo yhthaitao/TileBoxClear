@@ -320,6 +320,15 @@ class NativeCall {
         DataManager.setData();
     }
 
+    /** 震动 */
+    public playVibrate(milliseconds: number, amplitude: number) {
+        if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
+        Common.log(' cocosToJava cocos method: playVibrate() milliseconds: ', milliseconds, '; amplitude: ', amplitude);
+        let methodName = "vibrate";
+        let methodSignature = "(II)V";
+        jsb.reflection.callStaticMethod(CConst.javaClassName, methodName, methodSignature, milliseconds, amplitude);
+    }
+
     /**
      * 检测 本地语言
      * @param langDefault 默认语言

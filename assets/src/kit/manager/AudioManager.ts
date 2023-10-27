@@ -1,4 +1,5 @@
 import CConst from "../../config/CConst";
+import NativeCall from "../../config/NativeCall";
 import { kit } from "../kit";
 
 /**
@@ -33,6 +34,19 @@ export default class AudioManager {
     public static setIsPlayShake(isPlay: boolean) {
         this._config.isPlayShake = isPlay;
         cc.sys.localStorage.setItem("cfgAudio", JSON.stringify(this._config));
+    }
+
+    /**
+     * 震动
+     * @param milliseconds 震动时长，单位毫秒
+     * @param amplitude 震动幅度 1-255
+     * @returns 
+     */
+    public static playShake(milliseconds: number, amplitude: number): void {
+        if (!this._config.isPlayShake) {
+            return;
+        }
+        NativeCall.playVibrate(milliseconds, amplitude);
     }
 
     /**

@@ -1152,6 +1152,8 @@ export default class GameBox extends cc.Component {
         })
         dragon.timeScale = 1.3;
         dragon.playAnimation('yundong', 1);
+
+        kit.Audio.playShake(20, 20);
     }
 
     /** 刷新操作区 */
