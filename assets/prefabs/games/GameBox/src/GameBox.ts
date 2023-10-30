@@ -7,9 +7,9 @@ import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
-import ConfigGold from "../../../../src/config/ConfigGold";
 import { Design, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
 import { LangChars } from "../../../../src/config/ConfigLang";
+import { ConfigGold } from "../../../../src/config/ConfigGold";
 
 /** box参数 */
 export interface BoxParam {

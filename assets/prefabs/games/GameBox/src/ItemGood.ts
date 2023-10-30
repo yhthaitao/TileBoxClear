@@ -1,6 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import ConfigGold from "../../../../src/config/ConfigGold";
+import { ConfigGold, ConfigGoldPos } from "../../../../src/config/ConfigGold";
 import { kit } from "../../../../src/kit/kit";
 import GameBox, { GoodParam } from "./GameBox";
 
@@ -45,8 +45,6 @@ export default class ItemGood extends cc.Component {
                 return;
             }
             this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
-            this.nodeIcon.width = this.param.w;
-            this.nodeIcon.height = this.param.h;
             this.node.opacity = 255;
         });
     };
@@ -54,8 +52,6 @@ export default class ItemGood extends cc.Component {
     refreshRes(param: GoodParam) {
         let timeOpa = 0.3;
         this.param = param;
-        this.param.w = param.w;
-        this.param.h = param.h;
         this.param.nameRes = param.nameRes;
         this.param.keyGood = param.keyGood;
         this.param.gold = param.gold;
@@ -70,8 +66,6 @@ export default class ItemGood extends cc.Component {
                     return;
                 }
                 this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
-                this.nodeIcon.width = this.param.w;
-                this.nodeIcon.height = this.param.h;
             });
         }).to(timeOpa, { opacity: 255 }).start();
     }
@@ -90,13 +84,17 @@ export default class ItemGood extends cc.Component {
             arrGold.forEach((item, index) => {
                 item.active = index == this.param.gold.count;
                 // 资源更新
-                let path = CConst.pathGameGold + ConfigGold[this.param.keyGood] + '/' + index;
+                let nameGood = ConfigGold[this.param.keyGood];
+                let path = CConst.pathGameGold + nameGood + '/' + index;
                 kit.Resources.loadRes(CConst.bundleCommon, path, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
                     if (err) {
                         Common.log(' 资源加载异常 gold_path: ', path);
                         return;
                     }
                     item.getComponent(cc.Sprite).spriteFrame = assets;
+                    let obj = ConfigGoldPos[nameGood]['gold' + index];
+                    item.x = obj.x;
+                    item.y = obj.y;
                 });
             });
 

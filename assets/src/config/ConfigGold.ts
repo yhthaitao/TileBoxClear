@@ -1,7 +1,7 @@
-const ConfigGold = {
-    1001: "flower",
-    1002: "flower",
-    1003: "flower",
+export const ConfigGold = {
+    1001: "hua_fen_61_181",
+    1002: "hua_fen_61_181",
+    1003: "hua_fen_61_181",
     1007: "shengDanShouTao_hong_61_181",
     1020: "shengDanShouTao_hong_61_181",
     1008: "shengDanShu_lv_61_181",
@@ -51,4 +51,53 @@ const ConfigGold = {
     4013: "fangbao_hong_134_181",
     4014: "fangbao_hong_134_181"
 };
-export default ConfigGold;
+
+export const ConfigGoldPos = {
+    caidan_bai_61_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 11, y: 0 }, 
+    },
+    deng_hong_86_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 14, y: 0 }, 
+    },
+    diQiuYi_hong_86_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 1.5, y: 0 }, gold2: { x: -5, y: 0 }, gold3: { x: 1, y: 0 }, 
+    },
+    fanBuXie_fen_116_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 18.5, y: 0 }, 
+    },
+    fangbao_hong_134_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 20, y: 0 }, 
+    },
+
+    gaoGenXie_hei_116_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: -5.5, y: 0 }, gold3: { x: 17, y: 0 }, 
+    },
+    gou_fen_86_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 5, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 9.5, y: 0 }, 
+    },
+    hua_fen_61_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 1.5, y: 0 }, gold2: { x: -0.5, y: 0 }, gold3: { x: 2.5, y: 0 }, 
+    },
+    huaBan_fen_61_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 10, y: 0 }, 
+    },
+    mianmao_hong_116_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 19, y: 0 }, 
+    },
+
+    niuPiBao_huang_116_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 27.5, y: 0 }, 
+    },
+    piJia_hong_86_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 14.5, y: 0 }, 
+    },
+    shengDanShouTao_hong_61_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 1.5, y: 0 }, gold2: { x: 1.5, y: 0 }, gold3: { x: 13.5, y: 0 }, 
+    },
+    shengDanShu_lv_61_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 11.5, y: 0 }, 
+    },
+    tiBao_hong_86_181: { 
+        gold0: { x: 0, y: 0 }, gold1: { x: 0, y: 0 }, gold2: { x: 0, y: 0 }, gold3: { x: 9, y: 0 }, 
+    },
+};
