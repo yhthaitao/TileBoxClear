@@ -80,7 +80,6 @@ export default class MainScene extends cc.Component {
 
     /** 无视频提示 */
     async initNoVideo() {
-        this.refreshLabel_noVideo();
         this.noVideoTip.zIndex = CConst.zIndex_noVideo;
         this.noVideoTip.opacity = 0;
     }
@@ -195,11 +194,6 @@ export default class MainScene extends cc.Component {
         this.enterMenuLayer();
     };
 
-    /** 更新语言 */
-    eventBack_refreshLanguage() {
-        this.refreshLanguage();
-    };
-
     eventBack_enterLoading() {
         this.setGameState(StateGame.loading);
     };
@@ -253,7 +247,6 @@ export default class MainScene extends cc.Component {
         kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
         kit.Event.on(CConst.event_guide_game, this.eventBack_guide_game, this);
         kit.Event.on(CConst.event_guide_before, this.eventBack_guide_before, this);
-        kit.Event.on(CConst.event_refresh_language, this.eventBack_refreshLanguage, this);
         kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
     }
 
@@ -264,15 +257,5 @@ export default class MainScene extends cc.Component {
 
     protected onDestroy(): void {
         this.listernerIgnore();
-    };
-
-    refreshLanguage() {
-        this.refreshLabel_noVideo();
-    };
-
-    refreshLabel_noVideo() {
-        DataManager.setString(LangChars.adsNo, (chars: string) => {
-            this.noVideoTip.getComponent(cc.Label).string = chars;
-        });
     };
 }

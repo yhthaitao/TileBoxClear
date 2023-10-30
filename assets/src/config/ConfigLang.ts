@@ -192,6 +192,5 @@ export const LangChars = {
 
 /** 本地化 图片 名字 */
 export const LangImg = {
-    word_logo_title: "word_logo_title",
-    word_win_title: "word_win_title",
+    word_shop_title: "word_shop_title",
 };

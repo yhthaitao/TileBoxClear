@@ -13,15 +13,9 @@ export default class LocalImg extends cc.Component {
     @property({displayName: '资源名字'}) 
     resName: string = '名字';
 
-    /** 资源路径 */
-    path: string = './language/img/' + DataManager.data.langCur + '/';
-
-    protected start(): void {
-        this.initRes();
-    }
-
     initRes(){
-        kit.Resources.loadRes(CConst.bundleCommon, this.path + this.resName, cc.SpriteFrame, (e: any, asset: cc.SpriteFrame)=>{
+        let path: string = './language/img/' + DataManager.data.langCur + '/';
+        kit.Resources.loadRes(CConst.bundleCommon, path + this.resName, cc.SpriteFrame, (e: any, asset: cc.SpriteFrame)=>{
             switch (this.resType) {
                 case TypeRes.PNG:
                     this.setTexture(asset);

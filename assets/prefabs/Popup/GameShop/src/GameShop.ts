@@ -7,6 +7,7 @@ import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
+import LocalImg from "../../../../src/config/LocalImg";
 
 /** 商店产品 */
 interface Produce {
@@ -20,6 +21,7 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class GameShop<Options = any> extends PopupBase {
 
+    @property({ type: cc.Node, tooltip: '标题' }) imgWord: cc.Node = null;
     @property({ type: cc.Node, tooltip: '顶部' }) uiTop: cc.Node = null;
     @property({ type: cc.Node, tooltip: '金币数' }) labelCoin: cc.Node = null;
     @property({ type: cc.Node, tooltip: '滑动区域-根节点' }) scroll: cc.Node = null;
@@ -261,6 +263,7 @@ export default class GameShop<Options = any> extends PopupBase {
 
     /** label shop */
     refreshLabel() {
+        DataManager.setLocalImg(this.imgWord);
         for (let key in this.produceObj) {
             if (Object.prototype.hasOwnProperty.call(this.produceObj, key)) {
                 let produceCfg: Produce = this.produceObj[key];

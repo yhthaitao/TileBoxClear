@@ -5,6 +5,7 @@ import { LangChars } from "../../../../src/config/ConfigLang";
 import DataManager from "../../../../src/config/DataManager";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
+import LocalImg from "../../../../src/config/LocalImg";
 
 /** 商店产品 */
 interface Produce {
@@ -17,7 +18,7 @@ interface Produce {
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainMenuMidShop extends cc.Component {
-
+    @property({ type: cc.Node, tooltip: '标题' }) imgWord: cc.Node = null;
     @property({ type: cc.Node, tooltip: '滑动区域-根节点' }) scroll: cc.Node = null;
     @property({ type: cc.Node, tooltip: '滑动区域-content' }) scrollContent: cc.Node = null;
     @property({ type: [cc.Node], tooltip: '礼包类型（多种）' }) gifts: cc.Node[] = [];
@@ -197,13 +198,9 @@ export default class MainMenuMidShop extends cc.Component {
     /************************************************************************************************************************/
     /*********************************************************  事件  *******************************************************/
     /************************************************************************************************************************/
-    /** 更新语言 */
-    refreshLanguage() {
-        this.refreshLabel();
-    };
-
     /** label shop */
     refreshLabel() {
+        DataManager.setLocalImg(this.imgWord);
         for (let key in this.produceObj) {
             if (Object.prototype.hasOwnProperty.call(this.produceObj, key)) {
                 let produceCfg: Produce = this.produceObj[key];
@@ -233,7 +230,7 @@ export default class MainMenuMidShop extends cc.Component {
 
     /** 更新语言 */
     eventBack_refreshLanguage() {
-        this.refreshLanguage();
+        this.refreshLabel();
     };
 
     /** 监听-注册 */

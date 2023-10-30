@@ -11,6 +11,7 @@ import ConfigGood from "./ConfigGood";
 import ConfigUnlock from "./ConfigUnlock";
 import { LevelParam, ParamsWin, StateBeforeProp, TypeProp, TypeReward } from "./ConfigCommon";
 import ConfigAchieve from "./ConfigAchieve";
+import LocalImg from "./LocalImg";
 
 /** 数据管理类 */
 class DataManager {
@@ -186,26 +187,19 @@ class DataManager {
             let resPath = CConst.pathImage + this.data.langCur + '/' + arrName[index];
             await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
         }
-        // game bg
-        for (let index = 1; index < 5; index++) {
-            let resPath = CConst.pathGameBg + index;
-            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
-        }
-        // theme bg
-        for (let index = 1; index < 16; index++) {
-            let resPath = CConst.pathThemeBg + index;
-            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
-        }
-
-        // theme lock
-        for (let index = 1; index < 16; index++) {
-            let resPath = CConst.pathThemeLock + index;
-            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
-        }
-        // theme unlock
-        for (let index = 1; index < 16; index++) {
-            let resPath = CConst.pathThemeUnLock + index;
-            await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+        // 提前加载 其他 图片
+        let pathArr = [
+            { pre: CConst.pathGameBg, len: 5 },
+            { pre: CConst.pathThemeBg, len: 16 },
+            { pre: CConst.pathThemeLock, len: 16 },
+            { pre: CConst.pathThemeUnLock, len: 16 },
+        ];
+        for (let i = 0, lenA = pathArr.length; i < lenA; i++) {
+            const obj = pathArr[i];
+            for (let j = 0, lenB = obj.len; j < lenB; j++) {
+                let resPath = obj.pre + j;
+                await kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.SpriteFrame);
+            }
         }
         // 初始化视频动画
         this.nodeVideo = nodeAni;
@@ -918,7 +912,7 @@ class DataManager {
             this.nodeVideo.active = false;
             if (typeof callback == "function" && cc.isValid(callback)) callback();
         })
-        animation.playAnimation('newAnimation', 1);
+        animation.playAnimation('dacheng', 1);
     };
 
     /** 更新广告计数 */
@@ -1028,7 +1022,7 @@ class DataManager {
         return jsonAsset.json[key];
     };
 
-    /** 获取字符串 */
+    /** 设置本地化字符串 */
     public setString(key: string, callback) {
         let resPath = CConst.pathLanguage + this.data.langCur;
         kit.Resources.loadRes(CConst.bundleCommon, resPath, cc.JsonAsset, (e: any, jsonAsset: cc.JsonAsset) => {
@@ -1036,6 +1030,14 @@ class DataManager {
                 callback && callback(jsonAsset.json[key]);
             }
         });
+    };
+
+    /** 设置本地化图片 */
+    public setLocalImg(img: cc.Node){
+        let script = img.getComponent(LocalImg);
+        if (script) {
+            script.initRes();
+        }
     };
 };
 export default DataManager.instance;

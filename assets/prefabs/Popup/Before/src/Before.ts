@@ -30,8 +30,7 @@ export default class Before extends PopupBase {
         win: {
             opaTrue: 255,
             opaFalse: 125,
-            light: [{ x: -140, w: 110 }, { x: -10, w: 120 }, { x: 135, w: 120 },],
-            process: [{ w: 108 }, { w: 244 }, { w: 384 },],
+            process: [{ w: 119 }, { w: 252 }, { w: 384 },],
         },
         pos: {
             unlock: { win: { y: 140 }, chose: { y: 5 }, prop: { y: -100 }, play: { y: -230 }, },
@@ -163,6 +162,7 @@ export default class Before extends PopupBase {
 
     /** 重置节点（连胜） */
     resetWins() {
+        let arrLight = ['l', 'm', 'r'];
         this.winLight.opacity = 0;
         this.winProcess.opacity = 0;
         this.arrNodeWin.forEach((win) => { win.opacity = this.obj.win.opaFalse });
@@ -170,10 +170,11 @@ export default class Before extends PopupBase {
         if (wins > 0) {
             let index = wins - 1;
             // 连胜光罩
-            let light = this.obj.win.light[index];
             this.winLight.opacity = 255;
-            this.winLight.x = light.x;
-            this.winLight.width = light.w;
+            arrLight.forEach((name, id)=>{
+                let item = this.winLight.getChildByName(name);
+                item.active = id == index; 
+            });
             // 连胜进度
             let process = this.obj.win.process[index];
             this.winProcess.opacity = 255;

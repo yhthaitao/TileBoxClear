@@ -34,10 +34,10 @@ const CConst = {
     zIndex_gameWin: 997,
     zIndex_loading: 999,
     zIndex_mask: 1000,
-    zIndex_video: 1001,
     zIndex_popup: 1002,
     zIndex_noVideo: 1003,
     zIndex_newPlayer: 1004,
+    zIndex_video: 1005,
     /*************************************** end **************************************************/
 
 
@@ -46,7 +46,7 @@ const CConst = {
     /*****************************************************************************************/
     
     /** 进入 刷新语言 */
-    event_refresh_language: 'event_reset_language',
+    event_refresh_language: 'event_refresh_language',
 
     /** 进入 菜单 */
     event_enter_loading: 'event_enter_loading',
