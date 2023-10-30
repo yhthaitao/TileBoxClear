@@ -45,7 +45,6 @@ export default class MainMenuMidHome extends cc.Component {
     }
 
     protected onEnable(): void {
-        console.log('MainMenuMidHome onEnable()');
         this.init();
     }
 
@@ -97,10 +96,11 @@ export default class MainMenuMidHome extends cc.Component {
     };
 
     resetHard() {
+        let level = DataManager.data.boxData.level;
+        let levelParam = DataManager.getLevelData(level);
         // 标签
         let easy = this.home_bottom_button.getChildByName('easy');
         let hard = this.home_bottom_button.getChildByName('hard');
-        let levelParam = DataManager.getLevelData();
         if (levelParam.difficulty) {
             easy.active = false;
             hard.active = true;

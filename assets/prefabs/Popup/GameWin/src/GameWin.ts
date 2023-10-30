@@ -271,6 +271,7 @@ export default class GameWin<Options = any> extends PopupBase {
         }
         else {
             let obj = {
+                level: DataManager.data.boxData.level - 1,
                 eventStart: CConst.event_enter_menu,
                 eventFinish: CConst.event_menu_start,
             }
@@ -283,6 +284,7 @@ export default class GameWin<Options = any> extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         kit.Popup.hide();
         let obj = {
+            level: DataManager.data.boxData.level - 1,
             eventStart: CConst.event_enter_menu,
             eventFinish: CConst.event_menu_start,
         }

@@ -344,6 +344,8 @@ class NativeCall {
     /*************************************************  暂无  *************************************************/
     /** 购买道具 */
     public buyItem(buyCfg: BuyCfg) {
+        this.buySucc(buyCfg.name);
+        return;
         if (typeof (jsb) == "undefined" || cc.sys.os == cc.sys.OS_IOS) return;
         Common.log(' cocosToJava cocos method: buyItem() params: ', buyCfg);
         let methodName = "buyItem";

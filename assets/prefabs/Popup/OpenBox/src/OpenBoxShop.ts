@@ -25,7 +25,7 @@ export default class OpenBoxShop extends PopupBase {
             scale: { bottom: 0.25, mid: 1.0 },
             opacity: { bottom: 0, mid: 255, top: 0 },
         },
-        isAddCoin: false, 
+        isAddCoin: false,
         isAddProp: false,
     };
     produceCfg: BuyCfg = null;
@@ -207,11 +207,17 @@ export default class OpenBoxShop extends PopupBase {
             let itemArr = Common.getArrByName(this.nodeReward.getChildByName('nodeIcon'), 'prop');
             let itemLen = itemArr.length;
             for (let index = 0, length = this.produceCfg.props.length; index < length; index++) {
-                let produce = this.produceCfg.props[index];
+                let obj = this.produceCfg.props[index];
                 if (index < itemLen) {
-                    let item = itemArr[index];
-                    let label = item.getChildByName('label');
-                    label.getComponent(cc.Label).string = '' + produce.count;
+                    let propOne = itemArr[index];
+                    if (propOne) {
+                        let _string = '' + obj.count;
+                        if (obj.typeProp == TypeProp.tStrengthInfinite) {
+                            _string += 'h';
+                        }
+                        let labelProp = propOne.getChildByName('label');
+                        labelProp.getComponent(cc.Label).string = _string;
+                    }
                 }
             }
         }
@@ -220,11 +226,14 @@ export default class OpenBoxShop extends PopupBase {
             let itemArr = Common.getArrByName(this.nodeReward.getChildByName('nodeIcon'), 'prop');
             let itemLen = itemArr.length;
             for (let index = 0, length = this.produceCfg.props.length; index < length; index++) {
-                let produce = this.produceCfg.props[index];
+                let obj = this.produceCfg.props[index];
                 if (index < itemLen) {
-                    let item = itemArr[index];
-                    let label = item.getChildByName('label');
-                    label.getComponent(cc.Label).string = '' + produce.count;
+                    let propOne = itemArr[index];
+                    if (propOne) {
+                        let _string = '' + obj.count;
+                        let labelProp = propOne.getChildByName('label');
+                        labelProp.getComponent(cc.Label).string = _string;
+                    }
                 }
             }
         }

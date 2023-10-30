@@ -36,7 +36,7 @@ export default class MainScene extends cc.Component {
     protected onLoad(): void {
         Common.log('页面 主菜单 onLoad()');
 
-        cc.macro.ENABLE_MULTI_TOUCH = false;//关闭多点触控
+        cc.macro.ENABLE_MULTI_TOUCH = true;//关闭多点触控
         this.listernerRegist();
     }
 

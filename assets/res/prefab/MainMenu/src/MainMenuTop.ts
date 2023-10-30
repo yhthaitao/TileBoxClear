@@ -25,7 +25,6 @@ export default class MainMenuTop extends cc.Component {
     }
 
     protected onEnable(): void {
-        console.log('MainMenuTop onEnable()');
         this.refreshUI();
     }
 

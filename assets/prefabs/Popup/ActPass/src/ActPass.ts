@@ -15,6 +15,7 @@ export default class ActPass<Options = any> extends PopupBase {
     @property([cc.SpriteFrame]) roleFrames: cc.SpriteFrame[] = [];
 
     obj: {
+        level: number,
         eventStart: string,
         eventFinish: string,
     } = null;
@@ -24,8 +25,8 @@ export default class ActPass<Options = any> extends PopupBase {
         Common.log('弹窗 过度 showBefore()');
         this.nodeTitle.active = false;
         // 特定背景
-        let difficulty = DataManager.getLevelData().difficulty;
-        this.bg.getComponent(cc.Sprite).spriteFrame = this.bgFrames[difficulty ? 1 : 0];
+        let levelParam = DataManager.getLevelData(this.obj.level);
+        this.bg.getComponent(cc.Sprite).spriteFrame = this.bgFrames[levelParam.difficulty ? 1 : 0];
         // 随机头像
         let roleId = Math.floor(Math.random()*2);
         this.itemIcon.getComponent(cc.Sprite).spriteFrame = this.roleFrames[roleId];

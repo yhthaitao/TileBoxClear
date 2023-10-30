@@ -256,8 +256,10 @@ export default class SettingGame extends PopupBase {
             DataManager.setData();
 
             // 打点 插屏播放成功（从游戏中返回首页）
-            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(DataManager.data.boxData.level));
+            let level = DataManager.data.boxData.level;
+            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(level));
             let obj = {
+                level: level,
                 eventStart: CConst.event_enter_menu,
                 eventFinish: CConst.event_menu_start,
             }

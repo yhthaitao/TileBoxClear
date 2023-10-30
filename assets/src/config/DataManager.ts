@@ -144,7 +144,10 @@ class DataManager {
                 if (typeof objA[key0] != typeof objB[key0]) {
                     return;
                 }
-                if (objB[key0] instanceof Object) {
+                if (objB[key0] instanceof Array) {
+                    objA[key0] = objB[key0];
+                }
+                else if (objB[key0] instanceof Object) {
                     for (let key1 in objB[key0]) {
                         if (objA[key0] && objB[key0]) {
                             funcCopy(objA[key0], objB[key0], key1);
@@ -154,6 +157,7 @@ class DataManager {
                 else {
                     objA[key0] = objB[key0];
                 }
+                
             };
             for (let key in _data) {
                 if (this.data[key] && _data[key]) {
@@ -795,6 +799,9 @@ class DataManager {
         if (isAdvert) {
             let funcA = () => {
                 funcN();
+                // 更新广告计时
+                this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
+                this.data.advert.record.level = this.data.boxData.level;
             };
             let funcB = () => {
                 funcN();
@@ -919,9 +926,6 @@ class DataManager {
     public updateAdCount() {
         //  更新广告计数
         this.data.advert.count++;
-        // 更新广告计时
-        this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
-        this.data.advert.record.level = this.data.boxData.level;
 
         let dot = ConfigDot['dot_ad_revenue_track_flag_' + this.data.advert.count];
         dot && NativeCall.logEventOne(dot);
@@ -1001,9 +1005,8 @@ class DataManager {
         });
     };
 
-    public getLevelData(): LevelParam {
+    public getLevelData(level: number): LevelParam {
         let lens = [100, 174];
-        let level = this.data.boxData.level;
         let index = 0;
         if (level <= 100) {
             index = level - 1;
@@ -1033,7 +1036,7 @@ class DataManager {
     };
 
     /** 设置本地化图片 */
-    public setLocalImg(img: cc.Node){
+    public setLocalImg(img: cc.Node) {
         let script = img.getComponent(LocalImg);
         if (script) {
             script.initRes();

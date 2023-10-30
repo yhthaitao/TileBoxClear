@@ -6,6 +6,7 @@ import DataManager from "../../../../src/config/DataManager";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
 import LocalImg from "../../../../src/config/LocalImg";
+import { TypeProp } from "../../../../src/config/ConfigCommon";
 
 /** 商店产品 */
 interface Produce {
@@ -49,7 +50,6 @@ export default class MainMenuMidShop extends cc.Component {
     }
 
     protected onEnable(): void {
-        console.log('MainMenuMidShop onEnable()');
         this.init();
     }
 
@@ -113,11 +113,15 @@ export default class MainMenuMidShop extends cc.Component {
             if (buyCfg.props) {
                 nodeProp.active = true;
                 for (let index = 0, length = buyCfg.props.length; index < length; index++) {
+                    let obj = buyCfg.props[index];
                     let propOne = nodeProp.getChildByName('prop' + index);
                     if (propOne) {
-                        let count = buyCfg.props[index].count;
+                        let _string = '' + obj.count;
+                        if (obj.typeProp == TypeProp.tStrengthInfinite) {
+                            _string += 'h';
+                        }
                         let labelProp = propOne.getChildByName('label');
-                        labelProp.getComponent(cc.Label).string = '' + count;
+                        labelProp.getComponent(cc.Label).string = _string;
                     }
                 }
             }

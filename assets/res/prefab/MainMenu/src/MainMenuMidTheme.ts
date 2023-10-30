@@ -56,7 +56,6 @@ export default class MainMenuMidTheme extends cc.Component {
     }
 
     protected onEnable(): void {
-        console.log('MainMenuMidTheme onEnable()');
         this.init();
     }
 

@@ -19,10 +19,6 @@ export default class MainMenuBottom extends cc.Component {
         this.init();
     }
 
-    protected onEnable(): void {
-        console.log('MainMenuBottom onEnable()');
-    }
-
     init() {
         this.refreshLabel_bottom();
     };

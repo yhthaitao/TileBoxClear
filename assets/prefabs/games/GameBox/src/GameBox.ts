@@ -213,8 +213,9 @@ export default class GameBox extends cc.Component {
 
     /** 加载关卡数据 */
     loadBg() {
-        // 加载背景
         let level = DataManager.data.boxData.level;
+        let levelParam = DataManager.getLevelData(level);
+        // 加载背景
         let bgId = Math.floor((level - 1) / 5 % 4) + 1;
         let pathBg = CConst.pathGameBg + bgId;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
@@ -225,7 +226,6 @@ export default class GameBox extends cc.Component {
             this.bg.getComponent(cc.Sprite).spriteFrame = assets;
         });
         // 困难标签
-        let levelParam = DataManager.getLevelData();
         if (levelParam.difficulty) {
             this.uiTopLevel.getChildByName('nodeSign').active = true;
         }
@@ -236,6 +236,8 @@ export default class GameBox extends cc.Component {
 
     /** 初始化数据 */
     initData() {
+        let level = DataManager.data.boxData.level;
+        let levelParam = DataManager.getLevelData(level);
         /** 游戏用数据 */
         this.objData = {
             numSuipian: 0,
@@ -243,8 +245,6 @@ export default class GameBox extends cc.Component {
             passTime: new Date().getTime(),
             isFinish: false,
         };
-
-        let levelParam = DataManager.getLevelData();
         // 屏幕系数
         this.mainScale = 1;// 箱子父节点缩放比例
         this.mainLayer = 5;// 箱子父节点实际显示的层数
@@ -261,7 +261,8 @@ export default class GameBox extends cc.Component {
 
     /** 重新组合关卡数据 */
     initBox(isRestart = false) {
-        let levelParam = DataManager.getLevelData();
+        let level = DataManager.data.boxData.level;
+        let levelParam = DataManager.getLevelData(level);
         // 重构物品配置信息
         this.goodsCfg = DataManager.getObjAllGoods();
         // 用于磁铁和时钟功能
@@ -1032,7 +1033,9 @@ export default class GameBox extends cc.Component {
 
     /** 设置真实缩放: 先计算适配宽时，能够显示的层级 */
     setMainScale() {
-        let levelParam = DataManager.getLevelData();
+        let level = DataManager.data.boxData.level;
+        let levelParam = DataManager.getLevelData(level);
+        
         let boxParam = this.arrGame[0][0];
         let layer = (levelParam.layer || this.defaultLayer);
         let hBox = boxParam.h * layer;
@@ -1153,7 +1156,7 @@ export default class GameBox extends cc.Component {
         dragon.timeScale = 1.3;
         dragon.playAnimation('yundong', 1);
 
-        kit.Audio.playShake(20, 20);
+        // kit.Audio.playShake(20, 20);
     }
 
     /** 刷新操作区 */
@@ -1777,6 +1780,7 @@ export default class GameBox extends cc.Component {
         // DataManager.setData();
 
         // let obj = {
+        //     level: DataManager.data.boxData.level,
         //     eventStart: CConst.event_game_load,
         //     eventFinish: CConst.event_game_start,
         // }
@@ -1792,6 +1796,7 @@ export default class GameBox extends cc.Component {
         // DataManager.setData();
 
         // let obj = {
+        //     level: DataManager.data.boxData.level,
         //     eventStart: CConst.event_game_load,
         //     eventFinish: CConst.event_game_start,
         // }
@@ -2515,6 +2520,8 @@ export default class GameBox extends cc.Component {
                 main.removeAllChildren(true);
                 main.opacity = 255;
             }).start();
+
+            kit.Audio.playShake(20, 50);
         };
 
         // 4 剩余物品复制 并 移动

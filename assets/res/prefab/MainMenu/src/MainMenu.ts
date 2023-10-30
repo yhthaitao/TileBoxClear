@@ -102,7 +102,6 @@ export default class MainMenu extends cc.Component {
     }
 
     protected onEnable(): void {
-        console.log('MainMenu onEnable()');
         this.initMenu();
 
         // 缩放数据
