@@ -125,6 +125,7 @@ export default class OpenBoxShop extends PopupBase {
 
             // 箱子开启
             this.nodeBox.active = true;
+            this.nodeBox.opacity = 255;
             let dragon = this.nodeBox.getChildByName('dragon');
             DataManager.playAniDragon(dragon, this.obj.open.armatureName, this.obj.open.animationName);
 
@@ -146,7 +147,9 @@ export default class OpenBoxShop extends PopupBase {
                 cc.tween().to(0.25, { scale: this.obj.icon.scale.mid }).call(() => {
                     nodeIcon.getComponent(cc.Animation).play();
                 }),
-            ).delay(1.5).parallel(
+            ).delay(1.5).call(() => {
+                cc.tween(this.nodeBox).to(0.5, { opacity: 0 }).start();
+            }).parallel(
                 cc.tween().to(0.5, { y: this.obj.icon.y.top }),
                 cc.tween().to(0.5, { opacity: this.obj.icon.opacity.top }),
             ).call(() => {
