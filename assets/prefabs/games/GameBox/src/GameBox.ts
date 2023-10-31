@@ -1128,10 +1128,11 @@ export default class GameBox extends cc.Component {
             p2: cc.v2(pGoal.x, (point.y + pGoal.y) * 0.5),
             pTo: cc.v2(pGoal.x, pGoal.y),
         };
-        let time1 = Common.getMoveTime(cc.v3(obj.p1.x, obj.p1.y), cc.v3(obj.p2.x, obj.p2.y), 1, 1500);
-        let time2 = Common.getMoveTime(cc.v3(obj.p2.x, obj.p2.y), cc.v3(obj.pTo.x, obj.pTo.y), 1, 1500);
-        let tDelay = main.childrenCount * 0.05;
+        let time1 = Common.getMoveTime(cc.v3(obj.p1.x, obj.p1.y), cc.v3(obj.p2.x, obj.p2.y), 1, 1000);
+        let time2 = Common.getMoveTime(cc.v3(obj.p2.x, obj.p2.y), cc.v3(obj.pTo.x, obj.pTo.y), 1, 1000);
+        let tDelay = (main.childrenCount - 1) * 0.15;
         itemExp.opacity = 0;
+        cc.Tween.stopAllByTarget(itemExp);
         cc.tween(itemExp).delay(tDelay).call(() => {
             itemExp.opacity = 255;
         }).bezierTo(time1 + time2, obj.p1, obj.p2, obj.pTo).call(() => {
@@ -2014,7 +2015,7 @@ export default class GameBox extends cc.Component {
                 cc.tween().to(timeMove, { scale: scale }),
             ).delay(0.55).call(() => {
                 let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
-                this.effectExpShow(point);
+                this.effectExpShow(cc.v3(point.x, point.y));
             }).start();
         });
 
@@ -2141,7 +2142,7 @@ export default class GameBox extends cc.Component {
                 cc.tween().to(timeMove, { scale: scale }),
             ).delay(0.55).call(() => {
                 let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
-                this.effectExpShow(point);
+                this.effectExpShow(cc.v3(point.x, point.y));
             }).start();
         });
 
@@ -2528,11 +2529,13 @@ export default class GameBox extends cc.Component {
         let count = 0;
         let total = 2;
         let effectExpMain = this.effectExp.getChildByName('main');
+        let pointMid = Common.getLocalPos(goodMid.parent, goodMid.position, effectExpMain);
+        for (let index = 0, length = arrGoodParam.length; index < length; index++) {
+            this.effectExpShow(cc.v3(pointMid.x, pointMid.y));
+        }
         for (let index = 0, length = arrGoodParam.length; index < length; index++) {
             let param = arrGoodParam[index];
             let good = this.uiBottomMain.getChildByName(param.name);
-            let point = Common.getLocalPos(good.parent, good.position, effectExpMain);
-            this.effectExpShow(point);
             if (index == 1) {
                 continue;
             }

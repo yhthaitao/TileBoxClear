@@ -124,22 +124,24 @@ export default class OpenBoxShop extends PopupBase {
             cc.tween(this.maskDown).to(0.245, { opacity: 200 }).start();
 
             // 箱子开启
+            cc.Tween.stopAllByTarget(this.nodeBox);
             this.nodeBox.active = true;
             this.nodeBox.opacity = 255;
-            let dragon = this.nodeBox.getChildByName('dragon');
-            DataManager.playAniDragon(dragon, this.obj.open.armatureName, this.obj.open.animationName);
+            let itemBox = this.nodeBox.getChildByName('dragon');
+            DataManager.playAniDragon(itemBox, this.obj.open.armatureName, this.obj.open.animationName);
 
             this.setReward();
             this.nodeReward.active = true;
             this.nodeReward.y = this.obj.icon.y.bottom;
             this.nodeReward.scale = this.obj.icon.scale.bottom;
             this.nodeReward.opacity = this.obj.icon.opacity.bottom;
+            let particle = this.nodeBox.getChildByName('particle');
+            particle.getComponent(cc.ParticleSystem).stopSystem();
             let nodeIcon = this.nodeReward.getChildByName('nodeIcon');
             nodeIcon.getComponent(cc.Animation).stop();
             cc.tween(this.nodeReward).delay(1.35).call(() => {
                 this.nodeReward.opacity = this.obj.icon.opacity.mid;
                 // 粒子
-                let particle = this.nodeBox.getChildByName('particle');
                 particle.active = true;
                 particle.getComponent(cc.ParticleSystem).resetSystem();
             }).parallel(
@@ -153,6 +155,8 @@ export default class OpenBoxShop extends PopupBase {
                 cc.tween().to(0.5, { y: this.obj.icon.y.top }),
                 cc.tween().to(0.5, { opacity: this.obj.icon.opacity.top }),
             ).call(() => {
+                particle.getComponent(cc.ParticleSystem).stopSystem();
+                particle.active = false;
                 if (this.obj.isAddCoin) {
                     kit.Event.emit(CConst.event_refresh_coin);
                 }

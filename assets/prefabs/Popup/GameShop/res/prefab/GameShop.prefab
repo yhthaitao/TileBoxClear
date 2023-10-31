@@ -1258,8 +1258,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 123,
-      "height": 123
+      "width": 119,
+      "height": 119
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -7380,7 +7380,9 @@
     "maskUp": {
       "__id__": 202
     },
-    "imgWord": null,
+    "imgWord": {
+      "__id__": 174
+    },
     "uiTop": {
       "__id__": 172
     },

@@ -8,6 +8,7 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import { TypeBefore } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
+import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -236,11 +237,11 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
+        
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
-        kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromSettingGame }, { mode: PopupCacheMode.Frequent });
+        GameManager.setting_startGame(TypeBefore.fromSetting);
     };
 
     /** 按钮事件 退出 */

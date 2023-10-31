@@ -8,6 +8,7 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import { ParamsWin, StateBeforeProp, TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
+import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -112,8 +113,8 @@ export default class Before extends PopupBase {
         // 开始游戏
         let labelPLay = this.nodePlay.getChildByName('label');
         labelPLay.opacity = 0;
-        let isRestart = this.params.type == TypeBefore.fromSettingGame
-            || this.params.type == TypeBefore.fromGameFail;
+        let isRestart = this.params.type == TypeBefore.fromSetting
+            || this.params.type == TypeBefore.fromFail;
         let playString = isRestart ? LangChars.exit_confirm_restart : LangChars.gameBefore_play;
         DataManager.setString(playString, (chars: string) => {
             let _string = chars;
@@ -172,9 +173,9 @@ export default class Before extends PopupBase {
             let index = wins - 1;
             // 连胜光罩
             this.winLight.opacity = 255;
-            arrLight.forEach((name, id)=>{
+            arrLight.forEach((name, id) => {
                 let item = this.winLight.getChildByName(name);
-                item.active = id == index; 
+                item.active = id == index;
             });
             // 连胜进度
             let process = this.obj.win.process[index];
@@ -340,79 +341,48 @@ export default class Before extends PopupBase {
         if (!objState) {
             return;
         }
-
-        let params = {
-            isSoon: true,
-            mode: PopupCacheMode.Frequent,
-        };
-        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type }, params);
+        kit.Popup.show(CConst.popup_path_getProps, { prop: objState.type }, { mode: PopupCacheMode.Frequent, isSoon: true, });
     }
 
     /** 按钮事件 游戏开始 */
-    async eventBtnSure() {
+    eventBtnSure() {
         this.unschedule(this.updateMagnet);
         this.unschedule(this.updateClock);
         kit.Audio.playEffect(CConst.sound_clickUI);
 
-        let level = DataManager.data.boxData.level;
+        let data = DataManager.data;
         let time = Math.floor(new Date().getTime() * 0.001);
-
-        await kit.Popup.hide();
         switch (this.params.type) {
-            case TypeBefore.fromMenu:
-                if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
-                    let funcNext = () => {
-                        // 打点 插屏播放成功（下关开始的插屏）
-                        NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_next, String(level));
-                        let obj = {
-                            level: level,
-                            eventStart: CConst.event_enter_game,
-                            eventFinish: CConst.event_game_start,
-                        }
-                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-                    };
-                    DataManager.playAdvert(funcNext);
+            case TypeBefore.fromMenu:// 菜单界面
+                if (data.strength.tInfinite > time || data.strength.count > 0) {
+                    kit.Popup.hide();
+                    GameManager.enterGameFromMenu(data.boxData.level);
                 }
                 else {
-                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
                 }
                 break;
-            case TypeBefore.fromSettingGame:// 游戏中途设置
-            case TypeBefore.fromGameFail:// 游戏失败
-                if (DataManager.data.strength.tInfinite > time || DataManager.data.strength.count > 0) {
-                    if (this.params.type == TypeBefore.fromGameFail) {
-                        NativeCall.logEventTwo(ConfigDot.dot_gameover_restart, String(level));
-                    }
-                    let funcNext = () => {
-                        // 打点 插屏播放成功（下关开始的插屏）
-                        NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_rePlay, String(level));
-                        let obj = {
-                            level: level,
-                            eventStart: CConst.event_game_reload,
-                            eventFinish: CConst.event_game_start,
-                        }
-                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-                    };
-                    DataManager.playAdvert(funcNext);
+            case TypeBefore.fromSetting:// 游戏设置
+                if (data.strength.tInfinite > time || data.strength.count > 0) {
+                    GameManager.enterGameFromSetting(data.boxData.level);
                 }
                 else {
-                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent });
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
                 }
                 break;
-            case TypeBefore.fromGameWin:// 游戏胜利后
-                let funcNext = () => {
-                    // 打点 插屏播放成功（下关开始的插屏）
-                    NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_next, String(level));
-                    let obj = {
-                        level: level,
-                        eventStart: CConst.event_game_load,
-                        eventFinish: CConst.event_game_start,
-                    }
-                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-                };
-                DataManager.playAdvert(funcNext);
+            case TypeBefore.fromFail:// 游戏失败
+                if (data.strength.tInfinite > time || data.strength.count > 0) {
+                    GameManager.enterGameFromFail(data.boxData.level);
+                }
+                else {
+                    kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
+                }
+                break;
+            case TypeBefore.fromWin:// 游戏胜利后
+                GameManager.enterGameFromWin(data.boxData.level);
                 break;
             default:
+                kit.Popup.hide();
                 break;
         }
     }
@@ -423,24 +393,12 @@ export default class Before extends PopupBase {
         this.unschedule(this.updateClock);
         kit.Audio.playEffect(CConst.sound_clickUI);
 
-        let funcNext = () => {
-            // 打点 插屏播放成功（从游戏中返回首页）
-            let level = DataManager.data.boxData.level;
-            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(level));
-            let obj = {
-                level: level,
-                eventStart: CConst.event_enter_menu,
-                eventFinish: CConst.event_menu_start,
-            }
-            kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-        };
         switch (this.params.type) {
             case TypeBefore.fromMenu:
                 kit.Popup.hide();
                 break;
             default:
-                DataManager.playAdvert(funcNext);
+                GameManager.backMenuFromGame(DataManager.data.boxData.level);
                 break;
         }
     }

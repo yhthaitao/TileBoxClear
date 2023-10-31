@@ -48,9 +48,9 @@ export enum TypeFinish {
 /** 弹窗枚举(游戏前弹窗类型) */
 export enum TypeBefore {
     fromMenu = 1,
-    fromSettingGame = 1 << 1,
-    fromGameWin = 1 << 2,
-    fromGameFail = 1 << 3,
+    fromWin = 1 << 1,
+    fromFail = 1 << 2,
+    fromSetting = 1 << 3,
 }
 
 /** 关卡参数 */

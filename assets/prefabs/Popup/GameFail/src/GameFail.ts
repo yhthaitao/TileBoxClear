@@ -8,6 +8,7 @@ import { PopupCacheMode, PopupShowResult } from "../../../../src/kit/manager/pop
 import { ParamsFail, TypeBefore, TypeFinish } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
+import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -109,14 +110,11 @@ export default class GameFail extends PopupBase {
     }
 
     /** 放弃 */
-    async eventBtnGiveUp() {
+    eventBtnGiveUp() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        await kit.Popup.hide();
-
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
-        
-        kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameFail }, { mode: PopupCacheMode.Frequent });
+        GameManager.gameFail_giveUp(TypeBefore.fromFail);
     }
 }

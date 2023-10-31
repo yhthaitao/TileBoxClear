@@ -157,7 +157,6 @@ class DataManager {
                 else {
                     objA[key0] = objB[key0];
                 }
-                
             };
             for (let key in _data) {
                 if (this.data[key] && _data[key]) {
@@ -913,13 +912,14 @@ class DataManager {
 
     /** 播放动画 */
     public adAnimPlay(callback: Function = null) {
-        this.nodeVideo.active = true;
-        let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay);
-        animation.once(dragonBones.EventObject.COMPLETE, () => {
-            this.nodeVideo.active = false;
-            if (typeof callback == "function" && cc.isValid(callback)) callback();
-        })
-        animation.playAnimation('dacheng', 1);
+        callback && callback();
+        // this.nodeVideo.active = true;
+        // let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay);
+        // animation.once(dragonBones.EventObject.COMPLETE, () => {
+        //     this.nodeVideo.active = false;
+        //     if (typeof callback == "function" && cc.isValid(callback)) callback();
+        // })
+        // animation.playAnimation('dacheng', 1);
     };
 
     /** 更新广告计数 */

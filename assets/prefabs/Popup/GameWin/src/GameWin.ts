@@ -6,6 +6,7 @@ import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import { ParamsWin, TypeBefore } from "../../../../src/config/ConfigCommon";
+import GameManager from "../../../../src/config/GameManager";
 
 /** 动作参数（宝箱相关） */
 interface ParamsAniBox {
@@ -264,10 +265,8 @@ export default class GameWin<Options = any> extends PopupBase {
     /** 按钮事件 确定 */
     eventBtnNext() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
         if (this.isNext) {
-            // next 游戏开始前页面
-            kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromGameWin }, { mode: PopupCacheMode.Frequent });
+            GameManager.gameWin_startGame(TypeBefore.fromWin);
         }
         else {
             let obj = {
@@ -275,6 +274,7 @@ export default class GameWin<Options = any> extends PopupBase {
                 eventStart: CConst.event_enter_menu,
                 eventFinish: CConst.event_menu_start,
             }
+            kit.Popup.hide();
             kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
         }
     }

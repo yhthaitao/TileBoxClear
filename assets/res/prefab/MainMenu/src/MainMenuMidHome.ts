@@ -5,6 +5,7 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
+import GameManager from "../../../../src/config/GameManager";
 
 /** 动作参数（宝箱相关） */
 interface ParamsAniBox {
@@ -590,7 +591,7 @@ export default class MainMenuMidHome extends cc.Component {
     /** 按钮事件 开始 */
     eventBtnHomeStart() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_before, { type: TypeBefore.fromMenu }, { mode: PopupCacheMode.Frequent });
+        GameManager.mainMenu_startGame(TypeBefore.fromMenu);
     };
 
     /** 按钮事件 开始 */

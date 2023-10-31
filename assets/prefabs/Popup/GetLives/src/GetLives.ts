@@ -152,8 +152,8 @@ export default class GetLives extends PopupBase {
     eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         switch (this.params.type) {
-            case TypeBefore.fromSettingGame:// 游戏中途设置
-            case TypeBefore.fromGameFail:// 游戏失败
+            case TypeBefore.fromSetting:// 游戏中途设置
+            case TypeBefore.fromFail:// 游戏失败
                 let funcNext = () => {
                     // 打点 插屏播放成功（从游戏中返回首页）
                     let level = DataManager.data.boxData.level;
