@@ -94,6 +94,7 @@ export default class OpenBoxShop extends PopupBase {
             }
         }
         DataManager.setData();
+        kit.Event.emit(CConst.event_refresh_shop, this.produceCfg);
     };
 
     initUI() {
@@ -163,7 +164,6 @@ export default class OpenBoxShop extends PopupBase {
                 if (this.obj.isAddProp) {
                     kit.Event.emit(CConst.event_refresh_prop);
                 }
-                kit.Event.emit(CConst.event_refresh_shop, this.produceCfg);
                 // 弹窗已完全展示
                 this.showAfter && this.showAfter();
                 // Done
