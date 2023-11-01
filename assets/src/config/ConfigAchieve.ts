@@ -1,7 +1,7 @@
 const ConfigAchieve = [
     // 玩具娃娃
     {
-        icon: 2001, length: 9, coin: 50,
+        icon: 2004, length: 9, coin: 50,
         goods: [2001, 2002, 2003, 2004, 2005, 2007, 4003, 4004, 4005],
     },
     // 手提包
@@ -16,12 +16,12 @@ const ConfigAchieve = [
     },
     // 球
     {
-        icon: 1031, length: 6, coin: 50,
+        icon: 3022, length: 6, coin: 50,
         goods: [1031, 2027, 3006, 3022, 4007, 4021],
     },
     // 聖誕節
     {
-        icon: 1007, length: 9, coin: 50,
+        icon: 1008, length: 9, coin: 50,
         goods: [1007, 1008, 1016, 1018, 1020, 2006, 2025, 2026, 3023],
     },
     // 鞋
@@ -51,12 +51,12 @@ const ConfigAchieve = [
     },
     // 日杂
     {
-        icon: 1009, length: 9, coin: 50,
+        icon: 1017, length: 9, coin: 50,
         goods: [1009, 1011, 1017, 2008, 2009, 2011, 2020, 4006, 4008],
     },
     // 菜单
     {
-        icon: 1021, length: 10, coin: 50,
+        icon: 1029, length: 10, coin: 50,
         goods: [1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030],
     },
 ];
