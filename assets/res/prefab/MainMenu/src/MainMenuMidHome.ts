@@ -17,6 +17,7 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class MainMenuMidHome extends cc.Component {
 
+    @property({ type: cc.Node, tooltip: '内容' }) content: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-金币图标' }) uiTop_coin_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-体力图标' }) uiTop_strength_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-背景' }) home_bg: cc.Node = null;
@@ -305,20 +306,12 @@ export default class MainMenuMidHome extends cc.Component {
         if (boxData.add > 0) {
             // 增加星星
             let sign = cc.instantiate(this.home_left_boxXing_sign);
-            let signLabel = sign.getChildByName('label');
-            signLabel.getComponent(cc.Label).string = '+' + boxData.add;
-            sign.parent = this.home_left_boxXing_sign.parent;
+            sign.getChildByName('label').getComponent(cc.Label).string = '+' + boxData.add;
+            sign.parent = this.content;
             sign.active = true;
-            let pGoal = this.home_left_boxXing_sign.position;
+            let pGoal =  Common.getLocalPos(this.home_left_boxXing_sign.parent, this.home_left_boxXing_sign.position, this.content);
             let pStart = cc.v3(pGoal.x + 150, pGoal.y);
-            sign.position = pStart;
-            let obj = {
-                p1: cc.v2(sign.x, sign.y),
-                p2: cc.v2((sign.x + pGoal.x) * 0.5, sign.y + 100),
-                pTo: cc.v2(pGoal.x, pGoal.y),
-                time: Common.getMoveTime(sign.position, pGoal, 1, 1500),
-            };
-            await DataManager.playAniReward(sign, obj);
+            await DataManager.playAniXingxing(sign, pStart, pGoal);
             kit.Event.emit(CConst.event_scale_xingxingBox);
 
             let boxReward = DataManager.getRewardBoxXinging();

@@ -965,7 +965,7 @@ class DataManager {
         return heightMax * 0.25;
     };
 
-    /** 播放物品奖励动画（主界面） */
+    /** 播放碎片动画（主界面） */
     public playAniReward(node: cc.Node, obj: { p1: cc.Vec2, p2: cc.Vec2, pTo: cc.Vec2, time: number }): Promise<void> {
         return new Promise((res) => {
             node.active = true;
@@ -975,6 +975,81 @@ class DataManager {
                 .to(0.1, { scale: 1.0 })
                 .delay(0.5)
                 .bezierTo(obj.time, obj.p1, obj.p2, obj.pTo)
+                .call(() => {
+                    node.removeFromParent();
+                    res();
+                })
+                .start();
+        });
+    };
+
+    /** 播放星星动画（主界面） */
+    public playAniXingxing(node: cc.Node, pStart: cc.Vec3, pGoal: cc.Vec3): Promise<void> {
+        let disX = pStart.x - pGoal.x;
+        let pGoal0 = cc.v3(pStart.x - disX * 0.2, pGoal.y + 50);
+        let pGoal1 = cc.v3(pGoal0.x - disX * 0.1, pGoal0.y);
+        let pGoal2 = cc.v3(pGoal1.x - disX * 0.5, pGoal1.y + 100);
+        let obj0 = {
+            time: 0.35,
+            scale: 1.0,
+            bezier: {
+                p1: cc.v2(pStart.x, pStart.y),
+                p2: cc.v2((pStart.x + pGoal0.x) * 0.5, pGoal0.y),
+                pTo: cc.v2(pGoal0.x, pGoal0.y),
+            },
+        };
+        let obj1 = {
+            time: 0.15,
+            scaleX: 1.0,
+            scaleY: 0.5,
+            position: pGoal1,
+        };
+        let obj2 = {
+            time: 0.25,
+            scaleX: 0.5,
+            scaleY: 1.0,
+            bezier: {
+                p1: cc.v2(pGoal1.x, pGoal1.y),
+                p2: cc.v2((pGoal1.x + pGoal2.x) * 0.5, pGoal2.y),
+                pTo: cc.v2(pGoal2.x, pGoal2.y),
+            },
+        };
+        let obj3 = {
+            time: 0.25,
+            scaleX: 1.1,
+            scaleY: 1.1,
+            bezier: {
+                p1: cc.v2(pGoal2.x, pGoal2.y),
+                p2: cc.v2((pGoal2.x + pGoal.x) * 0.5, pGoal2.y),
+                pTo: cc.v2(pGoal.x, pGoal.y),
+            },
+        };
+        node.position = pStart;
+        node.scale = 0;
+        return new Promise((res) => {
+            node.active = true;
+            cc.Tween.stopAllByTarget(node);
+            cc.tween(node)
+                .parallel(
+                    cc.tween().to(obj0.time, { scale: obj0.scale }),
+                    cc.tween().bezierTo(obj0.time, obj0.bezier.p1, obj0.bezier.p2, obj0.bezier.pTo),
+                )
+                .delay(0.2)
+                .parallel(
+                    cc.tween().to(obj1.time, { scaleX: obj1.scaleX }),
+                    cc.tween().to(obj1.time, { scaleY: obj1.scaleY }),
+                    cc.tween().to(obj1.time, { position: obj1.position }),
+                )
+                .parallel(
+                    cc.tween().to(obj2.time, { scaleX: obj2.scaleX}),
+                    cc.tween().to(obj2.time, { scaleY: obj2.scaleY}),
+                    cc.tween().bezierTo(obj2.time, obj2.bezier.p1, obj2.bezier.p2, obj2.bezier.pTo),
+                )
+                .parallel(
+                    cc.tween().to(obj3.time, { scaleX: obj3.scaleX}),
+                    cc.tween().to(obj3.time, { scaleY: obj3.scaleY}),
+                    cc.tween().bezierTo(obj3.time, obj3.bezier.p1, obj3.bezier.p2, obj3.bezier.pTo),
+                )
                 .call(() => {
                     node.removeFromParent();
                     res();
