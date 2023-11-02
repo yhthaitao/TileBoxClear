@@ -150,7 +150,7 @@ const CConst = {
     popup_path_openBoxShop: './Popup/OpenBox/res/prefab/OpenBoxShop',
     popup_path_openBoxSuipian: './Popup/OpenBox/res/prefab/OpenBoxSuipian',
     popup_path_openBoxXingxing: './Popup/OpenBox/res/prefab/OpenBoxXingxing',
-    popup_path_daily: './Popup/Daily/res/prefab/Daily',
+    popup_path_challenge: './Popup/Challenge/res/prefab/Challenge',
     popup_path_bank: './Popup/Bank/res/prefab/Bank',
     popup_path_before: './Popup/Before/res/prefab/Before',
     popup_path_getCoins: './Popup/GetCoins/res/prefab/GetCoins',

@@ -32,7 +32,7 @@ export default class MainMenuMidHome extends cc.Component {
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱' }) home_left_boxXing: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱图标' }) home_left_boxXing_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
-    @property({ type: cc.Node, tooltip: '主菜单-左侧-每日签到进度' }) home_left_calendar_process: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-左侧-每日签到进度' }) home_left_challenge_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-右侧-等级宝箱进度' }) home_right_boxLevel_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-银行进度' }) home_right_bank_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '拦截' }) menu_mask_bottom: cc.Node = null;
@@ -605,10 +605,10 @@ export default class MainMenuMidHome extends cc.Component {
         kit.Popup.show(CConst.popup_path_boxLevel, {}, { mode: PopupCacheMode.Frequent });
     };
 
-    /** 按钮事件 每日签到 */
-    eventBtnHomeDaily() {
+    /** 按钮事件 挑战 */
+    eventBtnHomeChallenge() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.show(CConst.popup_path_daily, {}, { mode: PopupCacheMode.Frequent });
+        kit.Popup.show(CConst.popup_path_challenge, {}, { mode: PopupCacheMode.Frequent });
     };
 
     /** 按钮事件 银行 */
@@ -664,7 +664,7 @@ export default class MainMenuMidHome extends cc.Component {
     /** label home left */
     refreshHomeLabelLeft() {
         DataManager.setString(LangChars.Daily, (chars: string) => {
-            let itemLabel = this.home_left_calendar_process.getChildByName('label');
+            let itemLabel = this.home_left_challenge_process.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
     };

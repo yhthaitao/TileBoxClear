@@ -9030,7 +9030,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "calendar",
+    "_name": "challenge",
     "_objFlags": 0,
     "_parent": {
       "__id__": 213
@@ -9043,7 +9043,7 @@
         "__id__": 255
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [],
     "_prefab": {
       "__id__": 263
@@ -9384,7 +9384,7 @@
     },
     "component": "",
     "_componentId": "55934oTsl5BPYFsBiy/FAaq",
-    "handler": "eventBtnHomeDaily",
+    "handler": "eventBtnHomeChallenge",
     "customEventData": ""
   },
   {
@@ -13186,7 +13186,7 @@
     "home_left_boxXing_process": {
       "__id__": 224
     },
-    "home_left_calendar_process": {
+    "home_left_challenge_process": {
       "__id__": 255
     },
     "home_right_boxLevel_process": {
