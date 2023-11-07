@@ -11,9 +11,10 @@ const { ccclass, property } = cc._decorator;
 export default class OpenBoxLevel extends PopupBase {
 
     @property(cc.Node) nodeBox: cc.Node = null;
-    @property(cc.Node) nodeClaim: cc.Node = null;
+    @property(cc.Node) nodeOpen: cc.Node = null;
     @property(cc.Node) nodeContinue: cc.Node = null;
     @property(cc.Node) nodeReward: cc.Node = null;
+    @property(cc.Node) btnClaim: cc.Node = null;
     @property([cc.SpriteFrame]) iconTexture: cc.SpriteFrame[] = [];
 
     obj = {
@@ -27,6 +28,7 @@ export default class OpenBoxLevel extends PopupBase {
             armatureName: 'xiangzidakai', animationName: 'dakai',
         },
         icon: { y: 320, },
+        isVideo: false,
     };
     params: { pStrength: { x: number, y: number }, pBtnStart: { x: number, y: number }, rewards: TypeReward } = null;
     pFinish: cc.Vec3 = cc.v3();
@@ -34,21 +36,21 @@ export default class OpenBoxLevel extends PopupBase {
     protected showBefore(options: any): void {
         Common.log('弹窗 开启等级宝箱 showBefore()');
         this.params = Common.clone(options);
-
         DataManager.setString(LangChars.tapToClaim, (chars: string) => {
-            let itemLabel = this.nodeClaim.getChildByName('label');
+            let itemLabel = this.nodeOpen.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
-        DataManager.setString(LangChars.tapToContinue, (chars: string) => {
-            let itemLabel = this.nodeContinue.getChildByName('label');
+        DataManager.setString(LangChars.logon_reward_claim, (chars: string) => {
+            let itemLabel = this.btnClaim.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
 
         this.nodeBox.active = false;
         this.nodeBox.getChildByName('particle').active = false;
-        this.nodeClaim.active = false;
+        this.nodeOpen.active = false;
         this.nodeContinue.active = false;
         this.nodeReward.active = false;
+        this.obj.isVideo = false;
     }
 
     public show(options?: any): Promise<void> {
@@ -81,14 +83,14 @@ export default class OpenBoxLevel extends PopupBase {
             let dragon = this.nodeBox.getChildByName('dragon');
             DataManager.playAniDragon(dragon, this.obj.drop.armatureName, this.obj.drop.animationName);
             this.scheduleOnce(() => {
-                this.nodeClaim.active = true;
-                this.nodeClaim.opacity = 0;
-                cc.tween(this.nodeClaim).to(0.3, { opacity: 255 }).start();
+                this.nodeOpen.active = true;
+                this.nodeOpen.opacity = 0;
+                cc.tween(this.nodeOpen).to(0.3, { opacity: 255 }).start();
                 DataManager.playAniDragon(dragon, this.obj.wait.armatureName, this.obj.wait.animationName);
             }, timeDrop);
             // 点击继续
             this.scheduleOnce(() => {
-                this.nodeClaim.active = false;
+                this.nodeOpen.active = false;
                 this.playAniOpen();
             }, timeDrop + timeWait);
         });
@@ -102,7 +104,7 @@ export default class OpenBoxLevel extends PopupBase {
     public hide(suspended: boolean = false): Promise<void> {
         return new Promise<void>(async res => {
             this.nodeBox.active = false;
-            this.nodeClaim.active = false;
+            this.nodeOpen.active = false;
             this.nodeContinue.active = false;
             // 开启拦截
             this.maskUp.active = true;
@@ -174,11 +176,6 @@ export default class OpenBoxLevel extends PopupBase {
             this.nodeContinue.opacity = 0;
             cc.tween(this.nodeContinue).to(0.3, { opacity: 255 }).start();
         }, timeOpen);
-        // 获取物品
-        this.scheduleOnce(() => {
-            this.nodeContinue.active = false;
-            kit.Popup.hide();
-        }, timeOpen + 2);
     };
 
     playAniHide(): Promise<void> {
@@ -194,6 +191,10 @@ export default class OpenBoxLevel extends PopupBase {
                 pTo: cc.v2(this.pFinish.x, this.pFinish.y),
             };
             cc.tween(this.nodeReward).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
+                // 看视频 奖励翻倍
+                DataManager.refreshDataAfterUnlockReward(this.params.rewards, this.obj.isVideo ? 2 : 1);
+                DataManager.setData();
+
                 let reward = this.params.rewards.reward[0];
                 let name = reward.type == TypeProp.tStrengthInfinite ? CConst.event_scale_strength : CConst.event_scale_prop;
                 kit.Event.emit(name);
@@ -203,15 +204,30 @@ export default class OpenBoxLevel extends PopupBase {
     };
 
     /** 开启箱子 */
-    eventBtnClaim() {
-        this.nodeClaim.active = false;
+    eventBtnOpen() {
+        this.nodeOpen.active = false;
         this.unscheduleAllCallbacks();
         kit.Audio.playEffect(CConst.sound_clickUI);
         this.playAniOpen();
     }
 
-    /** 获取物品 */
-    eventBtnContinue() {
+    /** 看视频 */
+    eventBtnVideo() {
+        let funcA = () => {
+            this.obj.isVideo = true;
+            this.nodeContinue.active = false;
+            this.unscheduleAllCallbacks();
+            kit.Audio.playEffect(CConst.sound_clickUI);
+            kit.Popup.hide();
+        };
+        let funcB = () => {
+            kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
+        };
+        DataManager.playVideo(funcA, funcB);
+    }
+
+    /** 获取 */
+    eventBtnClaim() {
         this.nodeContinue.active = false;
         this.unscheduleAllCallbacks();
         kit.Audio.playEffect(CConst.sound_clickUI);

@@ -508,33 +508,33 @@ class DataManager {
     }
 
     /** 数据更新（开启宝箱后） */
-    public refreshDataAfterUnlockReward(params: TypeReward) {
+    public refreshDataAfterUnlockReward(params: TypeReward, radio: number = 1) {
         params.reward.forEach((reward) => {
             switch (reward.type) {
                 case TypeProp.coin:
-                    this.data.numCoin += reward.number;
+                    this.data.numCoin += reward.number * radio;
                     break;
                 case TypeProp.ice:
-                    this.data.prop.ice.count += reward.number;
+                    this.data.prop.ice.count += reward.number * radio;
                     break;
                 case TypeProp.tip:
-                    this.data.prop.tip.count += reward.number;
+                    this.data.prop.tip.count += reward.number * radio;
                     break;
                 case TypeProp.back:
-                    this.data.prop.back.count += reward.number;
+                    this.data.prop.back.count += reward.number * radio;
                     break;
                 case TypeProp.refresh:
-                    this.data.prop.refresh.count += reward.number;
+                    this.data.prop.refresh.count += reward.number * radio;
                     break;
                 case TypeProp.magnet:
-                    this.data.prop.magnet.count += reward.number;
+                    this.data.prop.magnet.count += reward.number * radio;
                     let stateMagnet = this.data.prop.magnet;
                     if (stateMagnet.state == StateBeforeProp.noProp) {
                         stateMagnet.state = StateBeforeProp.unChoose;
                     }
                     break;
                 case TypeProp.clock:
-                    this.data.prop.clock.count += reward.number;
+                    this.data.prop.clock.count += reward.number * radio;
                     let stateClock = this.data.prop.clock;
                     if (stateClock.state == StateBeforeProp.noProp) {
                         stateClock.state = StateBeforeProp.unChoose;
@@ -547,26 +547,26 @@ class DataManager {
                     let time = Math.floor(new Date().getTime() * 0.001);
                     if (reward.type == TypeProp.tMagnetInfinite) {
                         if (this.data.prop.magnet.tInfinite < time) {
-                            this.data.prop.magnet.tInfinite = time + reward.number;
+                            this.data.prop.magnet.tInfinite = time + reward.number * radio;
                         }
                         else {
-                            this.data.prop.magnet.tInfinite += reward.number;
+                            this.data.prop.magnet.tInfinite += reward.number * radio;
                         }
                     }
                     else if (reward.type == TypeProp.tClockInfinite) {
                         if (this.data.prop.clock.tInfinite < time) {
-                            this.data.prop.clock.tInfinite = time + reward.number;
+                            this.data.prop.clock.tInfinite = time + reward.number * radio;
                         }
                         else {
-                            this.data.prop.clock.tInfinite += reward.number;
+                            this.data.prop.clock.tInfinite += reward.number * radio;
                         }
                     }
                     else if (reward.type == TypeProp.tStrengthInfinite) {
                         if (this.data.strength.tInfinite < time) {
-                            this.data.strength.tInfinite = time + reward.number;
+                            this.data.strength.tInfinite = time + reward.number * radio;
                         }
                         else {
-                            this.data.strength.tInfinite += reward.number;
+                            this.data.strength.tInfinite += reward.number * radio;
                         }
                     }
                     break;

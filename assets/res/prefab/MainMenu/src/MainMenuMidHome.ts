@@ -331,7 +331,6 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxData.count >= total) {
                 boxData.count -= total;
                 boxData.level += 1;
-                DataManager.refreshDataAfterUnlockReward(boxReward);
             }
             DataManager.setData();
 
@@ -420,7 +419,6 @@ export default class MainMenuMidHome extends cc.Component {
                     isBoxLevelFirst = true;
                 }
                 boxData.level += 1;
-                DataManager.refreshDataAfterUnlockReward(boxReward);
             }
             DataManager.setData();
 

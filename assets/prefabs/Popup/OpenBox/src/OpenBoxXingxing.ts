@@ -11,9 +11,10 @@ const { ccclass, property } = cc._decorator;
 export default class OpenBoxXingxing extends PopupBase {
 
     @property(cc.Node) nodeBox: cc.Node = null;
-    @property(cc.Node) nodeClaim: cc.Node = null;
+    @property(cc.Node) nodeOpen: cc.Node = null;
     @property(cc.Node) nodeContinue: cc.Node = null;
     @property(cc.Node) nodeReward: cc.Node = null;
+    @property(cc.Node) btnClaim: cc.Node = null;
     @property([cc.SpriteFrame]) iconTexture: cc.SpriteFrame[] = [];
 
     obj = {
@@ -29,6 +30,7 @@ export default class OpenBoxXingxing extends PopupBase {
         icon: {
             y1: 50, y2: 320,
         },
+        isVideo: false,
     };
     params: { pCoin: { x: number, y: number }, pProp: { x: number, y: number }, rewards: TypeReward } = null;
     pFinishArr: cc.Vec3[] = [];
@@ -38,20 +40,21 @@ export default class OpenBoxXingxing extends PopupBase {
         this.params = Common.clone(options);
 
         DataManager.setString(LangChars.tapToClaim, (chars: string) => {
-            let itemLabel = this.nodeClaim.getChildByName('label');
+            let itemLabel = this.nodeOpen.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
-        DataManager.setString(LangChars.tapToContinue, (chars: string) => {
-            let itemLabel = this.nodeContinue.getChildByName('label');
+        DataManager.setString(LangChars.logon_reward_claim, (chars: string) => {
+            let itemLabel = this.btnClaim.getChildByName('label');
             itemLabel.getComponent(cc.Label).string = chars;
         });
 
         this.nodeBox.active = false;
         this.nodeBox.getChildByName('particle').active = false;
-        this.nodeClaim.active = false;
+        this.nodeOpen.active = false;
         this.nodeContinue.active = false;
         this.nodeReward.active = false;
         this.nodeReward.children.forEach((item) => { item.active = false });
+        this.obj.isVideo = false;
     }
 
     public show(options?: any): Promise<void> {
@@ -84,14 +87,14 @@ export default class OpenBoxXingxing extends PopupBase {
             let dragon = this.nodeBox.getChildByName('dragon');
             DataManager.playAniDragon(dragon, this.obj.drop.armatureName, this.obj.drop.animationName);
             this.scheduleOnce(() => {
-                this.nodeClaim.active = true;
-                this.nodeClaim.opacity = 0;
-                cc.tween(this.nodeClaim).to(0.3, { opacity: 255 }).start();
+                this.nodeOpen.active = true;
+                this.nodeOpen.opacity = 0;
+                cc.tween(this.nodeOpen).to(0.3, { opacity: 255 }).start();
                 DataManager.playAniDragon(dragon, this.obj.wait.armatureName, this.obj.wait.animationName);
             }, timeDrop);
             // 点击继续
             this.scheduleOnce(() => {
-                this.nodeClaim.active = false;
+                this.nodeOpen.active = false;
                 this.playAniOpen();
             }, timeDrop + timeWait);
         });
@@ -105,7 +108,7 @@ export default class OpenBoxXingxing extends PopupBase {
     public hide(suspended: boolean = false): Promise<void> {
         return new Promise<void>(async res => {
             this.nodeBox.active = false;
-            this.nodeClaim.active = false;
+            this.nodeOpen.active = false;
             this.nodeContinue.active = false;
 
             // 开启拦截
@@ -214,11 +217,6 @@ export default class OpenBoxXingxing extends PopupBase {
             this.nodeContinue.opacity = 0;
             cc.tween(this.nodeContinue).to(0.3, { opacity: 255 }).start();
         }, timeOpen);
-        // 获取物品
-        this.scheduleOnce(() => {
-            this.nodeContinue.active = false;
-            kit.Popup.hide();
-        }, timeOpen + 2);
     };
 
     playAniHide(): Promise<void> {
@@ -228,13 +226,18 @@ export default class OpenBoxXingxing extends PopupBase {
         let count = 0;
         let total = rewards.length;
         return new Promise((res) => {
+
+            // 看视频 奖励翻倍
+            DataManager.refreshDataAfterUnlockReward(this.params.rewards, this.obj.isVideo ? 2 : 1);
+            DataManager.setData();
+
             let funcCount = () => {
                 count++;
                 if (count > total - 1) {
                     res();
                 }
             };
-            
+
             for (let index = 0, length = rewards.length; index < length; index++) {
                 let prop = this.nodeReward.getChildByName('prop' + index);
                 prop.opacity = 255;
@@ -249,15 +252,15 @@ export default class OpenBoxXingxing extends PopupBase {
                         funcCount();
                     }).start();
                 }
-                else{
+                else {
                     let opt = {
                         p1: cc.v2(p1.x, p1.y),
                         p2: cc.v2((p1.x + p2.x) * 0.5, p1.y),
                         pTo: cc.v2(p2.x, p2.y),
                     };
                     cc.tween(prop).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
-                        kit.Event.emit(CConst.event_scale_prop);
                         funcCount();
+                        kit.Event.emit(CConst.event_scale_prop);
                     }).start();
                 }
             }
@@ -265,15 +268,30 @@ export default class OpenBoxXingxing extends PopupBase {
     };
 
     /** 开启箱子 */
-    eventBtnClaim() {
-        this.nodeClaim.active = false;
+    eventBtnOpen() {
+        this.nodeOpen.active = false;
         this.unscheduleAllCallbacks();
         kit.Audio.playEffect(CConst.sound_clickUI);
         this.playAniOpen();
     }
 
-    /** 获取物品 */
-    eventBtnContinue() {
+    /** 看视频 */
+    eventBtnVideo() {
+        let funcA = () => {
+            this.obj.isVideo = true;
+            this.nodeContinue.active = false;
+            this.unscheduleAllCallbacks();
+            kit.Audio.playEffect(CConst.sound_clickUI);
+            kit.Popup.hide();
+        };
+        let funcB = () => {
+            kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
+        };
+        DataManager.playVideo(funcA, funcB);
+    }
+
+    /** 获取 */
+    eventBtnClaim() {
         this.nodeContinue.active = false;
         this.unscheduleAllCallbacks();
         kit.Audio.playEffect(CConst.sound_clickUI);

@@ -1776,12 +1776,8 @@ export default class GameBox extends cc.Component {
         // DataManager.data.boxData.level--;
         // DataManager.setData();
 
-        // let obj = {
-        //     level: DataManager.data.boxData.level,
-        //     eventStart: CConst.event_game_load,
-        //     eventFinish: CConst.event_game_start,
-        // }
-        // kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+        // this.gameLoad();
+        // this.gameStart();
     }
 
     /** 按钮事件 下一关 */
@@ -1792,12 +1788,8 @@ export default class GameBox extends cc.Component {
         // DataManager.data.boxData.level++;
         // DataManager.setData();
 
-        // let obj = {
-        //     level: DataManager.data.boxData.level,
-        //     eventStart: CConst.event_game_load,
-        //     eventFinish: CConst.event_game_start,
-        // }
-        // kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+        // this.gameLoad();
+        // this.gameStart();
     }
 
     /** 使用道具-时钟 */
