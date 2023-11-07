@@ -32,8 +32,12 @@ export default class OpenBoxXingxing extends PopupBase {
         },
         isVideo: false,
     };
-    params: { pCoin: { x: number, y: number }, pProp: { x: number, y: number }, rewards: TypeReward } = null;
-    pFinishArr: cc.Vec3[] = [];
+    params: {
+        pStrength: { x: number, y: number },
+        pCoin: { x: number, y: number },
+        pProp: { x: number, y: number },
+        rewards: TypeReward
+    } = null;
 
     protected showBefore(options: any): void {
         Common.log('弹窗 开启星星宝箱 showBefore()');
@@ -133,43 +137,20 @@ export default class OpenBoxXingxing extends PopupBase {
     }
 
     setReward() {
-        let propId = 0;
         let rewards = this.params.rewards.reward;
-        this.pFinishArr = [];
         for (let index = 0, length = rewards.length; index < length; index++) {
-            let reward = rewards[index];
-            switch (reward.type) {
-                case TypeProp.coin:
-                    propId = 0;
-                    this.pFinishArr.push(cc.v3(this.params.pCoin.x, this.params.pCoin.y));
-                    break;
-                case TypeProp.ice:
-                    propId = 1;
-                    this.pFinishArr.push(cc.v3(this.params.pProp.x, this.params.pProp.y));
-                    break;
-                case TypeProp.tip:
-                    propId = 2;
-                    this.pFinishArr.push(cc.v3(this.params.pProp.x, this.params.pProp.y));
-                    break;
-                case TypeProp.back:
-                    propId = 3;
-                    this.pFinishArr.push(cc.v3(this.params.pProp.x, this.params.pProp.y));
-                    break;
-                case TypeProp.refresh:
-                    propId = 4;
-                    this.pFinishArr.push(cc.v3(this.params.pProp.x, this.params.pProp.y));
-                    break;
-                default:
-                    break;
-            }
             let prop = this.nodeReward.getChildByName('prop' + index);
+            let itemIcon = prop.getChildByName('icon');
+            let itemLabel = prop.getChildByName('label');
             prop.active = true;
             prop.scale = 0;
             prop.opacity = 255;
-            let itemIcon = prop.getChildByName('icon');
-            itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[propId];
-            let itemLabel = prop.getChildByName('label');
-            itemLabel.getComponent(cc.Label).string = 'x' + reward.number;
+            prop.position = cc.v3();
+            
+            let reward = rewards[index];
+            let config = this.getPropConfig(reward);
+            itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[config.frameId];
+            itemLabel.getComponent(cc.Label).string = config.propChars;
         }
     };
 
@@ -239,17 +220,28 @@ export default class OpenBoxXingxing extends PopupBase {
             };
 
             for (let index = 0, length = rewards.length; index < length; index++) {
+                let reward = rewards[index];
                 let prop = this.nodeReward.getChildByName('prop' + index);
                 prop.opacity = 255;
                 let p1 = prop.position;
-                let p2 = this.pFinishArr[index];
+                let p2 = this.getPropConfig(reward).pFinish;
                 let time = Common.getMoveTime(p1, p2, 1, 1250);
-                let reward = rewards[index];
                 if (reward.type == TypeProp.coin) {
                     prop.opacity = 0;
                     kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
                     cc.tween(prop).delay(time).call(() => {
                         funcCount();
+                    }).start();
+                }
+                else if (reward.type == TypeProp.strength || reward.type == TypeProp.tStrengthInfinite) {
+                    let opt = {
+                        p1: cc.v2(p1.x, p1.y),
+                        p2: cc.v2((p1.x + p2.x) * 0.5, p1.y),
+                        pTo: cc.v2(p2.x, p2.y),
+                    };
+                    cc.tween(prop).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
+                        funcCount();
+                        kit.Event.emit(CConst.event_scale_strength);
                     }).start();
                 }
                 else {
@@ -266,6 +258,72 @@ export default class OpenBoxXingxing extends PopupBase {
             }
         });
     };
+
+    getPropConfig(reward: {type: TypeProp, number: number}) {
+        let frameId = 0;
+        let propChars = '';
+        let pFinish = cc.v3();
+        switch (reward.type) {
+            case TypeProp.coin:
+                frameId = 0;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pCoin.x, this.params.pCoin.y);
+                break;
+            case TypeProp.ice:
+                frameId = 1;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tip:
+                frameId = 2;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.back:
+                frameId = 3;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.refresh:
+                frameId = 4;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.magnet:
+                frameId = 5;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tMagnetInfinite:
+                frameId = 6;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.clock:
+                frameId = 7;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tClockInfinite:
+                frameId = 8;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.strength:
+                frameId = 9;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
+                break;
+            case TypeProp.tStrengthInfinite:
+                frameId = 10;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
+                break;
+            default:
+                break;
+        }
+        return { frameId: frameId, propChars: propChars, pFinish: pFinish };
+    }
 
     /** 开启箱子 */
     eventBtnOpen() {

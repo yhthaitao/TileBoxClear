@@ -4,7 +4,7 @@ import CConst from "../../../../src/config/CConst";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
-import { TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
+import { Design, TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -27,11 +27,17 @@ export default class OpenBoxLevel extends PopupBase {
         open: {
             armatureName: 'xiangzidakai', animationName: 'dakai',
         },
-        icon: { y: 320, },
+        icon: {
+            y1: 50, y2: 320,
+        },
         isVideo: false,
     };
-    params: { pStrength: { x: number, y: number }, pBtnStart: { x: number, y: number }, rewards: TypeReward } = null;
-    pFinish: cc.Vec3 = cc.v3();
+    params: { 
+        pStrength: { x: number, y: number },
+        pCoin: { x: number, y: number },
+        pProp: { x: number, y: number },
+        rewards: TypeReward 
+    } = null;
 
     protected showBefore(options: any): void {
         Common.log('弹窗 开启等级宝箱 showBefore()');
@@ -50,6 +56,7 @@ export default class OpenBoxLevel extends PopupBase {
         this.nodeOpen.active = false;
         this.nodeContinue.active = false;
         this.nodeReward.active = false;
+        this.nodeReward.children.forEach((item) => { item.active = false });
         this.obj.isVideo = false;
     }
 
@@ -128,27 +135,21 @@ export default class OpenBoxLevel extends PopupBase {
     }
 
     setReward() {
-        let index = 0;
-        let reward = this.params.rewards.reward[0];
-        if (reward.type == TypeProp.tStrengthInfinite) {
-            index = 0;
-            this.pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
+        let rewards = this.params.rewards.reward;
+        for (let index = 0, length = rewards.length; index < length; index++) {
+            let prop = this.nodeReward.getChildByName('prop' + index);
+            let itemIcon = prop.getChildByName('icon');
+            let itemLabel = prop.getChildByName('label');
+            prop.active = true;
+            prop.scale = 0;
+            prop.opacity = 255;
+            prop.position = cc.v3();
+            
+            let reward = rewards[index];
+            let config = this.getPropConfig(reward);
+            itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[config.frameId];
+            itemLabel.getComponent(cc.Label).string = config.propChars;
         }
-        else if (reward.type == TypeProp.tMagnetInfinite) {
-            index = 1;
-            this.pFinish = cc.v3(this.params.pBtnStart.x, this.params.pBtnStart.y);
-        }
-        else if (reward.type == TypeProp.tClockInfinite) {
-            index = 2;
-            this.pFinish = cc.v3(this.params.pBtnStart.x, this.params.pBtnStart.y);
-        }
-
-        let nodeIcon = this.nodeReward.getChildByName('nodeIcon');
-        nodeIcon.getComponent(cc.Animation).play();
-        let itemIcon = nodeIcon.getChildByName('icon');
-        itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[index];
-        let itemLabel = nodeIcon.getChildByName('label');
-        itemLabel.getComponent(cc.Label).string = Math.floor(reward.number / 60) + 'min';
     };
 
     playAniOpen() {
@@ -158,18 +159,37 @@ export default class OpenBoxLevel extends PopupBase {
         DataManager.playAniDragon(dragon, this.obj.open.armatureName, this.obj.open.animationName);
         // icon
         this.nodeReward.active = true;
-        this.nodeReward.position = cc.v3();
-        this.nodeReward.scale = 0;
+        this.nodeReward.getComponent(cc.Animation).play();
         this.setReward();
+
+        // 粒子
         cc.tween(this.nodeReward).delay(1.35).call(() => {
             // 粒子
             let particle = this.nodeBox.getChildByName('particle');
             particle.active = true;
             particle.getComponent(cc.ParticleSystem).resetSystem();
-        }).parallel(
-            cc.tween().to(0.1, { scale: 1 }),
-            cc.tween().to(0.2, { y: this.obj.icon.y }),
-        ).start();
+        }).call(() => {
+            let disX = 200;
+            let arrPos: cc.Vec3[] = [];
+            let rewards = this.params.rewards.reward;
+            let disWidth = (rewards.length - 1) * disX;
+            // 缩放数据
+            let winScaleByH = cc.winSize.height / Design.height;
+            let y1 = this.obj.icon.y1 * winScaleByH;
+            let y2 = this.obj.icon.y2 * winScaleByH;
+            rewards.forEach((item, index) => {
+                arrPos.push(cc.v3(index * disX - disWidth * 0.5, y2));
+            });
+            for (let index = 0, length = rewards.length; index < length; index++) {
+                let prop = this.nodeReward.getChildByName('prop' + index);
+                prop.position = cc.v3(0, y1);
+                cc.tween(prop).parallel(
+                    cc.tween().to(0.1, { scale: 1 }),
+                    cc.tween().to(0.2, { position: arrPos[index] }),
+                ).start();
+            }
+        }).start();
+
         // 点击继续
         this.scheduleOnce(() => {
             this.nodeContinue.active = true;
@@ -179,29 +199,129 @@ export default class OpenBoxLevel extends PopupBase {
     };
 
     playAniHide(): Promise<void> {
-        let nodeIcon = this.nodeReward.getChildByName('nodeIcon');
-        nodeIcon.getComponent(cc.Animation).stop();
-        nodeIcon.y = 0;
+        this.nodeReward.getComponent(cc.Animation).stop();
+        this.nodeReward.position = cc.v3();
+        let rewards = this.params.rewards.reward;
+        let count = 0;
+        let total = rewards.length;
         return new Promise((res) => {
-            let p1 = this.nodeReward.position;
-            let time = Common.getMoveTime(p1, this.pFinish, 1, 1250);
-            let opt = {
-                p1: cc.v2(p1.x, p1.y),
-                p2: cc.v2((p1.x + this.pFinish.x) * 0.5, p1.y),
-                pTo: cc.v2(this.pFinish.x, this.pFinish.y),
-            };
-            cc.tween(this.nodeReward).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
-                // 看视频 奖励翻倍
-                DataManager.refreshDataAfterUnlockReward(this.params.rewards, this.obj.isVideo ? 2 : 1);
-                DataManager.setData();
 
-                let reward = this.params.rewards.reward[0];
-                let name = reward.type == TypeProp.tStrengthInfinite ? CConst.event_scale_strength : CConst.event_scale_prop;
-                kit.Event.emit(name);
-                res();
-            }).start();
+            // 看视频 奖励翻倍
+            DataManager.refreshDataAfterUnlockReward(this.params.rewards, this.obj.isVideo ? 2 : 1);
+            DataManager.setData();
+
+            let funcCount = () => {
+                count++;
+                if (count > total - 1) {
+                    res();
+                }
+            };
+
+            for (let index = 0, length = rewards.length; index < length; index++) {
+                let reward = rewards[index];
+                let prop = this.nodeReward.getChildByName('prop' + index);
+                prop.opacity = 255;
+                let p1 = prop.position;
+                let p2 = this.getPropConfig(reward).pFinish;
+                let time = Common.getMoveTime(p1, p2, 1, 1250);
+                if (reward.type == TypeProp.coin) {
+                    prop.opacity = 0;
+                    kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
+                    cc.tween(prop).delay(time).call(() => {
+                        funcCount();
+                    }).start();
+                }
+                else if (reward.type == TypeProp.strength || reward.type == TypeProp.tStrengthInfinite) {
+                    let opt = {
+                        p1: cc.v2(p1.x, p1.y),
+                        p2: cc.v2((p1.x + p2.x) * 0.5, p1.y),
+                        pTo: cc.v2(p2.x, p2.y),
+                    };
+                    cc.tween(prop).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
+                        funcCount();
+                        kit.Event.emit(CConst.event_scale_strength);
+                    }).start();
+                }
+                else {
+                    let opt = {
+                        p1: cc.v2(p1.x, p1.y),
+                        p2: cc.v2((p1.x + p2.x) * 0.5, p1.y),
+                        pTo: cc.v2(p2.x, p2.y),
+                    };
+                    cc.tween(prop).bezierTo(time, opt.p1, opt.p2, opt.pTo).call(() => {
+                        funcCount();
+                        kit.Event.emit(CConst.event_scale_prop);
+                    }).start();
+                }
+            }
         });
     };
+
+    getPropConfig(reward: {type: TypeProp, number: number}) {
+        let frameId = 0;
+        let propChars = '';
+        let pFinish = cc.v3();
+        switch (reward.type) {
+            case TypeProp.coin:
+                frameId = 0;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pCoin.x, this.params.pCoin.y);
+                break;
+            case TypeProp.ice:
+                frameId = 1;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tip:
+                frameId = 2;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.back:
+                frameId = 3;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.refresh:
+                frameId = 4;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.magnet:
+                frameId = 5;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tMagnetInfinite:
+                frameId = 6;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.clock:
+                frameId = 7;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.tClockInfinite:
+                frameId = 8;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
+                break;
+            case TypeProp.strength:
+                frameId = 9;
+                propChars = 'x' + reward.number;
+                pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
+                break;
+            case TypeProp.tStrengthInfinite:
+                frameId = 10;
+                propChars = '+' + Math.floor(reward.number/60) + 'm';
+                pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
+                break;
+            default:
+                break;
+        }
+        return { frameId: frameId, propChars: propChars, pFinish: pFinish };
+    }
 
     /** 开启箱子 */
     eventBtnOpen() {

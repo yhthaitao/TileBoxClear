@@ -90,9 +90,10 @@ export enum TypeProp {
     magnet = 1 << 4,// 磁铁
     clock = 1 << 5,// 时钟
     coin = 1 << 6,// 金币
-    tStrengthInfinite = 1 << 7,// 无限时间-体力
-    tMagnetInfinite = 1 << 8,// 无限时间-磁铁
-    tClockInfinite = 1 << 9,// 无限时间-时钟
+    strength = 1 << 7,// 体力
+    tStrengthInfinite = 1 << 8,// 无限时间-体力
+    tMagnetInfinite = 1 << 9,// 无限时间-磁铁
+    tClockInfinite = 1 << 10,// 无限时间-时钟
 }
 
 /** 数据类型（碎片宝箱奖励） */

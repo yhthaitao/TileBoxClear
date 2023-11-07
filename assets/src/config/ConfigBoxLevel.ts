@@ -5,7 +5,9 @@ const ConfigBoxLevel = {
     1: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tStrengthInfinite, number: 10 * 60 } 
+            { type: TypeProp.refresh, number: 1 },
+            { type: TypeProp.ice, number: 1 },
+            { type: TypeProp.coin, number: 30 }
         ] 
     },
     2: { 
@@ -17,37 +19,81 @@ const ConfigBoxLevel = {
     3: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tStrengthInfinite, number: 20 * 60 } 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.strength, number: 5 },
+            { type: TypeProp.coin, number: 30 }
         ] 
     },
     4: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tClockInfinite, number: 20 * 60 } 
+            { type: TypeProp.tStrengthInfinite, number: 30 * 60 },
+            { type: TypeProp.back, number: 1 },
+            { type: TypeProp.coin, number: 30 }
         ] 
     },
     5: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tMagnetInfinite, number: 25 * 60 } 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.back, number: 1 },
+            { type: TypeProp.coin, number: 30 }
         ] 
     },
     6: {
         total: 10, 
         reward: [ 
-            { type: TypeProp.tStrengthInfinite, number: 25 * 60 } 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.ice, number: 1 },
+            { type: TypeProp.coin, number: 20 }
         ] 
     },
     7: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tClockInfinite, number: 25 * 60 } 
+            { type: TypeProp.back, number: 1 },
+            { type: TypeProp.refresh, number: 1 },
+            { type: TypeProp.coin, number: 20 }
         ] 
     },
     8: { 
         total: 10, 
         reward: [ 
-            { type: TypeProp.tMagnetInfinite, number: 25 * 60 } 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.refresh, number: 1 },
+            { type: TypeProp.coin, number: 20 }
+        ] 
+    },
+    9: { 
+        total: 10, 
+        reward: [ 
+            { type: TypeProp.refresh, number: 1 },
+            { type: TypeProp.ice, number: 1 },
+            { type: TypeProp.coin, number: 20 }
+        ] 
+    },
+    10: { 
+        total: 10, 
+        reward: [ 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.ice, number: 1 },
+            { type: TypeProp.coin, number: 20 }
+        ] 
+    },
+    11: { 
+        total: 10, 
+        reward: [ 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.refresh, number: 1 },
+            { type: TypeProp.coin, number: 20 }
+        ] 
+    },
+    12: { 
+        total: 10, 
+        reward: [ 
+            { type: TypeProp.tip, number: 1 },
+            { type: TypeProp.ice, number: 1 },
+            { type: TypeProp.coin, number: 20 }
         ] 
     },
 };

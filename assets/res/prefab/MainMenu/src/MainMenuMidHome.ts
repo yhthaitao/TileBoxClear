@@ -352,10 +352,16 @@ export default class MainMenuMidHome extends cc.Component {
             // 进度条再次刷新
             if (boxAddElse >= 0) {
                 // 开启宝箱
+                let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
                 pButton.y += this.home_bottom_button.height;
-                let param = { pCoin: { x: pCoin.x, y: pCoin.y }, pProp: { x: pButton.x, y: pButton.y }, rewards: boxReward };
+                let param = { 
+                    pStrength: { x: pStrength.x, y: pStrength.y }, 
+                    pCoin: { x: pCoin.x, y: pCoin.y }, 
+                    pProp: { x: pButton.x, y: pButton.y }, 
+                    rewards: boxReward 
+                };
                 await kit.Popup.show(CConst.popup_path_openBoxXingxing, param, { mode: PopupCacheMode.Frequent });
                 // 进度条再次刷新
                 boxCount = 0;
@@ -441,9 +447,15 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxAddElse >= 0) {
                 // 开启宝箱
                 let pStrength = Common.getLocalPos(this.uiTop_strength_sign.parent, this.uiTop_strength_sign.position, this.node);
+                let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
                 pButton.y += this.home_bottom_button.height;
-                let param = { pStrength: { x: pStrength.x, y: pStrength.y }, pBtnStart: { x: pButton.x, y: pButton.y }, rewards: boxReward };
+                let param = { 
+                    pStrength: { x: pStrength.x, y: pStrength.y }, 
+                    pCoin: { x: pCoin.x, y: pCoin.y }, 
+                    pProp: { x: pButton.x, y: pButton.y }, 
+                    rewards: boxReward 
+                };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
 
                 // 进度条再次刷新

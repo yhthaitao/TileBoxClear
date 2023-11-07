@@ -91,11 +91,11 @@ class DataManager {
         },
         // 宝箱相关参数（关卡等级宝箱）
         boxLevel: {
-            level: 1, count: 0, add: 0, loop: { start: 6, length: 3, },
+            level: 1, count: 0, add: 0, loop: { start: 6, length: 7, },
         },
         // 宝箱相关参数（星星宝箱）
         boxXingxing: {
-            level: 1, count: 0, add: 0, loop: { start: 6, length: 16, },
+            level: 1, count: 0, add: 0, loop: { start: 4, length: 7, },
         },
         // 宝箱相关参数（物品宝箱）
         boxGood: {
@@ -659,7 +659,7 @@ class DataManager {
             index = 1;
         }
         else {
-            if (index > boxData.loop.start - 1) {
+            if (index >= boxData.loop.start) {
                 index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
             }
         }
@@ -674,7 +674,7 @@ class DataManager {
             index = 1;
         }
         else {
-            if (index > boxData.loop.start - 1) {
+            if (index >= boxData.loop.start) {
                 index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
             }
         }
