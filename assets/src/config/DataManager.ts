@@ -52,7 +52,10 @@ class DataManager {
         // 广告参数
         advert: {
             isRemove: false,// 是否去除广告
-            record: { time: 0, level: 0 },// 广告计时
+            record: {
+                video: { time: 0, level: 0 },// 视频计时
+                advert: { time: 0, level: 0 },// 广告计时
+            },
             count: 0,// 广告计数
             s2sCount: 0,// 回传计数
             isCpe: false,// 打点记录 只打一次
@@ -799,8 +802,9 @@ class DataManager {
             let funcA = () => {
                 funcN();
                 // 更新广告计时
-                this.data.advert.record.time = Math.floor(new Date().getTime() * 0.001);
-                this.data.advert.record.level = this.data.boxData.level;
+                this.data.advert.record.advert.time = Math.floor(new Date().getTime() * 0.001);
+                this.data.advert.record.advert.level = this.data.boxData.level;
+                this.setData();
             };
             let funcB = () => {
                 funcN();
@@ -836,17 +840,22 @@ class DataManager {
             return false;
         }
 
-        // 时间不足
+        // 插屏间隔时间不足
         let timeNow = Math.floor(new Date().getTime() * 0.001);
-        let timeRecord = this.data.advert.record.time;
-        let timeLast = timeNow - timeRecord;
-        if (timeLast < 30) {
-            Common.log('checkIsPlayAdvert() 插屏广告检测  时间不足 timeLast: ', timeLast);
+        let advertDis = timeNow - this.data.advert.record.advert.time;
+        if (advertDis < 30) {
+            Common.log('checkIsPlayAdvert() 插屏广告检测  插屏间隔时间不足 advertDis: ', advertDis);
             return false;
         }
-        // let levelRecord = this.data.advert.record.level;
+        // 视频与插屏间隔时间不足
+        let videoDis = timeNow - this.data.advert.record.video.time;
+        if (videoDis < 30) {
+            Common.log('checkIsPlayAdvert() 插屏广告检测  视频与插屏间隔时间不足 videoDis: ', videoDis);
+            return false;
+        }
+        // let levelRecord = this.data.advert.record.advert.level;
         // let levelLast = level - levelRecord;
-        Common.log('checkIsPlayAdvert() 插屏广告检测  时间 timeLast: ', timeLast, '; timeNow: ', timeNow, '; timeRecord: ', timeRecord);
+        Common.log('checkIsPlayAdvert() 插屏广告检测  时间 advertDis: ', advertDis, '; videoDis: ', videoDis);
         return true;
     };
 
@@ -859,9 +868,15 @@ class DataManager {
      * @returns 
      */
     playVideo(funcA, funcB): void {
+        let funcSucce = () => {
+            funcA();
+            this.data.advert.record.video.time = Math.floor(new Date().getTime() * 0.001);
+            this.data.advert.record.video.level = this.data.boxData.level;
+            this.setData();
+        };
         let isReady = NativeCall.videoCheck();
         if (isReady) {
-            this.startVideo(funcA, funcB);
+            this.startVideo(funcSucce, funcB);
             return;
         }
         isReady = NativeCall.advertCheck();
@@ -869,7 +884,7 @@ class DataManager {
             this.startAdvert(() => {
                 // 打点 插屏播放成功（无视频、播放插屏成功）
                 NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
-                funcA();
+                funcSucce();
             }, funcB);
             return;
         }
@@ -883,7 +898,7 @@ class DataManager {
      * @returns
      */
     public startVideo(funcA: Function, funcB: Function): void {
-        this.adAnimPlay(NativeCall.videoShow.bind(NativeCall, async () => {
+        this.playAniAdvert(NativeCall.videoShow.bind(NativeCall, async () => {
             // 延迟一会儿
             await new Promise((_res) => {
                 cc.Canvas.instance.scheduleOnce(_res, this.interval);
@@ -901,7 +916,7 @@ class DataManager {
     public startAdvert(funcA: Function, funcB: Function): void {
         // 打点 插屏广告请求（游戏从后台返回）
         NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
-        this.adAnimPlay(NativeCall.advertShow.bind(NativeCall, async () => {
+        this.playAniAdvert(NativeCall.advertShow.bind(NativeCall, async () => {
             // 延迟一会儿
             await new Promise((_res) => {
                 cc.Canvas.instance.scheduleOnce(_res, this.interval);
@@ -909,18 +924,6 @@ class DataManager {
             funcA();
         }, funcB));
     }
-
-    /** 播放动画 */
-    public adAnimPlay(callback: Function = null) {
-        callback && callback();
-        // this.nodeVideo.active = true;
-        // let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay);
-        // animation.once(dragonBones.EventObject.COMPLETE, () => {
-        //     this.nodeVideo.active = false;
-        //     if (typeof callback == "function" && cc.isValid(callback)) callback();
-        // })
-        // animation.playAnimation('dacheng', 1);
-    };
 
     /** 更新广告计数 */
     public updateAdCount() {
@@ -963,6 +966,51 @@ class DataManager {
     public getTitlePosY() {
         let heightMax = cc.winSize.height * 0.5;
         return heightMax * 0.25;
+    };
+
+    /** 播放动画 获取金币 */
+    public playAniGetCoin(nodeCoin: cc.Node, pWorld: cc.Vec3 = cc.v3(), callBack: Function = null) {
+        let itemSign = nodeCoin.getChildByName('sign');
+        let itemLabel = nodeCoin.getChildByName('label');
+        let coinCur = Number(itemLabel.getComponent(cc.Label).string);
+        let coinNext = this.data.numCoin;
+        let coinDis = coinNext - coinCur;
+        let count = 0;
+        let total = 30;
+        let pStart = nodeCoin.convertToNodeSpaceAR(pWorld);
+        let pFinish = itemSign.position;
+        for (let index = 0; index < total; index++) {
+            let coin = cc.instantiate(itemSign);
+            coin.scale = 0.75;
+            coin.active = true;
+            coin.parent = itemSign.parent;
+            coin.position = pStart;
+            let randomX = Math.floor(Math.random() * 100 - 50);
+            let randomY = Math.floor(Math.random() * 50 - 50);
+            let pMid = cc.v2(pStart.x + randomX, pStart.y + randomY);
+            let bezier1 = { p1: cc.v2(pStart.x, pStart.y), p2: cc.v2(pMid.x, pStart.y), pTo: cc.v2(pMid.x, pMid.y), time: Math.random() * 0.2 + 0.1, };
+            let bezier2 = { p1: cc.v2(pMid.x, pMid.y), p2: cc.v2(pFinish.x, pMid.y), pTo: cc.v2(pFinish.x, pFinish.y) };
+            let time2 = Common.getMoveTime(cc.v3(bezier2.p1.x, bezier2.p1.y), cc.v3(bezier2.pTo.x, bezier2.pTo.y), 1, 1250);
+            cc.tween(coin)
+                .delay(index * 0.02)
+                .bezierTo(bezier1.time, bezier1.p1, bezier1.p2, bezier1.pTo)
+                .delay(0.3)
+                .parallel(
+                    cc.tween().bezierTo(time2, bezier2.p1, bezier2.p2, bezier2.pTo),
+                    cc.tween().to(time2, { scale: 1.0 }),
+                )
+                .call(() => {
+                    coin.removeFromParent();
+                    count++;
+                    let number = coinCur + coinDis * count / total;
+                    itemLabel.getComponent(cc.Label).string = '' + Math.floor(number);
+                    itemSign.getComponent(cc.Animation).play();
+                    if (index == total - 1) {
+                        callBack && callBack();
+                    }
+                })
+                .start();
+        }
     };
 
     /** 播放碎片动画（主界面） */
@@ -1041,13 +1089,13 @@ class DataManager {
                     cc.tween().to(obj1.time, { position: obj1.position }),
                 )
                 .parallel(
-                    cc.tween().to(obj2.time, { scaleX: obj2.scaleX}),
-                    cc.tween().to(obj2.time, { scaleY: obj2.scaleY}),
+                    cc.tween().to(obj2.time, { scaleX: obj2.scaleX }),
+                    cc.tween().to(obj2.time, { scaleY: obj2.scaleY }),
                     cc.tween().bezierTo(obj2.time, obj2.bezier.p1, obj2.bezier.p2, obj2.bezier.pTo),
                 )
                 .parallel(
-                    cc.tween().to(obj3.time, { scaleX: obj3.scaleX}),
-                    cc.tween().to(obj3.time, { scaleY: obj3.scaleY}),
+                    cc.tween().to(obj3.time, { scaleX: obj3.scaleX }),
+                    cc.tween().to(obj3.time, { scaleY: obj3.scaleY }),
                     cc.tween().bezierTo(obj3.time, obj3.bezier.p1, obj3.bezier.p2, obj3.bezier.pTo),
                 )
                 .call(() => {
@@ -1069,6 +1117,18 @@ class DataManager {
             dragon.armatureName = armatureName;
             dragon.playAnimation(animationName, 1);
         });
+    };
+
+    /** 播放动画 */
+    public playAniAdvert(callback: Function = null) {
+        callback && callback();
+        // this.nodeVideo.active = true;
+        // let animation = this.nodeVideo.getChildByName("dragon").getComponent(dragonBones.ArmatureDisplay);
+        // animation.once(dragonBones.EventObject.COMPLETE, () => {
+        //     this.nodeVideo.active = false;
+        //     if (typeof callback == "function" && cc.isValid(callback)) callback();
+        // })
+        // animation.playAnimation('dacheng', 1);
     };
 
     public refreshScrollview(scrollviewContent: cc.Node) {

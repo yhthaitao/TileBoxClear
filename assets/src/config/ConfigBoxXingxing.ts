@@ -21,7 +21,7 @@ const ConfigBoxXingxing = {
         total: 20,
         reward: [
             { type: TypeProp.coin, number: 50 }, 
-            { type: TypeProp.strength, number: 5 }
+            { type: TypeProp.tStrengthInfinite, number: 15 * 60 }
         ]
     },
     4: {

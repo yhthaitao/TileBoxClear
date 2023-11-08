@@ -200,7 +200,14 @@ class NativeCall {
         let timeNow = Math.floor(new Date().getTime() * 0.001);//当前时间戳
         let timeDis = timeNow - DataManager.backGameAdsTime;
         if (timeDis < DataManager.backGameNoAdsTime) {
-            Common.log('adsTimeTrue() 时间不够 不播 timeDis: ', timeDis, '; timeNeed: ', DataManager.backGameNoAdsTime);
+            Common.log('adsTimeTrue() 返回游戏间隔时间不足 timeDis: ', timeDis, '; timeNeed: ', DataManager.backGameNoAdsTime);
+            return;
+        }
+
+        // 视频与插屏间隔时间不足
+        let videoDis = timeNow - DataManager.data.advert.record.video.time;
+        if (videoDis < 30) {
+            Common.log('adsTimeTrue() 视频与插屏间隔时间不足 videoDis: ', videoDis);
             return;
         }
 

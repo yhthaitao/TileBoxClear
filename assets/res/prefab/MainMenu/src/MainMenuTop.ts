@@ -226,7 +226,7 @@ export default class MainMenuTop extends cc.Component {
         this.refreshStrength();
     };
 
-    playAniCoin(x: number, y: number) {
+    playAniGetCoin(x: number, y: number) {
         let coinCur = Number(this.labelCoinNum.getComponent(cc.Label).string);
         let coinNext = DataManager.data.numCoin;
         let coinDis = coinNext - coinCur;
@@ -286,7 +286,7 @@ export default class MainMenuTop extends cc.Component {
     /** 监听-注册 */
     listernerRegist(): void {
         kit.Event.on(CConst.event_scale_strength, this.playAniStrength, this);
-        kit.Event.on(CConst.event_scale_coin, this.playAniCoin, this);
+        kit.Event.on(CConst.event_scale_coin, this.playAniGetCoin, this);
         kit.Event.on(CConst.event_refresh_top, this.refreshUI, this);
         kit.Event.on(CConst.event_refresh_strength, this.refreshStrength, this);
         kit.Event.on(CConst.event_refresh_coin, this.refreshCoin, this);

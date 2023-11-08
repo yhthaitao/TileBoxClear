@@ -20,7 +20,7 @@ const ConfigBoxLevel = {
         total: 10, 
         reward: [ 
             { type: TypeProp.tip, number: 1 },
-            { type: TypeProp.strength, number: 5 },
+            { type: TypeProp.tClockInfinite, number: 15 * 60 },
             { type: TypeProp.coin, number: 30 }
         ] 
     },

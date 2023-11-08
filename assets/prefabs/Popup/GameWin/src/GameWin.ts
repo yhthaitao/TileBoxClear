@@ -8,12 +8,6 @@ import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupMa
 import { ParamsWin, TypeBefore } from "../../../../src/config/ConfigCommon";
 import GameManager from "../../../../src/config/GameManager";
 
-/** 动作参数（宝箱相关） */
-interface ParamsAniBox {
-    objBar: { node: cc.Node, time: number, goal: number },
-    objLabel: { node: cc.Node, desc: string },
-}
-
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class GameWin<Options = any> extends PopupBase {
@@ -21,24 +15,36 @@ export default class GameWin<Options = any> extends PopupBase {
     @property(cc.Node) nodeXing: cc.Node = null;
     @property(cc.Node) nodeClock: cc.Node = null;
     @property(cc.Node) nodeBox: cc.Node = null;
-    @property(cc.Node) nodeNext: cc.Node = null;
+    @property(cc.Node) nodeCoin: cc.Node = null;
+    @property(cc.Node) nodeLine: cc.Node = null;
+    @property(cc.Node) btnVideo: cc.Node = null;
+    @property(cc.Node) btnNext: cc.Node = null;
+    @property(cc.Node) itemCoinArrow: cc.Node = null;
     @property(cc.Node) itemLabelTitle: cc.Node = null;
     @property(cc.Node) itemLabelNext: cc.Node = null;
     @property(cc.Node) itemLabelTime: cc.Node = null;
     @property([cc.Node]) arrNodeXingxing: cc.Node[] = [];
-    @property(cc.Node) maskBottom: cc.Node = null;
+    @property(cc.Node) nodeReward: cc.Node = null;
 
     params: ParamsWin = null;
     isNext: boolean = false;
     islock: boolean = false;
     obj = {
-        boxShow: {
-            xing: { y: 160 }, clock: { y: -20 }, box: { y: -125 }, next: { y: -220 }
+        isShowLine: false,
+        show: {
+            xing: { y: 190 }, box: { y: 5 }, coin: { y: -70 }, line: { y: -145 }, video: { y: -245 }, next: { y: -400 }
         },
-        boxHide: {
-            xing: { y: 140 }, clock: { y: -70 }, box: { y: 0 }, next: { y: -210 }
+        hide: {
+            xing: { y: 190 }, box: { y: -15 }, coin: { y: -120 }, line: { y: -145 }, video: { y: -245 }, next: { y: -240 }
         },
         aniBox: { isPlay: false, count: 0, total: 0, goods: [0] },
+        line: {
+            isMove: false,
+            base: 10,
+            speed: { init: 0, cur: 0, max: 5, add: 0.06 },
+            radio: { init: 2, cur: 2, max: 5 },
+            arrow: { dir: 1, left: -90, right: 165, mid: [-9.5, 73.5, 138.5] },
+        },
     };
 
     protected showBefore(options: any): void {
@@ -87,6 +93,47 @@ export default class GameWin<Options = any> extends PopupBase {
         this.setIsLock(true);
     }
 
+    protected update(dt: number): void {
+        if (!this.obj.isShowLine) {
+            return;
+        }
+        if (!this.obj.line.isMove) {
+            return;
+        }
+        this.obj.line.speed.cur += this.obj.line.speed.add;
+        if (this.obj.line.speed.cur > this.obj.line.speed.max) {
+            this.obj.line.speed.cur = this.obj.line.speed.max;
+        }
+        this.itemCoinArrow.x += this.obj.line.speed.cur * this.obj.line.arrow.dir;
+        // 方向变化
+        if (this.itemCoinArrow.x > this.obj.line.arrow.right) {
+            this.itemCoinArrow.x = this.obj.line.arrow.right;
+            this.obj.line.arrow.dir = -1;
+            this.obj.line.speed.cur = this.obj.line.speed.init;
+        }
+        else if (this.itemCoinArrow.x < this.obj.line.arrow.left) {
+            this.itemCoinArrow.x = this.obj.line.arrow.left;
+            this.obj.line.arrow.dir = 1;
+            this.obj.line.speed.cur = this.obj.line.speed.init;
+        }
+        // 倍数变化
+        if (this.itemCoinArrow.x < this.obj.line.arrow.mid[0]) {
+            this.obj.line.radio.cur = 2;
+
+        }
+        else if (this.itemCoinArrow.x < this.obj.line.arrow.mid[1]) {
+            this.obj.line.radio.cur = 3;
+        }
+        else if (this.itemCoinArrow.x < this.obj.line.arrow.mid[2]) {
+            this.obj.line.radio.cur = 4;
+        }
+        else {
+            this.obj.line.radio.cur = 5;
+        }
+        let coinLabel = this.nodeCoin.getChildByName('label');
+        coinLabel.getComponent(cc.Label).string = 'x' + this.obj.line.radio.cur * this.obj.line.base;
+    }
+
     /**
      * 展示弹窗
      * @param options 弹窗选项
@@ -96,6 +143,8 @@ export default class GameWin<Options = any> extends PopupBase {
         this.node.scale = 1.2;
         this.maskDown.setContentSize(cc.winSize);
         this.maskUp.setContentSize(cc.winSize);
+        this.nodeReward.setContentSize(cc.winSize);
+        this.nodeReward.scale = 1 / 1.2;
 
         return new Promise<void>(res => {
             this.node.active = true;
@@ -123,6 +172,7 @@ export default class GameWin<Options = any> extends PopupBase {
                 this.maskUp.active = false;
                 // 弹窗已完全展示
                 this.playAniBoxGood();
+                this.playAniLine();
                 this.showAfter && this.showAfter();
                 // Done
                 res();
@@ -132,29 +182,53 @@ export default class GameWin<Options = any> extends PopupBase {
 
     /** 刷新ui */
     resetContent() {
-        this.obj.aniBox.isPlay = false;
-        let config = DataManager.getRewardBoxGood();
-        // 物品池子为空
-        if (config.goods.length <= 0) {
-            this.nodeXing.active = true;
-            this.nodeXing.y = this.obj.boxHide.xing.y;
-            this.nodeClock.active = true;
-            this.nodeClock.y = this.obj.boxHide.clock.y;
-            this.nodeBox.active = false;
-            this.nodeNext.active = true;
-            this.nodeNext.y = this.obj.boxHide.next.y;
+        // 从第六关开始 结算可以看视频翻倍
+        this.obj.isShowLine = DataManager.data.boxData.level > 6;
+        this.obj.line.isMove = false;
+        this.obj.line.speed.cur = this.obj.line.speed.init;
+        this.obj.line.radio.cur = this.obj.line.radio.init;
+        this.itemCoinArrow.x = this.obj.line.arrow.left;
+        this.nodeReward.active = false;
+        let rewardCoinLabel = this.nodeReward.getChildByName('nodeCoin').getChildByName('label');
+        rewardCoinLabel.getComponent(cc.Label).string = '' + DataManager.data.numCoin;
+        DataManager.data.numCoin += this.obj.line.base;
+        DataManager.setData();
+
+        // 显示金币倍数
+        this.nodeLine.active = true;
+        this.nodeCoin.active = true;
+        this.btnVideo.active = true;
+        if (this.obj.isShowLine) {
+            this.nodeXing.y = this.obj.show.xing.y;
+            this.nodeBox.y = this.obj.show.box.y;
+            this.nodeCoin.y = this.obj.show.coin.y;
+            this.nodeLine.y = this.obj.show.line.y;
+            this.btnVideo.y = this.obj.show.video.y;
+            this.btnNext.y = this.obj.show.next.y;
+            let nextBack = this.btnNext.getChildByName('back');
+            nextBack.active = false;
         }
         else {
-            this.nodeXing.active = true;
-            this.nodeXing.y = this.obj.boxShow.xing.y;
-            this.nodeClock.active = true;
-            this.nodeClock.y = this.obj.boxShow.clock.y;
-            this.nodeBox.active = true;
-            this.nodeBox.y = this.obj.boxShow.box.y;
-            this.nodeNext.active = true;
-            this.nodeNext.y = this.obj.boxShow.next.y;
+            this.nodeLine.active = false;
+            this.btnVideo.active = false;
+            this.nodeXing.y = this.obj.hide.xing.y;
+            this.nodeBox.y = this.obj.hide.box.y;
+            this.nodeCoin.y = this.obj.hide.coin.y;
+            this.nodeLine.y = this.obj.hide.line.y;
+            this.btnVideo.y = this.obj.hide.video.y;
+            this.btnNext.y = this.obj.hide.next.y;
+            let nextBack = this.btnNext.getChildByName('back');
+            nextBack.active = true;
+        }
 
+        this.obj.aniBox.isPlay = false;
+        let config = DataManager.getRewardBoxGood();
+        if (config.goods.length > 0) {
+            this.nodeBox.active = true;
             this.resetBoxProcess(config);
+        }
+        else {
+            this.nodeBox.active = false;
         }
     }
 
@@ -187,7 +261,7 @@ export default class GameWin<Options = any> extends PopupBase {
             let count = boxGood.count;
             let reward = DataManager.getRewardBoxGood();
             let total = reward.total;
-            
+
             let process = this.nodeBox.getChildByName('process');
             let itemBar = process.getChildByName('bar');
             itemBar.getComponent(cc.Sprite).fillRange = count / total;
@@ -201,32 +275,47 @@ export default class GameWin<Options = any> extends PopupBase {
 
                 let time = 0.5;
                 cc.tween(itemBar.getComponent(cc.Sprite)).parallel(
-                    cc.tween().to(time, { fillRange: boxGood.count/total }),
+                    cc.tween().to(time, { fillRange: boxGood.count / total }),
                     cc.tween().delay(time * 0.5).call(() => {
                         itemLabel.getComponent(cc.Label).string = boxGood.count + '/' + total;
                     }),
                 ).start();
             }
         }
-        
     }
 
-    playAniBoxOne(params: ParamsAniBox): Promise<void> {
-        return new Promise(res => {
-            cc.tween(params.objBar.node.getComponent(cc.Sprite)).parallel(
-                cc.tween().to(params.objBar.time, { fillRange: params.objBar.goal }),
-                cc.tween().delay(params.objBar.time * 0.5).call(() => {
-                    params.objLabel.node.getComponent(cc.Label).string = params.objLabel.desc;
-                }),
-            ).call(() => {
-                res();
-            }).start();
-        });
+    /** 播放动画 金币变动 */
+    playAniLine() {
+        this.obj.line.isMove = true;
+    }
+
+    /**
+     * 播放动画 金币获取
+     * @param coinRadio 金币倍数
+     * @param callBack 回调
+     */
+    playAniGetCoin(coinRadio: number, callBack: Function) {
+        // 金币加倍
+        if (coinRadio > 1) {
+            let coinNum = this.obj.line.radio.cur * this.obj.line.base;
+            DataManager.data.numCoin += (coinNum - this.obj.line.base);
+            DataManager.setData();
+        }
+
+        this.nodeReward.active = true;
+        this.nodeReward.opacity = 0;
+        let nodeRewardCoin = this.nodeReward.getChildByName('nodeCoin');
+        let pWorld = cc.v3(this.params.objCoin.position.x, this.params.objCoin.position.y);
+        nodeRewardCoin.position = this.nodeReward.convertToNodeSpaceAR(pWorld);
+        nodeRewardCoin.scale = this.params.objCoin.scale;
+        cc.tween(this.nodeReward).to(0.5, { opacity: 255 }).call(() => {
+            let nodeCoin = this.nodeReward.getChildByName('nodeCoin');
+            DataManager.playAniGetCoin(nodeCoin, cc.v3(cc.winSize.width * 0.5, cc.winSize.height * 0.5), callBack);
+        }).start();
     }
 
     setIsLock(islock) {
         this.islock = islock;
-        this.maskBottom.active = this.islock;
     }
 
     protected showAfter(): void {
@@ -244,7 +333,7 @@ export default class GameWin<Options = any> extends PopupBase {
                     funcXing(index);
                 }).start();
             }
-            else{
+            else {
                 this.setIsLock(false);
             }
         };
@@ -260,34 +349,83 @@ export default class GameWin<Options = any> extends PopupBase {
                 icon.scale = 1.0;
             }
         });
+        this.obj.isShowLine = false;
+        this.obj.line.isMove = false;
+    }
+
+    /** 按钮事件 视频 */
+    eventBtnVideo() {
+        let funcA = () => {
+            this.obj.line.isMove = false;
+            let funcDelay = () => {
+                this.nodeReward.opacity = 255;
+                cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+                    this.nodeReward.active = false;
+                    if (this.isNext) {
+                        GameManager.gameWin_startGame(TypeBefore.fromWin);
+                    }
+                    else {
+                        let obj = {
+                            level: DataManager.data.boxData.level - 1,
+                            eventStart: CConst.event_enter_menu,
+                            eventFinish: CConst.event_menu_start,
+                        }
+                        kit.Popup.hide();
+                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                    }
+                }).start();
+            }
+            this.playAniGetCoin(this.obj.line.radio.cur, funcDelay);
+        };
+        let funcB = () => {
+            kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
+        };
+        DataManager.playVideo(funcA, funcB);
     }
 
     /** 按钮事件 确定 */
     eventBtnNext() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        if (this.isNext) {
-            GameManager.gameWin_startGame(TypeBefore.fromWin);
+        this.obj.line.isMove = false;
+        let funcDelay = () => {
+            this.nodeReward.opacity = 255;
+            cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+                this.nodeReward.active = false;
+                if (this.isNext) {
+                    GameManager.gameWin_startGame(TypeBefore.fromWin);
+                }
+                else {
+                    let obj = {
+                        level: DataManager.data.boxData.level - 1,
+                        eventStart: CConst.event_enter_menu,
+                        eventFinish: CConst.event_menu_start,
+                    }
+                    kit.Popup.hide();
+                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                }
+            }).start();
         }
-        else {
-            let obj = {
-                level: DataManager.data.boxData.level - 1,
-                eventStart: CConst.event_enter_menu,
-                eventFinish: CConst.event_menu_start,
-            }
-            kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-        }
+        this.playAniGetCoin(1, funcDelay);
     }
 
     /** 按钮事件 退出 */
-    async eventBtnExit() {
+    eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        kit.Popup.hide();
-        let obj = {
-            level: DataManager.data.boxData.level - 1,
-            eventStart: CConst.event_enter_menu,
-            eventFinish: CConst.event_menu_start,
+
+        this.obj.line.isMove = false;
+        let funcDelay = () => {
+            this.nodeReward.opacity = 255;
+            cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+                this.nodeReward.active = false;
+                let obj = {
+                    level: DataManager.data.boxData.level - 1,
+                    eventStart: CConst.event_enter_menu,
+                    eventFinish: CConst.event_menu_start,
+                }
+                kit.Popup.hide();
+                kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+            }).start();
         }
-        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+        this.playAniGetCoin(1, funcDelay);
     }
 }

@@ -71,6 +71,10 @@ export interface ParamsWin {
     disBoxLevel: number;
     disBoxSuipian: number;
     disBoxXingxing: number;
+    objCoin: {
+        position: {x: number, y: number};
+        scale: number;
+    }
 }
 
 /** 参数枚举（游戏失败） */

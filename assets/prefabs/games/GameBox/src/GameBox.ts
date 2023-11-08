@@ -2579,6 +2579,8 @@ export default class GameBox extends cc.Component {
         }
         NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
 
+        let nodeSuipian = this.uiTop.getChildByName('suipian');
+        let pointWorld = this.uiTop.convertToWorldSpaceAR(nodeSuipian.position);
         // 更新数据
         let params: ParamsWin = {
             tCount: this.timeGame.count,
@@ -2586,6 +2588,10 @@ export default class GameBox extends cc.Component {
             disBoxLevel: 1,
             disBoxSuipian: this.objData.numSuipian,
             disBoxXingxing: this.getXingxingNum(),
+            objCoin: {
+                position: {x: pointWorld.x, y: pointWorld.y},
+                scale: nodeSuipian.scale,
+            },
         };
         DataManager.refreshDataAfterWin(params);
         DataManager.setData();
