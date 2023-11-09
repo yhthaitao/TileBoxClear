@@ -308,7 +308,7 @@ export default class GameWin<Options = any> extends PopupBase {
         let pWorld = cc.v3(this.params.objCoin.position.x, this.params.objCoin.position.y);
         nodeRewardCoin.position = this.nodeReward.convertToNodeSpaceAR(pWorld);
         nodeRewardCoin.scale = this.params.objCoin.scale;
-        cc.tween(this.nodeReward).to(0.5, { opacity: 255 }).call(() => {
+        cc.tween(this.nodeReward).to(0.1, { opacity: 255 }).call(() => {
             let nodeCoin = this.nodeReward.getChildByName('nodeCoin');
             DataManager.playAniGetCoin(nodeCoin, cc.v3(cc.winSize.width * 0.5, cc.winSize.height * 0.5), callBack);
         }).start();
@@ -355,11 +355,13 @@ export default class GameWin<Options = any> extends PopupBase {
 
     /** 按钮事件 视频 */
     eventBtnVideo() {
-        let funcA = () => {
+        let funcBefore = ()=>{
             this.obj.line.isMove = false;
+        };
+        let funcSucces = () => {
             let funcDelay = () => {
                 this.nodeReward.opacity = 255;
-                cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+                cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                     this.nodeReward.active = false;
                     if (this.isNext) {
                         GameManager.gameWin_startGame(TypeBefore.fromWin);
@@ -377,10 +379,10 @@ export default class GameWin<Options = any> extends PopupBase {
             }
             this.playAniGetCoin(this.obj.line.radio.cur, funcDelay);
         };
-        let funcB = () => {
+        let funcFail = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(funcA, funcB);
+        DataManager.playVideo(funcBefore, funcSucces, funcFail);
     }
 
     /** 按钮事件 确定 */
@@ -389,7 +391,7 @@ export default class GameWin<Options = any> extends PopupBase {
         this.obj.line.isMove = false;
         let funcDelay = () => {
             this.nodeReward.opacity = 255;
-            cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+            cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                 this.nodeReward.active = false;
                 if (this.isNext) {
                     GameManager.gameWin_startGame(TypeBefore.fromWin);
@@ -415,7 +417,7 @@ export default class GameWin<Options = any> extends PopupBase {
         this.obj.line.isMove = false;
         let funcDelay = () => {
             this.nodeReward.opacity = 255;
-            cc.tween(this.nodeReward).delay(1.0).to(0.5, { opacity: 0 }).delay(0.5).call(() => {
+            cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                 this.nodeReward.active = false;
                 let obj = {
                     level: DataManager.data.boxData.level - 1,

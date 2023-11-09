@@ -145,7 +145,7 @@ export default class GetLives extends PopupBase {
         let funcB = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(funcA, funcB);
+        DataManager.playVideo(()=>{}, funcA, funcB);
     };
 
     /** 按钮事件 退出 */

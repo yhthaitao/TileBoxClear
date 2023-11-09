@@ -362,7 +362,7 @@ export default class OpenBoxXingxing extends PopupBase {
         let funcB = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(funcA, funcB);
+        DataManager.playVideo(()=>{}, funcA, funcB);
     }
 
     /** 获取 */

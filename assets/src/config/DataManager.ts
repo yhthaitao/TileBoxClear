@@ -867,28 +867,30 @@ class DataManager {
      * @param funcB 
      * @returns 
      */
-    playVideo(funcA, funcB): void {
-        let funcSucce = () => {
-            funcA();
+    playVideo(funcBefore: Function, funcSucces: Function, funcFail: Function): void {
+        let funcRecord = ()=>{
             this.data.advert.record.video.time = Math.floor(new Date().getTime() * 0.001);
             this.data.advert.record.video.level = this.data.boxData.level;
             this.setData();
         };
         let isReady = NativeCall.videoCheck();
         if (isReady) {
-            this.startVideo(funcSucce, funcB);
+            funcBefore();
+            this.startVideo(()=>{ funcRecord(); funcSucces(); }, funcFail);
             return;
         }
-        isReady = NativeCall.advertCheck();
-        if (isReady) {
-            this.startAdvert(() => {
-                // 打点 插屏播放成功（无视频、播放插屏成功）
-                NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
-                funcSucce();
-            }, funcB);
-            return;
-        }
-        funcB();
+        // isReady = NativeCall.advertCheck();
+        // if (isReady) {
+        //     funcBefore();
+        //     this.startAdvert(() => {
+        //         // 打点 插屏播放成功（无视频、播放插屏成功）
+        //         NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
+        //         funcRecord();
+        //         funcSucces();
+        //     }, funcFail);
+        //     return;
+        // }
+        funcFail();
     };
 
     /**
@@ -976,7 +978,7 @@ class DataManager {
         let coinNext = this.data.numCoin;
         let coinDis = coinNext - coinCur;
         let count = 0;
-        let total = 30;
+        let total = 20;
         let pStart = nodeCoin.convertToNodeSpaceAR(pWorld);
         let pFinish = itemSign.position;
         for (let index = 0; index < total; index++) {
