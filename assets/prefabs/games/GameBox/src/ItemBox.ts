@@ -41,7 +41,40 @@ export default class ItemBox extends cc.Component {
         this.nodeMain.removeAllChildren(true);
     };
 
-    sortGood(isInit: boolean = false) {
+    sortGood(isInit: boolean = false){
+        if (this.param.isFrame) {
+            this.sortBoxFrame(isInit);
+            return;
+        }
+        // 叠着的衣服6
+        let sortBoxDress = (arrGoods)=>{
+            arrGoods.sort((a: cc.Node, b: cc.Node) => {
+                return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
+            });
+            arrGoods.forEach((good: cc.Node, index: number)=>{
+                let script = good.getComponent(ItemGood);
+                script.nodeIcon.getComponent(cc.Button).interactable = index == 0;
+                console.log('index: ', index, '; key: ', script.param.keyGood);
+            });
+        };
+        // 挂着的衣服5 或 叠着的衣服6
+        if (this.param.boxType == 9 || this.param.boxType == 10) {
+            sortBoxDress(this.nodeMain.children);
+        }
+        // 挂着的衣服5 + 叠着的衣服6
+        else if (this.param.boxType == 11) {
+            let arrGood5 = this.nodeMain.children.filter((good: cc.Node, index: Number)=>{
+                return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 5;
+            });
+            let arrGood6 = this.nodeMain.children.filter((good: cc.Node, index: Number)=>{
+                return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 6;
+            });
+            sortBoxDress(arrGood5);
+            sortBoxDress(arrGood6);
+        }
+    };
+
+    sortBoxFrame(isInit: boolean) {
         this.nodeMain.children.sort((a: cc.Node, b: cc.Node) => {
             return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
         });
@@ -61,39 +94,35 @@ export default class ItemBox extends cc.Component {
             let process = this.itemKuang.getChildByName('process');
             let bar = process.getChildByName('bar');
             bar.getComponent(cc.Sprite).fillRange = 1;
-            this.initGoods();
+            this.nodeMain.children.forEach((good: cc.Node, index: number) => {
+                good.x = 0;
+                good.active = index == 0;
+            });
         }
         else {
             let process = this.itemKuang.getChildByName('process');
             let bar = process.getChildByName('bar');
             bar.getComponent(cc.Sprite).fillRange = goodNum / this.total;
-            this.refreshGoods();
+            this.nodeMain.children.forEach((good: cc.Node, index: number) => {
+                if (index == 0) {
+                    if (!good.active) {
+                        good.active = true;
+                        good.scale = 0;
+                        cc.tween(good).to(0.2, { scale: 1.1 }).to(0.15, { scale: 1.0 }).start();
+                    }
+                }
+                else{
+                    good.active = false;
+                }
+            });
         }
         let itemLabel = this.itemKuang.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = '' + goodNum;
     };
 
-    initGoods(){
-        this.nodeMain.children.forEach((good: cc.Node, index: number) => {
-            good.x = 0;
-            good.active = index == 0;
-        });
-    }
+    sortBoxDress(){
 
-    refreshGoods() {
-        this.nodeMain.children.forEach((good: cc.Node, index: number) => {
-            if (index == 0) {
-                if (!good.active) {
-                    good.active = true;
-                    good.scale = 0;
-                    cc.tween(good).to(0.2, { scale: 1.1 }).to(0.15, { scale: 1.0 }).start();
-                }
-            }
-            else{
-                good.active = false;
-            }
-        });
-    }
+    };
 
     refreshParams(y: number) {
         this.param.y = y;
