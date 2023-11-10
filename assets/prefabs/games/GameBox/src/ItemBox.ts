@@ -48,13 +48,13 @@ export default class ItemBox extends cc.Component {
         }
         // 叠着的衣服6
         let sortBoxDress = (arrGoods)=>{
+            let length = arrGoods.length;
             arrGoods.sort((a: cc.Node, b: cc.Node) => {
                 return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
             });
             arrGoods.forEach((good: cc.Node, index: number)=>{
                 let script = good.getComponent(ItemGood);
-                script.nodeIcon.getComponent(cc.Button).interactable = index == 0;
-                console.log('index: ', index, '; key: ', script.param.keyGood);
+                script.nodeIcon.getComponent(cc.Button).interactable = index == length - 1;
             });
         };
         // 挂着的衣服5 或 叠着的衣服6
@@ -63,10 +63,10 @@ export default class ItemBox extends cc.Component {
         }
         // 挂着的衣服5 + 叠着的衣服6
         else if (this.param.boxType == 11) {
-            let arrGood5 = this.nodeMain.children.filter((good: cc.Node, index: Number)=>{
+            let arrGood5 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 5;
             });
-            let arrGood6 = this.nodeMain.children.filter((good: cc.Node, index: Number)=>{
+            let arrGood6 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 6;
             });
             sortBoxDress(arrGood5);
