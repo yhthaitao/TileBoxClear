@@ -42,6 +42,7 @@ export default class MainScene extends cc.Component {
 
     protected start(): void {
         this.init();
+        let date = new Date();
     }
 
     async init() {
@@ -111,7 +112,7 @@ export default class MainScene extends cc.Component {
         if (boxData.first) {
             boxData.first = false;
             DataManager.setData();
-            
+
             kit.Event.emit(CConst.event_enter_game);
             script.playAniLeave(() => {
                 this.nodeLoading.active = false;

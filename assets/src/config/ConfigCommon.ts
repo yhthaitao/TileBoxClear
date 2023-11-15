@@ -53,6 +53,51 @@ export enum TypeBefore {
     fromSetting = 1 << 3,
 }
 
+/** 挑战状态 */
+export enum ChallengeState {
+    before = 'before',// 未挑战-前
+    chose = 'chose',// 未挑战-选中
+    after = 'after',// 未挑战-后
+    already = 'already',// 已挑战
+}
+
+/** 挑战数据 */
+export interface ChallengeParam {
+    dayWeek: number, // 日期
+    dayTotal: number, // 当前天数（总）
+    state: ChallengeState,// 挑战状态
+}
+
+/** box参数 */
+export interface BoxParam {
+    index: number;
+    name: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    goods: any;
+    isMove: boolean;
+    isFrame: boolean;
+    boxType: number;
+}
+
+/** good参数 */
+export interface GoodParam {
+    index: number;
+    name: string;
+    nameRes: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    keyGood: number;
+    isMove: boolean;
+    isEnough: boolean;
+    gold: { isGold: boolean, count: number, total: number },
+    box: { name: string, key: number, x: number, y: number },
+}
+
 /** 关卡参数 */
 export interface LevelParam {
     difficulty?: number,// 难度（对应不同的过渡动画）

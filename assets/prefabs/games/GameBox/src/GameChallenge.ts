@@ -1,49 +1,19 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
-import DataManager from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
+import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
-import { Design, LevelParam, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
+import { BoxParam, Design, GoodParam, LevelParam, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { ConfigGold } from "../../../../src/config/ConfigGold";
 
-/** box参数 */
-export interface BoxParam {
-    index: number;
-    name: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    goods: any;
-    isMove: boolean;
-    isFrame: boolean;
-    boxType: number;
-}
-
-/** good参数 */
-export interface GoodParam {
-    index: number;
-    name: string;
-    nameRes: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    keyGood: number;
-    isMove: boolean;
-    isEnough: boolean;
-    gold: { isGold: boolean, count: number, total: number },
-    box: { name: string, key: number, x: number, y: number },
-}
-
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class GameBox extends cc.Component {
+export default class GameChallenge extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '事件拦截-游戏底层' }) maskTop: cc.Node = null;
     @property({ type: cc.Node, tooltip: '事件拦截-游戏顶层' }) maskBottom: cc.Node = null;
@@ -154,13 +124,6 @@ export default class GameBox extends cc.Component {
 
     baseTime: number = 1;// 1单位时间
     baseDis: number = 2000;// 单位时间移动距离
-    // 缓存
-    objPool = {
-        box: { pool: new cc.NodePool(), max: 100 },
-        good: { pool: new cc.NodePool(), max: 100 },
-        effectExp: { pool: new cc.NodePool(), max: 10 },
-        effectTouch: { pool: new cc.NodePool(), max: 10 },
-    };
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -218,7 +181,7 @@ export default class GameBox extends cc.Component {
         this.nodeMain.y = this.uiBottom.y + this.uiBottom.height * 0.5 + disBottomToMain;
 
         // 按钮特效
-        this.bg.on(cc.Node.EventType.TOUCH_START, this.effectTouchShow, this, true);
+        this.bg.on(cc.Node.EventType.TOUCH_START, this.eventTouchShow, this, true);
     }
 
     protected onEnable(): void {
@@ -1067,7 +1030,7 @@ export default class GameBox extends cc.Component {
     };
 
     /** 点击事件 */
-    eventTouch(good: cc.Node) {
+    eventTouchGood(good: cc.Node) {
         let scriptGood = good.getComponent(ItemGood);
         // 游戏不能继续
         if (this.isLock || this.getBottomGoodNum() > this.bottomMax - 1) {
@@ -1112,7 +1075,7 @@ export default class GameBox extends cc.Component {
     effectExpShow(point: cc.Vec3) {
         let main = this.effectExp.getChildByName('main');
         let itemDragon = this.effectExp.getChildByName('dragon');
-        let itemExp = DataManager.poolGet(itemDragon, this.objPool.effectExp);
+        let itemExp = DataManager.poolGet(itemDragon, DataManager.objPool.effectExp);
         itemExp.parent = main;
         itemExp.scale = 0.6;
         itemExp.active = true;
@@ -1133,28 +1096,26 @@ export default class GameBox extends cc.Component {
         cc.tween(itemExp).delay(tDelay).call(() => {
             itemExp.opacity = 255;
         }).bezierTo(time1 + time2, obj.p1, obj.p2, obj.pTo).call(() => {
-            DataManager.poolPut(itemExp, this.objPool.effectExp);
+            DataManager.poolPut(itemExp, DataManager.objPool.effectExp);
         }).start();
     }
 
     /** 点击事件效果反馈 */
-    effectTouchShow(event: cc.Event.EventTouch) {
+    eventTouchShow(event: cc.Event.EventTouch) {
         var pos = event.getLocation();
         let main = this.effectTouch.getChildByName('main');
         let itemDragon = this.effectTouch.getChildByName('dragon');
-        let itemTouch = DataManager.poolGet(itemDragon, this.objPool.effectTouch);
+        let itemTouch = DataManager.poolGet(itemDragon, DataManager.objPool.effectTouch);
         itemTouch.parent = main;
         itemTouch.active = true;
         itemTouch.scale = 0.5;
         itemTouch.position = main.convertToNodeSpaceAR(cc.v3(pos.x, pos.y));
         let dragon = itemTouch.getComponent(dragonBones.ArmatureDisplay)
         dragon.once(dragonBones.EventObject.COMPLETE, () => {
-            DataManager.poolPut(itemTouch, this.objPool.effectTouch);
+            DataManager.poolPut(itemTouch, DataManager.objPool.effectTouch);
         })
         dragon.timeScale = 1.3;
         dragon.playAnimation('yundong', 1);
-
-        // kit.Audio.playShake(20, 20);
     }
 
     /** 刷新操作区 */
@@ -1226,7 +1187,7 @@ export default class GameBox extends cc.Component {
         for (let index = 0, length = arrParam.length; index < length; index++) {
             let param = arrParam[index];
             let good = this.uiBottomMain.getChildByName(param.name);
-            DataManager.poolPut(good, this.objPool.good);
+            DataManager.poolPut(good, DataManager.objPool.good);
         }
         this.bottomParamArr.splice(arrIndex, 1);
         this.goodsCount += arrParam.length;
@@ -1256,13 +1217,13 @@ export default class GameBox extends cc.Component {
             let boxMain = box.getComponent(ItemBox).nodeMain;
             for (let j = boxMain.childrenCount - 1; j >= 0; j--) {
                 let good = boxMain.children[j];
-                DataManager.poolPut(good, this.objPool.good);
+                DataManager.poolPut(good, DataManager.objPool.good);
             }
-            DataManager.poolPut(box, this.objPool.box);
+            DataManager.poolPut(box, DataManager.objPool.box);
         }
         for (let index = this.uiBottomMain.childrenCount - 1; index >= 0; index--) {
             let good = this.uiBottomMain.children[index];
-            DataManager.poolPut(good, this.objPool.good);
+            DataManager.poolPut(good, DataManager.objPool.good);
         }
         this.timeProp.iceCount = 0;
         this.setIceHide();
@@ -1696,7 +1657,7 @@ export default class GameBox extends cc.Component {
 
         // ui移动
         cc.tween(good).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(() => {
-            DataManager.poolPut(good, this.objPool.good);
+            DataManager.poolPut(good, DataManager.objPool.good);
             cc.tween(this.uiTopTime).to(0.1, { scale: 1.1 }).call(() => {
                 // 道具逻辑
                 this.timeGame.count += this.timeProp.addTotal;
@@ -1754,7 +1715,7 @@ export default class GameBox extends cc.Component {
                 let goodParam = arrParam[index];
                 let good = this.uiBottomMain.getChildByName(goodParam.name);
                 let bottomGood = removeBottomGood(good, magnetMain);
-                DataManager.poolPut(good, this.objPool.good);
+                DataManager.poolPut(good, DataManager.objPool.good);
                 arrGoods.push(bottomGood);
             }
             let enough = false;
@@ -2028,7 +1989,7 @@ export default class GameBox extends cc.Component {
         copyNode.parent = parent;
 
         // 删除物品ui
-        DataManager.poolPut(good, this.objPool.good);
+        DataManager.poolPut(good, DataManager.objPool.good);
         // 删除物品数据
         this.removeGoodParam(goodParam);
         // 特殊箱子 重新排布
@@ -2373,7 +2334,7 @@ export default class GameBox extends cc.Component {
 
     /** 添加 箱子 */
     addBox(param: BoxParam): cc.Node {
-        let node = DataManager.poolGet(this.preBox, this.objPool.box);
+        let node = DataManager.poolGet(this.preBox, DataManager.objPool.box);
         node.parent = this.nodeMain;
         node.getComponent(ItemBox).init(param);
         return node;
@@ -2381,7 +2342,7 @@ export default class GameBox extends cc.Component {
 
     /** 添加 物品 */
     addGood(box: cc.Node, param: GoodParam): cc.Node {
-        let node = DataManager.poolGet(this.preGood, this.objPool.good);
+        let node = DataManager.poolGet(this.preGood, DataManager.objPool.good);
         node.parent = box.getComponent(ItemBox).nodeMain;
         node.getComponent(ItemGood).init(param);
         return node;
@@ -2437,7 +2398,7 @@ export default class GameBox extends cc.Component {
         else {
             // 检测是否移除箱子
             if (Object.keys(boxParam.goods).length < 1) {
-                DataManager.poolPut(box, this.objPool.box);
+                DataManager.poolPut(box, DataManager.objPool.box);
                 delete this.objGame[boxParam.index];
             }
         }
@@ -2506,6 +2467,8 @@ export default class GameBox extends cc.Component {
         kit.Event.on(CConst.event_game_start, this.gameStart, this);
         kit.Event.on(CConst.event_game_resume, this.gameResume, this);
         kit.Event.on(CConst.event_game_revive, this.gameRevive, this);
+        kit.Event.on(CConst.event_touch_show, this.eventTouchShow, this);
+        kit.Event.on(CConst.event_touch_good, this.eventTouchGood, this);
         kit.Event.on(CConst.event_refresh_prop, this.eventBackRefreshProp, this);
         // 引导
         kit.Event.on(CConst.event_guide_3, () => {

@@ -75,7 +75,9 @@ const CConst = {
     event_game_resume: 'event_game_resume',
     /** game revive */
     event_game_revive: 'event_game_revive',
-
+    /** 物品触摸 */
+    event_touch_show: 'event_touch_show',
+    event_touch_good: 'event_touch_good',
     /** 主页 刷新 */
     event_scale_strength: 'event_scale_strength',
     /** 主页 刷新 */

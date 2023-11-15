@@ -9,7 +9,7 @@ import ConfigBoxSuipian from "./ConfigBoxSuipian";
 import ConfigBoxXingxing from "./ConfigBoxXingxing";
 import ConfigGood from "./ConfigGood";
 import ConfigUnlock from "./ConfigUnlock";
-import { LevelParam, ParamsWin, StateBeforeProp, TypeProp, TypeReward } from "./ConfigCommon";
+import { ChallengeParam, ChallengeState, LevelParam, ParamsWin, StateBeforeProp, TypeProp, TypeReward } from "./ConfigCommon";
 import ConfigAchieve from "./ConfigAchieve";
 import LocalImg from "./LocalImg";
 
@@ -43,6 +43,14 @@ class DataManager {
     backGameAdsLevel = 0;
     /** 记录播放间隔时间 */
     backGameNoAdsTime = 30;
+    /** 缓存池 */
+    objPool = {
+        box: { pool: new cc.NodePool(), max: 100 },
+        good: { pool: new cc.NodePool(), max: 100 },
+        effectExp: { pool: new cc.NodePool(), max: 10 },
+        effectTouch: { pool: new cc.NodePool(), max: 10 },
+        challengeDay: { pool: new cc.NodePool(), max: 31 },
+    };
 
     /** 初始数据 */
     data = {
@@ -139,33 +147,20 @@ class DataManager {
                 6: [],
             },
         },
+        challengeData: {
+            level: 1,
+            date: {}, // 年、月、星期 {day: 0, state: 0}[]
+        },
     };
 
     /** 初始化数据 */
     public async initData(nodeAni: cc.Node) {
         let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
-            let funcCopy = (objA: any, objB: any, key0: string) => {
-                if (typeof objA[key0] != typeof objB[key0]) {
-                    return;
-                }
-                if (objB[key0] instanceof Array) {
-                    objA[key0] = objB[key0];
-                }
-                else if (objB[key0] instanceof Object) {
-                    for (let key1 in objB[key0]) {
-                        if (objA[key0] && objB[key0]) {
-                            funcCopy(objA[key0], objB[key0], key1);
-                        }
-                    }
-                }
-                else {
-                    objA[key0] = objB[key0];
-                }
-            };
-            for (let key in _data) {
-                if (this.data[key] && _data[key]) {
-                    funcCopy(this.data, _data, key);
+            let data = Common.clone(_data);
+            for (const key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    this.data[key] = data[key];
                 }
             }
         }
@@ -748,6 +743,109 @@ class DataManager {
         return { start: start, finish: finish };
     }
 
+    /** 获取挑战数据（单月） */
+    getChallengeData(year: number, month: number, dayTotalInit: number) {
+        let date = new Date();
+        date.setFullYear(year, month, 1);
+
+        let challenge = this.data.challengeData;
+        if (challenge.date[year] && challenge.date[year][month]) {
+            return challenge.date[year][month];
+        }
+        // 赋值
+        if (!challenge.date[year]) {
+            challenge.date[year] = {};
+        }
+        let objMonth = challenge.date[year][month];
+        if (!objMonth) {
+            objMonth = {};
+            let funcAddDay = (dayMonth: number, dayWeek: number, dayTotal: number) => {
+                let objDay = {
+                    dayWeek: dayWeek, dayTotal: dayTotal, state: ChallengeState.chose
+                };
+                if (objDay.dayTotal < dayTotalInit) {
+                    objDay.state = ChallengeState.before;
+                }
+                else if (objDay.dayTotal == dayTotalInit) {
+                    objDay.state = ChallengeState.chose;
+                }
+                else {
+                    objDay.state = ChallengeState.after;
+                }
+                objMonth[dayMonth] = objDay;
+            };
+            let lenDay = 31;
+            for (let index = 0; index < lenDay; index++) {
+                if (index == 0) {// 第一天
+                    funcAddDay(this.getDayMonth(date), this.getDayWeek(date), this.getDayTotalFromDate(date));
+                }
+                else {// 下一天
+                    let dayMonthBefore = this.getDayMonth(date);
+                    date.setTime(date.getTime() + 86400 * 1000);
+                    let dayMonthCurrent = this.getDayMonth(date);
+                    if (dayMonthCurrent > dayMonthBefore) {
+                        funcAddDay(dayMonthCurrent, this.getDayWeek(date), this.getDayTotalFromDate(date));
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            challenge.date[year][month] = objMonth;
+        }
+        this.setData();
+        return challenge.date[year][month];
+    }
+
+    /** 日期（0-6，0代表星期天）  */
+    getDayWeek(date: Date) {
+        return date.getDay();
+    };
+
+    /** 日期（1-31）  */
+    getDayMonth(date: Date) {
+        return date.getDate();
+    };
+
+    /** 日期（总数） */
+    getDayTotalCur(objMonth: any) {
+        let arrDays = Object.keys(objMonth);
+        arrDays.sort((a, b) => { return Number(a) - Number(b); });
+        let dayTotalCur = -1;
+        for (let index = arrDays.length - 1; index >= 0; index--) {
+            let key = arrDays[index];
+            let valueDay: ChallengeParam = objMonth[key];
+            if (valueDay.state == ChallengeState.chose || valueDay.state == ChallengeState.before) {
+                dayTotalCur = valueDay.dayTotal;
+                break;
+            }
+        }
+        return dayTotalCur;
+    };
+
+    /** 日期（总数）  */
+    getDayTotalFromDate(date: Date) {
+        return Math.floor(date.getTime() * 0.001 / 86400);
+    };
+
+    /** 获取日历行数 */
+    getWeekMax(objMonth: any) {
+        let week = 0;
+        let days = Object.keys(objMonth);
+        days.sort((a, b) => { return Number(a) - Number(b); });
+        for (let index = 0, length = days.length; index < length; index++) {
+            let key: string = days[index];
+            let value: ChallengeParam = objMonth[key];
+            if (index == 0) {
+                week = 1;
+            }
+            else if (value.dayWeek == 0) {
+                week++;
+            }
+        }
+        return week;
+    };
+
     /** 检测新手引导状态-游戏 */
     checkNewPlayerGame() {
         if (this.data.prop.tip.isGuide && this.data.boxData.level == 3
@@ -870,7 +968,7 @@ class DataManager {
      * @returns 
      */
     playVideo(funcBefore: Function, funcSucces: Function, funcFail: Function): void {
-        let funcRecord = ()=>{
+        let funcRecord = () => {
             this.data.advert.record.video.time = Math.floor(new Date().getTime() * 0.001);
             this.data.advert.record.video.level = this.data.boxData.level;
             this.setData();
@@ -878,7 +976,7 @@ class DataManager {
         let isReady = NativeCall.videoCheck();
         if (isReady) {
             funcBefore();
-            this.startVideo(()=>{ funcRecord(); funcSucces(); }, funcFail);
+            this.startVideo(() => { funcRecord(); funcSucces(); }, funcFail);
             return;
         }
         // isReady = NativeCall.advertCheck();

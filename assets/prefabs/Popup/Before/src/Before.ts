@@ -5,9 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin, StateBeforeProp, TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
-import ConfigDot from "../../../../src/config/ConfigDot";
-import NativeCall from "../../../../src/config/NativeCall";
+import { ParamsWin, StateBeforeProp, TypeBefore } from "../../../../src/config/ConfigCommon";
 import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;

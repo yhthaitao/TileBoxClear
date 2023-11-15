@@ -1,8 +1,8 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
+import { GoodParam } from "../../../../src/config/ConfigCommon";
 import { ConfigGold, ConfigGoldPos } from "../../../../src/config/ConfigGold";
 import { kit } from "../../../../src/kit/kit";
-import GameBox, { GoodParam } from "./GameBox";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -198,18 +198,12 @@ export default class ItemGood extends cc.Component {
 
     /** 点击事件 */
     eventBtn(event: cc.Event.EventTouch) {
-        let scriptMain = this.getScriptMain();
-        if (!scriptMain) {
-            Common.log(' 异常 找不到脚本 scriptMain ');
-            return;
-        }
-        scriptMain.effectTouchShow(event);
-
+        kit.Event.emit(CConst.event_touch_show, event);
         if (this.state > 0) {
             return;
         }
         this.state++;
-        scriptMain.eventTouch(this.node);
+        kit.Event.emit(CConst.event_touch_good, this.node);
     };
 
     resetParams(param: GoodParam) {
@@ -220,13 +214,5 @@ export default class ItemGood extends cc.Component {
         this.node.x = this.param.x;
         this.node.y = this.param.y;
         this.node.name = this.param.name;
-    }
-
-    getScriptMain(): GameBox {
-        let game = cc.find('Canvas/GameBox');
-        if (game) {
-            return game.getComponent(GameBox);
-        }
-        return null;
     }
 }

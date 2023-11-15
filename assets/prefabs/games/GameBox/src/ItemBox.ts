@@ -1,5 +1,5 @@
 import Common from "../../../../src/config/Common";
-import { BoxParam } from "./GameBox";
+import { BoxParam } from "../../../../src/config/ConfigCommon";
 import ItemGood from "./ItemGood";
 
 const { ccclass, property } = cc._decorator;

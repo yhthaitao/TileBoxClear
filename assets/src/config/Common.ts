@@ -1,3 +1,5 @@
+import { LangChars, LangFile } from "./ConfigLang";
+
 class Common {
     private static _instance: Common;
     public static get instance(): Common {
@@ -69,23 +71,69 @@ class Common {
     };
 
     /** 获取当天的时间：起始（s） */
-    getTimeDayStart(){
+    getTimeDayStart() {
         var dateCur = new Date();//获取到当前的时间
         let year = dateCur.getFullYear();
         let month = dateCur.getMonth();
         let day = dateCur.getDate();
         let dateStart = new Date(year, month, day);
-        return Math.floor(dateStart.getTime()/1000);
+        return Math.floor(dateStart.getTime() / 1000);
     };
 
     /** 获取当天的时间：完结（s） */
-    getTimeDayFinish(){
+    getTimeDayFinish() {
         var dateCur = new Date();//获取到当前的时间
         let year = dateCur.getFullYear();
         let month = dateCur.getMonth();
         let day = dateCur.getDate();
         let dateStart = new Date(year, month, day);
-        return Math.floor(dateStart.getTime()/1000) + 60 * 60 * 24;
+        return Math.floor(dateStart.getTime() / 1000) + 60 * 60 * 24;
+    };
+
+    /** 获取月份字符串 */
+    getLangCharsKeyMonth(month: number) {
+        let keyMonth = '';
+        switch (month) {
+            case 0:
+                keyMonth = LangChars.dailyChallenge_January;
+                break;
+            case 1:
+                keyMonth = LangChars.dailyChallenge_February;
+                break;
+            case 2:
+                keyMonth = LangChars.dailyChallenge_March;
+                break;
+            case 3:
+                keyMonth = LangChars.dailyChallenge_April;
+                break;
+            case 4:
+                keyMonth = LangChars.dailyChallenge_May;
+                break;
+            case 5:
+                keyMonth = LangChars.dailyChallenge_June;
+                break;
+            case 6:
+                keyMonth = LangChars.dailyChallenge_July;
+                break;
+            case 7:
+                keyMonth = LangChars.dailyChallenge_August;
+                break;
+            case 8:
+                keyMonth = LangChars.dailyChallenge_September;
+                break;
+            case 9:
+                keyMonth = LangChars.dailyChallenge_October;
+                break;
+            case 10:
+                keyMonth = LangChars.dailyChallenge_November;
+                break;
+            case 11:
+                keyMonth = LangChars.dailyChallenge_December;
+                break;
+            default:
+                break;
+        }
+        return keyMonth;
     };
 
     /** 获取贝塞尔参数 */
@@ -117,7 +165,7 @@ class Common {
     };
 
     /** 刷新 碰撞框 */
-    refreshCollider(collider: cc.BoxCollider, offsetX: number, offsetY: number, width: number, height: number){
+    refreshCollider(collider: cc.BoxCollider, offsetX: number, offsetY: number, width: number, height: number) {
         collider.offset.x = offsetX;
         collider.offset.y = offsetY;
         collider.size.width = width;
