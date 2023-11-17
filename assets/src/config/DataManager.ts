@@ -143,27 +143,10 @@ class DataManager {
     public async initData(nodeAni: cc.Node) {
         let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
-            let funcCopy = (objA: any, objB: any, key0: string) => {
-                if (typeof objA[key0] != typeof objB[key0]) {
-                    return;
-                }
-                if (objB[key0] instanceof Array) {
-                    objA[key0] = objB[key0];
-                }
-                else if (objB[key0] instanceof Object) {
-                    for (let key1 in objB[key0]) {
-                        if (objA[key0] && objB[key0]) {
-                            funcCopy(objA[key0], objB[key0], key1);
-                        }
-                    }
-                }
-                else {
-                    objA[key0] = objB[key0];
-                }
-            };
-            for (let key in _data) {
-                if (this.data[key] && _data[key]) {
-                    funcCopy(this.data, _data, key);
+            let data = Common.clone(_data);
+            for (const key in data) {
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    this.data[key] = data[key];
                 }
             }
         }
