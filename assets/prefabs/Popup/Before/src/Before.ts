@@ -5,7 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin, StateBeforeProp, TypeBefore } from "../../../../src/config/ConfigCommon";
+import { WinParam, BeforePropState, FromState, StateGame } from "../../../../src/config/ConfigCommon";
 import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
@@ -42,8 +42,8 @@ export default class Before extends PopupBase {
     };
 
     params: {
-        type: TypeBefore,
-        paramWin?: ParamsWin,
+        type: FromState,
+        paramWin?: WinParam,
     };
 
     protected showBefore(options: any): void {
@@ -55,8 +55,8 @@ export default class Before extends PopupBase {
         // 道具默认未选中
         let beforeProp = [DataManager.data.prop.magnet, DataManager.data.prop.clock];
         beforeProp.forEach((obj) => {
-            if (obj.state == StateBeforeProp.choose) {
-                obj.state = StateBeforeProp.unChoose;
+            if (obj.state == BeforePropState.choose) {
+                obj.state = BeforePropState.unChoose;
             }
         });
         DataManager.setData();
@@ -80,7 +80,7 @@ export default class Before extends PopupBase {
 
     resetLabel() {
         let level = DataManager.data.boxData.level;
-        let levelParam = DataManager.getLevelData(level);
+        let levelParam = DataManager.getCommonLevelData(level);
         // 困难标签
         if (levelParam.difficulty) {
             this.nodeBg.active = false;
@@ -111,8 +111,8 @@ export default class Before extends PopupBase {
         // 开始游戏
         let labelPLay = this.nodePlay.getChildByName('label');
         labelPLay.opacity = 0;
-        let isRestart = this.params.type == TypeBefore.fromSetting
-            || this.params.type == TypeBefore.fromFail;
+        let isRestart = this.params.type == FromState.fromSetting
+            || this.params.type == FromState.fromFail;
         let playString = isRestart ? LangChars.exit_confirm_restart : LangChars.gameBefore_play;
         DataManager.setString(playString, (chars: string) => {
             let _string = chars;
@@ -210,26 +210,26 @@ export default class Before extends PopupBase {
             let objState = arrProp[index];
             // 道具状态
             switch (objState.state) {
-                case StateBeforeProp.lock:// 未解锁
+                case BeforePropState.lock:// 未解锁
                     backLock.active = true;
                     break;
-                case StateBeforeProp.noProp:// 解锁 无道具
+                case BeforePropState.noProp:// 解锁 无道具
                     backN.active = true;
                     signAdd.active = true;
                     button.active = true;
                     break;
-                case StateBeforeProp.unChoose:// 解锁 有道具 未选中
+                case BeforePropState.unChoose:// 解锁 有道具 未选中
                     backN.active = true;
                     label.active = true;
                     button.active = true;
                     break;
-                case StateBeforeProp.choose:// 解锁 有道具 选中
+                case BeforePropState.choose:// 解锁 有道具 选中
                     backY.active = true;
                     label.active = false;
                     button.active = true;
                     right.active = true;
                     break;
-                case StateBeforeProp.infinite:
+                case BeforePropState.infinite:
                     backY.active = true;
                     label.active = false;
                     button.active = false;
@@ -310,16 +310,16 @@ export default class Before extends PopupBase {
             return;
         }
         // 未解锁 返回
-        if (objState.state == StateBeforeProp.lock) {
+        if (objState.state == BeforePropState.lock) {
             return;
         }
         switch (objState.state) {
-            case StateBeforeProp.unChoose:// 解锁 有道具 未选中
-                objState.state = StateBeforeProp.choose;
+            case BeforePropState.unChoose:// 解锁 有道具 未选中
+                objState.state = BeforePropState.choose;
                 this.resetProp();
                 break;
-            case StateBeforeProp.choose:// 解锁 有道具 选中
-                objState.state = StateBeforeProp.unChoose;
+            case BeforePropState.choose:// 解锁 有道具 选中
+                objState.state = BeforePropState.unChoose;
                 this.resetProp();
                 break;
             default:
@@ -351,33 +351,33 @@ export default class Before extends PopupBase {
         let data = DataManager.data;
         let time = Math.floor(new Date().getTime() * 0.001);
         switch (this.params.type) {
-            case TypeBefore.fromMenu:// 菜单界面
+            case FromState.fromMenu:// 菜单界面
                 if (data.strength.tInfinite > time || data.strength.count > 0) {
                     kit.Popup.hide();
-                    GameManager.enterGameFromMenu(data.boxData.level);
+                    GameManager.enterGameFromMenu(FromState.fromMenu);
                 }
                 else {
                     kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
                 }
                 break;
-            case TypeBefore.fromSetting:// 游戏设置
+            case FromState.fromSetting:// 游戏设置
                 if (data.strength.tInfinite > time || data.strength.count > 0) {
-                    GameManager.enterGameFromSetting(data.boxData.level);
+                    GameManager.enterGameFromSetting(FromState.fromSetting);
                 }
                 else {
                     kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
                 }
                 break;
-            case TypeBefore.fromFail:// 游戏失败
+            case FromState.fromFail:// 游戏失败
                 if (data.strength.tInfinite > time || data.strength.count > 0) {
-                    GameManager.enterGameFromFail(data.boxData.level);
+                    GameManager.enterGameFromFail(FromState.fromFail);
                 }
                 else {
                     kit.Popup.show(CConst.popup_path_getLives, this.params, { mode: PopupCacheMode.Frequent, isSoon: true });
                 }
                 break;
-            case TypeBefore.fromWin:// 游戏胜利后
-                GameManager.enterGameFromWin(data.boxData.level);
+            case FromState.fromWin:// 游戏胜利后
+                GameManager.enterGameFromWin(FromState.fromWin);
                 break;
             default:
                 kit.Popup.hide();
@@ -392,11 +392,11 @@ export default class Before extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         switch (this.params.type) {
-            case TypeBefore.fromMenu:
+            case FromState.fromMenu:
                 kit.Popup.hide();
                 break;
             default:
-                GameManager.backMenuFromGame(DataManager.data.boxData.level);
+                GameManager.backMenuFromGame(this.params.type);
                 break;
         }
     }

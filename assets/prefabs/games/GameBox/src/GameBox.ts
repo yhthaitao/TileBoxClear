@@ -178,7 +178,7 @@ export default class GameBox extends cc.Component {
             boxInLine: 0,
             isFinish: false,
         };
-        this.levelParam = DataManager.getLevelData(this.objData.level);
+        this.levelParam = DataManager.getCommonLevelData(this.objData.level);
         // 屏幕系数
         this.mainScale = 1;// 箱子父节点缩放比例
         this.mainLayer = 5;// 箱子父节点实际显示的层数

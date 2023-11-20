@@ -4,7 +4,7 @@ import Common from "../../../../src/config/Common";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
-import { TypeBefore, TypeProp } from "../../../../src/config/ConfigCommon";
+import { StateGame, FromState, PropType } from "../../../../src/config/ConfigCommon";
 import GameManager from "../../../../src/config/GameManager";
 
 /** 动作参数（宝箱相关） */
@@ -55,7 +55,7 @@ export default class MainMenuMidHome extends cc.Component {
     }
 
     init(): void {
-        this.setIsLock(false);
+        this.setIsLock(true);
         // menu
         this.initHome();
     };
@@ -81,6 +81,8 @@ export default class MainMenuMidHome extends cc.Component {
         await this.resetBoxXingxingProcess();
         await this.resetBoxLevelProcess();
         await this.resetBoxAreas();
+        await this.resetChallenge();
+        this.setIsLock(false);
     };
 
     resetBg() {
@@ -99,7 +101,7 @@ export default class MainMenuMidHome extends cc.Component {
 
     resetHard() {
         let level = DataManager.data.boxData.level;
-        let levelParam = DataManager.getLevelData(level);
+        let levelParam = DataManager.getCommonLevelData(level);
         // 标签
         let easy = this.home_bottom_button.getChildByName('easy');
         let hard = this.home_bottom_button.getChildByName('hard');
@@ -128,9 +130,9 @@ export default class MainMenuMidHome extends cc.Component {
 
         // 奖励
         let types = [
-            TypeProp.coin,
-            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh, TypeProp.magnet, TypeProp.clock,
-            TypeProp.tStrengthInfinite,
+            PropType.coin,
+            PropType.ice, PropType.tip, PropType.back, PropType.refresh, PropType.magnet, PropType.clock,
+            PropType.tStrengthInfinite,
         ];
         let reward = boxReward.reward[0];
         let index = types.indexOf(reward.type);
@@ -146,7 +148,7 @@ export default class MainMenuMidHome extends cc.Component {
         itemIcon.scale = Math.min(this.home_top_prop.width / itemIcon.width, this.home_top_prop.height / itemIcon.height);
 
         let str = '+' + reward.number;
-        if (reward.type == TypeProp.tStrengthInfinite) {
+        if (reward.type == PropType.tStrengthInfinite) {
             str = '+' + Math.floor(reward.number / 60) + 'm';
         }
         let propLabel = this.home_top_prop.getChildByName('label');
@@ -194,7 +196,9 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxData.count >= total) {
                 boxData.count -= total;
                 boxData.level += 1;
-                DataManager.refreshDataAfterUnlockReward(boxReward);
+                boxReward.reward.forEach((reward)=>{
+                    DataManager.refreshDataByReward(reward);
+                });
             }
             DataManager.setData();
 
@@ -500,22 +504,27 @@ export default class MainMenuMidHome extends cc.Component {
         if (boxAreas.new > boxAreas.cur) {
             await kit.Popup.show(CConst.popup_path_openBoxAreas, {}, { mode: PopupCacheMode.Frequent });
         }
-        this.setIsLock(true);
+    }
+
+    async resetChallenge(){
+        if (DataManager.stateLast == StateGame.challenge) {
+            await kit.Popup.show(CConst.popup_path_challenge, {}, { mode: PopupCacheMode.Frequent });
+        }
     }
 
     setIsLock(isLock): void {
         if (isLock) {
-            if (this.obj.ani.boxLevel && this.obj.ani.boxSuipian && this.obj.ani.boxXingxing) {
-                this.menu_mask_bottom.active = false;
-                Common.log('功能：菜单界面 解除锁屏');
-            }
-        }
-        else {
             this.obj.ani.boxLevel = false;
             this.obj.ani.boxSuipian = false;
             this.obj.ani.boxXingxing = false;
             this.menu_mask_bottom.active = true;
             Common.log('功能：菜单界面 锁屏');
+        }
+        else {
+            if (this.obj.ani.boxLevel && this.obj.ani.boxSuipian && this.obj.ani.boxXingxing) {
+                this.menu_mask_bottom.active = false;
+                Common.log('功能：菜单界面 解除锁屏');
+            }
         }
     };
 
@@ -550,9 +559,9 @@ export default class MainMenuMidHome extends cc.Component {
         this.home_top_prop.active = true;
         // 刷新道具
         let types = [
-            TypeProp.coin,
-            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh, TypeProp.magnet, TypeProp.clock,
-            TypeProp.tStrengthInfinite,
+            PropType.coin,
+            PropType.ice, PropType.tip, PropType.back, PropType.refresh, PropType.magnet, PropType.clock,
+            PropType.tStrengthInfinite,
         ];
         let boxReward = DataManager.getRewardBoxSuipian();
         let reward = boxReward.reward[0];
@@ -569,7 +578,7 @@ export default class MainMenuMidHome extends cc.Component {
         itemIcon.scale = Math.min(this.home_top_prop.width / itemIcon.width, this.home_top_prop.height / itemIcon.height);
 
         let str = '+' + reward.number;
-        if (reward.type == TypeProp.tStrengthInfinite) {
+        if (reward.type == PropType.tStrengthInfinite) {
             str = '+' + Math.floor(reward.number / 60) + 'm';
         }
         let itemLabel = this.home_top_prop.getChildByName('label');
@@ -594,7 +603,7 @@ export default class MainMenuMidHome extends cc.Component {
     /** 按钮事件 开始 */
     eventBtnHomeStart() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        GameManager.mainMenu_startGame(TypeBefore.fromMenu);
+        GameManager.mainMenu_startGame(FromState.fromMenu);
     };
 
     /** 按钮事件 开始 */

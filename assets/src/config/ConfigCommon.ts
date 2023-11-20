@@ -21,16 +21,17 @@ export enum StateGame {
     loading = 1,// 冰冻
     menu = 1 << 1,// 提示
     game = 1 << 2,// 返回上一步
+    challenge = 1 << 3,// 挑战
 }
 
 /** 资源类型 */
-export enum TypeRes {
+export enum ResType {
     PNG = "png",// 图片
     DRAGON = "dragon", // 龙骨
 };
 
 /** 道具状态（游戏开始前的弹窗） */
-export enum StateBeforeProp {
+export enum BeforePropState {
     lock = 1,// 未解锁
     noProp = 1 << 1,// 解锁 无道具
     unChoose = 1 << 2,// 解锁 有道具 未选中
@@ -39,14 +40,14 @@ export enum StateBeforeProp {
 };
 
 /** 游戏结束枚举状态 */
-export enum TypeFinish {
+export enum FinishType {
     win = 1,
     failSpace = 1 << 1,
     failTime = 1 << 2,
 }
 
 /** 弹窗枚举(游戏前弹窗类型) */
-export enum TypeBefore {
+export enum FromState {
     fromMenu = 1,
     fromWin = 1 << 1,
     fromFail = 1 << 2,
@@ -55,17 +56,29 @@ export enum TypeBefore {
 
 /** 挑战状态 */
 export enum ChallengeState {
-    before = 'before',// 未挑战-前
-    chose = 'chose',// 未挑战-选中
-    after = 'after',// 未挑战-后
+    notplay = 'notplay',// 未玩
     already = 'already',// 已挑战
 }
 
 /** 挑战数据 */
-export interface ChallengeParam {
+export interface ChallengeDayParam {
     dayWeek: number, // 日期
     dayTotal: number, // 当前天数（总）
     state: ChallengeState,// 挑战状态
+}
+
+/** 挑战数据 */
+export interface ChallengeMonthParam {
+    count: number,
+    reward: {
+        isGet: boolean,
+        total: number,
+        props: {
+            type: PropType,
+            number: number,
+        }[],
+    }[],
+    objDay: {},
 }
 
 /** box参数 */
@@ -110,7 +123,7 @@ export interface LevelParam {
 }
 
 /** 参数枚举（游戏胜利） */
-export interface ParamsWin {
+export interface WinParam {
     tCount: number;
     disBoxGood: number;
     disBoxLevel: number;
@@ -123,15 +136,23 @@ export interface ParamsWin {
 }
 
 /** 参数枚举（游戏失败） */
-export interface ParamsFail {
-    type: TypeFinish;
+export interface FailParam {
+    type: FinishType;
     numStrength: number;
     numSuipian: number;
     numMagnet: number;
 }
 
+/** 参数枚举（跳转） */
+export interface ActPassParam {
+    level: number;
+    difficulty: number;
+    eventStart: string;
+    eventFinish: string;
+}
+
 /** 道具类型 */
-export enum TypeProp {
+export enum PropType {
     ice = 1,// 冰冻
     tip = 1 << 1,// 提示
     back = 1 << 2,// 返回上一步
@@ -146,13 +167,19 @@ export enum TypeProp {
 }
 
 /** 数据类型（碎片宝箱奖励） */
-export interface TypeReward {
+export interface BoxRewardType {
     total: number, // 碎片数量
-    reward: { type: TypeProp, number: number }[],// 奖励的类型和数量
+    reward: PropRewardType[],// 奖励的类型和数量
+}
+
+/** 数据类型（道具奖励） */
+export interface PropRewardType {
+    type: PropType, 
+    number: number,
 }
 
 /** 数据类型（资源） */
-export interface TypeResource {
+export interface ResourceType {
     bundle: string,
     resPath: string,
 }

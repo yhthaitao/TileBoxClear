@@ -69,8 +69,8 @@ export default class BoxGood<Options = any> extends PopupBase {
             this.content.active = false;
 
             this.nodeOpen.active = true;
-            let dragon = this.nodeOpen.getChildByName('dragon');
-            await DataManager.playAniDragon(dragon, 'baoxiangdakai', 'dakai');
+            let itemDragon = this.nodeOpen.getChildByName('dragon');
+            await DataManager.playAniDragon(itemDragon, 'baoxiangdakai', 'dakai');
             this.nodeOpen.active = false;
 
             // 播放弹窗主体动画

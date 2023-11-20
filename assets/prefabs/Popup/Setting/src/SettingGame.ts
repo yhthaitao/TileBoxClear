@@ -5,7 +5,7 @@ import Common from "../../../../src/config/Common";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { TypeBefore } from "../../../../src/config/ConfigCommon";
+import { FromState, StateGame } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import GameManager from "../../../../src/config/GameManager";
@@ -237,37 +237,24 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        
+
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
-        GameManager.setting_startGame(TypeBefore.fromSetting);
+        GameManager.setting_startGame(FromState.fromSetting);
     };
 
     /** 按钮事件 退出 */
-    async eventQuitBtnQuit() {
+    eventQuitBtnQuit() {
         if (this.isLock) {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        let funcNext = async () => {
-            // 进入菜单页
-            DataManager.data.wins.count = 0;
-            DataManager.strengthReduce();
-            DataManager.setData();
-
-            // 打点 插屏播放成功（从游戏中返回首页）
-            let level = DataManager.data.boxData.level;
-            NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(level));
-            let obj = {
-                level: level,
-                eventStart: CConst.event_enter_menu,
-                eventFinish: CConst.event_menu_start,
-            }
-            kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
-        };
-        DataManager.playAdvert(funcNext);
+        // 进入菜单页
+        DataManager.data.wins.count = 0;
+        DataManager.strengthReduce();
+        DataManager.setData();
+        GameManager.backMenuFromGame(FromState.fromSetting);
     };
 
     /** 按钮事件 退出 */

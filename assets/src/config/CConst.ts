@@ -19,7 +19,8 @@ const CConst = {
     pathGameGold: './game/gold/',
 
     bundlePrefabs: 'prefabs',
-    pathGame: './games/GameBox/res/prefab/GameBox',
+    pathGameBox: './games/GameBox/res/prefab/GameBox',
+    pathGameChallenge: './games/GameBox/res/prefab/GameChallenge',
     pathLevel: './games/GameBox/res/level/',
     pathGuideGame: 'components/UserGuide/res/prefab/GuideGame',
     pathGuideBefore: 'components/UserGuide/res/prefab/GuideBefore',
@@ -57,12 +58,12 @@ const CConst = {
     event_enter_menu: 'event_enter_menu',
     /** 菜单 动画开始 */
     event_menu_start: 'event_menu_start',
-
     /** 进入 菜单商店 */
     event_enter_menuShop: 'event_enter_menuShop',
-    
     /** 进入 游戏 */
     event_enter_game: 'event_enter_game',
+    /** 进入 挑战 */
+    event_enter_challenge: 'event_enter_challenge',
     /** game load */
     event_game_load: 'event_game_load',
     /** game reload */

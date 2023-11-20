@@ -5,7 +5,7 @@ import Common from "../../../../src/config/Common";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin, TypeBefore } from "../../../../src/config/ConfigCommon";
+import { WinParam, FromState, StateGame, ActPassParam } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
 
@@ -21,8 +21,8 @@ export default class GetLives extends PopupBase {
     @property(cc.Node) btnFree: cc.Node = null;
 
     params: {
-        type: TypeBefore,
-        paramWin?: ParamsWin,
+        type: FromState,
+        paramWin?: WinParam,
     };
 
     protected showBefore(options: any): void {
@@ -134,7 +134,7 @@ export default class GetLives extends PopupBase {
             kit.Event.emit(CConst.event_notice, LangChars.notice_strengthFull);
             return;
         }
-        let funcA = () => {
+        let funcSucces = () => {
             NativeCall.logEventTwo(ConfigDot.dot_ads_video_getLife_succe, String(DataManager.data.boxData.level));
             DataManager.data.strength.count += 1;
             DataManager.data.boxData.timesLive.count -= 1;
@@ -142,31 +142,50 @@ export default class GetLives extends PopupBase {
             kit.Event.emit(CConst.event_refresh_strength);
             kit.Popup.hide();
         };
-        let funcB = () => {
+        let funcFail = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(()=>{}, funcA, funcB);
+        DataManager.playVideo(funcSucces, funcFail);
     };
 
     /** 按钮事件 退出 */
     eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         switch (this.params.type) {
-            case TypeBefore.fromSetting:// 游戏中途设置
-            case TypeBefore.fromFail:// 游戏失败
-                let funcNext = () => {
-                    // 打点 插屏播放成功（从游戏中返回首页）
-                    let level = DataManager.data.boxData.level;
-                    NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_home, String(level));
-                    let obj = {
+            case FromState.fromSetting:// 游戏中途设置
+            case FromState.fromFail:// 游戏失败
+                let level: number;
+                let levelParam: any;
+                let message: string;
+                if (DataManager.stateCur == StateGame.challenge) {
+                    level = DataManager.data.challengeData.level;
+                    levelParam = DataManager.getChallengeLevelData(level);
+                    message = ConfigDot.dot_ads_advert_succe_challenge_home;
+                }
+                else{
+                    level = DataManager.data.boxData.level;
+                    levelParam = DataManager.getCommonLevelData(level);
+                    message = ConfigDot.dot_ads_advert_succe_home;
+                }
+
+                let funcEnterMenu = () => {
+                    let param: ActPassParam = {
                         level: level,
+                        difficulty: levelParam.difficulty ? 1 : 0,
                         eventStart: CConst.event_enter_menu,
                         eventFinish: CConst.event_menu_start,
                     }
                     kit.Popup.hide();
-                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                    kit.Popup.show(CConst.popup_path_actPass, param, { mode: PopupCacheMode.Frequent });
                 };
-                DataManager.playAdvert(funcNext);
+                let funcSucces = () => {
+                    NativeCall.logEventTwo(message, String(level));
+                    funcEnterMenu();
+                };
+                let funcFail = () => {
+                    funcEnterMenu();
+                };
+                DataManager.playAdvert(funcSucces, funcFail);
                 break;
             default:
                 kit.Popup.hide();

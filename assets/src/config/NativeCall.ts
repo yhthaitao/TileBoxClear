@@ -210,22 +210,19 @@ class NativeCall {
             Common.log('adsTimeTrue() 视频与插屏间隔时间不足 videoDis: ', videoDis);
             return;
         }
+        
+        //成功播放，才记录一下这次播放的关卡，下一次不播放。
+        DataManager.backGameAdsLevel = DataManager.data.boxData.level;
+        // 第一次是30s  第二次是1分钟  第三次是6分钟
+        if (DataManager.backGameNoAdsTime == 30) DataManager.backGameNoAdsTime = 60;
+        else if (DataManager.backGameNoAdsTime == 60) DataManager.backGameNoAdsTime = 600;
 
-        let isReady = this.advertCheck();
-        if (isReady) {
-            //成功播放，才记录一下这次播放的关卡，下一次不播放。
-            DataManager.backGameAdsLevel = DataManager.data.boxData.level;
-            // 第一次是30s  第二次是1分钟  第三次是6分钟
-            if (DataManager.backGameNoAdsTime == 30) DataManager.backGameNoAdsTime = 60;
-            else if (DataManager.backGameNoAdsTime == 60) DataManager.backGameNoAdsTime = 600;
-
-            let funcA = () => {
-                // 打点 插屏播放成功（游戏从后台返回）
-                this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
-            };
-            let funcB = (err: any) => { };
-            DataManager.startAdvert(funcA, funcB);
-        }
+        let funcA = () => {
+            // 打点 插屏播放成功（游戏从后台返回）
+            this.logEventTwo(ConfigDot.dot_ads_advert_succe_back, String(DataManager.data.boxData.level));
+        };
+        let funcB = (err: any) => { };
+        DataManager.startAdvert(funcA, funcB);
     }
 
     public advertFail() {

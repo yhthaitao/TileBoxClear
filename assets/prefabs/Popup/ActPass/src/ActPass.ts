@@ -1,5 +1,6 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
+import { ActPassParam } from "../../../../src/config/ConfigCommon";
 import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
@@ -14,19 +15,14 @@ export default class ActPass<Options = any> extends PopupBase {
     @property([cc.SpriteFrame]) bgFrames: cc.SpriteFrame[] = [];
     @property([cc.SpriteFrame]) roleFrames: cc.SpriteFrame[] = [];
 
-    obj: {
-        level: number,
-        eventStart: string,
-        eventFinish: string,
-    } = null;
+    actPassParam: ActPassParam;
 
     protected showBefore(options: any): void {
-        this.obj = Common.clone(options);
+        this.actPassParam = Common.clone(options);
         Common.log('弹窗 过度 showBefore()');
         this.nodeTitle.active = false;
         // 特定背景
-        let levelParam = DataManager.getLevelData(this.obj.level);
-        this.bg.getComponent(cc.Sprite).spriteFrame = this.bgFrames[levelParam.difficulty ? 1 : 0];
+        this.bg.getComponent(cc.Sprite).spriteFrame = this.bgFrames[this.actPassParam.difficulty];
         // 随机头像
         let roleId = Math.floor(Math.random()*2);
         this.itemIcon.getComponent(cc.Sprite).spriteFrame = this.roleFrames[roleId];
@@ -34,12 +30,12 @@ export default class ActPass<Options = any> extends PopupBase {
     }
 
     protected showAfter(): void {
-        kit.Event.emit(this.obj.eventStart);
+        kit.Event.emit(this.actPassParam.eventStart);
         this.scheduleOnce(() => { kit.Popup.hide(); }, 0.5);
     }
 
     protected hideAfter(suspended: boolean): void {
-        kit.Event.emit(this.obj.eventFinish);
+        kit.Event.emit(this.actPassParam.eventFinish);
     }
 
     /**

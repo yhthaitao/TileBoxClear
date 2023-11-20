@@ -4,7 +4,7 @@ import CConst from "../../../../src/config/CConst";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
-import { TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
+import { PropType, BoxRewardType } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -25,7 +25,7 @@ export default class OpenBoxLevel extends PopupBase {
         pStrength: { x: number, y: number },
         pCoin: { x: number, y: number },
         pButton: { x: number, y: number },
-        rewards: TypeReward
+        rewards: BoxRewardType
     } = null;
     pFinish: cc.Vec3 = cc.v3();
 
@@ -133,10 +133,10 @@ export default class OpenBoxLevel extends PopupBase {
 
     setReward() {
         let types = [
-            TypeProp.coin,
-            TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh,
-            TypeProp.magnet, TypeProp.clock,
-            TypeProp.tStrengthInfinite,
+            PropType.coin,
+            PropType.ice, PropType.tip, PropType.back, PropType.refresh,
+            PropType.magnet, PropType.clock,
+            PropType.tStrengthInfinite,
         ];
         let events = [
             this.params.pCoin,
@@ -160,7 +160,7 @@ export default class OpenBoxLevel extends PopupBase {
         let itemIcon = this.nodeProp.getChildByName('icon');
         itemIcon.getComponent(cc.Sprite).spriteFrame = this.iconTexture[index];
         let str = '+' + reward.number;
-        if (reward.type == TypeProp.tStrengthInfinite) {
+        if (reward.type == PropType.tStrengthInfinite) {
             str = '+' + Math.floor(reward.number / 60) + 'm';
         }
         let propLabel = this.nodeProp.getChildByName('label');
@@ -184,7 +184,7 @@ export default class OpenBoxLevel extends PopupBase {
             let p1 = this.nodeProp.position;
             let time = Common.getMoveTime(p1, this.pFinish, 1, 1500);
             let reward = this.params.rewards.reward[0];
-            if (reward.type == TypeProp.coin) {
+            if (reward.type == PropType.coin) {
                 this.nodeProp.active = false;
                 kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
                 this.scheduleOnce(() => {
@@ -192,7 +192,7 @@ export default class OpenBoxLevel extends PopupBase {
                     res();
                 }, 1.0);
             }
-            else if (reward.type == TypeProp.tStrengthInfinite) {
+            else if (reward.type == PropType.tStrengthInfinite) {
                 let opt = {
                     p1: cc.v2(p1.x, p1.y),
                     p2: cc.v2((p1.x + this.pFinish.x) * 0.5, p1.y),

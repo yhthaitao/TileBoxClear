@@ -9,7 +9,7 @@ import ConfigBoxSuipian from "./ConfigBoxSuipian";
 import ConfigBoxXingxing from "./ConfigBoxXingxing";
 import ConfigGood from "./ConfigGood";
 import ConfigUnlock from "./ConfigUnlock";
-import { ChallengeParam, ChallengeState, LevelParam, ParamsWin, StateBeforeProp, TypeProp, TypeReward } from "./ConfigCommon";
+import { ChallengeDayParam, ChallengeMonthParam, ChallengeState, LevelParam, WinParam, BeforePropState, StateGame, PropType, BoxRewardType, PropRewardType } from "./ConfigCommon";
 import ConfigAchieve from "./ConfigAchieve";
 import LocalImg from "./LocalImg";
 
@@ -22,7 +22,8 @@ class DataManager {
         }
         return this._instance;
     };
-
+    /** 道具素材 */
+    propFrames: cc.SpriteFrame[] = [];
     /** 当前状态 */
     stateCur: number = 0;
     /** 上一个状态 */
@@ -34,7 +35,7 @@ class DataManager {
     /** 插屏广告开启关卡 */
     adStartLevel: number = 12;
     /** 关卡数据 */
-    levelData: { data0: LevelParam[], data1: LevelParam[] } = { data0: null, data1: null };
+    levelData: { data0: LevelParam[], data1: LevelParam[], data2: LevelParam[] } = { data0: null, data1: null, data2: null };
     /** 广告回来延迟时间（秒） */
     interval: number = 0.02;
     /** 切出去的时间戳 */
@@ -86,12 +87,12 @@ class DataManager {
         },
         // 道具参数
         prop: {
-            ice: { type: TypeProp.ice, count: 3, unlock: 9, isGuide: true },// 冰冻
-            tip: { type: TypeProp.tip, count: 3, unlock: 3, isGuide: true },// 提示
-            back: { type: TypeProp.back, count: 3, unlock: 5, isGuide: true },// 返回上一步
-            refresh: { type: TypeProp.refresh, count: 3, unlock: 7, isGuide: true },// 刷新
-            magnet: { type: TypeProp.magnet, count: 3, unlock: 12, isGuide: true, tInfinite: 0, state: StateBeforeProp.lock },// 磁铁
-            clock: { type: TypeProp.clock, count: 3, unlock: 15, isGuide: true, tInfinite: 0, state: StateBeforeProp.lock },// 时钟
+            ice: { type: PropType.ice, count: 3, unlock: 9, isGuide: true },// 冰冻
+            tip: { type: PropType.tip, count: 3, unlock: 3, isGuide: true },// 提示
+            back: { type: PropType.back, count: 3, unlock: 5, isGuide: true },// 返回上一步
+            refresh: { type: PropType.refresh, count: 3, unlock: 7, isGuide: true },// 刷新
+            magnet: { type: PropType.magnet, count: 3, unlock: 12, isGuide: true, tInfinite: 0, state: BeforePropState.lock },// 磁铁
+            clock: { type: PropType.clock, count: 3, unlock: 15, isGuide: true, tInfinite: 0, state: BeforePropState.lock },// 时钟
         },
         wins: {
             count: 0, start: 1, unlock: 25
@@ -149,19 +150,38 @@ class DataManager {
         },
         challengeData: {
             level: 1,
-            date: {}, // 年、月、星期 {day: 0, state: 0}[]
+            about: { year: 0, month: 0, day: 0 },
+            limit: 2023 * 12,
+            date: {}, // 年、月、(reward: [] / objDay {day: 0, state: 0}[])
         },
     };
 
     /** 初始化数据 */
-    public async initData(nodeAni: cc.Node) {
+    public async initData(nodeAni: cc.Node, propFrames: cc.SpriteFrame[]) {
         let _data = JSON.parse(cc.sys.localStorage.getItem(CConst.localDataKey));
         if (_data) {
-            let data = Common.clone(_data);
-            for (const key in data) {
-                if (Object.prototype.hasOwnProperty.call(data, key)) {
-                    this.data[key] = data[key];
+            let funcCopy = (a: any, b: any, k: string) => {
+                if (b[k] instanceof Array) {
+                    a[k] = b[k];
                 }
+                else if (b[k] instanceof Object) {
+                    for (let key in b[k]) {
+                        if (!Object.prototype.hasOwnProperty.call(b[k], key)) {
+                            continue;
+                        }
+                        if (!a[k]) a[k] = {};
+                        funcCopy(a[k], b[k], key);
+                    }
+                }
+                else {
+                    a[k] = b[k];
+                }
+            };
+            for (let key in _data) {
+                if (!Object.prototype.hasOwnProperty.call(_data, key)) {
+                    continue;
+                }
+                funcCopy(this.data, _data, key);
             }
         }
         else {
@@ -208,6 +228,7 @@ class DataManager {
         this.nodeVideo = nodeAni;
         this.nodeVideo.zIndex = CConst.zIndex_video;
         this.nodeVideo.active = false;
+        this.propFrames = propFrames;
         this.setData();
     }
 
@@ -236,7 +257,7 @@ class DataManager {
                     this.levelData.data0 = asset.json;
                 }
                 else {
-                    Common.log('加载关卡数据 level0 出错');
+                    Common.log('加载普通关卡数据 level0 出错');
                 }
             });
 
@@ -247,7 +268,17 @@ class DataManager {
                     this.levelData.data1 = asset.json;
                 }
                 else {
-                    Common.log('加载关卡数据 level1 出错');
+                    Common.log('加载普通关卡数据 level1 出错');
+                }
+            });
+        }
+        if (!this.levelData.data2) {
+            await kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level2', cc.JsonAsset, (e: any, asset: any) => {
+                if (asset) {
+                    this.levelData.data2 = asset.json;
+                }
+                else {
+                    Common.log('加载挑战关卡数据 level2 出错');
                 }
             });
         }
@@ -296,6 +327,7 @@ class DataManager {
         }
     }
 
+    /** 道具状态初始化 */
     public initPropState() {
         let time = Math.floor(new Date().getTime() * 0.001);
         let level = this.data.boxData.level;
@@ -303,50 +335,50 @@ class DataManager {
         beforeProp.forEach((obj) => {
             if (level >= obj.unlock) {
                 // 状态：锁定 转 无道具
-                if (obj.state == StateBeforeProp.lock) {
-                    obj.state = StateBeforeProp.noProp;
+                if (obj.state == BeforePropState.lock) {
+                    obj.state = BeforePropState.noProp;
                 }
                 // 磁铁
-                if (obj.type == TypeProp.magnet) {
+                if (obj.type == PropType.magnet) {
                     // 无限 状态：转 锁定
                     if (this.data.prop.magnet.tInfinite - time > 0) {
-                        obj.state = StateBeforeProp.infinite;
+                        obj.state = BeforePropState.infinite;
                     }
                     else {
                         // 有道具 
                         if (this.data.prop.magnet.count > 0) {
                             // 状态：无道具 转 未选择
-                            if (obj.state == StateBeforeProp.noProp) {
-                                obj.state = StateBeforeProp.unChoose;
+                            if (obj.state == BeforePropState.noProp) {
+                                obj.state = BeforePropState.unChoose;
                             }
-                            else if (obj.state == StateBeforeProp.infinite) {
-                                obj.state = StateBeforeProp.unChoose;
+                            else if (obj.state == BeforePropState.infinite) {
+                                obj.state = BeforePropState.unChoose;
                             }
                         }
                         else {
-                            obj.state = StateBeforeProp.noProp
+                            obj.state = BeforePropState.noProp
                         }
                     }
                 }
                 // 时钟
-                if (obj.type == TypeProp.clock) {
+                if (obj.type == PropType.clock) {
                     // 无限 状态：转 锁定
                     if (this.data.prop.clock.tInfinite - time > 0) {
-                        obj.state = StateBeforeProp.infinite;
+                        obj.state = BeforePropState.infinite;
                     }
                     else {
                         // 有道具 
                         if (this.data.prop.clock.count > 0) {
                             // 状态：无道具 转 未选择
-                            if (obj.state == StateBeforeProp.noProp) {
-                                obj.state = StateBeforeProp.unChoose;
+                            if (obj.state == BeforePropState.noProp) {
+                                obj.state = BeforePropState.unChoose;
                             }
-                            else if (obj.state == StateBeforeProp.infinite) {
-                                obj.state = StateBeforeProp.unChoose;
+                            else if (obj.state == BeforePropState.infinite) {
+                                obj.state = BeforePropState.unChoose;
                             }
                         }
                         else {
-                            obj.state = StateBeforeProp.noProp
+                            obj.state = BeforePropState.noProp
                         }
                     }
                 }
@@ -398,51 +430,51 @@ class DataManager {
     }
 
     /** 使用道具 */
-    public useProp(type: TypeProp) {
+    public useProp(type: PropType) {
         let propNum = -1;
         switch (type) {
-            case TypeProp.ice:
+            case PropType.ice:
                 if (this.data.prop.ice.count > 0) {
                     this.data.prop.ice.count -= 1;
                     propNum = this.data.prop.ice.count;
                 }
                 break;
-            case TypeProp.tip:
+            case PropType.tip:
                 if (this.data.prop.tip.count > 0) {
                     this.data.prop.tip.count -= 1;
                     propNum = this.data.prop.tip.count;
                 }
                 break;
-            case TypeProp.back:
+            case PropType.back:
                 if (this.data.prop.back.count > 0) {
                     this.data.prop.back.count -= 1;
                     propNum = this.data.prop.back.count;
                 }
                 break;
-            case TypeProp.refresh:
+            case PropType.refresh:
                 if (this.data.prop.refresh.count > 0) {
                     this.data.prop.refresh.count -= 1;
                     propNum = this.data.prop.refresh.count;
                 }
                 break;
-            case TypeProp.magnet:
+            case PropType.magnet:
                 // 磁铁选中
                 let stateMagnet = this.data.prop.magnet;
-                if (stateMagnet.state == StateBeforeProp.infinite) {
+                if (stateMagnet.state == BeforePropState.infinite) {
                     propNum = this.data.prop.magnet.count;
                 }
-                else if (stateMagnet.state == StateBeforeProp.choose) {
+                else if (stateMagnet.state == BeforePropState.choose) {
                     this.data.prop.magnet.count -= 1;
                     propNum = this.data.prop.magnet.count;
                 }
                 break;
-            case TypeProp.clock:
+            case PropType.clock:
                 // 时钟选中
                 let stateClock = this.data.prop.clock;
-                if (stateClock.state == StateBeforeProp.infinite) {
+                if (stateClock.state == BeforePropState.infinite) {
                     propNum = this.data.prop.clock.count;
                 }
-                else if (stateClock.state == StateBeforeProp.choose) {
+                else if (stateClock.state == BeforePropState.choose) {
                     this.data.prop.clock.count -= 1;
                     propNum = this.data.prop.clock.count;
                 }
@@ -454,51 +486,61 @@ class DataManager {
     }
 
     /** 数据更新（游戏胜利后） */
-    public refreshDataAfterWin(params: ParamsWin) {
+    public refreshDataAfterWin(params: WinParam) {
         // 等级变化
-        this.data.boxData.level++;
-        // 主题变化
-        if (this.data.boxData.level == 21) {
-            this.data.boxAreas.new = 2;
-        }
-        else if (this.data.boxData.level == 41) {
-            this.data.boxAreas.new = 3;
-        }
-        else if (this.data.boxData.level > 41) {
-            if ((this.data.boxData.level - 41) % 40 == 0) {
-                this.data.boxAreas.new = 3 + Math.floor((this.data.boxData.level - 41) / 40);
+        if (this.stateCur == StateGame.game) {
+            this.data.boxData.level++;
+            // 主题变化
+            if (this.data.boxData.level == 21) {
+                this.data.boxAreas.new = 2;
             }
-            if (this.data.boxAreas.new > 15) {
-                this.data.boxAreas.new = 15;
+            else if (this.data.boxData.level == 41) {
+                this.data.boxAreas.new = 3;
+            }
+            else if (this.data.boxData.level > 41) {
+                if ((this.data.boxData.level - 41) % 40 == 0) {
+                    this.data.boxAreas.new = 3 + Math.floor((this.data.boxData.level - 41) / 40);
+                }
+                if (this.data.boxAreas.new > 15) {
+                    this.data.boxAreas.new = 15;
+                }
+            }
+            // 过关数据变更 物品宝箱
+            if (params.disBoxGood && params.disBoxGood > 0) {
+                this.data.boxGood.add += params.disBoxGood;
+            }
+            // 过关数据变更 关卡宝箱
+            if (params.disBoxLevel && params.disBoxLevel > 0) {
+                this.data.boxLevel.add += params.disBoxLevel;
+            }
+            // 过关数据变更 碎片宝箱
+            if (params.disBoxSuipian && params.disBoxSuipian > 0) {
+                this.data.boxSuipian.add += params.disBoxSuipian;
+            }
+            // 过关数据变更 星星宝箱
+            if (params.disBoxXingxing && params.disBoxXingxing > 0) {
+                this.data.boxXingxing.add += params.disBoxXingxing;
             }
         }
-        // 过关数据变更 物品宝箱
-        if (params.disBoxGood && params.disBoxGood > 0) {
-            this.data.boxGood.add += params.disBoxGood;
-        }
-        // 过关数据变更 关卡宝箱
-        if (params.disBoxLevel && params.disBoxLevel > 0) {
-            this.data.boxLevel.add += params.disBoxLevel;
-        }
-        // 过关数据变更 碎片宝箱
-        if (params.disBoxSuipian && params.disBoxSuipian > 0) {
-            this.data.boxSuipian.add += params.disBoxSuipian;
-        }
-        // 过关数据变更 星星宝箱
-        if (params.disBoxXingxing && params.disBoxXingxing > 0) {
-            this.data.boxXingxing.add += params.disBoxXingxing;
+        else if (this.stateCur == StateGame.challenge) {
+            let challenge = this.data.challengeData;
+            challenge.level++;
+            let objMonth: ChallengeMonthParam = challenge.date[challenge.about.year][challenge.about.month];
+            objMonth.count++;
+            let objDay: ChallengeDayParam = objMonth.objDay[challenge.about.day];
+            objDay.state = ChallengeState.already;
         }
 
         // 道具解锁（游戏开始前界面）
         let beforeProp = [this.data.prop.magnet, this.data.prop.clock];
         beforeProp.forEach((prop) => {
-            if (prop.state == StateBeforeProp.lock) {
+            if (prop.state == BeforePropState.lock) {
                 if (this.data.boxData.level >= prop.unlock) {
-                    prop.state = StateBeforeProp.unChoose;
+                    prop.state = BeforePropState.unChoose;
                 }
             }
             // 连胜奖励在25关之后开启
-            if (this.data.boxData.level > 25 && prop.type == TypeProp.magnet && prop.state != StateBeforeProp.lock) {
+            if (this.data.boxData.level > 25 && prop.type == PropType.magnet && prop.state != BeforePropState.lock) {
                 let wins = this.data.wins.count - this.data.wins.start;
                 if (wins < 3) {
                     this.data.wins.count++;
@@ -508,72 +550,70 @@ class DataManager {
     }
 
     /** 数据更新（开启宝箱后） */
-    public refreshDataAfterUnlockReward(params: TypeReward, radio: number = 1) {
-        params.reward.forEach((reward) => {
-            switch (reward.type) {
-                case TypeProp.coin:
-                    this.data.numCoin += reward.number * radio;
-                    break;
-                case TypeProp.ice:
-                    this.data.prop.ice.count += reward.number * radio;
-                    break;
-                case TypeProp.tip:
-                    this.data.prop.tip.count += reward.number * radio;
-                    break;
-                case TypeProp.back:
-                    this.data.prop.back.count += reward.number * radio;
-                    break;
-                case TypeProp.refresh:
-                    this.data.prop.refresh.count += reward.number * radio;
-                    break;
-                case TypeProp.magnet:
-                    this.data.prop.magnet.count += reward.number * radio;
-                    let stateMagnet = this.data.prop.magnet;
-                    if (stateMagnet.state == StateBeforeProp.noProp) {
-                        stateMagnet.state = StateBeforeProp.unChoose;
+    public refreshDataByReward(reward: PropRewardType, radio: number = 1) {
+        switch (reward.type) {
+            case PropType.coin:
+                this.data.numCoin += reward.number * radio;
+                break;
+            case PropType.ice:
+                this.data.prop.ice.count += reward.number * radio;
+                break;
+            case PropType.tip:
+                this.data.prop.tip.count += reward.number * radio;
+                break;
+            case PropType.back:
+                this.data.prop.back.count += reward.number * radio;
+                break;
+            case PropType.refresh:
+                this.data.prop.refresh.count += reward.number * radio;
+                break;
+            case PropType.magnet:
+                this.data.prop.magnet.count += reward.number * radio;
+                let stateMagnet = this.data.prop.magnet;
+                if (stateMagnet.state == BeforePropState.noProp) {
+                    stateMagnet.state = BeforePropState.unChoose;
+                }
+                break;
+            case PropType.clock:
+                this.data.prop.clock.count += reward.number * radio;
+                let stateClock = this.data.prop.clock;
+                if (stateClock.state == BeforePropState.noProp) {
+                    stateClock.state = BeforePropState.unChoose;
+                }
+                break;
+            case PropType.tMagnetInfinite:
+            case PropType.tClockInfinite:
+            case PropType.tStrengthInfinite:
+                // 没有无限时间 or 有无限时间
+                let time = Math.floor(new Date().getTime() * 0.001);
+                if (reward.type == PropType.tMagnetInfinite) {
+                    if (this.data.prop.magnet.tInfinite < time) {
+                        this.data.prop.magnet.tInfinite = time + reward.number * radio;
                     }
-                    break;
-                case TypeProp.clock:
-                    this.data.prop.clock.count += reward.number * radio;
-                    let stateClock = this.data.prop.clock;
-                    if (stateClock.state == StateBeforeProp.noProp) {
-                        stateClock.state = StateBeforeProp.unChoose;
+                    else {
+                        this.data.prop.magnet.tInfinite += reward.number * radio;
                     }
-                    break;
-                case TypeProp.tMagnetInfinite:
-                case TypeProp.tClockInfinite:
-                case TypeProp.tStrengthInfinite:
-                    // 没有无限时间 or 有无限时间
-                    let time = Math.floor(new Date().getTime() * 0.001);
-                    if (reward.type == TypeProp.tMagnetInfinite) {
-                        if (this.data.prop.magnet.tInfinite < time) {
-                            this.data.prop.magnet.tInfinite = time + reward.number * radio;
-                        }
-                        else {
-                            this.data.prop.magnet.tInfinite += reward.number * radio;
-                        }
+                }
+                else if (reward.type == PropType.tClockInfinite) {
+                    if (this.data.prop.clock.tInfinite < time) {
+                        this.data.prop.clock.tInfinite = time + reward.number * radio;
                     }
-                    else if (reward.type == TypeProp.tClockInfinite) {
-                        if (this.data.prop.clock.tInfinite < time) {
-                            this.data.prop.clock.tInfinite = time + reward.number * radio;
-                        }
-                        else {
-                            this.data.prop.clock.tInfinite += reward.number * radio;
-                        }
+                    else {
+                        this.data.prop.clock.tInfinite += reward.number * radio;
                     }
-                    else if (reward.type == TypeProp.tStrengthInfinite) {
-                        if (this.data.strength.tInfinite < time) {
-                            this.data.strength.tInfinite = time + reward.number * radio;
-                        }
-                        else {
-                            this.data.strength.tInfinite += reward.number * radio;
-                        }
+                }
+                else if (reward.type == PropType.tStrengthInfinite) {
+                    if (this.data.strength.tInfinite < time) {
+                        this.data.strength.tInfinite = time + reward.number * radio;
                     }
-                    break;
-                default:
-                    break;
-            }
-        });
+                    else {
+                        this.data.strength.tInfinite += reward.number * radio;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /** 数据更新（解锁物品后） */
@@ -652,7 +692,7 @@ class DataManager {
     }
 
     /** 获取奖励参数（等级宝箱） */
-    public getRewardBoxLevel(): TypeReward {
+    public getRewardBoxLevel(): BoxRewardType {
         let boxData = this.data.boxLevel;
         let index = boxData.level;
         if (index < 1) {
@@ -667,7 +707,7 @@ class DataManager {
     }
 
     /** 获取奖励参数（星星宝箱） */
-    public getRewardBoxXinging(): TypeReward {
+    public getRewardBoxXinging(): BoxRewardType {
         let boxData = this.data.boxXingxing;
         let index = boxData.level;
         if (index < 1) {
@@ -678,12 +718,12 @@ class DataManager {
                 index = boxData.loop.start + (index - boxData.loop.start) % boxData.loop.length;
             }
         }
-        let config: TypeReward = ConfigBoxXingxing[index];
+        let config: BoxRewardType = ConfigBoxXingxing[index];
         return config;
     }
 
     /** 获取奖励参数（碎片宝箱） */
-    public getRewardBoxSuipian(): TypeReward {
+    public getRewardBoxSuipian(): BoxRewardType {
         let index = this.data.boxSuipian.level;
         if (index < 1) {
             index = 1;
@@ -694,7 +734,7 @@ class DataManager {
                 index = max;
             }
         }
-        let config: TypeReward = ConfigBoxSuipian[index];
+        let config: BoxRewardType = ConfigBoxSuipian[index];
         return config;
     }
 
@@ -744,37 +784,51 @@ class DataManager {
     }
 
     /** 获取挑战数据（单月） */
-    getChallengeData(year: number, month: number, dayTotalInit: number) {
-        let date = new Date();
-        date.setFullYear(year, month, 1);
-
+    getChallengeData(yearCur: number, monthCur: number) {
         let challenge = this.data.challengeData;
-        if (challenge.date[year] && challenge.date[year][month]) {
-            return challenge.date[year][month];
+        if (challenge.date[yearCur] && challenge.date[yearCur][monthCur]) {
+            return challenge.date[yearCur][monthCur];
         }
         // 赋值
-        if (!challenge.date[year]) {
-            challenge.date[year] = {};
+        if (!challenge.date[yearCur]) {
+            challenge.date[yearCur] = {};
         }
-        let objMonth = challenge.date[year][month];
+        let objMonth: ChallengeMonthParam = challenge.date[yearCur][monthCur];
         if (!objMonth) {
-            objMonth = {};
+            objMonth = {
+                count: 0,
+                reward: [
+                    {
+                        total: 0, isGet: false, props: [
+                            { type: PropType.coin, number: 30 },
+                        ],
+                    },
+                    {
+                        total: 3, isGet: false, props: [
+                            { type: PropType.tStrengthInfinite, number: 30 * 60 },
+                            { type: PropType.tip, number: 2 },
+                        ],
+                    },
+                    {
+                        total: 10, isGet: false, props: [
+                            { type: PropType.coin, number: 100 },
+                            { type: PropType.tMagnetInfinite, number: 15 * 60 },
+                        ],
+                    },
+                    {
+                        total: 28, isGet: false, props: [
+                            { type: PropType.coin, number: 30 },
+                        ],
+                    },
+                ],
+                objDay: {},
+            };
             let funcAddDay = (dayMonth: number, dayWeek: number, dayTotal: number) => {
-                let objDay = {
-                    dayWeek: dayWeek, dayTotal: dayTotal, state: ChallengeState.chose
-                };
-                if (objDay.dayTotal < dayTotalInit) {
-                    objDay.state = ChallengeState.before;
-                }
-                else if (objDay.dayTotal == dayTotalInit) {
-                    objDay.state = ChallengeState.chose;
-                }
-                else {
-                    objDay.state = ChallengeState.after;
-                }
-                objMonth[dayMonth] = objDay;
+                objMonth.objDay[dayMonth] = { dayWeek: dayWeek, dayTotal: dayTotal, state: ChallengeState.notplay };
             };
             let lenDay = 31;
+            let date = new Date();
+            date.setFullYear(yearCur, monthCur, 1);
             for (let index = 0; index < lenDay; index++) {
                 if (index == 0) {// 第一天
                     funcAddDay(this.getDayMonth(date), this.getDayWeek(date), this.getDayTotalFromDate(date));
@@ -791,10 +845,10 @@ class DataManager {
                     }
                 }
             }
-            challenge.date[year][month] = objMonth;
+            challenge.date[yearCur][monthCur] = objMonth;
+            this.setData();
         }
-        this.setData();
-        return challenge.date[year][month];
+        return objMonth;
     }
 
     /** 日期（0-6，0代表星期天）  */
@@ -808,15 +862,18 @@ class DataManager {
     };
 
     /** 日期（总数） */
-    getDayTotalCur(objMonth: any) {
-        let arrDays = Object.keys(objMonth);
+    getDayTotalCur(objMonth: ChallengeMonthParam, dayTotalInit: number) {
+        let arrDays = Object.keys(objMonth.objDay);
         arrDays.sort((a, b) => { return Number(a) - Number(b); });
         let dayTotalCur = -1;
         for (let index = arrDays.length - 1; index >= 0; index--) {
             let key = arrDays[index];
-            let valueDay: ChallengeParam = objMonth[key];
-            if (valueDay.state == ChallengeState.chose || valueDay.state == ChallengeState.before) {
-                dayTotalCur = valueDay.dayTotal;
+            let value: ChallengeDayParam = objMonth.objDay[key];
+            if (value.dayTotal > dayTotalInit) {
+                continue;
+            }
+            if (value.state == ChallengeState.notplay) {
+                dayTotalCur = value.dayTotal;
                 break;
             }
         }
@@ -829,13 +886,13 @@ class DataManager {
     };
 
     /** 获取日历行数 */
-    getWeekMax(objMonth: any) {
+    getWeekMax(objMonth: ChallengeMonthParam) {
         let week = 0;
-        let days = Object.keys(objMonth);
+        let days = Object.keys(objMonth.objDay);
         days.sort((a, b) => { return Number(a) - Number(b); });
         for (let index = 0, length = days.length; index < length; index++) {
             let key: string = days[index];
-            let value: ChallengeParam = objMonth[key];
+            let value: ChallengeDayParam = objMonth.objDay[key];
             if (index == 0) {
                 week = 1;
             }
@@ -852,7 +909,7 @@ class DataManager {
             || this.data.prop.back.isGuide && this.data.boxData.level == 5
             || this.data.prop.refresh.isGuide && this.data.boxData.level == 7
             || this.data.prop.ice.isGuide && this.data.boxData.level == 9) {
-            return true;
+            return this.stateCur == StateGame.game;
         }
         return false;
     }
@@ -866,11 +923,7 @@ class DataManager {
         return false;
     }
 
-    /**
-     * 存储数据
-     * @param isSaveCloud 是否存储到云端
-     * @returns 
-     */
+    /** 存储数据 */
     public setData(isSaveCloud = false) {
         let dataString = JSON.stringify(this.data);
         cc.sys.localStorage.setItem(CConst.localDataKey, dataString);
@@ -887,47 +940,90 @@ class DataManager {
         return this.data.boxData.level > this.adStartLevel;
     }
 
-    /**
-     * 检测是否播放插屏
-     *      可：判断插屏是否准备好
-     *          准备好：播放funA
-     *          为准备：播放funB
-     *      否：执行funcN
-     * @param funcN 
-     */
-    public playAdvert(funcN: Function) {
-        let level = this.data.boxData.level;
-        let isAdvert = this.checkIsPlayAdvert(level);
-        if (isAdvert) {
-            let funcA = () => {
-                funcN();
-                // 更新广告计时
-                this.data.advert.record.advert.time = Math.floor(new Date().getTime() * 0.001);
-                this.data.advert.record.advert.level = this.data.boxData.level;
-                this.setData();
-            };
-            let funcB = () => {
-                funcN();
-            };
-            // 先判断是否准备好
-            let isReady = NativeCall.advertCheck();
-            if (isReady) {
-                this.startAdvert(funcA, funcB);
-            }
-            else {
-                funcB();
-            }
+    /** 播放视频广告 */
+    playVideo(funcSucces: Function, funcFail: Function, funcBefore: Function = null): void {
+        let funcA = () => {
+            funcSucces();
+            this.data.advert.record.video.time = Math.floor(new Date().getTime() * 0.001);
+            this.data.advert.record.video.level = this.data.boxData.level;
+            this.setData();
+        };
+        let funcB = () => {
+            funcFail();
+        };
+        this.startVideo(funcA, funcB, funcBefore);
+    };
+
+    /** 播放奖励视频 */
+    public startVideo(funcSucces: Function, funcFail: Function, funcBefore: Function = null): void {
+        let funcA = async () => {
+            funcBefore && funcBefore();
+            // 延迟一会儿
+            await new Promise((_res) => {
+                cc.Canvas.instance.scheduleOnce(_res, this.interval);
+            });
+            funcSucces();
+        };
+        let funcB = () => {
+            funcFail();
+        };
+        let isReady = NativeCall.videoCheck();
+        if (isReady) {
+            NativeCall.videoShow(funcA, funcB);
         }
         else {
-            funcN();
+            Common.log('startVideo() 视频广告检测  未准备好');
+            funcB();
         }
     };
 
-    /**
-     * 检测插屏是否开启(针对游戏结束自动弹出的广告)
-     * @param level 检测时的关卡 
-     * @returns 
-     */
+    /** 检测是否播放插屏 */
+    public playAdvert(funcSucces: Function, funcFail: Function, funcBefore: Function = null) {
+        let funcA = () => {
+            funcSucces();
+            // 更新广告计时
+            this.data.advert.record.advert.time = Math.floor(new Date().getTime() * 0.001);
+            this.data.advert.record.advert.level = this.data.boxData.level;
+            this.setData();
+        };
+        let funcB = () => {
+            funcFail();
+        };
+        let isAdvert = this.checkIsPlayAdvert(this.data.boxData.level);
+        if (isAdvert) {
+            this.startAdvert(funcA, funcB, funcBefore);
+        }
+        else {
+            funcB();
+        }
+    };
+
+    /** 播放广告视频 */
+    public startAdvert(funcSucces: Function, funcFail: Function, funcBefore: Function = null): void {
+        let funcA = async () => {
+            funcBefore && funcBefore();
+            // 延迟一会儿
+            await new Promise((_res) => {
+                cc.Canvas.instance.scheduleOnce(_res, this.interval);
+            });
+            funcSucces();
+        };
+        let funcB = () => {
+            funcFail();
+        };
+        let isReady = NativeCall.advertCheck();
+        if (isReady) {
+            // 打点 插屏广告请求（游戏从后台返回）
+            NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
+            NativeCall.advertShow(funcA, funcB);
+        }
+        else {
+            Common.log('startAdvert() 插屏广告检测  未准备好');
+            funcB();
+        }
+    }
+
+    /** 检测插屏是否开启(针对游戏结束自动弹出的广告) */
     public checkIsPlayAdvert(level: number) {
         // 去广告
         if (this.data.advert.isRemove) {
@@ -958,74 +1054,6 @@ class DataManager {
         Common.log('checkIsPlayAdvert() 插屏广告检测  时间 advertDis: ', advertDis, '; videoDis: ', videoDis);
         return true;
     };
-
-    /**
-     * 播放视频广告
-     * 1.先检测视频广告
-     * 2.再检测插屏广告
-     * @param funcA 
-     * @param funcB 
-     * @returns 
-     */
-    playVideo(funcBefore: Function, funcSucces: Function, funcFail: Function): void {
-        let funcRecord = () => {
-            this.data.advert.record.video.time = Math.floor(new Date().getTime() * 0.001);
-            this.data.advert.record.video.level = this.data.boxData.level;
-            this.setData();
-        };
-        let isReady = NativeCall.videoCheck();
-        if (isReady) {
-            funcBefore();
-            this.startVideo(() => { funcRecord(); funcSucces(); }, funcFail);
-            return;
-        }
-        // isReady = NativeCall.advertCheck();
-        // if (isReady) {
-        //     funcBefore();
-        //     this.startAdvert(() => {
-        //         // 打点 插屏播放成功（无视频、播放插屏成功）
-        //         NativeCall.logEventTwo(ConfigDot.dot_ads_advert_succe_noVideo, String(this.data.boxData.level));
-        //         funcRecord();
-        //         funcSucces();
-        //     }, funcFail);
-        //     return;
-        // }
-        funcFail();
-    };
-
-    /**
-     * 播放奖励视频
-     * @param funcA 
-     * @param funcB 
-     * @returns
-     */
-    public startVideo(funcA: Function, funcB: Function): void {
-        this.playAniAdvert(NativeCall.videoShow.bind(NativeCall, async () => {
-            // 延迟一会儿
-            await new Promise((_res) => {
-                cc.Canvas.instance.scheduleOnce(_res, this.interval);
-            });
-            funcA();
-        }, funcB));
-    };
-
-    /**
-     * 播放广告视频
-     * @param funcA 
-     * @param funcB 
-     * @returns 
-     */
-    public startAdvert(funcA: Function, funcB: Function): void {
-        // 打点 插屏广告请求（游戏从后台返回）
-        NativeCall.logEventThree(ConfigDot.dot_ad_req, "inter_backGame", "Interstital");
-        this.playAniAdvert(NativeCall.advertShow.bind(NativeCall, async () => {
-            // 延迟一会儿
-            await new Promise((_res) => {
-                cc.Canvas.instance.scheduleOnce(_res, this.interval);
-            });
-            funcA();
-        }, funcB));
-    }
 
     /** 更新广告计数 */
     public updateAdCount() {
@@ -1242,7 +1270,8 @@ class DataManager {
         });
     };
 
-    public getLevelData(level: number): LevelParam {
+    /** 获取普通关卡数据 */
+    public getCommonLevelData(level: number): LevelParam {
         let lens = [100, 174];
         let index = 0;
         if (level <= 100) {
@@ -1254,6 +1283,76 @@ class DataManager {
             return this.levelData.data1[index];
         }
     };
+
+    /** 获取挑战关卡数据 */
+    public getChallengeLevelData(level: number): LevelParam {
+        let total = 21;
+        let loop = { start: 12, length: 10 };
+        if (level <= total) {
+            console.log('getChallengeLevelData: ', level);
+            return this.levelData.data2[level - 1];
+        }
+        else {
+            level = loop.start + (level - total - 1) % loop.length;
+            console.log('getChallengeLevelData: ', level);
+            return this.levelData.data2[level - 1];
+        }
+    };
+
+    /** 获取道具素材 */
+    public getRewardInfo(reward: { type: PropType, number: number }) {
+        let frameId = 0;
+        let labelString = '';
+        switch (reward.type) {
+            case PropType.coin:
+                frameId = 0;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.ice:
+                frameId = 1;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.tip:
+                frameId = 2;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.back:
+                frameId = 3;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.refresh:
+                frameId = 4;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.magnet:
+                frameId = 5;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.tMagnetInfinite:
+                frameId = 6;
+                labelString = 'x' + Math.floor(reward.number / 60) + 'm';
+                break;
+            case PropType.clock:
+                frameId = 7;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.tClockInfinite:
+                frameId = 8;
+                labelString = 'x' + Math.floor(reward.number / 60) + 'm';
+                break;
+            case PropType.strength:
+                frameId = 9;
+                labelString = 'x' + reward.number;
+                break;
+            case PropType.tStrengthInfinite:
+                frameId = 10;
+                labelString = 'x' + Math.floor(reward.number / 60) + 'm';
+                break;
+            default:
+                break;
+        }
+        return { frame: this.propFrames[frameId], string: labelString };
+    }
 
     /** 获取字符串 */
     public async getString(key: string): Promise<string> {

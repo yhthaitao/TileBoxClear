@@ -6,7 +6,7 @@ import DataManager from "../../../../src/config/DataManager";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
 import LocalImg from "../../../../src/config/LocalImg";
-import { TypeProp } from "../../../../src/config/ConfigCommon";
+import { PropType } from "../../../../src/config/ConfigCommon";
 
 /** 商店产品 */
 interface Produce {
@@ -117,7 +117,7 @@ export default class MainMenuMidShop extends cc.Component {
                     let propOne = nodeProp.getChildByName('prop' + index);
                     if (propOne) {
                         let _string = '' + obj.count;
-                        if (obj.typeProp == TypeProp.tStrengthInfinite) {
+                        if (obj.typeProp == PropType.tStrengthInfinite) {
                             _string += 'h';
                         }
                         let labelProp = propOne.getChildByName('label');

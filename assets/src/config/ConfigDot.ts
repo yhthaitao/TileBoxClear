@@ -29,8 +29,11 @@ const ConfigDot = {
     dot_ads_advert_succe_next: 'Ads_Interstitial_nextlevel_Succeed', // 下关开始的插屏
     dot_ads_advert_succe_rePlay: 'Ads_Interstitial_restart_Succeed',// 重新开始的插屏（play)，可能没意义
     dot_ads_advert_succe_noVideo: 'Ads_Interstitial_videoNull_Succeed',// 没有视频的插屏
-    dot_ads_advert_succe_challenge: 'Ads_Interstitial_dailyChallenge_Succeed',// 每日挑战结束的插屏播放成功
-    dot_ads_video_succe_challenge: 'Ads_video_dailyChallenge_succ',// 每日挑战结束的视频播放成功
+    dot_ads_advert_succe_challenge_win: 'Ads_Interstitial_dailyChallenge_Succeed',// 每日挑战胜利的插屏播放成功
+    dot_ads_advert_succe_challenge_home: 'Ads_Interstitial_dailyChallenge_home_Succeed',// 每日挑战返回首页的插屏播放成功
+    dot_ads_advert_succe_challenge_replay: 'Ads_Interstitial_dailyChallenge_restart_Succeed',// 每日挑战重新开始的插屏播放成功
+
+    dot_ads_video_succe_challenge: 'Ads_video_dailyChallenge_succ',// 每日挑战开始的视频播放成功
     dot_ads_video_getGold_show: 'Ads_video_getGold_show',// 加金币弹窗弹出
     dot_ads_video_getGold_succe: 'Ads_video_getGold_succ',// 加金币，视频播放成功
     dot_ads_video_getLife_show: 'Ads_video_getLife_show',// 加体力弹窗弹出
@@ -62,7 +65,11 @@ const ConfigDot = {
     dot_pass_level_15: '175_pass_level_15',
     dot_pass_level_20: '180_pass_level_20',
     dot_pass_level_all: '205_Stage_pass_all',
-    // gameover
+    /** 挑战 */
+    dot_challenge_start: 'dailyChallenge_start', // 挑战开始
+    dot_challenge_fail: 'dailyChallenge_failure', // 挑战失败
+    dot_challenge_win: 'dailyChallenge_end', // 挑战胜利
+    /** gameover */
     dot_gameover_outOfMove: 'Gameover_outOfMove',
     dot_gameover_outOFTime: 'Gameover_outOFTime',
     dot_gameover_restart: 'Gameover_restart',

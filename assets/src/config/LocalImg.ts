@@ -1,6 +1,6 @@
 import { kit } from "../kit/kit";
 import CConst from "./CConst";
-import { TypeRes } from "./ConfigCommon";
+import { ResType } from "./ConfigCommon";
 import DataManager from "./DataManager";
 
 const { ccclass, property } = cc._decorator;
@@ -17,10 +17,10 @@ export default class LocalImg extends cc.Component {
         let path: string = './language/img/' + DataManager.data.langCur + '/';
         kit.Resources.loadRes(CConst.bundleCommon, path + this.resName, cc.SpriteFrame, (e: any, asset: cc.SpriteFrame)=>{
             switch (this.resType) {
-                case TypeRes.PNG:
+                case ResType.PNG:
                     this.setTexture(asset);
                     break;
-                case TypeRes.DRAGON:
+                case ResType.DRAGON:
                     this.setDragon(asset);
                     break;
                 default:

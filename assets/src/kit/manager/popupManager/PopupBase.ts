@@ -36,15 +36,13 @@ export default class PopupBase<Options = any> extends cc.Component {
         this.node.scale = 1.2;
         this.maskDown.setContentSize(cc.winSize);
         this.maskUp.setContentSize(cc.winSize);
-        
+
         return new Promise<void>(res => {
             this.node.active = true;
             // 开启拦截
             this.maskUp.active = true;
             // 储存选项
             this.options = options;
-            // 展示前
-            this.showBefore(this.options);
             // 播放背景遮罩动画
             this.maskDown.active = true;
             this.maskDown.opacity = 0;
@@ -53,7 +51,10 @@ export default class PopupBase<Options = any> extends cc.Component {
             this.content.active = true;
             this.content.scale = 0.5;
             this.content.opacity = 0;
-            cc.tween(this.content).parallel(
+            cc.tween(this.content).call(() => {
+                // 展示前
+                this.showBefore(this.options);
+            }).parallel(
                 cc.tween().to(this.popupShowTime.scale0, { scale: 1.05 }, { easing: 'cubicOut' })
                     .to(this.popupShowTime.scale1, { scale: 0.98 }, { easing: 'sineInOut' })
                     .to(this.popupShowTime.scale2, { scale: 1 }, { easing: 'sineInOut' }),

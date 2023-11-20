@@ -5,7 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode, PopupShowResult } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsFail, TypeBefore, TypeFinish } from "../../../../src/config/ConfigCommon";
+import { FailParam, FromState, FinishType } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import GameManager from "../../../../src/config/GameManager";
@@ -23,7 +23,7 @@ export default class GameFail extends PopupBase {
 
     @property([cc.Node]) arrNodeLose: cc.Node[] = [];// 0: 碎片  1: 体力  2: 磁体
 
-    params: ParamsFail = null;
+    params: FailParam = null;
     obj = {
         itemLoseX: {
             0: [],
@@ -59,7 +59,7 @@ export default class GameFail extends PopupBase {
 
         // 多语言
         let keyTitle = LangChars.over_nospace_title;
-        if (this.params.type == TypeFinish.failTime) {
+        if (this.params.type == FinishType.failTime) {
             keyTitle = LangChars.over_timeout_title;
             this.nodeClock.active = true;
             this.nodeGoods.active = false;
@@ -96,7 +96,7 @@ export default class GameFail extends PopupBase {
             return;
         }
         // 复活打点
-        if (this.params.type == TypeFinish.failTime) {
+        if (this.params.type == FinishType.failTime) {
             NativeCall.logEventTwo(ConfigDot.dot_buy_succ_fuhuo_noTime, String(DataManager.data.boxData.level));
         }
         else{
@@ -115,6 +115,6 @@ export default class GameFail extends PopupBase {
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
-        GameManager.gameFail_giveUp(TypeBefore.fromFail);
+        GameManager.gameFail_giveUp(FromState.fromFail);
     }
 }

@@ -5,7 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { ParamsWin, TypeBefore } from "../../../../src/config/ConfigCommon";
+import { WinParam, StateGame, FromState } from "../../../../src/config/ConfigCommon";
 import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
@@ -26,7 +26,7 @@ export default class GameWin<Options = any> extends PopupBase {
     @property([cc.Node]) arrNodeXingxing: cc.Node[] = [];
     @property(cc.Node) nodeReward: cc.Node = null;
 
-    params: ParamsWin = null;
+    params: WinParam = null;
     isNext: boolean = false;
     islock: boolean = false;
     obj = {
@@ -62,16 +62,17 @@ export default class GameWin<Options = any> extends PopupBase {
             this.itemLabelTitle.getComponent(cc.Label).string = chars;
         });
 
-        // next 或 continue
+        // 挑战状态,直接会主菜单; 正常游戏,判断 next 或 continue
         this.isNext = true;
-        let _data = DataManager.data;
-        if (_data.boxLevel.count + _data.boxLevel.add >= DataManager.getRewardBoxLevel().total
-            || _data.boxSuipian.count + _data.boxSuipian.add >= DataManager.getRewardBoxSuipian().total
-            || _data.boxXingxing.count + _data.boxXingxing.add >= DataManager.getRewardBoxXinging().total) {
+        if (DataManager.stateCur == StateGame.challenge) {
             this.isNext = false;
         }
-        if (this.isNext) {
-            if (_data.boxAreas.new > _data.boxAreas.cur) {
+        else {
+            let _data = DataManager.data;
+            if (_data.boxLevel.count + _data.boxLevel.add >= DataManager.getRewardBoxLevel().total
+                || _data.boxSuipian.count + _data.boxSuipian.add >= DataManager.getRewardBoxSuipian().total
+                || _data.boxXingxing.count + _data.boxXingxing.add >= DataManager.getRewardBoxXinging().total
+                || _data.boxAreas.new > _data.boxAreas.cur) {
                 this.isNext = false;
             }
         }
@@ -355,7 +356,7 @@ export default class GameWin<Options = any> extends PopupBase {
 
     /** 按钮事件 视频 */
     eventBtnVideo() {
-        let funcBefore = ()=>{
+        let funcBefore = () => {
             this.obj.line.isMove = false;
         };
         let funcSucces = () => {
@@ -364,16 +365,10 @@ export default class GameWin<Options = any> extends PopupBase {
                 cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                     this.nodeReward.active = false;
                     if (this.isNext) {
-                        GameManager.gameWin_startGame(TypeBefore.fromWin);
+                        GameManager.gameWin_startGame(FromState.fromWin);
                     }
                     else {
-                        let obj = {
-                            level: DataManager.data.boxData.level - 1,
-                            eventStart: CConst.event_enter_menu,
-                            eventFinish: CConst.event_menu_start,
-                        }
-                        kit.Popup.hide();
-                        kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                        GameManager.backMenuFromGame(FromState.fromWin);
                     }
                 }).start();
             }
@@ -382,7 +377,7 @@ export default class GameWin<Options = any> extends PopupBase {
         let funcFail = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(funcBefore, funcSucces, funcFail);
+        DataManager.playVideo(funcSucces, funcFail, funcBefore);
     }
 
     /** 按钮事件 确定 */
@@ -394,16 +389,10 @@ export default class GameWin<Options = any> extends PopupBase {
             cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                 this.nodeReward.active = false;
                 if (this.isNext) {
-                    GameManager.gameWin_startGame(TypeBefore.fromWin);
+                    GameManager.gameWin_startGame(FromState.fromWin);
                 }
                 else {
-                    let obj = {
-                        level: DataManager.data.boxData.level - 1,
-                        eventStart: CConst.event_enter_menu,
-                        eventFinish: CConst.event_menu_start,
-                    }
-                    kit.Popup.hide();
-                    kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                    GameManager.backMenuFromGame(FromState.fromWin);
                 }
             }).start();
         }
@@ -419,13 +408,7 @@ export default class GameWin<Options = any> extends PopupBase {
             this.nodeReward.opacity = 255;
             cc.tween(this.nodeReward).delay(0.5).to(0.25, { opacity: 0 }).delay(0.25).call(() => {
                 this.nodeReward.active = false;
-                let obj = {
-                    level: DataManager.data.boxData.level - 1,
-                    eventStart: CConst.event_enter_menu,
-                    eventFinish: CConst.event_menu_start,
-                }
-                kit.Popup.hide();
-                kit.Popup.show(CConst.popup_path_actPass, obj, { mode: PopupCacheMode.Frequent });
+                GameManager.backMenuFromGame(FromState.fromWin);
             }).start();
         }
         this.playAniGetCoin(1, funcDelay);

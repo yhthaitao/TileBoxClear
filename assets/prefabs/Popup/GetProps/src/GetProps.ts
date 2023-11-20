@@ -5,7 +5,7 @@ import Common from "../../../../src/config/Common";
 import DataManager from "../../../../src/config/DataManager";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
-import { StateGame, TypeProp, coinsBuyMagnet, coinsBuyClock } from "../../../../src/config/ConfigCommon";
+import { StateGame, PropType, coinsBuyMagnet, coinsBuyClock } from "../../../../src/config/ConfigCommon";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
 
@@ -19,7 +19,7 @@ export default class GetProps extends PopupBase {
     @property([cc.SpriteFrame]) spriteFrames: cc.SpriteFrame[] = [];
 
     options: {
-        prop: TypeProp,
+        prop: PropType,
     } = null;
 
     protected showBefore(options: any): void {
@@ -55,10 +55,10 @@ export default class GetProps extends PopupBase {
         };
 
         switch (this.options.prop) {
-            case TypeProp.magnet:
+            case PropType.magnet:
                 funcMagnet();
                 break;
-            case TypeProp.clock:
+            case PropType.clock:
                 funcClock();
                 break;
             default:
@@ -71,10 +71,10 @@ export default class GetProps extends PopupBase {
         kit.Audio.playEffect(CConst.sound_clickUI);
         let coins = 0;
         switch (this.options.prop) {
-            case TypeProp.magnet:
+            case PropType.magnet:
                 coins = coinsBuyMagnet;
                 break;
-            case TypeProp.clock:
+            case PropType.clock:
                 coins = coinsBuyClock;
                 break;
             default:
@@ -87,12 +87,12 @@ export default class GetProps extends PopupBase {
         }
 
         switch (this.options.prop) {
-            case TypeProp.magnet:
+            case PropType.magnet:
                 NativeCall.logEventTwo(ConfigDot.dot_buy_succ_magnet, String(DataManager.data.boxData.level));
                 DataManager.data.prop.magnet.count += 3;
                 kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);
                 break;
-            case TypeProp.clock:
+            case PropType.clock:
                 NativeCall.logEventTwo(ConfigDot.dot_buy_succ_clock, String(DataManager.data.boxData.level));
                 DataManager.data.prop.clock.count += 3;
                 kit.Event.emit(CConst.event_notice, LangChars.notice_buySuccess);

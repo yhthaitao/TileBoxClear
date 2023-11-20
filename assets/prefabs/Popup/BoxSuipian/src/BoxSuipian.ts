@@ -5,7 +5,7 @@ import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigBoxSuipian from "../../../../src/config/ConfigBoxSuipian";
-import { TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
+import { PropType, BoxRewardType } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -19,9 +19,9 @@ export default class BoxSuipian<Options = any> extends PopupBase {
     @property([cc.SpriteFrame]) spriteFrames: cc.SpriteFrame[] = [];
 
     types = [
-        TypeProp.coin,
-        TypeProp.ice, TypeProp.tip, TypeProp.back, TypeProp.refresh, TypeProp.magnet, TypeProp.clock,
-        TypeProp.tStrengthInfinite,
+        PropType.coin,
+        PropType.ice, PropType.tip, PropType.back, PropType.refresh, PropType.magnet, PropType.clock,
+        PropType.tStrengthInfinite,
     ];
 
     protected showBefore(options: any): void {
@@ -185,11 +185,11 @@ export default class BoxSuipian<Options = any> extends PopupBase {
         let spriteframeId = this.types.indexOf(raward.type);
         let rewardPropIcon = rewardProp.getChildByName('icon');
         rewardPropIcon.getComponent(cc.Sprite).spriteFrame = this.spriteFrames[spriteframeId];
-        if (raward.type == TypeProp.magnet) {
+        if (raward.type == PropType.magnet) {
             rewardPropIcon.position = cc.v3(10, 2);
             rewardPropIcon.scale = 0.75;
         }
-        else if (raward.type == TypeProp.clock) {
+        else if (raward.type == PropType.clock) {
             rewardPropIcon.position = cc.v3(-10, 2);
             rewardPropIcon.scale = 0.75;
         }
@@ -198,7 +198,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
             rewardPropIcon.scale = 1.0;
         }
         let str = '' + raward.number;
-        if (raward.type == TypeProp.tStrengthInfinite) {
+        if (raward.type == PropType.tStrengthInfinite) {
             str = '' + Math.floor(raward.number / 60) + 'm';
         }
         let rewardPropLabel = rewardProp.getChildByName('label');
@@ -210,7 +210,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
      * @param rewardLevel 奖励等级
      * @returns 
      */
-    public getRewardBoxSuipian(rewardLevel): TypeReward {
+    public getRewardBoxSuipian(rewardLevel): BoxRewardType {
         let index = rewardLevel;
         if (index < 1) {
             index = 1;
@@ -221,7 +221,7 @@ export default class BoxSuipian<Options = any> extends PopupBase {
                 index = max;
             }
         }
-        let config: TypeReward = ConfigBoxSuipian[index];
+        let config: BoxRewardType = ConfigBoxSuipian[index];
         return config;
     }
 

@@ -58,7 +58,7 @@ export default class GetCoins extends PopupBase {
             kit.Event.emit(CConst.event_notice, LangChars.notice_noTimesToday);
             return;
         }
-        let funcA = () => {
+        let funcSucces = () => {
             NativeCall.logEventTwo(ConfigDot.dot_ads_video_getGold_succe, String(DataManager.data.boxData.level));
 
             DataManager.data.numCoin += 60;
@@ -67,10 +67,10 @@ export default class GetCoins extends PopupBase {
             kit.Event.emit(CConst.event_scale_coin, 0, 0);
             kit.Popup.hide();
         };
-        let funcB = () => {
+        let funcFail = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(()=>{}, funcA, funcB);
+        DataManager.playVideo(funcSucces, funcFail);
     };
 
     /** 按钮事件 退出 */

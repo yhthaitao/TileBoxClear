@@ -7,6 +7,7 @@ import NativeCall from "../src/config/NativeCall";
 import Loading from "../res/prefab/Loading/src/Loading";
 import { LangChars } from "../src/config/ConfigLang";
 import { StateGame } from "../src/config/ConfigCommon";
+import { PopupCacheMode } from "../src/kit/manager/popupManager/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -20,13 +21,17 @@ export default class MainScene extends cc.Component {
     @property(cc.Node) nodeVideo: cc.Node = null;
     /** noVideoTip */
     @property(cc.Node) noVideoTip: cc.Node = null;
+    /** 道具素材 */
+    @property([cc.SpriteFrame]) propFrames: cc.SpriteFrame[] = [];
 
     // 不需要动态加载
     nodeLoading: cc.Node = null;
-    NodeMenu: cc.Node = null;
+    nodeMenu: cc.Node = null;
 
     // 动态加载
     nodeGame: cc.Node = null;
+    // 动态加载
+    nodeChallenge: cc.Node = null;
 
     /** 节点-弹窗父节点 */
     nodePopup: cc.Node = null;
@@ -65,7 +70,7 @@ export default class MainScene extends cc.Component {
         kit.Audio.initAudio();
         kit.Audio.playMusic(CConst.sound_music);
         // 初始化游戏数据
-        await DataManager.initData(this.nodeVideo);
+        await DataManager.initData(this.nodeVideo, this.propFrames);
         this.objComplete.data = true;
         this.enterMenuLayer();
     };
@@ -95,10 +100,10 @@ export default class MainScene extends cc.Component {
 
     /** 加载公用资源 */
     async loadComponents() {
-        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGame, cc.Prefab);
+        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGameBox, cc.Prefab);
+        await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGameChallenge, cc.Prefab);
         await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideGame, cc.Prefab);
         await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideBefore, cc.Prefab);
-
         NativeCall.logEventOne(ConfigDot.dot_resource_load_success);
     }
 
@@ -141,11 +146,15 @@ export default class MainScene extends cc.Component {
                 // this.nodeLoading.active = false;
                 break;
             case StateGame.menu:
-                this.NodeMenu.active = false;
+                this.nodeMenu.active = false;
                 break;
             case StateGame.game:
-                this.nodeGame.active = false;
-                NativeCall.closeBanner();
+                this.nodeGame.destroy();
+                this.nodeGame = null;
+                break;
+            case StateGame.challenge:
+                this.nodeChallenge.destroy();
+                this.nodeChallenge = null;
                 break;
             default:
                 break;
@@ -160,14 +169,14 @@ export default class MainScene extends cc.Component {
                 this.nodeLoading.active = true;
                 break;
             case StateGame.menu:
-                if (this.NodeMenu) {
-                    this.NodeMenu.active = true;
+                if (this.nodeMenu) {
+                    this.nodeMenu.active = true;
                 }
                 else {
-                    this.NodeMenu = cc.instantiate(this.preMainMenu);
-                    this.NodeMenu.parent = this.node;
-                    this.NodeMenu.zIndex = CConst.zIndex_menu;
-                    this.NodeMenu.active = true;
+                    this.nodeMenu = cc.instantiate(this.preMainMenu);
+                    this.nodeMenu.parent = this.node;
+                    this.nodeMenu.zIndex = CConst.zIndex_menu;
+                    this.nodeMenu.active = true;
                 }
                 break;
             case StateGame.game:
@@ -175,13 +184,27 @@ export default class MainScene extends cc.Component {
                     this.nodeGame.active = true;
                 }
                 else {
-                    let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGame, cc.Prefab);
+                    let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGameBox, cc.Prefab);
                     this.nodeGame = cc.instantiate(pre);
                     this.nodeGame.parent = this.node;
                     this.nodeGame.setContentSize(cc.winSize);
                     this.nodeGame.position = cc.v3();
                     this.nodeGame.zIndex = CConst.zIndex_game;
                     this.nodeGame.active = true;
+                }
+                break;
+            case StateGame.challenge:
+                if (this.nodeChallenge) {
+                    this.nodeChallenge.active = true;
+                }
+                else {
+                    let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGameChallenge, cc.Prefab);
+                    this.nodeChallenge = cc.instantiate(pre);
+                    this.nodeChallenge.parent = this.node;
+                    this.nodeChallenge.setContentSize(cc.winSize);
+                    this.nodeChallenge.position = cc.v3();
+                    this.nodeChallenge.zIndex = CConst.zIndex_game;
+                    this.nodeChallenge.active = true;
                 }
                 break;
             default:
@@ -207,6 +230,11 @@ export default class MainScene extends cc.Component {
     /** 事件回调：进入游戏box */
     eventBack_enterGame() {
         this.setGameState(StateGame.game);
+    }
+
+    /** 事件回调：进入游戏挑战 */
+    eventBack_enterChallenge() {
+        this.setGameState(StateGame.challenge);
     }
 
     /** 事件回调：进入新手引导 */
@@ -246,6 +274,7 @@ export default class MainScene extends cc.Component {
         kit.Event.on(CConst.event_loading_complete, this.eventBack_loadingComplete, this);
         kit.Event.on(CConst.event_enter_menu, this.eventBack_enterMenu, this);
         kit.Event.on(CConst.event_enter_game, this.eventBack_enterGame, this);
+        kit.Event.on(CConst.event_enter_challenge, this.eventBack_enterChallenge, this);
         kit.Event.on(CConst.event_guide_game, this.eventBack_guide_game, this);
         kit.Event.on(CConst.event_guide_before, this.eventBack_guide_before, this);
         kit.Event.on(CConst.event_notice, this.eventBack_notice, this);

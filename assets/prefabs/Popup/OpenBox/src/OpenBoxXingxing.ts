@@ -4,7 +4,7 @@ import CConst from "../../../../src/config/CConst";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
 import { LangChars } from "../../../../src/config/ConfigLang";
-import { Design, TypeProp, TypeReward } from "../../../../src/config/ConfigCommon";
+import { Design, PropType, BoxRewardType } from "../../../../src/config/ConfigCommon";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -37,7 +37,7 @@ export default class OpenBoxXingxing extends PopupBase {
         pStrength: { x: number, y: number },
         pCoin: { x: number, y: number },
         pProp: { x: number, y: number },
-        rewards: TypeReward
+        rewards: BoxRewardType
     } = null;
 
     protected showBefore(options: any): void {
@@ -90,13 +90,13 @@ export default class OpenBoxXingxing extends PopupBase {
             let timeWait = 0.833 + 1.0;
             // 箱子下落
             this.nodeBox.active = true;
-            let dragon = this.nodeBox.getChildByName('dragon');
-            DataManager.playAniDragon(dragon, this.obj.drop.armatureName, this.obj.drop.animationName);
+            let itemDragon = this.nodeBox.getChildByName('dragon');
+            DataManager.playAniDragon(itemDragon, this.obj.drop.armatureName, this.obj.drop.animationName);
             this.scheduleOnce(() => {
                 this.nodeOpen.active = true;
                 this.nodeOpen.opacity = 0;
                 cc.tween(this.nodeOpen).to(0.3, { opacity: 255 }).start();
-                DataManager.playAniDragon(dragon, this.obj.wait.armatureName, this.obj.wait.animationName);
+                DataManager.playAniDragon(itemDragon, this.obj.wait.armatureName, this.obj.wait.animationName);
             }, timeDrop);
             // 点击继续
             this.scheduleOnce(() => {
@@ -170,8 +170,8 @@ export default class OpenBoxXingxing extends PopupBase {
     playAniOpen() {
         // 箱子开启
         let timeOpen = 2.919;
-        let dragon = this.nodeBox.getChildByName('dragon');
-        DataManager.playAniDragon(dragon, this.obj.open.armatureName, this.obj.open.animationName);
+        let itemDragon = this.nodeBox.getChildByName('dragon');
+        DataManager.playAniDragon(itemDragon, this.obj.open.armatureName, this.obj.open.animationName);
         // icon
         this.nodeReward.active = true;
         this.nodeReward.getComponent(cc.Animation).play();
@@ -222,7 +222,10 @@ export default class OpenBoxXingxing extends PopupBase {
         return new Promise((res) => {
 
             // 看视频 奖励翻倍
-            DataManager.refreshDataAfterUnlockReward(this.params.rewards, this.obj.isVideo ? 2 : 1);
+            let radio = this.obj.isVideo ? 2 : 1;
+            this.params.rewards.reward.forEach((reward)=>{
+                DataManager.refreshDataByReward(reward, radio);
+            });
             DataManager.setData();
 
             let funcCount = () => {
@@ -239,14 +242,14 @@ export default class OpenBoxXingxing extends PopupBase {
                 let p1 = prop.position;
                 let p2 = this.getPropConfig(reward).pFinish;
                 let time = Common.getMoveTime(p1, p2, 1, 1250);
-                if (reward.type == TypeProp.coin) {
+                if (reward.type == PropType.coin) {
                     prop.opacity = 0;
                     kit.Event.emit(CConst.event_scale_coin, p1.x, p1.y);
                     cc.tween(prop).delay(time).call(() => {
                         funcCount();
                     }).start();
                 }
-                else if (reward.type == TypeProp.strength || reward.type == TypeProp.tStrengthInfinite) {
+                else if (reward.type == PropType.strength || reward.type == PropType.tStrengthInfinite) {
                     let opt = {
                         p1: cc.v2(p1.x, p1.y),
                         p2: cc.v2((p1.x + p2.x) * 0.5, p1.y),
@@ -272,62 +275,62 @@ export default class OpenBoxXingxing extends PopupBase {
         });
     };
 
-    getPropConfig(reward: { type: TypeProp, number: number }) {
+    getPropConfig(reward: { type: PropType, number: number }) {
         let frameId = 0;
         let propChars = '';
         let pFinish = cc.v3();
         switch (reward.type) {
-            case TypeProp.coin:
+            case PropType.coin:
                 frameId = 0;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pCoin.x, this.params.pCoin.y);
                 break;
-            case TypeProp.ice:
+            case PropType.ice:
                 frameId = 1;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.tip:
+            case PropType.tip:
                 frameId = 2;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.back:
+            case PropType.back:
                 frameId = 3;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.refresh:
+            case PropType.refresh:
                 frameId = 4;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.magnet:
+            case PropType.magnet:
                 frameId = 5;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.tMagnetInfinite:
+            case PropType.tMagnetInfinite:
                 frameId = 6;
                 propChars = '+' + Math.floor(reward.number * this.obj.radio / 60) + 'm';
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.clock:
+            case PropType.clock:
                 frameId = 7;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.tClockInfinite:
+            case PropType.tClockInfinite:
                 frameId = 8;
                 propChars = '+' + Math.floor(reward.number * this.obj.radio / 60) + 'm';
                 pFinish = cc.v3(this.params.pProp.x, this.params.pProp.y);
                 break;
-            case TypeProp.strength:
+            case PropType.strength:
                 frameId = 9;
                 propChars = 'x' + reward.number * this.obj.radio;
                 pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
                 break;
-            case TypeProp.tStrengthInfinite:
+            case PropType.tStrengthInfinite:
                 frameId = 10;
                 propChars = '+' + Math.floor(reward.number * this.obj.radio / 60) + 'm';
                 pFinish = cc.v3(this.params.pStrength.x, this.params.pStrength.y);
@@ -349,7 +352,7 @@ export default class OpenBoxXingxing extends PopupBase {
     /** 看视频 */
     eventBtnVideo() {
         kit.Audio.playEffect(CConst.sound_clickUI);
-        let funcA = () => {
+        let funcSucces = () => {
             this.obj.isVideo = true;
             this.obj.radio = 2;
             this.nodeContinue.active = false;
@@ -359,10 +362,10 @@ export default class OpenBoxXingxing extends PopupBase {
                 kit.Popup.hide();
             }).start();
         };
-        let funcB = () => {
+        let funcFail = () => {
             kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
         };
-        DataManager.playVideo(()=>{}, funcA, funcB);
+        DataManager.playVideo(funcSucces, funcFail);
     }
 
     /** 获取 */

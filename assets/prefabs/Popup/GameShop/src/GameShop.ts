@@ -7,7 +7,7 @@ import { LangChars } from "../../../../src/config/ConfigLang";
 import ConfigBuyItem, { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import NativeCall from "../../../../src/config/NativeCall";
 import ConfigDot from "../../../../src/config/ConfigDot";
-import { TypeProp } from "../../../../src/config/ConfigCommon";
+import { PropType } from "../../../../src/config/ConfigCommon";
 
 /** 商店产品 */
 interface Produce {
@@ -194,7 +194,7 @@ export default class GameShop<Options = any> extends PopupBase {
                     let propOne = nodeProp.getChildByName('prop' + index);
                     if (propOne) {
                         let _string = '' + obj.count;
-                        if (obj.typeProp == TypeProp.tStrengthInfinite) {
+                        if (obj.typeProp == PropType.tStrengthInfinite) {
                             _string += 'h';
                         }
                         let labelProp = propOne.getChildByName('label');

@@ -2383,7 +2383,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnLevelBack",
     "customEventData": ""
   },
@@ -2997,7 +2997,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnLevelNext",
     "customEventData": ""
   },
@@ -4190,7 +4190,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnSetting",
     "customEventData": ""
   },
@@ -6009,7 +6009,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnTimeIce",
     "customEventData": ""
   },
@@ -7209,7 +7209,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnTip",
     "customEventData": ""
   },
@@ -8409,7 +8409,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnBack",
     "customEventData": ""
   },
@@ -9609,7 +9609,7 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "836eaRGaoRNLoVLndli9sLK",
+    "_componentId": "3a272te+R9KLK8pIyCEfI6M",
     "handler": "eventBtnRefresh",
     "customEventData": ""
   },
@@ -11794,7 +11794,7 @@
     "sync": false
   },
   {
-    "__type__": "836eaRGaoRNLoVLndli9sLK",
+    "__type__": "3a272te+R9KLK8pIyCEfI6M",
     "_name": "",
     "_objFlags": 0,
     "node": {

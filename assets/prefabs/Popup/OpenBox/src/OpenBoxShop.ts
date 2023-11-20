@@ -2,7 +2,7 @@ import { kit } from "../../../../src/kit/kit";
 import PopupBase from "../../../../src/kit/manager/popupManager/PopupBase";
 import DataManager from "../../../../src/config/DataManager";
 import Common from "../../../../src/config/Common";
-import { TypeProp } from "../../../../src/config/ConfigCommon";
+import { PropType } from "../../../../src/config/ConfigCommon";
 import { BuyCfg } from "../../../../src/config/ConfigBuyItem";
 import CConst from "../../../../src/config/CConst";
 
@@ -53,23 +53,23 @@ export default class OpenBoxShop extends PopupBase {
             for (let index = 0, length = this.produceCfg.props.length; index < length; index++) {
                 let prop = this.produceCfg.props[index];
                 switch (prop.typeProp) {
-                    case TypeProp.coin:
+                    case PropType.coin:
                         this.obj.isAddCoin = true;
                         DataManager.data.numCoin += prop.count;
                         break;
-                    case TypeProp.ice:
+                    case PropType.ice:
                         this.obj.isAddProp = true;
                         DataManager.data.prop.ice.count += prop.count;
                         break;
-                    case TypeProp.refresh:
+                    case PropType.refresh:
                         this.obj.isAddProp = true;
                         DataManager.data.prop.refresh.count += prop.count;
                         break;
-                    case TypeProp.back:
+                    case PropType.back:
                         this.obj.isAddProp = true;
                         DataManager.data.prop.back.count += prop.count;
                         break;
-                    case TypeProp.tStrengthInfinite:
+                    case PropType.tStrengthInfinite:
                         let time = Math.floor(new Date().getTime() * 0.001);
                         if (DataManager.data.strength.tInfinite < time) {
                             DataManager.data.strength.tInfinite = time + prop.count * 3600;
@@ -78,14 +78,14 @@ export default class OpenBoxShop extends PopupBase {
                             DataManager.data.strength.tInfinite += prop.count * 3600;
                         }
                         break;
-                    case TypeProp.tip:
+                    case PropType.tip:
                         this.obj.isAddProp = true;
                         DataManager.data.prop.tip.count += prop.count;
                         break;
-                    case TypeProp.clock:
+                    case PropType.clock:
                         DataManager.data.prop.clock.count += prop.count;
                         break;
-                    case TypeProp.magnet:
+                    case PropType.magnet:
                         DataManager.data.prop.magnet.count += prop.count;
                         break;
                     default:
@@ -128,8 +128,8 @@ export default class OpenBoxShop extends PopupBase {
             cc.Tween.stopAllByTarget(this.nodeBox);
             this.nodeBox.active = true;
             this.nodeBox.opacity = 255;
-            let itemBox = this.nodeBox.getChildByName('dragon');
-            DataManager.playAniDragon(itemBox, this.obj.open.armatureName, this.obj.open.animationName);
+            let itemDragon = this.nodeBox.getChildByName('dragon');
+            DataManager.playAniDragon(itemDragon, this.obj.open.armatureName, this.obj.open.animationName);
 
             this.setReward();
             this.nodeReward.active = true;
@@ -219,7 +219,7 @@ export default class OpenBoxShop extends PopupBase {
                     let propOne = itemArr[index];
                     if (propOne) {
                         let _string = '' + obj.count;
-                        if (obj.typeProp == TypeProp.tStrengthInfinite) {
+                        if (obj.typeProp == PropType.tStrengthInfinite) {
                             _string += 'h';
                         }
                         let labelProp = propOne.getChildByName('label');

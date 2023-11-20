@@ -7,13 +7,13 @@ import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
-import { BoxParam, Design, GoodParam, LevelParam, ParamsFail, ParamsWin, TypeFinish, TypeProp } from "../../../../src/config/ConfigCommon";
+import { BoxParam, Design, GoodParam, LevelParam, FailParam, WinParam, FinishType, PropType } from "../../../../src/config/ConfigCommon";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { ConfigGold } from "../../../../src/config/ConfigGold";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class GameChallenge extends cc.Component {
+export default class GameBox extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '事件拦截-游戏底层' }) maskTop: cc.Node = null;
     @property({ type: cc.Node, tooltip: '事件拦截-游戏顶层' }) maskBottom: cc.Node = null;
@@ -81,11 +81,11 @@ export default class GameChallenge extends cc.Component {
             { "x": 231, "y": 90.5, "w": 4, "p": 19, "n": "4003", "g": 0 }, { "x": -231, "y": 1176.5, "w": 4, "p": 23, "n": "4003", "g": 0 }, { "x": 231, "y": 1176.5, "w": 4, "p": 24, "n": "4003", "g": 0 },
             { "x": -235, "y": 1357.5, "w": 4, "p": 25, "n": "4003", "g": 0 }, { "x": 143, "y": 2262.5, "w": 4, "p": 31, "n": "4003", "g": 0 }, { "x": 71, "y": 2443.5, "w": 4, "p": 32, "n": "4003", "g": 0 }
         ]
-    };
+    };;
 
     /** 游戏用数据 */
     objData = {
-        numSuipian: 0, stepCount: 0, passTime: 0, boxInLine: 0, isFinish: false
+        level: 1, numSuipian: 0, stepCount: 0, passTime: 0, boxInLine: 0, isFinish: false
     };
     heightObj = {};
 
@@ -199,31 +199,49 @@ export default class GameChallenge extends cc.Component {
     gameLoad(isRestart = false) {
         Common.log('功能：游戏开始 isRestart: ', isRestart ? 'true' : 'false');
         this.setIsLock(true);
-
-        // 从 101 关以后，都走重新开始游戏；
-        let level = DataManager.data.boxData.level;
-        if (level > 100) {
-            isRestart = true;
-        }
-        // this.levelParam = DataManager.getLevelData(level);
-        // 游戏初始 碎片ui不显示
-        this.uiTopSuipian.opacity = 0;
-        NativeCall.logEventOne(ConfigDot.dot_levelStart);
-        NativeCall.logEventOne(ConfigDot.dot_levelStart_one);
         this.clear();
-        this.loadBg();
         this.initData();
+        this.loadBg();
         this.initBox(isRestart);
         this.initUI();
         this.initLevel();
         NativeCall.showBanner();
     }
 
+    /** 初始化数据 */
+    initData() {
+        /** 游戏用数据 */
+        this.objData = {
+            level: DataManager.data.challengeData.level,
+            numSuipian: 0,
+            stepCount: 0,
+            passTime: new Date().getTime(),
+            boxInLine: 0,
+            isFinish: false,
+        };
+        this.levelParam = DataManager.getChallengeLevelData(this.objData.level);
+        // 屏幕系数
+        this.mainScale = 1;// 箱子父节点缩放比例
+        this.mainLayer = 5;// 箱子父节点实际显示的层数
+        this.mainLeftX = 0;// 箱子最左边
+        this.mainRightX = 0;// 箱子最后边
+        // 物品计数
+        this.goodsCount = 0;
+        this.goodsTotal = this.levelParam.item.length;
+        // 倒计时开始
+        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
+        this.timeGame.cur = this.timeGame.init;
+        this.timeGame.count = this.timeGame.total;
+
+        // 游戏初始 碎片ui不显示
+        this.uiTopSuipian.opacity = 0;
+        NativeCall.logEventOne(ConfigDot.dot_challenge_start);
+    }
+
     /** 加载关卡数据 */
     loadBg() {
-        let level = DataManager.data.boxData.level;
         // 加载背景
-        let bgId = Math.floor((level - 1) / 5 % 4) + 1;
+        let bgId = Math.floor((this.objData.level - 1) / 5 % 4) + 1;
         let pathBg = CConst.pathGameBg + bgId;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
@@ -239,30 +257,6 @@ export default class GameChallenge extends cc.Component {
         else {
             this.uiTopLevel.getChildByName('nodeSign').active = false;
         }
-    }
-
-    /** 初始化数据 */
-    initData() {
-        /** 游戏用数据 */
-        this.objData = {
-            numSuipian: 0,
-            stepCount: 0,
-            passTime: new Date().getTime(),
-            boxInLine: 0,
-            isFinish: false,
-        };
-        // 屏幕系数
-        this.mainScale = 1;// 箱子父节点缩放比例
-        this.mainLayer = 5;// 箱子父节点实际显示的层数
-        this.mainLeftX = 0;// 箱子最左边
-        this.mainRightX = 0;// 箱子最后边
-        // 物品计数
-        this.goodsCount = 0;
-        this.goodsTotal = this.levelParam.item.length;
-        // 倒计时开始
-        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
-        this.timeGame.cur = this.timeGame.init;
-        this.timeGame.count = this.timeGame.total;
     }
 
     /** 重新组合关卡数据 */
@@ -478,7 +472,7 @@ export default class GameChallenge extends cc.Component {
         });
 
         // 使用道具-磁铁
-        if (DataManager.useProp(TypeProp.magnet) < 0) {
+        if (DataManager.useProp(PropType.magnet) < 0) {
             Common.log('道具 磁铁 未使用');
         }
         else {
@@ -492,7 +486,7 @@ export default class GameChallenge extends cc.Component {
         }
 
         // 使用道具-时钟
-        if (DataManager.useProp(TypeProp.clock) < 0) {
+        if (DataManager.useProp(PropType.clock) < 0) {
             Common.log('道具 时钟 未使用');
         }
         else {
@@ -553,10 +547,10 @@ export default class GameChallenge extends cc.Component {
         this.setIceHide();// 设置时间颜色
         this.setUIProcess();// 设置游戏进度
         // 设置道具栏
-        this.setUIProp(TypeProp.ice);
-        this.setUIProp(TypeProp.tip);
-        this.setUIProp(TypeProp.back);
-        this.setUIProp(TypeProp.refresh);
+        this.setUIProp(PropType.ice);
+        this.setUIProp(PropType.tip);
+        this.setUIProp(PropType.back);
+        this.setUIProp(PropType.refresh);
     }
 
     /** 初始化游戏关卡 */
@@ -579,9 +573,8 @@ export default class GameChallenge extends cc.Component {
 
     /** 设置关卡等级 */
     setUILevel() {
-        let level = DataManager.data.boxData.level;
         let label = this.uiTopLevel.getChildByName('label');
-        label.getComponent(cc.Label).string = 'Lv.' + level;
+        label.getComponent(cc.Label).string = 'Lv.' + this.objData.level;
     }
 
     /** 设置碎片数量 */
@@ -618,7 +611,7 @@ export default class GameChallenge extends cc.Component {
     }
 
     /** 设置道具栏 */
-    setUIProp(type: TypeProp) {
+    setUIProp(type: PropType) {
         let funcProp = (isLock: boolean, prop: cc.Node, count: number) => {
             let button = prop.getChildByName('button');
             let locked = prop.getChildByName('locked');
@@ -653,20 +646,20 @@ export default class GameChallenge extends cc.Component {
         let isLock = false;
         let data = DataManager.data;
         switch (type) {
-            case TypeProp.ice:
-                isLock = data.boxData.level < data.prop.ice.unlock;
+            case PropType.ice:
+                isLock = this.objData.level < data.prop.ice.unlock;
                 funcProp(isLock, this.uiPropIce, DataManager.data.prop.ice.count);
                 break;
-            case TypeProp.tip:
-                isLock = data.boxData.level < data.prop.tip.unlock;
+            case PropType.tip:
+                isLock = this.objData.level < data.prop.tip.unlock;
                 funcProp(isLock, this.uiPropTip, DataManager.data.prop.tip.count);
                 break;
-            case TypeProp.back:
-                isLock = data.boxData.level < data.prop.back.unlock;
+            case PropType.back:
+                isLock = this.objData.level < data.prop.back.unlock;
                 funcProp(isLock, this.uiPropBack, DataManager.data.prop.back.count);
                 break;
-            case TypeProp.refresh:
-                isLock = data.boxData.level < data.prop.refresh.unlock;
+            case PropType.refresh:
+                isLock = this.objData.level < data.prop.refresh.unlock;
                 funcProp(isLock, this.uiPropRefresh, DataManager.data.prop.refresh.count);
                 break;
             default:
@@ -708,7 +701,7 @@ export default class GameChallenge extends cc.Component {
             this.timeGame.count--;
             this.setUITime();
             if (this.timeGame.count <= 0) {
-                this.playAniGameOver(TypeFinish.failTime);
+                this.playAniGameOver(FinishType.failTime);
             }
         }
     }
@@ -848,7 +841,7 @@ export default class GameChallenge extends cc.Component {
         if (!isContinueMove) {
             this.setMoveGood(false);
             if (this.getBottomGoodNum() > this.bottomMax - 1) {
-                this.playAniGameOver(TypeFinish.failSpace);
+                this.playAniGameOver(FinishType.failSpace);
             }
         }
     }
@@ -1193,7 +1186,7 @@ export default class GameChallenge extends cc.Component {
         this.goodsCount += arrParam.length;
         if (this.goodsCount >= this.goodsTotal) {
             this.goodsCount = this.goodsTotal;
-            this.playAniGameOver(TypeFinish.win);
+            this.playAniGameOver(FinishType.win);
         }
         this.setUIProcess();
     }
@@ -1249,7 +1242,7 @@ export default class GameChallenge extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-冰冻
-        let propNum = DataManager.useProp(TypeProp.ice);
+        let propNum = DataManager.useProp(PropType.ice);
         if (propNum < 0) {
             let coin = DataManager.data.numCoin;
             let need = 50;
@@ -1260,13 +1253,13 @@ export default class GameChallenge extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_ice, String(DataManager.data.boxData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_ice, String(this.objData.level));
             }
         }
         DataManager.setData();
 
         // 更新ui
-        this.setUIProp(TypeProp.ice);
+        this.setUIProp(PropType.ice);
         this.setIceShow();
 
         // 道具逻辑
@@ -1282,7 +1275,7 @@ export default class GameChallenge extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-提示
-        let propNum = DataManager.useProp(TypeProp.tip);
+        let propNum = DataManager.useProp(PropType.tip);
         if (propNum < 0) {
             let coin = DataManager.data.numCoin;
             let need = 50;
@@ -1293,12 +1286,12 @@ export default class GameChallenge extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_tip, String(DataManager.data.boxData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_tip, String(this.objData.level));
             }
         }
         DataManager.setData();
         // 更新ui
-        this.setUIProp(TypeProp.tip);
+        this.setUIProp(PropType.tip);
 
         // 道具逻辑
         let needNum = 3;
@@ -1389,7 +1382,7 @@ export default class GameChallenge extends cc.Component {
         }
 
         // 使用道具-返回上一步
-        let propNum = DataManager.useProp(TypeProp.back);
+        let propNum = DataManager.useProp(PropType.back);
         if (propNum < 0) {
             let coin = DataManager.data.numCoin;
             let need = 30;
@@ -1400,13 +1393,13 @@ export default class GameChallenge extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_back, String(DataManager.data.boxData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_back, String(this.objData.level));
             }
         }
         DataManager.setData();
 
         // 更新ui
-        this.setUIProp(TypeProp.back);
+        this.setUIProp(PropType.back);
 
         // 道具逻辑
         this.isLock = true;
@@ -1520,7 +1513,7 @@ export default class GameChallenge extends cc.Component {
         kit.Audio.playEffect(CConst.sound_clickUI);
 
         // 使用道具-刷新
-        let propNum = DataManager.useProp(TypeProp.refresh);
+        let propNum = DataManager.useProp(PropType.refresh);
         if (propNum < 0) {
             let coin = DataManager.data.numCoin;
             let need = 20;
@@ -1531,13 +1524,13 @@ export default class GameChallenge extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_refresh, String(DataManager.data.boxData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_refresh, String(this.objData.level));
             }
         }
         DataManager.setData();
 
         // 刷新ui
-        this.setUIProp(TypeProp.refresh);
+        this.setUIProp(PropType.refresh);
 
         // 道具逻辑
         this.isLock = true;
@@ -1612,7 +1605,10 @@ export default class GameChallenge extends cc.Component {
         // if (this.speedBox.isMove || this.speedGood.isMove) {
         //     return;
         // }
-        // DataManager.data.boxData.level--;
+        // if (this.objData.level < 2) {
+        //     return;
+        // }
+        // DataManager.data.challengeData.level--;
         // DataManager.setData();
 
         // this.gameLoad();
@@ -1624,7 +1620,7 @@ export default class GameChallenge extends cc.Component {
         // if (this.speedBox.isMove || this.speedGood.isMove) {
         //     return;
         // }
-        // DataManager.data.boxData.level++;
+        // DataManager.data.challengeData.level++;
         // DataManager.setData();
 
         // this.gameLoad();
@@ -1841,7 +1837,7 @@ export default class GameChallenge extends cc.Component {
                 this.goodsCount += 3;
                 if (this.goodsCount >= this.goodsTotal) {
                     this.goodsCount = this.goodsTotal;
-                    this.playAniGameOver(TypeFinish.win);
+                    this.playAniGameOver(FinishType.win);
                 }
                 this.setUIProcess();
             }).start();
@@ -2265,21 +2261,23 @@ export default class GameChallenge extends cc.Component {
     };
 
     /** 播放动画（游戏结束） */
-    playAniGameOver(type: TypeFinish) {
+    playAniGameOver(type: FinishType) {
         this.isLock = true;
         this.objData.isFinish = true;
         switch (type) {
-            case TypeFinish.win:
+            case FinishType.win:
                 this.gameStageWin();
                 break;
-            case TypeFinish.failSpace:
-            case TypeFinish.failTime:
-                let params: ParamsFail = {
+            case FinishType.failSpace:
+            case FinishType.failTime:
+                let params: FailParam = {
                     type: type,
                     numSuipian: this.objData.numSuipian,
                     numStrength: 1,
                     numMagnet: DataManager.data.wins.count - DataManager.data.wins.start,
                 };
+                // 打点 失败
+                NativeCall.logEventOne(ConfigDot.dot_challenge_fail);
                 kit.Popup.show(CConst.popup_path_gameFail, params, { mode: PopupCacheMode.Frequent });
                 break;
             default:
@@ -2292,20 +2290,19 @@ export default class GameChallenge extends cc.Component {
         // 打点
         NativeCall.sTsEvent();
 
-        let stageLevel = DataManager.data.boxData.level
+        let stageLevel = this.objData.level;
         // 打点 过关
-        NativeCall.logEventOne(ConfigDot.dot_levelPass);
+        NativeCall.logEventOne(ConfigDot.dot_challenge_win);
         let dot = ConfigDot['dot_pass_level_' + stageLevel];
         if (dot) {
             let passTime = Math.floor((new Date().getTime() - this.objData.passTime) * 0.001); //通关时间
             NativeCall.logEventFore(dot, String(stageLevel), String(passTime), String(this.objData.stepCount));
         }
-        NativeCall.logEventOne(ConfigDot.dot_pass_level_all);
 
         let nodeSuipian = this.uiTop.getChildByName('suipian');
         let pointWorld = this.uiTop.convertToWorldSpaceAR(nodeSuipian.position);
         // 更新数据
-        let params: ParamsWin = {
+        let params: WinParam = {
             tCount: this.timeGame.count,
             disBoxGood: 1,
             disBoxLevel: 1,
@@ -2409,9 +2406,6 @@ export default class GameChallenge extends cc.Component {
         this.playAniShow(true, () => {
             // 新手引导 返回道具 移除一个物品到检测区
             if (DataManager.checkNewPlayerGame()) {
-                if (DataManager.data.boxData.level == 5) {
-                    this.removeGoodToBottom();
-                }
                 this.gamePause();
                 kit.Event.emit(CConst.event_guide_game);
             }
@@ -2435,13 +2429,13 @@ export default class GameChallenge extends cc.Component {
     };
 
     /** 复活 */
-    async gameRevive(type: TypeFinish) {
+    async gameRevive(type: FinishType) {
         Common.log('功能：游戏复活');
         switch (type) {
-            case TypeFinish.failTime:// 超时复活 +60s
+            case FinishType.failTime:// 超时复活 +60s
                 this.timeGame.count += 60;
                 break;
-            case TypeFinish.failSpace:// 无移动空间 回退3个物品
+            case FinishType.failSpace:// 无移动空间 回退3个物品
                 await this.returnGoods();
                 await this.returnGoods();
                 await this.returnGoods();
@@ -2454,10 +2448,10 @@ export default class GameChallenge extends cc.Component {
     };
 
     eventBackRefreshProp() {
-        this.setUIProp(TypeProp.ice);
-        this.setUIProp(TypeProp.tip);
-        this.setUIProp(TypeProp.back);
-        this.setUIProp(TypeProp.refresh);
+        this.setUIProp(PropType.ice);
+        this.setUIProp(PropType.tip);
+        this.setUIProp(PropType.back);
+        this.setUIProp(PropType.refresh);
     };
 
     /** 监听-注册 */

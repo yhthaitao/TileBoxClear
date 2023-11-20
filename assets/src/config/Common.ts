@@ -11,22 +11,16 @@ class Common {
 
     /** 从节点上获取数组 */
     getArrByName(node: cc.Node, name: string): cc.Node[] {
-        let child = node.children;
-        let arrObj = [];
-        for (let index = 0, length = child.length; index < length; index++) {
-            const element = child[index];
-            if (element.name.indexOf(name) < 0) {
-                continue;
-            }
-            arrObj.push(element);
-        }
+        let items = node.children.filter((item) => {
+            return item.name.indexOf(name) >= 0;
+        });
         let strlen = name.length;
-        arrObj.sort((a, b) => {
+        items.sort((a, b) => {
             let indexA = Number(a.name.slice(strlen, a.name.length));
             let indexB = Number(b.name.slice(strlen, b.name.length));
             return indexA - indexB;
         });
-        return [].concat(arrObj);
+        return items;
     };
 
     /** 从节点上获取数组  y：从小到大*/
