@@ -35,6 +35,12 @@ export default class Challenge<Options = any> extends PopupBase {
             notAfter: cc.color(166, 143, 120),
             already: cc.color(83, 176, 253),
         },
+        aniNames: {
+            start: 'dacheng',
+            enough: 'jingzhi',
+            open: 'dakai',
+            finish: 'kaiqijieshuhou',
+        },
     };
 
     /**
@@ -172,19 +178,19 @@ export default class Challenge<Options = any> extends PopupBase {
             dragon.armatureName = armatureName;
             // 已获取
             if (reward.isGet) {
-                dragon.playAnimation('dacheng', 0);
+                dragon.playAnimation(this.obj.aniNames.finish, 0);
             }
             // 未获取
             else {
                 if (objMonth.count > reward.total) {
                     reward.isGet = true;
-                    DataManager.playAniDragon(itemDragon, armatureName, 'dakai', ()=>{
-                        dragon.playAnimation('dacheng', 0);
+                    DataManager.playAniDragon(itemDragon, armatureName, this.obj.aniNames.open, ()=>{
+                        dragon.playAnimation(this.obj.aniNames.finish, 0);
                     });
                     this.getReward(reward.props, item.convertToWorldSpaceAR(itemDragon.position));
                 }
                 else {
-                    dragon.playAnimation('jingzhi', 0);
+                    dragon.playAnimation(this.obj.aniNames.start, 0);
                 }
             }
         }

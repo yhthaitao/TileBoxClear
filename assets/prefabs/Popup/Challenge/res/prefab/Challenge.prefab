@@ -1294,12 +1294,12 @@
       }
     ],
     "_armatureName": "1lihe",
-    "_animationName": "dacheng",
+    "_animationName": "jingzhi",
     "_preCacheMode": 0,
     "_cacheMode": 0,
     "playTimes": -1,
     "premultipliedAlpha": false,
-    "_armatureKey": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50#60039f33-26f0-401f-b3de-717544c384fa",
+    "_armatureKey": "1fe60cd4-569e-40df-9c12-5181c629ad00#b080ca56-c942-49fb-b5bc-ff1b2bf740ea",
     "_accTime": 0,
     "_playCount": 0,
     "_frameCache": null,
@@ -1307,13 +1307,13 @@
     "_playing": false,
     "_armatureCache": null,
     "_N$dragonAsset": {
-      "__uuid__": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50"
+      "__uuid__": "1fe60cd4-569e-40df-9c12-5181c629ad00"
     },
     "_N$dragonAtlasAsset": {
-      "__uuid__": "60039f33-26f0-401f-b3de-717544c384fa"
+      "__uuid__": "b080ca56-c942-49fb-b5bc-ff1b2bf740ea"
     },
     "_N$_defaultArmatureIndex": 0,
-    "_N$_animationIndex": 2,
+    "_N$_animationIndex": 1,
     "_N$_defaultCacheMode": 0,
     "_N$timeScale": 1,
     "_N$debugBones": false,
@@ -1602,7 +1602,7 @@
     "_cacheMode": 0,
     "playTimes": -1,
     "premultipliedAlpha": false,
-    "_armatureKey": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50#60039f33-26f0-401f-b3de-717544c384fa",
+    "_armatureKey": "1fe60cd4-569e-40df-9c12-5181c629ad00#b080ca56-c942-49fb-b5bc-ff1b2bf740ea",
     "_accTime": 0,
     "_playCount": 0,
     "_frameCache": null,
@@ -1610,10 +1610,10 @@
     "_playing": false,
     "_armatureCache": null,
     "_N$dragonAsset": {
-      "__uuid__": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50"
+      "__uuid__": "1fe60cd4-569e-40df-9c12-5181c629ad00"
     },
     "_N$dragonAtlasAsset": {
-      "__uuid__": "60039f33-26f0-401f-b3de-717544c384fa"
+      "__uuid__": "b080ca56-c942-49fb-b5bc-ff1b2bf740ea"
     },
     "_N$_defaultArmatureIndex": 1,
     "_N$_animationIndex": 1,
@@ -1905,7 +1905,7 @@
     "_cacheMode": 0,
     "playTimes": -1,
     "premultipliedAlpha": false,
-    "_armatureKey": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50#60039f33-26f0-401f-b3de-717544c384fa",
+    "_armatureKey": "1fe60cd4-569e-40df-9c12-5181c629ad00#b080ca56-c942-49fb-b5bc-ff1b2bf740ea",
     "_accTime": 0,
     "_playCount": 0,
     "_frameCache": null,
@@ -1913,10 +1913,10 @@
     "_playing": false,
     "_armatureCache": null,
     "_N$dragonAsset": {
-      "__uuid__": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50"
+      "__uuid__": "1fe60cd4-569e-40df-9c12-5181c629ad00"
     },
     "_N$dragonAtlasAsset": {
-      "__uuid__": "60039f33-26f0-401f-b3de-717544c384fa"
+      "__uuid__": "b080ca56-c942-49fb-b5bc-ff1b2bf740ea"
     },
     "_N$_defaultArmatureIndex": 2,
     "_N$_animationIndex": 1,
@@ -2208,7 +2208,7 @@
     "_cacheMode": 0,
     "playTimes": -1,
     "premultipliedAlpha": false,
-    "_armatureKey": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50#60039f33-26f0-401f-b3de-717544c384fa",
+    "_armatureKey": "1fe60cd4-569e-40df-9c12-5181c629ad00#b080ca56-c942-49fb-b5bc-ff1b2bf740ea",
     "_accTime": 0,
     "_playCount": 0,
     "_frameCache": null,
@@ -2216,10 +2216,10 @@
     "_playing": false,
     "_armatureCache": null,
     "_N$dragonAsset": {
-      "__uuid__": "fd5700cb-1e2c-4ad1-a878-a68ad748ed50"
+      "__uuid__": "1fe60cd4-569e-40df-9c12-5181c629ad00"
     },
     "_N$dragonAtlasAsset": {
-      "__uuid__": "60039f33-26f0-401f-b3de-717544c384fa"
+      "__uuid__": "b080ca56-c942-49fb-b5bc-ff1b2bf740ea"
     },
     "_N$_defaultArmatureIndex": 3,
     "_N$_animationIndex": 1,

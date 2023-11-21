@@ -106,7 +106,6 @@ export interface GoodParam {
     h: number;
     keyGood: number;
     isMove: boolean;
-    isEnough: boolean;
     gold: { isGold: boolean, count: number, total: number },
     box: { name: string, key: number, x: number, y: number },
 }

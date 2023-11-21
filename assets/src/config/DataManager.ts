@@ -1289,12 +1289,10 @@ class DataManager {
         let total = 21;
         let loop = { start: 12, length: 10 };
         if (level <= total) {
-            console.log('getChallengeLevelData: ', level);
             return this.levelData.data2[level - 1];
         }
         else {
             level = loop.start + (level - total - 1) % loop.length;
-            console.log('getChallengeLevelData: ', level);
             return this.levelData.data2[level - 1];
         }
     };

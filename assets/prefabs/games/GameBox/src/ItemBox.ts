@@ -120,10 +120,6 @@ export default class ItemBox extends cc.Component {
         itemLabel.getComponent(cc.Label).string = '' + goodNum;
     };
 
-    sortBoxDress(){
-
-    };
-
     refreshParams(y: number) {
         this.param.y = y;
         this.node.y = this.param.y;
