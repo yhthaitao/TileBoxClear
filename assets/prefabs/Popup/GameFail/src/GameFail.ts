@@ -99,7 +99,7 @@ export default class GameFail extends PopupBase {
         if (this.params.type == FinishType.failTime) {
             NativeCall.logEventTwo(ConfigDot.dot_buy_succ_fuhuo_noTime, String(DataManager.data.boxData.level));
         }
-        else{
+        else {
             NativeCall.logEventTwo(ConfigDot.dot_buy_succ_fuhuo_noSpace, String(DataManager.data.boxData.level));
         }
         // 60个金币 复活

@@ -1,13 +1,13 @@
 import CConst from "../../../../src/config/CConst";
 import Common from "../../../../src/config/Common";
+import DataManager from "../../../../src/config/DataManager";
 import ConfigDot from "../../../../src/config/ConfigDot";
 import NativeCall from "../../../../src/config/NativeCall";
-import DataManager from "../../../../src/config/DataManager";
 import { kit } from "../../../../src/kit/kit";
 import { PopupCacheMode } from "../../../../src/kit/manager/popupManager/PopupManager";
 import ItemBox from "./ItemBox";
 import ItemGood from "./ItemGood";
-import { BoxParam, Design, GoodParam, LevelParam, FailParam, WinParam, FinishType, PropType } from "../../../../src/config/ConfigCommon";
+import { BoxParam, Design, FailParam, FinishType, GoodParam, LevelParam, PropType, WinParam } from "../../../../src/config/ConfigCommon";
 import { LangChars } from "../../../../src/config/ConfigLang";
 import { ConfigGold } from "../../../../src/config/ConfigGold";
 
@@ -44,7 +44,7 @@ export default class GameBox extends cc.Component {
 
     /** 游戏用数据 */
     objData = {
-        level: 1, numSuipian: 0, stepCount: 0, passTime: 0, boxInLine: 0, isFinish: false
+        numSuipian: 0, stepCount: 0, passTime: 0, isFinish: false
     };
     heightObj = {};
 
@@ -52,7 +52,8 @@ export default class GameBox extends cc.Component {
     goodsCount: number = 0;// 物品计数
     goodsTotal: number = 0;// 物品总数
     objGame: any = {};// 箱子数据（按游戏数据整理）
-    objGameCopy: any = {};// 箱子数据（用于 返回上一步 确认箱子位置）
+    arrGame: BoxParam[][] = [];// 箱子数据（按层级排列）
+    arrGameCopy: BoxParam[][] = [];// 箱子数据（用于 返回上一步 确认箱子位置）
     isLock: boolean = false;// 游戏是否锁定
     timeGame = { cur: 0, init: 0, count: 0, total: 1200 };// 游戏时间
     timeProp = { iceCount: 0, iceTotal: 15, addTotal: 10 };// 道具时间
@@ -79,11 +80,17 @@ export default class GameBox extends cc.Component {
         4: 0.5 * 134 / 110,
         5: 0.5, 6: 0.5, 7: 0.5, 8: 0.5, 9: 0.5,
     };
-    boxBottomY: number = 0;
-    boxH: number = 181;
+    arrBoxY: { y: number, h: number }[] = [];// 每层箱子的位置数据
 
     baseTime: number = 1;// 1单位时间
     baseDis: number = 2000;// 单位时间移动距离
+    // 缓存
+    objPool = {
+        box: { pool: new cc.NodePool(), max: 100 },
+        good: { pool: new cc.NodePool(), max: 100 },
+        effectExp: { pool: new cc.NodePool(), max: 10 },
+        effectTouch: { pool: new cc.NodePool(), max: 10 },
+    };
 
     /** 移动速度 箱子 */
     speedBox = {
@@ -159,50 +166,31 @@ export default class GameBox extends cc.Component {
     gameLoad(isRestart = false) {
         Common.log('功能：游戏开始 isRestart: ', isRestart ? 'true' : 'false');
         this.setIsLock(true);
+        
+        // 从 101 关以后，都走重新开始游戏；
+        let level = DataManager.data.boxData.level;
+        if (level > 100) {
+            isRestart = true;
+        }
+        this.levelParam = DataManager.getCommonLevelData(level);
+        // 游戏初始 碎片ui不显示
+        this.uiTopSuipian.opacity = 0;
+        NativeCall.logEventOne(ConfigDot.dot_levelStart);
+        NativeCall.logEventOne(ConfigDot.dot_levelStart_one);
         this.clear();
-        this.initData();
         this.loadBg();
+        this.initData();
         this.initBox(isRestart);
         this.initUI();
         this.initLevel();
         NativeCall.showBanner();
     }
 
-    /** 初始化数据 */
-    initData() {
-        /** 游戏用数据 */
-        this.objData = {
-            level: DataManager.data.boxData.level,
-            numSuipian: 0,
-            stepCount: 0,
-            passTime: new Date().getTime(),
-            boxInLine: 0,
-            isFinish: false,
-        };
-        this.levelParam = DataManager.getCommonLevelData(this.objData.level);
-        // 屏幕系数
-        this.mainScale = 1;// 箱子父节点缩放比例
-        this.mainLayer = 5;// 箱子父节点实际显示的层数
-        this.mainLeftX = 0;// 箱子最左边
-        this.mainRightX = 0;// 箱子最后边
-        // 物品计数
-        this.goodsCount = 0;
-        this.goodsTotal = this.levelParam.item.length;
-        // 倒计时开始
-        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
-        this.timeGame.cur = this.timeGame.init;
-        this.timeGame.count = this.timeGame.total;
-
-        // 游戏初始 碎片ui不显示
-        this.uiTopSuipian.opacity = 0;
-        NativeCall.logEventOne(ConfigDot.dot_levelStart);
-        NativeCall.logEventOne(ConfigDot.dot_levelStart_one);
-    }
-
     /** 加载关卡数据 */
     loadBg() {
+        let level = DataManager.data.boxData.level;
         // 加载背景
-        let bgId = Math.floor((this.objData.level - 1) / 5 % 4) + 1;
+        let bgId = Math.floor((level - 1) / 5 % 4) + 1;
         let pathBg = CConst.pathGameBg + bgId;
         kit.Resources.loadRes(CConst.bundleCommon, pathBg, cc.SpriteFrame, (err: any, assets: cc.SpriteFrame) => {
             if (err) {
@@ -220,6 +208,29 @@ export default class GameBox extends cc.Component {
         }
     }
 
+    /** 初始化数据 */
+    initData() {
+        /** 游戏用数据 */
+        this.objData = {
+            numSuipian: 0,
+            stepCount: 0,
+            passTime: new Date().getTime(),
+            isFinish: false,
+        };
+        // 屏幕系数
+        this.mainScale = 1;// 箱子父节点缩放比例
+        this.mainLayer = 5;// 箱子父节点实际显示的层数
+        this.mainLeftX = 0;// 箱子最左边
+        this.mainRightX = 0;// 箱子最后边
+        // 物品计数
+        this.goodsCount = 0;
+        this.goodsTotal = this.levelParam.item.length;
+        // 倒计时开始
+        this.timeGame.total = this.levelParam.levelTime || this.defaultTime;
+        this.timeGame.cur = this.timeGame.init;
+        this.timeGame.count = this.timeGame.total;
+    }
+
     /** 重新组合关卡数据 */
     initBox(isRestart = false) {
         // 重构物品配置信息
@@ -234,10 +245,10 @@ export default class GameBox extends cc.Component {
         this.objGame = {};
         for (let index = 0, length = this.levelParam.map.length; index < length; index++) {
             let obj = this.levelParam.map[index];
-            let w = Number(obj.w);
-            let h = Number(obj.h);
-            let x = Number(obj.x);
-            let y = Number(obj.y) - h * 0.5;
+            let x = Math.floor(Number(obj.x));
+            let y = Math.floor(Number(obj.y));
+            let w = Math.floor(Number(obj.w));
+            let h = Math.floor(Number(obj.h));
             if (topY < y) {
                 topY = y;
                 topH = h;
@@ -253,7 +264,7 @@ export default class GameBox extends cc.Component {
                 this.mainRightX = x + w * 0.5;
             }
             let boxParam: BoxParam = {
-                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {},
+                index: index, name: 'box_' + index, x: x, y: y, w: w, h: h, goods: {}, 
                 isMove: false, isFrame: isFrame, boxType: Number(obj.id),
             };
             this.objGame[index] = boxParam;
@@ -269,21 +280,19 @@ export default class GameBox extends cc.Component {
         let goldTotal = Math.floor(Math.random() * (goldMax + 1 - goldMin) + goldMin);// 有金币的物品数量
 
         /** 已解锁的物品, 重新开始时，从物品类型会有变化 */
-        let goodUnlock: { 
-            1: [number], 2: [number], 3: [number], 4: [number], 5: [number], 6: [number] 
-        } = Common.clone(DataManager.data.boxData.goodUnlock);
+        let goodUnlock: { 1: [number], 2: [number], 3: [number], 4: [number] } = Common.clone(DataManager.data.boxData.goodUnlock);
         let objGood = {};
         let resetKey = (key) => {
             if (!objGood[key]) {
                 let first = Math.floor(key * 0.001);
                 let unlocks: [number] = goodUnlock[first];
-                if (unlocks && unlocks.length > 1) {
+                if (unlocks.length > 1) {
                     let mid = Math.floor(unlocks.length * 0.5);
                     let index = Math.random() * (unlocks.length - mid) + mid;
                     let goodKey = goodUnlock[first].splice(index, 1)[0];
                     objGood[key] = goodKey;
                 }
-                else if (unlocks && unlocks.length == 1) {
+                else if (unlocks.length == 1) {
                     let index = 0;
                     let goodKey = goodUnlock[first].splice(index, 1)[0];
                     objGood[key] = goodKey;
@@ -308,13 +317,9 @@ export default class GameBox extends cc.Component {
             let h = cfg.h;
             let keyBox = Number(obj.p);
             let dataBox: BoxParam = this.objGame[keyBox];
-            let x = obj.x - dataBox.x
-            let y = obj.y - h * 0.5 - dataBox.y + 15;
-            let first = Math.floor(keyGood * 0.001);
-            if (first > 4) {
-                y = obj.y - h * 0.5 - dataBox.y;
-            }
-            else if (dataBox.isFrame) {
+            let x = obj.x - this.levelParam.map[keyBox].x;
+            let y = obj.y - this.levelParam.map[keyBox].y + 15;
+            if (dataBox.isFrame) {
                 y = 15;
             }
             // 关卡内有金币  物品可以有金币  物品空间高度上间隔两个箱子以上的距离  有金币的物品数量还有剩余
@@ -336,14 +341,7 @@ export default class GameBox extends cc.Component {
         for (let key in this.objGame) {
             if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
                 let boxParam: BoxParam = this.objGame[key];
-                // 删除空箱子
-                if (Object.keys(boxParam.goods).length < 1) {
-                    delete this.objGame[key];
-                }
-                // 移动箱子以剧中
-                else {
-                    boxParam.x -= xDis;
-                }
+                boxParam.x -= xDis;
             }
         }
 
@@ -467,34 +465,70 @@ export default class GameBox extends cc.Component {
 
     /** 初始化游戏ui */
     initUI() {
-        // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
-        this.objGameCopy = Common.clone(this.objGame);
-
-        // 排列
-        let arrGame = this.sortArrByXY(Object.values(this.objGame));
-        // 计算操作区缩放比例
-        this.setMainScale();
-        this.nodeMain.scale = this.mainScale;
-        // 最下层 y
-        this.boxBottomY = arrGame[0].y;
-
-        // 计算最多的一行箱子数量
-        let boxInLine = 1;
-        for (let index = 1; index < arrGame.length; index++) {
-            let boxCur: BoxParam = arrGame[index];
-            let boxLast: BoxParam = arrGame[index - 1];
-            if (boxCur.y == boxLast.y) {
-                boxInLine++;
-            }
-            else {
-                if (boxInLine > this.objData.boxInLine) {
-                    this.objData.boxInLine = boxInLine;
+        // 组织数据 dataBox
+        this.arrGame = [];
+        let arrBox = {};
+        let arrBoxFrame: BoxParam[] = [];
+        for (const key in this.objGame) {
+            if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
+                let boxParam: BoxParam = Common.clone(this.objGame[key]);
+                if (boxParam.isFrame) {
+                    arrBoxFrame.push(boxParam);
                 }
-                boxInLine = 1;
+                else {
+                    if (arrBox[boxParam.y]) {
+                        arrBox[boxParam.y].push(boxParam);
+                    }
+                    else {
+                        arrBox[boxParam.y] = [boxParam];
+                    }
+                }
             }
         }
 
-        // 刷新底部物品数据
+        let arrValue = Object.keys(arrBox);
+        arrValue.sort((a, b) => { return Number(a) - Number(b) });
+        for (let index = 0; index < arrValue.length; index++) {
+            this.arrGame.push(arrBox[arrValue[index]]);
+        }
+        // 删除空箱子
+        for (let i = this.arrGame.length - 1; i >= 0; i--) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = arrBoxParam.length - 1; j >= 0; j--) {
+                if (Object.keys(arrBoxParam[j].goods).length <= 0) {
+                    arrBoxParam.splice(j, 1);
+                }
+            }
+            if (arrBoxParam.length <= 0) {
+                this.arrGame.splice(i, 1);
+            }
+        }
+
+        // 特殊箱子添加到第一层
+        this.arrGame[0] = this.arrGame[0].concat(arrBoxFrame);
+        // 控制箱子y值
+        let disBoxY = this.arrGame[0][0].y;
+        for (let index = 0, length = this.arrGame.length; index < length; index++) {
+            let arrBoxParam = this.arrGame[index];
+            arrBoxParam.forEach((boxParam) => {
+                boxParam.y -= disBoxY;
+            });
+        }
+        // 保存箱子原始数据（用于返回上一步逻辑中，确认消失箱子的位置）
+        this.arrGameCopy = Common.clone(this.arrGame);
+
+        this.setMainScale();
+        this.nodeMain.scale = this.mainScale;
+
+        // 箱子层级 y
+        this.arrBoxY = [];
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let boxArr = this.arrGame[i];
+            let boxOne = boxArr[0];
+            this.arrBoxY.push({ y: boxOne.y, h: boxOne.h });
+        }
+
+        // 底部物品位置
         this.bottomParamArr = [];
         this.bottomPosArr = [];
         let arrGoodPos = Common.getArrByName(this.uiBottom.getChildByName('pos'), 'pos');
@@ -516,9 +550,8 @@ export default class GameBox extends cc.Component {
 
     /** 初始化游戏关卡 */
     initLevel() {
-        for (const key in this.objGame) {
-            if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
-                const boxParam: BoxParam = this.objGame[key];
+        this.arrGame.forEach((arrBoxParam) => {
+            arrBoxParam.forEach((boxParam) => {
                 let box = this.addBox(boxParam);
                 for (const key in boxParam.goods) {
                     if (!Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
@@ -527,15 +560,18 @@ export default class GameBox extends cc.Component {
                     let goodParam: GoodParam = boxParam.goods[key];
                     this.addGood(box, goodParam);
                 }
-                box.getComponent(ItemBox).sortGood(true);
-            }
-        }
+                if (boxParam.isFrame) {
+                    box.getComponent(ItemBox).sortGood(true);
+                }
+            });
+        });
     }
 
     /** 设置关卡等级 */
     setUILevel() {
+        let level = DataManager.data.boxData.level;
         let label = this.uiTopLevel.getChildByName('label');
-        label.getComponent(cc.Label).string = 'Lv.' + this.objData.level;
+        label.getComponent(cc.Label).string = 'Lv.' + level;
     }
 
     /** 设置碎片数量 */
@@ -673,48 +709,97 @@ export default class GameBox extends cc.Component {
         if (!this.speedBox.isMove) {
             return;
         }
-        this.speedBox.speedCur += this.speedBox.speedDis;
         if (this.speedBox.speedCur > this.speedBox.speedMax) {
             this.speedBox.speedCur = this.speedBox.speedMax
         }
+        else {
+            this.speedBox.speedCur += this.speedBox.speedDis;
+        }
+
+        /** 获取矩形 */
+        let getRect = (boxParam: BoxParam) => {
+            return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
+        };
+
+        // 碰撞检测
+        let funcCollider = (rectA: cc.Rect, arrB: BoxParam[]) => {
+            let isCollider = false;
+            for (let index = 0, length = arrB.length; index < length; index++) {
+                let boxParamB = arrB[index];
+                if (boxParamB.isFrame) {
+                    continue;
+                }
+                if (boxParamB.isMove) {
+                    continue;
+                }
+                let rectB = getRect(boxParamB);
+                if (rectA.intersects(rectB)) {
+                    isCollider = true;
+                    break;
+                }
+            }
+            return isCollider;
+        };
 
         let isContinueMove = false;
-        let arrGame = this.sortArrByXY(Object.values(this.objGame));
-        for (let index = 0, length = arrGame.length; index < length; index++) {
-            // 箱子 单个
-            let boxParam = arrGame[index];
-            if (boxParam.isFrame) {
-                continue;
+        // 箱子 多层
+        for (let i = 0; i < this.arrGame.length; i++) {
+            // 箱子 单层
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0; j < arrBoxParam.length; j++) {
+                // 箱子 单个
+                let boxParam = arrBoxParam[j];
+                if (boxParam.isFrame) {
+                    continue;
+                }
+                if (!boxParam.isMove) {
+                    continue;
+                }
+                let box = this.nodeMain.getChildByName(boxParam.name);
+                let scriptBox = box.getComponent(ItemBox);
+                let yA = boxParam.y - this.speedBox.speedCur;
+                if (i == 0) {
+                    if (yA < this.arrBoxY[0].y) {
+                        boxParam.isMove = false;
+                        boxParam.y = this.arrBoxY[0].y;
+                        scriptBox.refreshParams(boxParam.y);
+                    }
+                    else {
+                        isContinueMove = true;
+                        boxParam.y = yA;
+                        scriptBox.refreshParams(boxParam.y);
+                    }
+                }
+                else {
+                    let rectA = getRect(boxParam);
+                    rectA.y = yA;
+                    let isCollider = funcCollider(rectA, this.arrGame[i - 1]);
+                    if (isCollider) {
+                        boxParam.isMove = false;
+                        boxParam.y = this.arrBoxY[i].y;
+                        scriptBox.refreshParams(boxParam.y);
+                    }
+                    else {
+                        isContinueMove = true;
+                        boxParam.y = yA;
+                        scriptBox.refreshParams(boxParam.y);
+                        let boxGoal = this.arrBoxY[i - 1];// 下层的位置
+                        // 进入下层范围，数据转移到下层
+                        if (boxParam.y < boxGoal.y + boxGoal.h * 0.5) {
+                            arrBoxParam.splice(j, 1);
+                            this.arrGame[i - 1].push(boxParam);
+                            j--;
+                        }
+                    }
+                }
             }
-            if (!boxParam.isMove) {
-                continue;
+            // 删除空箱子
+            if (arrBoxParam.length < 1) {
+                this.arrGame.splice(i, 1);
+                i--;
             }
-            // 最下层
-            let box = this.nodeMain.getChildByName(boxParam.name);
-            let scriptBox = box.getComponent(ItemBox);
-            let yA = boxParam.y - this.speedBox.speedCur;
-            if (yA <= this.boxBottomY) {
-                boxParam.isMove = false;
-                boxParam.y = this.boxBottomY;
-                scriptBox.refreshParams(boxParam.y);
-                continue;
-            }
-            // 有碰撞（停止）
-            let rectA = this.getBoxRect(boxParam);
-            rectA.y = yA;
-            let start = index - this.objData.boxInLine * 2;
-            let arrBottom = arrGame.slice(start < 0 ? 0 : start, index);
-            let objCollider = this.checkBoxCollider(rectA, arrBottom);
-            if (objCollider.isCollider) {
-                boxParam.isMove = false;
-                boxParam.y = objCollider.colliderY;
-                scriptBox.refreshParams(boxParam.y);
-                continue;
-            }
-            isContinueMove = true;
-            boxParam.y = yA;
-            scriptBox.refreshParams(boxParam.y);
         }
+
         // 是否继续移动
         if (!isContinueMove) {
             this.setMoveBox(false);
@@ -807,46 +892,21 @@ export default class GameBox extends cc.Component {
         }
     }
 
-    /** 获取矩形 */
-    getBoxRect(boxParam: BoxParam) {
-        let disW = 1;// 宽度 左右减1
-        return cc.rect(boxParam.x - boxParam.w * 0.5 + disW, boxParam.y, boxParam.w - disW * 2, boxParam.h);
-    };
-
-    // 检测是否有碰撞
-    checkBoxCollider(rectA: cc.Rect, arrParam: BoxParam[]) {
-        let isCollider = false;
-        let colliderY = 0;
-        for (let index = 0, length = arrParam.length; index < length; index++) {
-            let boxParamB = arrParam[index];
-            if (boxParamB.isFrame) {
-                continue;
-            }
-            if (boxParamB.isMove) {
-                continue;
-            }
-            let rectB = this.getBoxRect(boxParamB);
-            if (rectA.intersects(rectB)) {
-                isCollider = true;
-                colliderY = rectB.y + rectB.height;
-                break;
-            }
-        }
-        return { isCollider: isCollider, colliderY: colliderY };
-    };
-
     /** 开始移动 箱子 */
     setMoveBox(isMove) {
         if (isMove) {
-            for (const key in this.objGame) {
-                if (Object.prototype.hasOwnProperty.call(this.objGame, key)) {
-                    const element: BoxParam = this.objGame[key];
-                    element.isMove = true
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    boxParam.isMove = true;
                 }
             }
             this.speedBox.speedCur = this.speedBox.speedInit;
+            this.speedBox.isMove = isMove;
         }
-        this.speedBox.isMove = isMove;
+        else {
+            this.speedBox.isMove = isMove;
+        }
     };
 
     /** 开始移动 物品 */
@@ -867,56 +927,26 @@ export default class GameBox extends cc.Component {
 
     /** 物品上的金色破碎 */
     setGoldPosui() {
-        for (let key in this.objGame) {
-            if (!Object.prototype.hasOwnProperty.call(this.objGame, key)) {
+        let layer = Math.floor(this.mainLayer);
+        for (let i = 0, length = this.arrGame.length; i < length; i++) {
+            if (i > layer - 1) {
                 continue;
             }
-            let boxParam = this.objGame[key];
-            if (boxParam.y > this.mainLayer * 181) {
-                continue;
-            }
-            // 特殊箱子 只检测 index 编号最小的
-            if (boxParam.isFrame) {
-                let goodParams = Object.values(boxParam.goods);
-                // 空箱子
-                if (goodParams.length <= 0) {
-                    continue;
-                }
-                let arrGoodParam: GoodParam[] = Common.getArrByFunc(goodParams, (a: GoodParam, b: GoodParam) => {
-                    return a.index - b.index;
-                });
-                // 物品上无金色遮罩
-                let goodParam = arrGoodParam[0];
-                if (!goodParam.gold.isGold) {
-                    continue;
-                }
-                // 物品节点不存在
-                let box = this.nodeMain.getChildByName(boxParam.name);
-                if (!box) {
-                    continue;
-                }
-                let scriptBox = box.getComponent(ItemBox);
-                let good = scriptBox.nodeMain.getChildByName(goodParam.name);
-                if (!good) {
-                    continue;
-                }
-                // 遮罩破碎
-                let scriptGood = good.getComponent(ItemGood);
-                scriptGood.refreshGold();
-                // 同步数据
-                let key = goodParam.index;
-                scriptBox.param.goods[key] = Common.clone(scriptGood.param);
-                boxParam = Common.clone(scriptBox.param);
-            }
-            // 普通箱子
-            else {
-                for (let key in boxParam.goods) {
-                    // 属性不存在
-                    if (!Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, length = arrBoxParam.length; j < length; j++) {
+                let boxParam = arrBoxParam[j];
+                // 特殊箱子 只检测 index 编号最小的
+                if (boxParam.isFrame) {
+                    let goodParams = Object.values(boxParam.goods);
+                    // 空箱子
+                    if (goodParams.length <= 0) {
                         continue;
                     }
+                    let arrGoodParam: GoodParam[] = Common.getArrByFunc(goodParams, (a: GoodParam, b: GoodParam) => {
+                        return a.index - b.index;
+                    });
                     // 物品上无金色遮罩
-                    let goodParam: GoodParam = boxParam.goods[key];
+                    let goodParam = arrGoodParam[0];
                     if (!goodParam.gold.isGold) {
                         continue;
                     }
@@ -934,8 +964,39 @@ export default class GameBox extends cc.Component {
                     let scriptGood = good.getComponent(ItemGood);
                     scriptGood.refreshGold();
                     // 同步数据
+                    let key = goodParam.index;
                     scriptBox.param.goods[key] = Common.clone(scriptGood.param);
                     boxParam = Common.clone(scriptBox.param);
+                }
+                // 普通箱子
+                else {
+                    for (const key in boxParam.goods) {
+                        // 属性不存在
+                        if (!Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            continue;
+                        }
+                        // 物品上无金色遮罩
+                        let goodParam: GoodParam = boxParam.goods[key];
+                        if (!goodParam.gold.isGold) {
+                            continue;
+                        }
+                        // 物品节点不存在
+                        let box = this.nodeMain.getChildByName(boxParam.name);
+                        if (!box) {
+                            continue;
+                        }
+                        let scriptBox = box.getComponent(ItemBox);
+                        let good = scriptBox.nodeMain.getChildByName(goodParam.name);
+                        if (!good) {
+                            continue;
+                        }
+                        // 遮罩破碎
+                        let scriptGood = good.getComponent(ItemGood);
+                        scriptGood.refreshGold();
+                        // 同步数据
+                        scriptBox.param.goods[key] = Common.clone(scriptGood.param);
+                        boxParam = Common.clone(scriptBox.param);
+                    }
                 }
             }
         }
@@ -943,8 +1004,9 @@ export default class GameBox extends cc.Component {
 
     /** 设置真实缩放: 先计算适配宽时，能够显示的层级 */
     setMainScale() {
+        let boxParam = this.arrGame[0][0];
         let layer = (this.levelParam.layer || this.defaultLayer);
-        let hBox = this.boxH * layer;
+        let hBox = boxParam.h * layer;
         let hMain = cc.winSize.height * 0.5 - this.nodeMain.y - this.uiMask.height;
         let scaleByH = hMain / hBox;
 
@@ -960,27 +1022,12 @@ export default class GameBox extends cc.Component {
         else {
             this.mainScale = scaleByH;
         }
-        this.mainLayer = hMain / (this.boxH * this.mainScale);
+        this.mainLayer = Math.floor(10 * hMain / (boxParam.h * this.mainScale)) * 0.1;
     };
 
     /** 检测特殊箱子 */
     getBoxIsFrame(h: number) {
         return h < 100;
-    };
-
-    /** 重新排列箱子数据 */
-    sortArrByXY(boxParams: BoxParam[]): BoxParam[] {
-        boxParams.sort((a: BoxParam, b: BoxParam) => {
-            let aTop = a.y + a.h;
-            let bTop = b.y + b.h;
-            if (aTop == bTop) {
-                return a.x - b.x;
-            }
-            else {
-                return aTop - bTop;
-            }
-        });
-        return boxParams;
     };
 
     /** 点击事件 */
@@ -1017,19 +1064,26 @@ export default class GameBox extends cc.Component {
 
     eventTouchAfter(arrGoodParam: GoodParam[]) {
         kit.Audio.playEffect(CConst.sound_clickGood);
+
+        let removeBoxNum = 0;
         for (let index = 0, length = arrGoodParam.length; index < length; index++) {
-            this.refreshOperationArea(arrGoodParam[index])
+            if (this.refreshOperationArea(arrGoodParam[index])) {
+                removeBoxNum++;
+            }
         }
         this.setMoveGood(true);
-        this.setMoveBox(true);
         this.setGoldPosui();
+        if (removeBoxNum > 0) {
+            // 开始移动 箱子
+            this.setMoveBox(true);
+        }
     }
 
     /** 经验事件效果反馈 */
     effectExpShow(point: cc.Vec3) {
         let main = this.effectExp.getChildByName('main');
         let itemDragon = this.effectExp.getChildByName('dragon');
-        let itemExp = DataManager.poolGet(itemDragon, DataManager.objPool.effectExp);
+        let itemExp = DataManager.poolGet(itemDragon, this.objPool.effectExp);
         itemExp.parent = main;
         itemExp.scale = 0.6;
         itemExp.active = true;
@@ -1050,7 +1104,7 @@ export default class GameBox extends cc.Component {
         cc.tween(itemExp).delay(tDelay).call(() => {
             itemExp.opacity = 255;
         }).bezierTo(time1 + time2, obj.p1, obj.p2, obj.pTo).call(() => {
-            DataManager.poolPut(itemExp, DataManager.objPool.effectExp);
+            DataManager.poolPut(itemExp, this.objPool.effectExp);
         }).start();
     }
 
@@ -1059,28 +1113,30 @@ export default class GameBox extends cc.Component {
         var pos = event.getLocation();
         let main = this.effectTouch.getChildByName('main');
         let itemDragon = this.effectTouch.getChildByName('dragon');
-        let itemTouch = DataManager.poolGet(itemDragon, DataManager.objPool.effectTouch);
+        let itemTouch = DataManager.poolGet(itemDragon, this.objPool.effectTouch);
         itemTouch.parent = main;
         itemTouch.active = true;
         itemTouch.scale = 0.5;
         itemTouch.position = main.convertToNodeSpaceAR(cc.v3(pos.x, pos.y));
         let dragon = itemTouch.getComponent(dragonBones.ArmatureDisplay)
         dragon.once(dragonBones.EventObject.COMPLETE, () => {
-            DataManager.poolPut(itemTouch, DataManager.objPool.effectTouch);
+            DataManager.poolPut(itemTouch, this.objPool.effectTouch);
         })
         dragon.timeScale = 1.3;
         dragon.playAnimation('yundong', 1);
+
+        // kit.Audio.playShake(20, 20);
     }
 
     /** 刷新操作区 */
     refreshOperationArea(goodParam: GoodParam) {
-        // 箱子
+        // 刷新数据
+        let isRemoveBox = false;
+        let isDelete = false;
         let box = this.nodeMain.getChildByName(goodParam.box.name);
         let scriptBox = box.getComponent(ItemBox);
-        // 物品
         let good = scriptBox.nodeMain.getChildByName(goodParam.name);
         let scriptGood = good.getComponent(ItemGood);
-
         let pStart = Common.getLocalPos(good.parent, good.position, this.uiBottomMain);
         good.parent = this.uiBottomMain;
         good.scale = this.mainScale;
@@ -1088,9 +1144,53 @@ export default class GameBox extends cc.Component {
         scriptGood.refreshParams(pStart);
         this.playAniSuipian(good);
         this.goodParamsInsert(scriptGood.param);
-        // 删除物品数据
-        this.removeGoodParam(goodParam);
-        scriptBox.sortGood();
+
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                for (const key in boxParam.goods) {
+                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                        // 删除物品参数
+                        let goodParamOne: GoodParam = boxParam.goods[key];
+                        if (goodParamOne.name == goodParam.name) {
+                            isDelete = true;
+                            delete boxParam.goods[key];
+                            scriptBox.param = boxParam;
+                            if (scriptBox.param.isFrame) {
+                                scriptBox.sortGood();
+                            }
+                            break;
+                        }
+                    }
+                }
+                // 特殊箱子
+                if (boxParam.isFrame) {
+                    if (isDelete) {
+                        break;
+                    }
+                }
+                // 普通箱子 箱子内无物品 删除箱子
+                else {
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.objPool.box);
+                        isRemoveBox = true;
+                    }
+                    if (isDelete) {
+                        break;
+                    }
+                }
+            }
+            // 当前层无箱子 删除层数据
+            if (arrBoxParam.length < 1) {
+                this.arrGame.splice(i, 1);
+            }
+            if (isDelete) {
+                break;
+            }
+        }
+        return isRemoveBox;
     }
 
     /** 物品参数-数量 */
@@ -1141,7 +1241,7 @@ export default class GameBox extends cc.Component {
         for (let index = 0, length = arrParam.length; index < length; index++) {
             let param = arrParam[index];
             let good = this.uiBottomMain.getChildByName(param.name);
-            DataManager.poolPut(good, DataManager.objPool.good);
+            DataManager.poolPut(good, this.objPool.good);
         }
         this.bottomParamArr.splice(arrIndex, 1);
         this.goodsCount += arrParam.length;
@@ -1171,13 +1271,13 @@ export default class GameBox extends cc.Component {
             let boxMain = box.getComponent(ItemBox).nodeMain;
             for (let j = boxMain.childrenCount - 1; j >= 0; j--) {
                 let good = boxMain.children[j];
-                DataManager.poolPut(good, DataManager.objPool.good);
+                DataManager.poolPut(good, this.objPool.good);
             }
-            DataManager.poolPut(box, DataManager.objPool.box);
+            DataManager.poolPut(box, this.objPool.box);
         }
         for (let index = this.uiBottomMain.childrenCount - 1; index >= 0; index--) {
             let good = this.uiBottomMain.children[index];
-            DataManager.poolPut(good, DataManager.objPool.good);
+            DataManager.poolPut(good, this.objPool.good);
         }
         this.timeProp.iceCount = 0;
         this.setIceHide();
@@ -1214,7 +1314,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_ice, String(this.objData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_ice, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1247,7 +1347,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_tip, String(this.objData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_tip, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1274,18 +1374,20 @@ export default class GameBox extends cc.Component {
             }
         }
         else {
-            for (const keyA in this.objGame) {
-                if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                    continue;
-                }
-                const boxParam: BoxParam = this.objGame[keyA];
-                for (const keyB in boxParam.goods) {
-                    if (!Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                        continue;
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                let arrBoxParam = this.arrGame[i];
+                for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                    let boxParam = arrBoxParam[j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (arrPropElse.indexOf(goodParam.keyGood) < 0) {
+                                keyGood = goodParam.keyGood;
+                                break;
+                            }
+                        }
                     }
-                    const goodParam: GoodParam = boxParam.goods[keyB];
-                    if (arrPropElse.indexOf(goodParam.keyGood) < 0) {
-                        keyGood = goodParam.keyGood;
+                    if (keyGood != 0) {
                         break;
                     }
                 }
@@ -1301,22 +1403,24 @@ export default class GameBox extends cc.Component {
 
         let isEnough: boolean = false;
         let arrChose: GoodParam[] = [];
-        for (const keyA in this.objGame) {
-            if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                continue;
-            }
-            const boxParam: BoxParam = this.objGame[keyA];
-            for (const keyB in boxParam.goods) {
-                if (!Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                    continue;
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                let goodKeys = Object.keys(boxParam.goods);
+                goodKeys.sort((a: string, b: string) => { return boxParam.goods[a].index - boxParam.goods[b].index; });
+                for (let k = 0, lenC = goodKeys.length; k < lenC; k++) {
+                    let value = goodKeys[k];
+                    let goodParam: GoodParam = boxParam.goods[value];
+                    if (goodParam.keyGood == keyGood) {
+                        arrChose.push(goodParam);
+                        if (arrChose.length > needNum - 1) {
+                            isEnough = true;
+                            break;
+                        }
+                    }
                 }
-                const goodParam: GoodParam = boxParam.goods[keyB];
-                if (goodParam.keyGood != keyGood) {
-                    continue;
-                }
-                arrChose.push(goodParam);
-                if (arrChose.length > needNum - 1) {
-                    isEnough = true;
+                if (isEnough) {
                     break;
                 }
             }
@@ -1324,6 +1428,7 @@ export default class GameBox extends cc.Component {
                 break;
             }
         }
+
         this.eventTouchAfter(arrChose);
     }
 
@@ -1354,7 +1459,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_back, String(this.objData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_back, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1384,9 +1489,11 @@ export default class GameBox extends cc.Component {
                 good.parent = scriptBox.nodeMain;
                 good.scale = 1.0;
                 scriptBox.param.goods[goodParam.index] = goodParam;
-                scriptBox.sortGood();
+                if (scriptBox.param.isFrame) {
+                    scriptBox.sortGood();
+                }
                 good.getComponent(ItemGood).resetParams(goodParam);
-                this.objGame[scriptBox.param.index] = Common.clone(scriptBox.param);
+                this.refreshBoxParam(scriptBox.param);
 
                 this.isLock = false;
             }).start();
@@ -1401,65 +1508,135 @@ export default class GameBox extends cc.Component {
              * 5.根据数据移动现有箱子，底部物品返回到箱子中
              */
 
-            // 拿到原箱子
-            let boxParamNew: BoxParam = Common.clone(this.objGameCopy[goodParam.box.key]);
-            boxParamNew.goods = {};
-            this.addBox(boxParamNew);
-            this.objGame[boxParamNew.index] = boxParamNew;
-            for (const key in this.objGame) {
-                if (!Object.prototype.hasOwnProperty.call(this.objGame, key)) {
-                    continue;
+            // 获取矩形
+            let getRect = (boxParam: BoxParam) => {
+                return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
+            };
+            // 获取箱子列数
+            let getBoxLayer = (boxParamCur: BoxParam, layerCur: number) => {
+                let layer = 0;
+                let rectA = getRect(boxParamCur);
+                for (let i = layerCur - 1; i >= 0; i--) {
+                    let isInter = false;
+                    let arrLayer = this.arrGame[i];
+                    for (let j = 0; j < arrLayer.length; j++) {
+                        let boxParam = arrLayer[j];
+                        let rectB = getRect(boxParam);
+                        rectA.y = rectB.y + boxParamCur.h * 0.5;
+                        isInter = cc.Intersection.rectRect(rectA, rectB);
+                        if (isInter) {
+                            break;
+                        }
+                    }
+                    if (isInter) {
+                        layer = i + 1;
+                        break;
+                    }
                 }
-                const boxParam: BoxParam = this.objGame[key];
-                boxParam.y = this.objGameCopy[boxParam.index].y;
+                return layer;
+            };
+
+            // 拿到原箱子
+            let boxParamCur: BoxParam = Common.clone(this.objGame[goodParam.box.key]);
+            // 组合剩余箱子
+            let names = [boxParamCur.name];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    names.push(this.arrGame[i][j].name);
+                }
+            }
+            // 去除以消除箱子
+            let dataBox: BoxParam[][] = Common.clone(this.arrGameCopy);
+            for (let i = dataBox.length - 1; i >= 0; i--) {
+                let arrBoxParam = dataBox[i];
+                for (let j = arrBoxParam.length - 1; j >= 0; j--) {
+                    let boxParamB = arrBoxParam[j];
+                    if (names.indexOf(boxParamB.name) < 0) {
+                        arrBoxParam.splice(j, 1);
+                        if (arrBoxParam.length < 1) {
+                            dataBox.splice(i, 1);
+                        }
+                    }
+                }
             }
 
+            // 添加箱子 刚出现时高度为0
+            boxParamCur.goods = {};
+            this.addBox(boxParamCur);
+            let objBox = {};
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0; j < this.arrGame[i].length; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    objBox[boxParam.index] = Common.clone(boxParam);
+                }
+            }
             // 重置箱子位置
-            let arrGame = this.sortArrByXY(Object.values(this.objGame));
-            for (let index = 0, length = arrGame.length; index < length; index++) {
-                let boxParam = arrGame[index];
-                // 框不移动
-                if (boxParam.isFrame) {
-                    continue;
-                }
-                if (index == 0) {
-                    boxParam.y = 0;
-                }
-                else {
-                    boxParam.y = this.getBoxPositionY(boxParam, this.sortArrByXY(arrGame.slice(0, index)));
-                }
-                let box = this.nodeMain.getChildByName(boxParam.name);
-                let y1 = box.y;
-                let y2 = boxParam.y;
-                let timeY = 0.15;
-                if (boxParam.index == boxParamNew.index) {
-                    box.y = y2;
-                    // 箱子高度变化+物品移动
-                    let boxH = boxParam.h;
-                    let scriptBox = box.getComponent(ItemBox);
-                    scriptBox.param.y = boxParam.y;
-                    scriptBox.itemIcon.height = 0;
-                    cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
-                        let goodP1 = good.position;
-                        let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
-                        let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
-                        // 物品移动
-                        cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
-                            scriptBox.param.goods[goodParam.index] = goodParam;
-                            good.parent = scriptBox.nodeMain;
-                            good.scale = 1.0;
-                            good.getComponent(ItemGood).resetParams(goodParam);
-                            this.objGame[scriptBox.param.index] = Common.clone(scriptBox.param);
+            this.arrGame = Common.clone(dataBox);// 赋值箱子
+            for (let i = 0; i < this.arrGame.length; i++) {
+                let arrLayer = this.arrGame[i];
+                for (let j = 0; j < arrLayer.length; j++) {
+                    let boxParam = arrLayer[j];
+                    let isBox = boxParam.name == boxParamCur.name;
+                    // 物品还原
+                    if (isBox) {
+                        boxParam.goods = {};
+                    }
+                    else {
+                        boxParam.goods = objBox[boxParam.index] ? objBox[boxParam.index].goods : {};
+                    }
+                    // 框不移动
+                    if (boxParam.isFrame) {
+                        continue;
+                    }
+                    // 箱子层级
+                    let layer = getBoxLayer(boxParam, i);
+                    boxParam.y = this.arrBoxY[layer].y;
+                    let box = this.nodeMain.getChildByName(boxParam.name);
+                    let boxP1 = box.position;
+                    let boxP2 = cc.v3(box.x, boxParam.y);
+                    let timeY = Common.getMoveTime(cc.v3(0, 0), cc.v3(0, boxParamCur.h), this.baseTime, this.baseDis);
+                    if (isBox) {
+                        box.position = boxP2;
+                        // 箱子高度变化+物品移动
+                        let boxH = boxParamCur.h;
+                        let scriptBox = box.getComponent(ItemBox);
+                        scriptBox.param.y = boxParam.y;
+                        scriptBox.itemIcon.height = 0;
+                        cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
+                            let goodP1 = good.position;
+                            let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
+                            let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
+                            // 物品移动
+                            cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
+                                scriptBox.param.goods[goodParam.index] = goodParam;
+                                good.parent = scriptBox.nodeMain;
+                                good.scale = 1.0;
+                                good.getComponent(ItemGood).resetParams(goodParam);
+                                this.refreshBoxParam(scriptBox.param);
 
-                            this.isLock = false;
+                                this.isLock = false;
+                            }).start();
                         }).start();
-                    }).start();
+                    }
+                    else {
+                        box.position = boxP1;
+                        cc.tween(box).to(timeY, { position: boxP2 }).call(() => {
+                            box.getComponent(ItemBox).refreshParams(boxParam.y);
+                        }).start();
+                    }
+                    if (layer == i) {
+                        continue;
+                    }
+                    // 转移箱子数据
+                    arrLayer.splice(j, 1);
+                    this.arrGame[layer].push(boxParam);
+                    j--;
                 }
-                else {
-                    box.y = y1;
-                    cc.tween(box).to(timeY, { y: y2 }).call(() => {
-                        box.getComponent(ItemBox).refreshParams(boxParam.y);
-                    }).start();
+            }
+            for (let i = this.arrGame.length - 1; i >= 0; i--) {
+                let arrLayer = this.arrGame[i];
+                if (arrLayer.length <= 0) {
+                    this.arrGame.splice(i, 1);
                 }
             }
         }
@@ -1485,7 +1662,7 @@ export default class GameBox extends cc.Component {
             }
             else {
                 DataManager.data.numCoin -= need;
-                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_refresh, String(this.objData.level));
+                NativeCall.logEventTwo(ConfigDot.dot_buy_succ_refresh, String(DataManager.data.boxData.level));
             }
         }
         DataManager.setData();
@@ -1496,41 +1673,44 @@ export default class GameBox extends cc.Component {
         // 道具逻辑
         this.isLock = true;
         /*****************************************************组合物品数组*************************************************************/
-        let objParamGood = {};
-        for (const keyA in this.objGame) {
-            if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                continue;
+        let arrGoodParam: GoodParam[][] = [];
+        let composeArr = (boxParam: BoxParam) => {
+            for (const key in boxParam.goods) {
+                if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                    let goodParam: GoodParam = boxParam.goods[key];
+                    let char = String(goodParam.keyGood);
+                    let index = Number(char.substring(0, 1)) - 1;
+                    if (arrGoodParam[index]) {
+                        arrGoodParam[index].push(goodParam);
+                    }
+                    else {
+                        arrGoodParam[index] = [goodParam];
+                    }
+                }
             }
-            const boxParam: BoxParam = this.objGame[keyA];
-            for (const keyB in boxParam.goods) {
-                if (!Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                    continue;
-                }
-                const goodParam: GoodParam = boxParam.goods[keyB];
-                let key = Math.floor(Number(goodParam.keyGood) * 0.001);
-                if (objParamGood[key]) {
-                    objParamGood[key].push(goodParam);
-                }
-                else {
-                    objParamGood[key] = [goodParam];
+        };
+        // 组合物品数组 操作区
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                composeArr(this.arrGame[i][j]);
+            }
+        }
+
+        /*****************************************************赋值物品数组 并 重新排序*************************************************************/
+        let arrCopy: GoodParam[][] = Common.clone(arrGoodParam);
+        for (let index = 0, length = arrCopy.length; index < length; index++) {
+            let arrParam = arrCopy[index];
+            if (arrParam) {
+                let i = arrParam.length;
+                while (i) {
+                    let j = Math.floor(Math.random() * i--);
+                    let temp = arrParam[i];
+                    arrParam[i] = arrParam[j];
+                    arrParam[j] = temp;
                 }
             }
         }
-        let objParamCopy = Common.clone(objParamGood);
-        for (const key in objParamCopy) {
-            if (!Object.prototype.hasOwnProperty.call(objParamCopy, key)) {
-                continue;
-            }
-            let arrParams: GoodParam[] = objParamCopy[key];
-            let i = arrParams.length - 1;
-            while (i > 1) {
-                let j = Math.floor(Math.random() * i);
-                let temp = arrParams[i];
-                arrParams[i] = arrParams[j];
-                arrParams[j] = temp;
-                i--;
-            }
-        }
+
         /**********************************************重新排序后的物品数组 赋值给 物品数组, 并执行更新*************************************************/
         let voluationArr = (arrParamA: GoodParam[], arrParamB: GoodParam[]) => {
             for (let index = 0, length = arrParamA.length; index < length; index++) {
@@ -1542,21 +1722,18 @@ export default class GameBox extends cc.Component {
                 goodParamA.keyGood = goodParamB.keyGood;
                 goodParamA.gold = goodParamB.gold;
                 let box = this.nodeMain.getChildByName(goodParamA.box.name);
-                let scriptBox = box.getComponent(ItemBox);
-                let good = scriptBox.nodeMain.getChildByName(goodParamA.name);
+                let good = box.getComponent(ItemBox).nodeMain.getChildByName(goodParamA.name);
                 if (good) {
-                    let scriptGood = good.getComponent(ItemGood);
-                    scriptGood.refreshRes(goodParamA);
-                    scriptBox.param.goods[goodParamA.index] = goodParamA;
-                    this.objGame[scriptBox.param.index] = scriptBox.param;
+                    good.getComponent(ItemGood).refreshRes(goodParamA);
                 }
             }
         };
-        for (const keyA in objParamGood) {
-            if (!Object.prototype.hasOwnProperty.call(objParamGood, keyA)) {
-                continue;
+        for (let index = 0, length = arrGoodParam.length; index < length; index++) {
+            let arrParamA = arrGoodParam[index];
+            let arrParamB = arrCopy[index];
+            if (arrParamA && arrParamB) {
+                voluationArr(arrParamA, arrParamB);
             }
-            voluationArr( objParamGood[keyA], objParamCopy[keyA]);
         }
 
         /** 延时解锁 */
@@ -1566,9 +1743,6 @@ export default class GameBox extends cc.Component {
     /** 按钮事件 上一关 */
     eventBtnLevelBack() {
         // if (this.speedBox.isMove || this.speedGood.isMove) {
-        //     return;
-        // }
-        // if (this.objData.level < 2) {
         //     return;
         // }
         // DataManager.data.boxData.level--;
@@ -1598,10 +1772,9 @@ export default class GameBox extends cc.Component {
 
         kit.Audio.playEffect(CConst.sound_clickUI);
 
-        let goodParam = Common.clone(good.getComponent(ItemGood).param);
         let p1 = Common.getLocalPos(good.parent, good.position, this.node);
         let p2 = Common.getLocalPos(this.uiTopTime.parent, this.uiTopTime.position, this.node);
-        p2.y -= goodParam.h * 0.5 * this.mainScale;
+        p2.y -= good.getComponent(ItemGood).param.h * 0.5 * this.mainScale;
         let time = Common.getMoveTime(p1, p2, 1, 1500);
         let obj = {
             p1: cc.v2(p1.x, p1.y),
@@ -1611,12 +1784,36 @@ export default class GameBox extends cc.Component {
         good.parent = this.node;
         good.position = p1;
 
-        // 删除物品数据
-        this.removeGoodParam(goodParam);
+        // 删除物品节点 并 更新数据
+        let goodScript = good.getComponent(ItemGood);
+        let goodKey = goodScript.param.index;
+        let box = this.nodeMain.getChildByName(goodScript.param.box.name);
+        let boxScript = box.getComponent(ItemBox);
+        delete boxScript.param.goods[goodKey];
+        // 同步数据
+        let isFinish = false;
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                if (boxParam.index == boxScript.param.index) {
+                    isFinish = true;
+                    boxParam.goods = boxScript.param.goods;
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.objPool.box);
+                    }
+                    break;
+                }
+            }
+            if (isFinish) {
+                break;
+            }
+        }
 
         // ui移动
         cc.tween(good).bezierTo(time, obj.p1, obj.p2, obj.pTo).call(() => {
-            DataManager.poolPut(good, DataManager.objPool.good);
+            DataManager.poolPut(good, this.objPool.good);
             cc.tween(this.uiTopTime).to(0.1, { scale: 1.1 }).call(() => {
                 // 道具逻辑
                 this.timeGame.count += this.timeProp.addTotal;
@@ -1674,28 +1871,29 @@ export default class GameBox extends cc.Component {
                 let goodParam = arrParam[index];
                 let good = this.uiBottomMain.getChildByName(goodParam.name);
                 let bottomGood = removeBottomGood(good, magnetMain);
-                DataManager.poolPut(good, DataManager.objPool.good);
+                DataManager.poolPut(good, this.objPool.good);
                 arrGoods.push(bottomGood);
             }
             let enough = false;
             let midNum = needNum - bottomNum;
-            let arrSign: { keyA: string, keyB: string }[] = [];
-            for (const keyA in this.objGame) {
-                if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                    continue;
-                }
-                const boxParam: BoxParam = this.objGame[keyA];
-                for (const keyB in boxParam.goods) {
-                    if (!Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                        continue;
-                    }
-                    let goodParam: GoodParam = boxParam.goods[keyB];
-                    if (goodParam.keyGood == needKey) {
-                        arrSign.push({ keyA: keyA, keyB: keyB });
-                        enough = arrSign.length >= midNum;
-                        if (enough) {
-                            break;
+            let arrSign: { i: number, j: number, key: string }[] = [];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= midNum;
+                                if (enough) {
+                                    break;
+                                }
+                            }
                         }
+                    }
+                    if (enough) {
+                        break;
                     }
                 }
                 if (enough) {
@@ -1703,34 +1901,35 @@ export default class GameBox extends cc.Component {
                 }
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
-                let midGood = this.removeMidParam(arrSign[index].keyA, arrSign[index].keyB, magnetMain);
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
                 arrGoods.push(midGood);
             }
         }
         else {
             let enough = false;
             let midNum = 3;
-            let arrSign: { keyA: string, keyB: string }[] = [];
+            let arrSign: { i: number, j: number, key: string }[] = [];
             let specialKey = [9001, 9002];
-            for (const keyA in this.objGame) {
-                if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                    continue;
-                }
-                const boxParam: BoxParam = this.objGame[keyA];
-                for (const keyB in boxParam.goods) {
-                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                        continue;
-                    }
-                    const goodParam: GoodParam = boxParam.goods[keyB];
-                    if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
-                        needKey = goodParam.keyGood;
-                    }
-                    if (goodParam.keyGood == needKey) {
-                        arrSign.push({ keyA: keyA, keyB: keyB });
-                        enough = arrSign.length >= midNum;
-                        if (enough) {
-                            break;
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
+                                needKey = goodParam.keyGood;
+                            }
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= midNum;
+                                if (enough) {
+                                    break;
+                                }
+                            }
                         }
+                    }
+                    if (enough) {
+                        break;
                     }
                 }
                 if (enough) {
@@ -1738,19 +1937,13 @@ export default class GameBox extends cc.Component {
                 }
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
-                let midGood = this.removeMidParam(arrSign[index].keyA, arrSign[index].keyB, magnetMain);
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
                 arrGoods.push(midGood);
             }
         }
 
-        // 移除物品
-        let scriptGood = good.getComponent(ItemGood);
-        let goodParam: GoodParam = Common.clone(scriptGood.param);
-        // 移除物品ui
-        good.removeFromParent();
-        // 移除物品数据
-        this.removeGoodParam(goodParam);
-
+        // 磁铁移动
+        this.removeMidGood(good);
         // 物品移动
         let effectExpMain = this.effectExp.getChildByName('main');
         arrGoods.forEach((good, index) => {
@@ -1842,26 +2035,27 @@ export default class GameBox extends cc.Component {
         let moveGroup = () => {
             let enough = false;
             let needKey = 0;
-            let arrSign: { keyA: string, keyB: string }[] = [];
-            for (const keyA in this.objGame) {
-                if (!Object.prototype.hasOwnProperty.call(this.objGame, keyA)) {
-                    continue;
-                }
-                const boxParam: BoxParam = this.objGame[keyA];
-                for (const keyB in boxParam.goods) {
-                    if (Object.prototype.hasOwnProperty.call(boxParam.goods, keyB)) {
-                        continue;
-                    }
-                    let goodParam: GoodParam = boxParam.goods[keyB];
-                    if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
-                        needKey = goodParam.keyGood;
-                    }
-                    if (goodParam.keyGood == needKey) {
-                        arrSign.push({ keyA: keyA, keyB: keyB });
-                        enough = arrSign.length >= 3;
-                        if (enough) {
-                            break;
+            let arrSign: { i: number, j: number, key: string }[] = [];
+            for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                    let boxParam = this.arrGame[i][j];
+                    for (const key in boxParam.goods) {
+                        if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+                            let goodParam: GoodParam = boxParam.goods[key];
+                            if (needKey <= 0 && specialKey.indexOf(goodParam.keyGood) < 0) {
+                                needKey = goodParam.keyGood;
+                            }
+                            if (goodParam.keyGood == needKey) {
+                                arrSign.push({ i: i, j: j, key: key });
+                                enough = arrSign.length >= 3;
+                                if (enough) {
+                                    break;
+                                }
+                            }
                         }
+                    }
+                    if (enough) {
+                        break;
                     }
                 }
                 if (enough) {
@@ -1869,7 +2063,7 @@ export default class GameBox extends cc.Component {
                 }
             }
             for (let index = arrSign.length - 1; index >= 0; index--) {
-                let midGood = this.removeMidParam(arrSign[index].keyA, arrSign[index].keyB, magnetMain);
+                let midGood = this.removeMidParam(arrSign[index], magnetMain);
                 arrGoods.push(midGood);
             }
         };
@@ -1931,28 +2125,72 @@ export default class GameBox extends cc.Component {
         this.setMoveBox(true);
     }
 
-    removeMidParam(keyA: string, keyB: string, parent: cc.Node) {
-        let boxParam = this.objGame[keyA];
-        let box = this.nodeMain.getChildByName(boxParam.name);
+    removeMidGood(node: cc.Node) {
+        // 删除物品节点 并 更新数据
+        let goodScript = node.getComponent(ItemGood);
+        let goodKey = goodScript.param.index;
+        let box = this.nodeMain.getChildByName(goodScript.param.box.name);
         let boxScript = box.getComponent(ItemBox);
-        let good = boxScript.nodeMain.getChildByName(boxParam.goods[keyB].name);
-        let goodScript = good.getComponent(ItemGood);
-        let goodParam = Common.clone(goodScript.param);
-        this.playAniSuipian(good);
+        delete boxScript.param.goods[goodKey];
+        node.removeFromParent();
 
-        let p1 = Common.getLocalPos(good.parent, good.position, parent);
+        // 同步数据
+        let isFinish = false;
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            let arrBoxParam = this.arrGame[i];
+            for (let j = 0, lenB = arrBoxParam.length; j < lenB; j++) {
+                let boxParam = arrBoxParam[j];
+                if (boxParam.index == boxScript.param.index) {
+                    isFinish = true;
+                    boxParam.goods = boxScript.param.goods;
+                    if (Object.keys(boxParam.goods).length < 1) {
+                        arrBoxParam.splice(j, 1);
+                        DataManager.poolPut(box, this.objPool.box);
+                    }
+                    break;
+                }
+            }
+            if (isFinish) {
+                break;
+            }
+        }
+    };
+
+    removeMidParam(sign: { i: number, j: number, key: string }, parent: cc.Node) {
+        let boxParamArr = this.arrGame[sign.i];
+        let boxParamOne = boxParamArr[sign.j];
+        let boxNode = this.nodeMain.getChildByName(boxParamOne.name);
+        let boxScript = boxNode.getComponent(ItemBox);
         let copyNode: cc.Node = null;
-        copyNode = cc.instantiate(good);
-        copyNode.position = p1;
-        copyNode.getComponent(ItemGood).param = Common.clone(good.getComponent(ItemGood).param);
-        copyNode.parent = parent;
+        if (Object.prototype.hasOwnProperty.call(boxParamOne.goods, sign.key)) {
+            let goodParamOne: GoodParam = boxParamOne.goods[sign.key];
 
-        // 删除物品ui
-        DataManager.poolPut(good, DataManager.objPool.good);
-        // 删除物品数据
-        this.removeGoodParam(goodParam);
-        // 特殊箱子 重新排布
-        boxScript.sortGood();
+            let goodNode = boxScript.nodeMain.getChildByName(goodParamOne.name);
+            this.playAniSuipian(goodNode);
+
+            let p1 = Common.getLocalPos(goodNode.parent, goodNode.position, parent);
+            copyNode = cc.instantiate(goodNode);
+            copyNode.position = p1;
+            copyNode.getComponent(ItemGood).param = Common.clone(goodNode.getComponent(ItemGood).param);
+            copyNode.parent = parent;
+            delete boxParamOne.goods[sign.key];
+            boxScript.param = Common.clone(boxParamOne);
+            DataManager.poolPut(goodNode, this.objPool.good);
+            // 特殊箱子 重新排布
+            if (boxScript.param.isFrame) {
+                boxScript.sortGood();
+            }
+            else {
+                if (Object.keys(boxParamOne.goods).length < 1) {
+                    boxParamArr.splice(sign.j, 1);
+                    DataManager.poolPut(boxNode, this.objPool.box);
+                }
+            }
+        }
+        // 当前层无箱子 删除层数据
+        if (boxParamArr.length < 1) {
+            this.arrGame.splice(sign.i, 1);
+        }
         return copyNode;
     };
 
@@ -1979,9 +2217,11 @@ export default class GameBox extends cc.Component {
                     good.parent = scriptBox.nodeMain;
                     good.scale = 1.0;
                     scriptBox.param.goods[goodParam.index] = goodParam;
-                    scriptBox.sortGood();
+                    if (scriptBox.param.isFrame) {
+                        scriptBox.sortGood();
+                    }
                     good.getComponent(ItemGood).resetParams(goodParam);
-                    this.objGame[scriptBox.param.index] = Common.clone(scriptBox.param);
+                    this.refreshBoxParam(scriptBox.param);
 
                     res();
                 }).start();
@@ -1996,90 +2236,140 @@ export default class GameBox extends cc.Component {
                  * 5.根据数据移动现有箱子，底部物品返回到箱子中
                  */
 
-                // 拿到原箱子
-                let boxParamNew: BoxParam = Common.clone(this.objGameCopy[goodParam.box.key]);
-                boxParamNew.goods = {};
-                this.addBox(boxParamNew);
-                this.objGame[boxParamNew.index] = boxParamNew;
-                for (const key in this.objGame) {
-                    if (!Object.prototype.hasOwnProperty.call(this.objGame, key)) {
-                        continue;
+                // 获取矩形
+                let getRect = (boxParam: BoxParam) => {
+                    return cc.rect(boxParam.x - boxParam.w * 0.5 + 1, boxParam.y, boxParam.w - 2, boxParam.h);
+                };
+                // 获取箱子列数
+                let getBoxLayer = (boxParamCur: BoxParam, layerCur: number) => {
+                    let layer = 0;
+                    let rectA = getRect(boxParamCur);
+                    for (let i = layerCur - 1; i >= 0; i--) {
+                        let isInter = false;
+                        let arrLayer = this.arrGame[i];
+                        for (let j = 0; j < arrLayer.length; j++) {
+                            let boxParam = arrLayer[j];
+                            let rectB = getRect(boxParam);
+                            rectA.y = rectB.y + boxParamCur.h * 0.5;
+                            isInter = cc.Intersection.rectRect(rectA, rectB);
+                            if (isInter) {
+                                break;
+                            }
+                        }
+                        if (isInter) {
+                            layer = i + 1;
+                            break;
+                        }
                     }
-                    const boxParam: BoxParam = this.objGame[key];
-                    boxParam.y = this.objGameCopy[boxParam.index].y;
+                    return layer;
+                };
+
+                // 拿到原箱子
+                let boxParamCur: BoxParam = Common.clone(this.objGame[goodParam.box.key]);
+                // 组合剩余箱子
+                let names = [boxParamCur.name];
+                for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                    for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                        names.push(this.arrGame[i][j].name);
+                    }
+                }
+                // 去除以消除箱子
+                let dataBox: BoxParam[][] = Common.clone(this.arrGameCopy);
+                for (let i = dataBox.length - 1; i >= 0; i--) {
+                    let arrBoxParam = dataBox[i];
+                    for (let j = arrBoxParam.length - 1; j >= 0; j--) {
+                        let boxParamB = arrBoxParam[j];
+                        if (names.indexOf(boxParamB.name) < 0) {
+                            arrBoxParam.splice(j, 1);
+                            if (arrBoxParam.length < 1) {
+                                dataBox.splice(i, 1);
+                            }
+                        }
+                    }
                 }
 
+                // 添加箱子 刚出现时高度为0
+                boxParamCur.goods = {};
+                this.addBox(boxParamCur);
+                let objBox = {};
+                for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+                    for (let j = 0; j < this.arrGame[i].length; j++) {
+                        let boxParam = this.arrGame[i][j];
+                        objBox[boxParam.index] = Common.clone(boxParam);
+                    }
+                }
                 // 重置箱子位置
-                let arrGame = this.sortArrByXY(Object.values(this.objGame));
-                for (let index = 0, length = arrGame.length; index < length; index++) {
-                    let boxParam = arrGame[index];
-                    // 框不移动
-                    if (boxParam.isFrame) {
-                        continue;
-                    }
-                    if (index == 0) {
-                        boxParam.y = 0;
-                    }
-                    else {
-                        boxParam.y = this.getBoxPositionY(boxParam, this.sortArrByXY(arrGame.slice(0, index)));
-                    }
-                    let box = this.nodeMain.getChildByName(boxParam.name);
-                    let y1 = box.y;
-                    let y2 = boxParam.y;
-                    let timeY = 0.15;
-                    if (boxParam.index == boxParamNew.index) {
-                        box.y = y2;
-                        // 箱子高度变化+物品移动
-                        let boxH = boxParamNew.h;
-                        let scriptBox = box.getComponent(ItemBox);
-                        scriptBox.param.y = boxParam.y;
-                        scriptBox.itemIcon.height = 0;
-                        cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
-                            let goodP1 = good.position;
-                            let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
-                            let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
-                            // 物品移动
-                            cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
-                                scriptBox.param.goods[goodParam.index] = goodParam;
-                                good.parent = scriptBox.nodeMain;
-                                good.scale = 1.0;
-                                good.getComponent(ItemGood).resetParams(goodParam);
-                                this.objGame[scriptBox.param.index] = Common.clone(scriptBox.param);
+                this.arrGame = Common.clone(dataBox);// 赋值箱子
+                for (let i = 0; i < this.arrGame.length; i++) {
+                    let arrLayer = this.arrGame[i];
+                    for (let j = 0; j < arrLayer.length; j++) {
+                        let boxParam = arrLayer[j];
+                        let isBox = boxParam.name == boxParamCur.name;
+                        // 物品还原
+                        if (isBox) {
+                            boxParam.goods = {};
+                        }
+                        else {
+                            boxParam.goods = objBox[boxParam.index] ? objBox[boxParam.index].goods : {};
+                        }
+                        // 框不移动
+                        if (boxParam.isFrame) {
+                            continue;
+                        }
+                        // 箱子层级
+                        let layer = getBoxLayer(boxParam, i);
+                        boxParam.y = this.arrBoxY[layer].y;
+                        let box = this.nodeMain.getChildByName(boxParam.name);
+                        let boxP1 = box.position;
+                        let boxP2 = cc.v3(box.x, boxParam.y);
+                        let timeY = Common.getMoveTime(cc.v3(0, 0), cc.v3(0, boxParamCur.h), this.baseTime, this.baseDis);
+                        if (isBox) {
+                            box.position = boxP2;
+                            // 箱子高度变化+物品移动
+                            let boxH = boxParamCur.h;
+                            let scriptBox = box.getComponent(ItemBox);
+                            scriptBox.param.y = boxParam.y;
+                            scriptBox.itemIcon.height = 0;
+                            cc.tween(scriptBox.itemIcon).to(timeY, { height: boxH }).call(() => {
+                                let goodP1 = good.position;
+                                let goodP2 = Common.getLocalPos(scriptBox.nodeMain, cc.v3(goodParam.box.x, goodParam.box.y), this.uiBottomMain);
+                                let timeP12 = Common.getMoveTime(goodP1, goodP2, this.baseTime, this.baseDis);
+                                // 物品移动
+                                cc.tween(good).to(timeP12, { position: goodP2, scale: this.mainScale }).call(() => {
+                                    scriptBox.param.goods[goodParam.index] = goodParam;
+                                    good.parent = scriptBox.nodeMain;
+                                    good.scale = 1.0;
+                                    good.getComponent(ItemGood).resetParams(goodParam);
+                                    this.refreshBoxParam(scriptBox.param);
 
-                                res();
+                                    res();
+                                }).start();
                             }).start();
-                        }).start();
+                        }
+                        else {
+                            box.position = boxP1;
+                            cc.tween(box).to(timeY, { position: boxP2 }).call(() => {
+                                box.getComponent(ItemBox).refreshParams(boxParam.y);
+                            }).start();
+                        }
+                        if (layer == i) {
+                            continue;
+                        }
+                        // 转移箱子数据
+                        arrLayer.splice(j, 1);
+                        this.arrGame[layer].push(boxParam);
+                        j--;
                     }
-                    else {
-                        box.y = y1;
-                        cc.tween(box).to(timeY, { y: y2 }).call(() => {
-                            box.getComponent(ItemBox).refreshParams(boxParam.y);
-                        }).start();
+                }
+                for (let i = this.arrGame.length - 1; i >= 0; i--) {
+                    let arrLayer = this.arrGame[i];
+                    if (arrLayer.length <= 0) {
+                        this.arrGame.splice(i, 1);
                     }
                 }
             }
         });
     }
-
-    getBoxPositionY(boxParam: BoxParam, arrBottom: BoxParam[]) {
-        let boxY = 0;
-        let disX = 1;
-        let a1 = boxParam.x - boxParam.w * 0.5 + disX * 0.5;
-        let a2 = boxParam.x + boxParam.w * 0.5 - disX * 0.5;
-        for (let index = arrBottom.length - 1; index >= 0; index--) {
-            let boxParamB = arrBottom[index];
-            if (boxParamB.isFrame) {
-                continue;
-            }
-            let b1 = boxParamB.x - boxParamB.w * 0.5 + disX * 0.5;
-            let b2 = boxParamB.x + boxParamB.w * 0.5 - disX * 0.5;
-            if (a1 <= b1 && b1 <= a2 || a1 <= b2 && b2 <= a2) {
-                boxY = boxParamB.y + boxParamB.h;
-                break;
-            }
-        }
-        return boxY;
-    };
 
     setIceShow() {
         let itemTime = this.uiTop.getChildByName('time');
@@ -2251,7 +2541,7 @@ export default class GameBox extends cc.Component {
         // 打点
         NativeCall.sTsEvent();
 
-        let stageLevel = this.objData.level;
+        let stageLevel = DataManager.data.boxData.level
         // 打点 过关
         NativeCall.logEventOne(ConfigDot.dot_levelPass);
         let dot = ConfigDot['dot_pass_level_' + stageLevel];
@@ -2271,7 +2561,7 @@ export default class GameBox extends cc.Component {
             disBoxSuipian: this.objData.numSuipian,
             disBoxXingxing: this.getXingxingNum(),
             objCoin: {
-                position: { x: pointWorld.x, y: pointWorld.y },
+                position: {x: pointWorld.x, y: pointWorld.y},
                 scale: nodeSuipian.scale,
             },
         };
@@ -2293,7 +2583,7 @@ export default class GameBox extends cc.Component {
 
     /** 添加 箱子 */
     addBox(param: BoxParam): cc.Node {
-        let node = DataManager.poolGet(this.preBox, DataManager.objPool.box);
+        let node = DataManager.poolGet(this.preBox, this.objPool.box);
         node.parent = this.nodeMain;
         node.getComponent(ItemBox).init(param);
         return node;
@@ -2301,10 +2591,22 @@ export default class GameBox extends cc.Component {
 
     /** 添加 物品 */
     addGood(box: cc.Node, param: GoodParam): cc.Node {
-        let node = DataManager.poolGet(this.preGood, DataManager.objPool.good);
+        let node = DataManager.poolGet(this.preGood, this.objPool.good);
         node.parent = box.getComponent(ItemBox).nodeMain;
         node.getComponent(ItemGood).init(param);
         return node;
+    };
+
+    refreshBoxParam(param: BoxParam) {
+        for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+            for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+                let boxParam = this.arrGame[i][j];
+                if (boxParam.name == param.name) {
+                    this.arrGame[i][j] = param;
+                    return;
+                }
+            }
+        }
     };
 
     /** 获取星星数量（根据剩余时间获取） */
@@ -2320,10 +2622,28 @@ export default class GameBox extends cc.Component {
         return xingNum;
     }
 
+    // gameLog(sign: string) {
+    //     let name = { a: sign + ' 当前游戏数据：' };
+    //     for (let i = 0, lenA = this.arrGame.length; i < lenA; i++) {
+    //         for (let j = 0, lenB = this.arrGame[i].length; j < lenB; j++) {
+    //             let boxParam = this.arrGame[i][j];
+    //             let key = '' + i + '-' + j + ': ';
+    //             let value = boxParam.name + ', y = ' + boxParam.y + ', ';
+    //             for (let key in boxParam.goods) {
+    //                 if (Object.prototype.hasOwnProperty.call(boxParam.goods, key)) {
+    //                     let goodParam: GoodParam = boxParam.goods[key];
+    //                     value += goodParam.name + ', ';
+    //                 }
+    //             }
+    //             name[key] = value;
+    //         }
+    //     }
+    //     Common.log(JSON.stringify(name, null, 4));
+    // }
+
     removeGoodToBottom() {
         // 获取 箱子数据 并 更改
-        let arrGame = this.sortArrByXY(Object.values(this.objGame));
-        let boxParam: BoxParam = arrGame[0];
+        let boxParam: BoxParam = this.arrGame[0][0];
         let keys = Object.keys(boxParam.goods);
         let goodParam: GoodParam = Common.clone(boxParam.goods[keys[0]]);
         delete boxParam.goods[keys[0]];
@@ -2342,33 +2662,12 @@ export default class GameBox extends cc.Component {
         good.active = true;
     };
 
-    /** 移除数据（箱子内物品） */
-    removeGoodParam(goodParam: GoodParam) {
-        let box = this.nodeMain.getChildByName(goodParam.box.name);
-        if (!box) {
-            return;
-        }
-        let boxParam = box.getComponent(ItemBox).param;
-        delete boxParam.goods[goodParam.index];
-        // 框 不消除
-        if (boxParam.isFrame) {
-            this.objGame[boxParam.index] = Common.clone(boxParam);
-        }
-        else {
-            // 检测是否移除箱子
-            if (Object.keys(boxParam.goods).length < 1) {
-                DataManager.poolPut(box, DataManager.objPool.box);
-                delete this.objGame[boxParam.index];
-            }
-        }
-    };
-
     /** 游戏开始 */
     gameStart() {
         this.playAniShow(true, () => {
-            // 新手引导 返回道具 移除一个物品到检测区
+            // 新手引导
             if (DataManager.checkNewPlayerGame()) {
-                if (this.objData.level == 5) {
+                if (DataManager.data.boxData.level == 5) {
                     this.removeGoodToBottom();
                 }
                 this.gamePause();

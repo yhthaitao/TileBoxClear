@@ -103,7 +103,6 @@ export default class MainMenu extends cc.Component {
 
     protected onEnable(): void {
         this.initMenu();
-
         // 缩放数据
         let winScaleByH = cc.winSize.height / Design.height;
         let home_dis_topToTop = 20 * winScaleByH;

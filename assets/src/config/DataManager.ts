@@ -150,8 +150,9 @@ class DataManager {
         },
         challengeData: {
             level: 1,
-            about: { year: 0, month: 0, day: 0 },
+            about: { year: 0, month: 0, dayMonth: 0, dayTotal: 0},
             limit: 2023 * 12,
+            guide: { isTouchChallenge: true, isTouchGift: true },
             date: {}, // 年、月、(reward: [] / objDay {day: 0, state: 0}[])
         },
     };
@@ -192,7 +193,9 @@ class DataManager {
         NativeCall.setRevenue(this.data.advert.revenue);
         // 初始化时间
         this.initDay();
-        /** 初始化关卡数据 */
+        // 初始化挑战数据
+        this.initChallenge();
+        // 初始化关卡数据
         this.initLevelData();
         // 初始化语言
         this.initLanguage();
@@ -248,6 +251,16 @@ class DataManager {
         }
     }
 
+    /** 初始化挑战数据 */
+    public initChallenge(){
+        let date = new Date();
+        let challenge = this.data.challengeData;
+        challenge.about.year = date.getFullYear();
+        challenge.about.month = date.getMonth();
+        challenge.about.dayMonth = this.getDayMonth(date);
+        challenge.about.dayTotal = this.getDayTotalFromDate(date);
+    }
+
     /** 初始化关卡数据 */
     public async initLevelData() {
         let path = CConst.pathLevel;
@@ -260,7 +273,6 @@ class DataManager {
                     Common.log('加载普通关卡数据 level0 出错');
                 }
             });
-
         }
         if (!this.levelData.data1) {
             await kit.Resources.loadRes(CConst.bundlePrefabs, path + 'level1', cc.JsonAsset, (e: any, asset: any) => {
@@ -527,7 +539,7 @@ class DataManager {
             challenge.level++;
             let objMonth: ChallengeMonthParam = challenge.date[challenge.about.year][challenge.about.month];
             objMonth.count++;
-            let objDay: ChallengeDayParam = objMonth.objDay[challenge.about.day];
+            let objDay: ChallengeDayParam = objMonth.objDay[challenge.about.dayMonth];
             objDay.state = ChallengeState.already;
         }
 
@@ -799,25 +811,27 @@ class DataManager {
                 count: 0,
                 reward: [
                     {
-                        total: 0, isGet: false, props: [
-                            { type: PropType.coin, number: 30 },
+                        total: 1, isGet: false, props: [
+                            { type: PropType.coin, number: 80 },
+                            { type: PropType.tStrengthInfinite, number: 15 * 60 },
                         ],
                     },
                     {
-                        total: 3, isGet: false, props: [
+                        total: 5, isGet: false, props: [
+                            { type: PropType.tip, number: 5 },
                             { type: PropType.tStrengthInfinite, number: 30 * 60 },
-                            { type: PropType.tip, number: 2 },
                         ],
                     },
                     {
-                        total: 10, isGet: false, props: [
-                            { type: PropType.coin, number: 100 },
-                            { type: PropType.tMagnetInfinite, number: 15 * 60 },
+                        total: 15, isGet: false, props: [
+                            { type: PropType.coin, number: 300 },
+                            { type: PropType.tStrengthInfinite, number: 30 * 60 },
                         ],
                     },
                     {
                         total: 28, isGet: false, props: [
-                            { type: PropType.coin, number: 30 },
+                            { type: PropType.coin, number: 500 },
+                            { type: PropType.tStrengthInfinite, number: 60 * 60 }
                         ],
                     },
                 ],
@@ -1286,13 +1300,14 @@ class DataManager {
 
     /** 获取挑战关卡数据 */
     public getChallengeLevelData(level: number): LevelParam {
-        let total = 21;
-        let loop = { start: 12, length: 10 };
+        let total = 28;
         if (level <= total) {
             return this.levelData.data2[level - 1];
         }
         else {
-            level = loop.start + (level - total - 1) % loop.length;
+            let start = 2;
+            let length = total - 1;
+            level = start + (level - total - 1) % length;
             return this.levelData.data2[level - 1];
         }
     };

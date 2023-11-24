@@ -30,6 +30,7 @@ export default class MainMenuMidHome extends cc.Component {
     @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_button: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-底部-开始按钮' }) home_bottom_btnSign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱' }) home_left_boxXing: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '主菜单-顶部-挑战按钮' }) home_left_challenge: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-顶部-星星宝箱图标' }) home_left_boxXing_sign: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-星星宝箱进度' }) home_left_boxXing_process: cc.Node = null;
     @property({ type: cc.Node, tooltip: '主菜单-左侧-每日签到进度' }) home_left_challenge_process: cc.Node = null;
@@ -81,7 +82,7 @@ export default class MainMenuMidHome extends cc.Component {
         await this.resetBoxXingxingProcess();
         await this.resetBoxLevelProcess();
         await this.resetBoxAreas();
-        await this.resetChallenge();
+        this.resetChallenge();
         this.setIsLock(false);
     };
 
@@ -196,7 +197,7 @@ export default class MainMenuMidHome extends cc.Component {
             if (boxData.count >= total) {
                 boxData.count -= total;
                 boxData.level += 1;
-                boxReward.reward.forEach((reward)=>{
+                boxReward.reward.forEach((reward) => {
                     DataManager.refreshDataByReward(reward);
                 });
             }
@@ -313,7 +314,7 @@ export default class MainMenuMidHome extends cc.Component {
             sign.getChildByName('label').getComponent(cc.Label).string = '+' + boxData.add;
             sign.parent = this.content;
             sign.active = true;
-            let pGoal =  Common.getLocalPos(this.home_left_boxXing_sign.parent, this.home_left_boxXing_sign.position, this.content);
+            let pGoal = Common.getLocalPos(this.home_left_boxXing_sign.parent, this.home_left_boxXing_sign.position, this.content);
             let pStart = cc.v3(pGoal.x + 150, pGoal.y);
             await DataManager.playAniXingxing(sign, pStart, pGoal);
             kit.Event.emit(CConst.event_scale_xingxingBox);
@@ -360,11 +361,11 @@ export default class MainMenuMidHome extends cc.Component {
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
                 pButton.y += this.home_bottom_button.height;
-                let param = { 
-                    pStrength: { x: pStrength.x, y: pStrength.y }, 
-                    pCoin: { x: pCoin.x, y: pCoin.y }, 
-                    pProp: { x: pButton.x, y: pButton.y }, 
-                    rewards: boxReward 
+                let param = {
+                    pStrength: { x: pStrength.x, y: pStrength.y },
+                    pCoin: { x: pCoin.x, y: pCoin.y },
+                    pProp: { x: pButton.x, y: pButton.y },
+                    rewards: boxReward
                 };
                 await kit.Popup.show(CConst.popup_path_openBoxXingxing, param, { mode: PopupCacheMode.Frequent });
                 // 进度条再次刷新
@@ -454,11 +455,11 @@ export default class MainMenuMidHome extends cc.Component {
                 let pCoin = Common.getLocalPos(this.uiTop_coin_sign.parent, this.uiTop_coin_sign.position, this.node);
                 let pButton = Common.getLocalPos(this.home_bottom_button.parent, this.home_bottom_button.position, this.node);
                 pButton.y += this.home_bottom_button.height;
-                let param = { 
-                    pStrength: { x: pStrength.x, y: pStrength.y }, 
-                    pCoin: { x: pCoin.x, y: pCoin.y }, 
-                    pProp: { x: pButton.x, y: pButton.y }, 
-                    rewards: boxReward 
+                let param = {
+                    pStrength: { x: pStrength.x, y: pStrength.y },
+                    pCoin: { x: pCoin.x, y: pCoin.y },
+                    pProp: { x: pButton.x, y: pButton.y },
+                    rewards: boxReward
                 };
                 await kit.Popup.show(CConst.popup_path_openBoxLevel, param, { mode: PopupCacheMode.Frequent });
 
@@ -489,8 +490,9 @@ export default class MainMenuMidHome extends cc.Component {
         this.obj.ani.boxLevel = true;
     };
 
-    /** 刷新日历 */
+    /** 刷新挑战按钮 */
     resetCalendar() {
+        this.home_left_challenge.active = DataManager.data.boxData.level > 20;
         this.refreshHomeLabelLeft();
     };
 
@@ -506,9 +508,24 @@ export default class MainMenuMidHome extends cc.Component {
         }
     }
 
-    async resetChallenge(){
-        if (DataManager.stateLast == StateGame.challenge) {
-            await kit.Popup.show(CConst.popup_path_challenge, {}, { mode: PopupCacheMode.Frequent });
+    resetChallenge() {
+        if (DataManager.stateLast == StateGame.game) {
+            if (DataManager.data.boxData.level == 21 && DataManager.data.challengeData.guide.isTouchChallenge) {
+                DataManager.data.challengeData.guide.isTouchChallenge = false;
+                DataManager.setData();
+                // 挑战引导
+                let point = Common.getLocalPos(this.home_left_challenge.parent, this.home_left_challenge.position, this.node);
+                let params = {
+                    name: 'challenge1',
+                    itemPosition: { x: point.x, y: point.y, },
+                    handPosition: { x: point.x + 220, y: point.y, },
+                    descPosition: { x: 0, y: 0, },
+                };
+                kit.Event.emit(CConst.event_guide_challenge, params);
+            }
+        }
+        else if (DataManager.stateLast == StateGame.challenge) {
+            kit.Popup.show(CConst.popup_path_challenge, {}, { mode: PopupCacheMode.Frequent });
         }
     }
 

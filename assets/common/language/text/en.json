@@ -178,5 +178,7 @@
     "notice_buySuccess": "Purchase successful",
     "notice_buyFail": "Purchase failed",
     "notice_buyCancal": "Purchase canceled",
-    "notice_noNetwork": "No network available"											
+    "notice_noNetwork": "No network available",
+    
+    "challenge_gift": "Complete daily challenges for rewards"						
 }

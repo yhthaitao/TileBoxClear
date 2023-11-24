@@ -15,7 +15,6 @@ export default class ItemGood extends cc.Component {
     @property({ type: cc.Node, tooltip: '碎片节点-动画' }) propLight: cc.Node = null;
 
     state: number = 0;
-    isChose: boolean = false;
     param: GoodParam = null;
     idClock: number = 9001;
     idMagnet: number = 9002;
@@ -45,6 +44,7 @@ export default class ItemGood extends cc.Component {
                 return;
             }
             this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
+            this.nodeIcon.getComponent(cc.Button).interactable = true;
             this.node.opacity = 255;
         });
     };

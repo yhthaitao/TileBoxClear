@@ -87,16 +87,35 @@ export default class Challenge<Options = any> extends PopupBase {
     }
 
     protected showBefore(options: any): void {
-        Common.log('弹窗 银行页面 showBefore()');
+        Common.log('弹窗 挑战页面 showBefore()');
         this.nodeReward.active = false;
 
         let date = new Date();
         this.obj.year.init = date.getFullYear();
-        this.obj.year.cur = this.obj.year.init;
         this.obj.month.init = date.getMonth();
-        this.obj.month.cur = this.obj.month.init;
         this.obj.dayTotal.init = DataManager.getDayTotalFromDate(date);
+
+        let challenge = DataManager.data.challengeData;
+        this.obj.year.cur = challenge.about.year;
+        this.obj.month.cur = challenge.about.month;
         this.refreshUI();
+    }
+
+    protected showAfter(): void {
+        if (DataManager.data.challengeData.guide.isTouchGift) {
+            DataManager.data.challengeData.guide.isTouchGift = false;
+            DataManager.setData();
+            // 挑战引导
+            let point = Common.getLocalPos(this.nodeGift.parent, this.nodeGift.position, this.node);
+            point.y = point.y * 1.2;
+            let params = {
+                name: 'challenge2',
+                itemPosition: { x: point.x, y: point.y, },
+                handPosition: { x: point.x, y: 50, },
+                descPosition: { x: point.x, y: -200, },
+            };
+            kit.Event.emit(CConst.event_guide_challenge, params);
+        }
     }
 
     /** 刷新ui */
@@ -156,17 +175,28 @@ export default class Challenge<Options = any> extends PopupBase {
     refreshGift(objMonth: ChallengeMonthParam) {
         let count = objMonth.count;
         count = count > 28 ? 28 : count;
-        let total = Object.keys(objMonth.objDay).length;
         // 进度
         let process = this.nodeGift.getChildByName('process');
         let bar = process.getChildByName('bar');
-        bar.getComponent(cc.Sprite).fillRange = count / total;
+        let objRadio = { a: 0.325, b: 0.65, c: 1.0 };
+        let objCount = { a: 5, b: 15, c: 28 };
+        let radio = 0;
+        if (count <= objCount.a) {
+            radio = objRadio.a * count / objCount.a;
+        }
+        else if (count <= objCount.b) {
+            radio = objRadio.a + (objRadio.b - objRadio.a) * (count - objCount.a) / (objCount.b - objCount.a);
+        }
+        else {
+            radio = objRadio.b + (objRadio.c - objRadio.b) * (count - objCount.b) / (objCount.c - objCount.b);
+        }
+        bar.getComponent(cc.Sprite).fillRange = radio;
         // 标识
         let width = 340;
         let sign = this.nodeGift.getChildByName('sign');
         let label = sign.getChildByName('label');
         label.getComponent(cc.Label).string = '' + objMonth.count;
-        sign.x = -width * 0.5 + width * count / total;
+        sign.x = -width * 0.5 + width * radio;
         // 礼包
         let itemGift = this.nodeGift.getChildByName('gift');
         for (let index = 0, length = itemGift.children.length; index < length; index++) {
@@ -182,9 +212,9 @@ export default class Challenge<Options = any> extends PopupBase {
             }
             // 未获取
             else {
-                if (objMonth.count > reward.total) {
+                if (objMonth.count > reward.total - 1) {
                     reward.isGet = true;
-                    DataManager.playAniDragon(itemDragon, armatureName, this.obj.aniNames.open, ()=>{
+                    DataManager.playAniDragon(itemDragon, armatureName, this.obj.aniNames.open, () => {
                         dragon.playAnimation(this.obj.aniNames.finish, 0);
                     });
                     this.getReward(reward.props, item.convertToWorldSpaceAR(itemDragon.position));
@@ -196,7 +226,7 @@ export default class Challenge<Options = any> extends PopupBase {
         }
     }
 
-    async getReward(props: PropRewardType[], pWorld: cc.Vec3){
+    async getReward(props: PropRewardType[], pWorld: cc.Vec3) {
         this.nodeReward.active = true;
         let mask = this.nodeReward.getChildByName('mask');
         mask.opacity = 0;
@@ -208,19 +238,19 @@ export default class Challenge<Options = any> extends PopupBase {
         });
         // back
         mask.opacity = 0;
-        cc.tween(mask).to(0.25, {opacity: 180}).start();
+        cc.tween(mask).to(0.25, { opacity: 180 }).start();
         // reward
         nodeIcon.opacity = 255;
-        nodeIcon.children.forEach((item)=>{item.active = false});
+        nodeIcon.children.forEach((item) => { item.active = false });
         let propLen = props.length;
         let propDis = 240;
-        props.forEach((reward, index)=>{
+        props.forEach((reward, index) => {
             let info = DataManager.getRewardInfo(reward);
             let item = nodeIcon.children[index];
             let icon = item.getChildByName('icon');
             icon.getComponent(cc.Sprite).spriteFrame = info.frame;
-            let scaleX = item.width/icon.width;
-            let scaleY = item.height/icon.height;
+            let scaleX = item.width / icon.width;
+            let scaleY = item.height / icon.height;
             icon.scale = scaleX < scaleY ? scaleX : scaleY;
             let label = item.getChildByName('label');
             label.getComponent(cc.Label).string = info.string;
@@ -235,13 +265,13 @@ export default class Challenge<Options = any> extends PopupBase {
         nodeIcon.position = p1;
         nodeIcon.y += 100;
         cc.tween(nodeIcon).parallel(
-            cc.tween().to(0.25, {position: p2}),
-            cc.tween().to(0.25, {scale: 1}),
+            cc.tween().to(0.25, { position: p2 }),
+            cc.tween().to(0.25, { scale: 1 }),
         ).delay(1.25).parallel(
-            cc.tween().to(0.25, {position: p3}),
-            cc.tween().to(0.25, {opacity: 50}),
-        ).call(()=>{
-            props.forEach((reward)=>{
+            cc.tween().to(0.25, { position: p3 }),
+            cc.tween().to(0.25, { opacity: 50 }),
+        ).call(() => {
+            props.forEach((reward) => {
                 DataManager.refreshDataByReward(reward);
                 switch (reward.type) {
                     case PropType.coin:
@@ -355,7 +385,8 @@ export default class Challenge<Options = any> extends PopupBase {
             date.setTime(this.obj.dayTotal.cur * 86400 * 1000);
             DataManager.data.challengeData.about.year = date.getFullYear();
             DataManager.data.challengeData.about.month = date.getMonth();
-            DataManager.data.challengeData.about.day = DataManager.getDayMonth(date);
+            DataManager.data.challengeData.about.dayMonth = DataManager.getDayMonth(date);
+            DataManager.data.challengeData.about.dayTotal = DataManager.getDayTotalFromDate(date);
             kit.Popup.hide();
             GameManager.enterGameFromChallenge(this.obj.isVideo);
         }

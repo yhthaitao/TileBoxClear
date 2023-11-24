@@ -47,21 +47,26 @@ export default class ItemBox extends cc.Component {
             return;
         }
         // 叠着的衣服6
-        let sortBoxDress = (arrGoods)=>{
+        let sortBoxDress = (arrGoods, xStart: number, xDis: number)=>{
             let length = arrGoods.length;
             arrGoods.sort((a: cc.Node, b: cc.Node) => {
                 return a.getComponent(ItemGood).param.index - b.getComponent(ItemGood).param.index;
             });
             arrGoods.forEach((good: cc.Node, index: number)=>{
+                good.y = xStart + xDis * index;
                 let script = good.getComponent(ItemGood);
                 script.nodeIcon.getComponent(cc.Button).interactable = index == length - 1;
             });
         };
-        // 挂着的衣服5 或 叠着的衣服6
-        if (this.param.boxType == 9 || this.param.boxType == 10) {
-            sortBoxDress(this.nodeMain.children);
+        // 叠着的衣服6
+        if (this.param.boxType == 9) {
+            sortBoxDress(this.nodeMain.children, 19, 10);
         }
-        // 挂着的衣服5 + 叠着的衣服6
+        // 挂着的衣服5
+        else if (this.param.boxType == 10) {
+            sortBoxDress(this.nodeMain.children, 125, -12);
+        }
+        // 叠着的衣服6 + 挂着的衣服5 
         else if (this.param.boxType == 11) {
             let arrGood5 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 5;
@@ -69,8 +74,8 @@ export default class ItemBox extends cc.Component {
             let arrGood6 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 6;
             });
-            sortBoxDress(arrGood5);
-            sortBoxDress(arrGood6);
+            sortBoxDress(arrGood5, 165, -12);
+            sortBoxDress(arrGood6, 19, 10);
         }
     };
 
@@ -118,6 +123,10 @@ export default class ItemBox extends cc.Component {
         }
         let itemLabel = this.itemKuang.getChildByName('label');
         itemLabel.getComponent(cc.Label).string = '' + goodNum;
+    };
+
+    refreshCloseY(){
+
     };
 
     refreshParams(y: number) {

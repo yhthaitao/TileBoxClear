@@ -71,20 +71,24 @@ class GameManager {
      * 设置界面-开始游戏
      */
     setting_startGame(fromState: FromState) {
-        let isEnterBefore = this.checkIsEnterBefore();
-        if (isEnterBefore) {
-            kit.Popup.hide();
-            kit.Popup.show(CConst.popup_path_before, { type: fromState }, { mode: PopupCacheMode.Frequent });
-        }
-        else {
-            let data = DataManager.data;
-            let time = Math.floor(new Date().getTime() * 0.001);
-            if (data.strength.tInfinite > time || data.strength.count > 0) {
-                this.enterGameFromSetting(fromState);
+        let data = DataManager.data;
+        let time = Math.floor(new Date().getTime() * 0.001);
+        if (data.strength.tInfinite > time || data.strength.count > 1) {
+            DataManager.data.wins.count = 0;
+            DataManager.strengthReduce();
+            DataManager.setData();
+
+            let isEnterBefore = this.checkIsEnterBefore();
+            if (isEnterBefore) {
+                kit.Popup.hide();
+                kit.Popup.show(CConst.popup_path_before, { type: fromState }, { mode: PopupCacheMode.Frequent });
             }
             else {
-                kit.Popup.show(CConst.popup_path_getLives, { type: fromState }, { mode: PopupCacheMode.Frequent });
+                this.enterGameFromSetting(fromState);
             }
+        }
+        else {
+            kit.Popup.show(CConst.popup_path_getLives, { type: fromState }, { mode: PopupCacheMode.Frequent, isSoon: true });
         }
     };
 
@@ -273,7 +277,7 @@ class GameManager {
             }
             levelParam = DataManager.getChallengeLevelData(level);
         }
-        else{
+        else {
             level = DataManager.data.boxData.level;
             message = ConfigDot.dot_ads_advert_succe_home;
             if (fromState == FromState.fromWin) {

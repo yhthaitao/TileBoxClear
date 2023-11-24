@@ -1049,7 +1049,7 @@
       "y": 0
     },
     "_fillStart": 0,
-    "_fillRange": 0.5,
+    "_fillRange": 0.65,
     "_isTrimmedMode": true,
     "_atlas": null,
     "_id": ""
@@ -6102,7 +6102,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 200,
+      "width": 140,
       "height": 36
     },
     "_anchorPoint": {
@@ -6397,7 +6397,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 45,
+      "width": 140,
       "height": 36
     },
     "_anchorPoint": {

@@ -7,7 +7,7 @@ import NativeCall from "../src/config/NativeCall";
 import Loading from "../res/prefab/Loading/src/Loading";
 import { LangChars } from "../src/config/ConfigLang";
 import { StateGame } from "../src/config/ConfigCommon";
-import { PopupCacheMode } from "../src/kit/manager/popupManager/PopupManager";
+import GuideChallenge from "../prefabs/components/UserGuide/src/GuideChallenge";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -253,6 +253,17 @@ export default class MainScene extends cc.Component {
         guide.parent = this.node;
     };
 
+    /** 事件回调：进入新手引导 */
+    async eventBack_guide_challenge(params: any) {
+        let pre: cc.Prefab = await kit.Resources.loadRes(CConst.bundlePrefabs, CConst.pathGuideChallenge, cc.Prefab);
+        let guide = cc.instantiate(pre);
+        guide.zIndex = CConst.zIndex_newPlayer;
+        guide.parent = this.node;
+
+        let script = guide.getComponent(GuideChallenge);
+        script.show(params);
+    };
+
     /** 事件回调：提示 */
     eventBack_notice(key: string): void {
         DataManager.setString(LangChars[key], (chars: string) => {
@@ -277,6 +288,7 @@ export default class MainScene extends cc.Component {
         kit.Event.on(CConst.event_enter_challenge, this.eventBack_enterChallenge, this);
         kit.Event.on(CConst.event_guide_game, this.eventBack_guide_game, this);
         kit.Event.on(CConst.event_guide_before, this.eventBack_guide_before, this);
+        kit.Event.on(CConst.event_guide_challenge, this.eventBack_guide_challenge, this);
         kit.Event.on(CConst.event_notice, this.eventBack_notice, this);
     }
 

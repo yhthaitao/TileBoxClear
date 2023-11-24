@@ -24,6 +24,7 @@ const CConst = {
     pathLevel: './games/GameBox/res/level/',
     pathGuideGame: 'components/UserGuide/res/prefab/GuideGame',
     pathGuideBefore: 'components/UserGuide/res/prefab/GuideBefore',
+    pathGuideChallenge: 'components/UserGuide/res/prefab/GuideChallenge',
     /*************************************** end **************************************************/
 
 
@@ -108,6 +109,7 @@ const CConst = {
     /** 进入 新手引导 */
     event_guide_game: 'event_guide_game',
     event_guide_before: 'event_guide_before',
+    event_guide_challenge: 'event_guide_challenge',
     /** 刷新 引导 点击 */
     event_guide_3: 'event_guide_3',
     event_guide_5: 'event_guide_5',

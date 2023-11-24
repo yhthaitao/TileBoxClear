@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "ani_guide",
+  "_name": "ani_left_right",
   "_objFlags": 0,
   "_native": "",
   "_duration": 2,
@@ -21,8 +21,8 @@
         {
           "frame": 1,
           "value": [
+            30,
             0,
-            -30,
             0
           ]
         },

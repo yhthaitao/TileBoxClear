@@ -152,7 +152,6 @@ export default class GetLives extends PopupBase {
     eventBtnExit() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         switch (this.params.type) {
-            case FromState.fromSetting:// 游戏中途设置
             case FromState.fromFail:// 游戏失败
                 let level: number;
                 let levelParam: any;
@@ -162,7 +161,7 @@ export default class GetLives extends PopupBase {
                     levelParam = DataManager.getChallengeLevelData(level);
                     message = ConfigDot.dot_ads_advert_succe_challenge_home;
                 }
-                else{
+                else {
                     level = DataManager.data.boxData.level;
                     levelParam = DataManager.getCommonLevelData(level);
                     message = ConfigDot.dot_ads_advert_succe_home;

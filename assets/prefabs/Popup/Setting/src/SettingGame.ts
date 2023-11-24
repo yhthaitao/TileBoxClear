@@ -237,10 +237,6 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-
-        DataManager.data.wins.count = 0;
-        DataManager.strengthReduce();
-        DataManager.setData();
         GameManager.setting_startGame(FromState.fromSetting);
     };
 
@@ -250,7 +246,6 @@ export default class SettingGame extends PopupBase {
             return;
         }
         kit.Audio.playEffect(CConst.sound_clickUI);
-        // 进入菜单页
         DataManager.data.wins.count = 0;
         DataManager.strengthReduce();
         DataManager.setData();
