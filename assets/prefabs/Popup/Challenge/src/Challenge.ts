@@ -382,11 +382,21 @@ export default class Challenge<Options = any> extends PopupBase {
         let time = Math.floor(date.getTime() * 0.001);
         let data = DataManager.data;
         if (data.strength.tInfinite > time || data.strength.count > 0) {
+            // 更新数据
             date.setTime(this.obj.dayTotal.cur * 86400 * 1000);
-            DataManager.data.challengeData.about.year = date.getFullYear();
-            DataManager.data.challengeData.about.month = date.getMonth();
-            DataManager.data.challengeData.about.dayMonth = DataManager.getDayMonth(date);
-            DataManager.data.challengeData.about.dayTotal = DataManager.getDayTotalFromDate(date);
+            let challenge = DataManager.data.challengeData;
+            let year = challenge.about.year;
+            let month = challenge.about.month;
+            challenge.about.year = date.getFullYear();
+            challenge.about.month = date.getMonth();
+            challenge.about.dayMonth = DataManager.getDayMonth(date);
+            challenge.about.dayTotal = DataManager.getDayTotalFromDate(date);
+            // 切换月份 更新关卡
+            if (year * 12 + month != challenge.about.year * 12 + challenge.about.month) {
+                challenge.level++;
+            }
+            DataManager.setData();
+
             kit.Popup.hide();
             GameManager.enterGameFromChallenge(this.obj.isVideo);
         }

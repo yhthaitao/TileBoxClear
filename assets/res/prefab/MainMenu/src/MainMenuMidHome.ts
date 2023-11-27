@@ -510,8 +510,9 @@ export default class MainMenuMidHome extends cc.Component {
 
     resetChallenge() {
         if (DataManager.stateLast == StateGame.game) {
-            if (DataManager.data.boxData.level == 21 && DataManager.data.challengeData.guide.isTouchChallenge) {
-                DataManager.data.challengeData.guide.isTouchChallenge = false;
+            let data = DataManager.data;
+            if (data.boxData.level > 20 && data.challengeData.guide.isTouchChallenge) {
+                data.challengeData.guide.isTouchChallenge = false;
                 DataManager.setData();
                 // 挑战引导
                 let point = Common.getLocalPos(this.home_left_challenge.parent, this.home_left_challenge.position, this.node);

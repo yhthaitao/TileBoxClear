@@ -9,6 +9,7 @@ const { ccclass, property } = cc._decorator;
 export default class ItemGood extends cc.Component {
 
     @property({ type: cc.Node, tooltip: '物品节点-图' }) nodeIcon: cc.Node = null;
+    @property({ type: cc.Node, tooltip: '物品节点-图' }) nodeShadow: cc.Node = null;
     @property({ type: cc.Node, tooltip: '碎片节点-图' }) nodeGold: cc.Node = null;
     @property({ type: cc.Node, tooltip: '碎片节点-动画' }) goldDragon: cc.Node = null;
     @property({ type: cc.Node, tooltip: '碎片节点-动画' }) propDragon: cc.Node = null;
@@ -44,6 +45,7 @@ export default class ItemGood extends cc.Component {
                 return;
             }
             this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
+            this.nodeShadow.getComponent(cc.Sprite).spriteFrame = assets;
             this.nodeIcon.getComponent(cc.Button).interactable = true;
             this.node.opacity = 255;
         });
@@ -66,6 +68,7 @@ export default class ItemGood extends cc.Component {
                     return;
                 }
                 this.nodeIcon.getComponent(cc.Sprite).spriteFrame = assets;
+                this.nodeShadow.getComponent(cc.Sprite).spriteFrame = assets;
             });
         }).to(timeOpa, { opacity: 255 }).start();
     }

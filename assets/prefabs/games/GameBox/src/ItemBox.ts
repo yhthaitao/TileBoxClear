@@ -11,9 +11,16 @@ export default class ItemBox extends cc.Component {
     @property({ type: [cc.Node], tooltip: '箱子节点-图数组-框' }) arrKuang: cc.Node[] = [];
     @property({ type: cc.Node, tooltip: '物品父节点' }) nodeMain: cc.Node = null;
 
-    objSpeed = {
-        speedCur: 0, speedDis: 1, speedInit: 0, speedMax: 20, isMove: false,
+    obj = {
+        dress: {// 5: 挂着的衣服  6：叠着的衣服
+            start_6: 19,
+            start_10_5: 125,
+            start_11_5: 165,
+            dis_5: -12,
+            dis_6: 10,
+        }
     };
+
     param: BoxParam = null;
     total: number = 0;
     init(param: BoxParam) {
@@ -58,15 +65,16 @@ export default class ItemBox extends cc.Component {
                 script.nodeIcon.getComponent(cc.Button).interactable = index == length - 1;
             });
         };
+        let dress = this.obj.dress;
         // 叠着的衣服6
         if (this.param.boxType == 9) {
-            sortBoxDress(this.nodeMain.children, 19, 10);
+            sortBoxDress(this.nodeMain.children, dress.start_6, dress.dis_6);
         }
         // 挂着的衣服5
         else if (this.param.boxType == 10) {
-            sortBoxDress(this.nodeMain.children, 125, -12);
+            sortBoxDress(this.nodeMain.children, dress.start_10_5, dress.dis_5);
         }
-        // 叠着的衣服6 + 挂着的衣服5 
+        // 叠着的衣服6 + 挂着的衣服5
         else if (this.param.boxType == 11) {
             let arrGood5 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 5;
@@ -74,8 +82,8 @@ export default class ItemBox extends cc.Component {
             let arrGood6 = this.nodeMain.children.filter((good: cc.Node)=>{
                 return Math.floor(good.getComponent(ItemGood).param.keyGood * 0.001) == 6;
             });
-            sortBoxDress(arrGood5, 165, -12);
-            sortBoxDress(arrGood6, 19, 10);
+            sortBoxDress(arrGood5, dress.start_11_5, dress.dis_5);
+            sortBoxDress(arrGood6, dress.start_6, dress.dis_6);
         }
     };
 

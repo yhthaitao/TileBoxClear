@@ -33,8 +33,8 @@ export default class GuideChallenge extends cc.Component {
 
             this.params = Common.clone(params);
 
-            let timeMackOpa = 0.245;
-            let timeIconOpa = 0.245;
+            let timeMackOpa = 0.5;
+            let timeIconOpa = 0.5;
             // 播放背景遮罩动画
             this.maskDown.active = true;
             this.maskDown.opacity = 0;
@@ -73,7 +73,7 @@ export default class GuideChallenge extends cc.Component {
                 }
             });
 
-            cc.tween(this.content).delay(timeMackOpa + timeIconOpa).call(() => {
+            cc.tween(this.content).delay(Math.max(timeMackOpa, timeIconOpa)).call(() => {
                 // 关闭拦截
                 this.maskUp.active = false;
                 // Done
