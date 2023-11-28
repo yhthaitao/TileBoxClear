@@ -10,7 +10,7 @@ import GameManager from "../../../../src/config/GameManager";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
-export default class Before extends PopupBase {
+export default class Before<Options = any> extends PopupBase {
 
     @property(cc.Node) nodeTitle: cc.Node = null;
     @property(cc.Node) nodeBg: cc.Node = null;
@@ -45,6 +45,50 @@ export default class Before extends PopupBase {
         type: FromState,
         paramWin?: WinParam,
     };
+
+    /**
+     * 展示弹窗
+     * @param options 弹窗选项
+     * @param duration 动画时长
+     */
+    public show(options?: Options) {
+        this.node.scale = 1.2;
+        this.maskDown.setContentSize(cc.winSize);
+        this.maskUp.setContentSize(cc.winSize);
+
+        return new Promise<void>(res => {
+            this.node.active = true;
+            // 开启拦截
+            this.maskUp.active = true;
+            // 储存选项
+            this.options = options;
+            // 播放背景遮罩动画
+            this.maskDown.active = true;
+            this.maskDown.opacity = 0;
+            cc.tween(this.maskDown).to(0.245, { opacity: 200 }).start();
+            // 播放弹窗主体动画
+            this.content.active = true;
+            this.content.scale = 0.5;
+            this.content.opacity = 0;
+            cc.tween(this.content).call(() => {
+                // 展示前
+                this.showBefore(this.options);
+            }).parallel(
+                cc.tween().to(this.popupShowTime.scale0, { scale: 1.05 }, { easing: 'cubicOut' })
+                    .to(this.popupShowTime.scale1, { scale: 0.98 }, { easing: 'sineInOut' })
+                    .to(this.popupShowTime.scale2, { scale: 1 }, { easing: 'sineInOut' }),
+                cc.tween().to(this.popupShowTime.opacity, { opacity: 255 }),
+            ).call(() => {
+                // 弹窗已完全展示
+                this.showAfter && this.showAfter();
+            }).delay(0.25).call(() => {
+                // 关闭拦截
+                this.maskUp.active = false;
+                // Done
+                res();
+            }).start();
+        });
+    }
 
     protected showBefore(options: any): void {
         this.listernerRegist();

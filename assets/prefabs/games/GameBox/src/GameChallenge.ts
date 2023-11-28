@@ -1444,29 +1444,29 @@ export default class GameBox extends cc.Component {
 
     /** 按钮事件 上一关 */
     eventBtnLevelBack() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        if (this.objData.level < 2) {
-            return;
-        }
-        DataManager.data.challengeData.level--;
-        DataManager.setData();
+        // if (this.speedBox.isMove || this.speedGood.isMove) {
+        //     return;
+        // }
+        // if (this.objData.level < 2) {
+        //     return;
+        // }
+        // DataManager.data.challengeData.level--;
+        // DataManager.setData();
 
-        this.gameLoad();
-        this.gameStart();
+        // this.gameLoad();
+        // this.gameStart();
     }
 
     /** 按钮事件 下一关 */
     eventBtnLevelNext() {
-        if (this.speedBox.isMove || this.speedGood.isMove) {
-            return;
-        }
-        DataManager.data.challengeData.level++;
-        DataManager.setData();
+        // if (this.speedBox.isMove || this.speedGood.isMove) {
+        //     return;
+        // }
+        // DataManager.data.challengeData.level++;
+        // DataManager.setData();
 
-        this.gameLoad();
-        this.gameStart();
+        // this.gameLoad();
+        // this.gameStart();
     }
 
     /** 使用道具-时钟 */

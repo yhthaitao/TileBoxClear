@@ -7,7 +7,6 @@ import NativeCall from "../src/config/NativeCall";
 import Loading from "../res/prefab/Loading/src/Loading";
 import { LangChars } from "../src/config/ConfigLang";
 import { StateGame } from "../src/config/ConfigCommon";
-import GuideChallenge from "../prefabs/components/UserGuide/src/GuideChallenge";
 
 const { ccclass, property } = cc._decorator;
 @ccclass
@@ -259,9 +258,7 @@ export default class MainScene extends cc.Component {
         let guide = cc.instantiate(pre);
         guide.zIndex = CConst.zIndex_newPlayer;
         guide.parent = this.node;
-
-        let script = guide.getComponent(GuideChallenge);
-        script.show(params);
+        kit.Event.emit(CConst.event_guide_challenge_show, params);
     };
 
     /** 事件回调：提示 */

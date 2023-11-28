@@ -3,6 +3,7 @@ import { PopupCacheMode } from "../kit/manager/popupManager/PopupManager";
 import CConst from "./CConst";
 import { ActPassParam, FromState, StateGame } from "./ConfigCommon";
 import ConfigDot from "./ConfigDot";
+import { LangChars } from "./ConfigLang";
 import DataManager from "./DataManager";
 import NativeCall from "./NativeCall";
 
@@ -254,9 +255,9 @@ class GameManager {
                 funcEnterGame();
             };
             let funcFail = () => {
-                funcEnterGame();
+                kit.Event.emit(CConst.event_notice, LangChars.notice_adLoading);
             };
-            DataManager.playVideo(funcSucces, funcSucces);
+            DataManager.playVideo(funcSucces, funcFail);
         }
         else {
             funcEnterGame();

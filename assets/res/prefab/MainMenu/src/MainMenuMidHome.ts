@@ -83,7 +83,9 @@ export default class MainMenuMidHome extends cc.Component {
         await this.resetBoxLevelProcess();
         await this.resetBoxAreas();
         this.resetChallenge();
-        this.setIsLock(false);
+        this.scheduleOnce(()=>{
+            this.setIsLock(false);
+        }, 0.25);
     };
 
     resetBg() {

@@ -110,6 +110,7 @@ const CConst = {
     event_guide_game: 'event_guide_game',
     event_guide_before: 'event_guide_before',
     event_guide_challenge: 'event_guide_challenge',
+    event_guide_challenge_show: 'event_guide_challenge_show',
     /** 刷新 引导 点击 */
     event_guide_3: 'event_guide_3',
     event_guide_5: 'event_guide_5',

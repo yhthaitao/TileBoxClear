@@ -20,6 +20,10 @@ export default class GuideChallenge extends cc.Component {
         descPosition: { x: number, y: number, },
     } = null;
 
+    protected onLoad(): void {
+        this.listernerRegist();
+    }
+
     /**
      * 展示弹窗
      * @param options 弹窗选项
@@ -93,5 +97,19 @@ export default class GuideChallenge extends cc.Component {
     eventBtnGift() {
         kit.Audio.playEffect(CConst.sound_clickUI);
         this.node.removeFromParent();
+    }
+
+    /** 监听-注册 */
+    listernerRegist(): void {
+        kit.Event.on(CConst.event_guide_challenge_show, this.show, this);
+    }
+
+    /** 监听-取消 */
+    listernerIgnore(): void {
+        kit.Event.removeByTarget(this);
+    };
+
+    protected onDestroy(): void {
+        this.listernerIgnore();
     }
 }
